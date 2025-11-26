@@ -39,6 +39,14 @@ export default {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
         },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
+        },
         popover: {
           DEFAULT: "hsl(var(--popover))",
           foreground: "hsl(var(--popover-foreground))",
@@ -57,18 +65,19 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        teal: {
-          DEFAULT: "hsl(180 65% 45%)",
-          foreground: "hsl(0 0% 100%)",
-        },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        heading: ['IBM Plex Sans', 'system-ui', 'sans-serif'],
+        sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+        heading: ['Outfit', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
         'card': 'var(--card-shadow)',
         'card-hover': 'var(--card-shadow-hover)',
+        'glow': 'var(--glow)',
+      },
+      backgroundImage: {
+        'hero-gradient': 'var(--hero-gradient)',
+        'card-gradient': 'var(--card-gradient)',
       },
       borderRadius: {
         lg: "var(--radius)",
