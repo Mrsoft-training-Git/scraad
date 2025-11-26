@@ -57,6 +57,18 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        teal: {
+          DEFAULT: "hsl(180 65% 45%)",
+          foreground: "hsl(0 0% 100%)",
+        },
+      },
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        heading: ['IBM Plex Sans', 'system-ui', 'sans-serif'],
+      },
+      boxShadow: {
+        'card': 'var(--card-shadow)',
+        'card-hover': 'var(--card-shadow-hover)',
       },
       borderRadius: {
         lg: "var(--radius)",
