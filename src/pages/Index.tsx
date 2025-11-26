@@ -82,60 +82,60 @@ const Index = () => {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative bg-hero-gradient text-white py-24 lg:py-32 overflow-hidden">
+      <section className="relative bg-hero-gradient text-white py-16 lg:py-20 overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent"></div>
         <div className="container mx-auto px-4 relative">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div className="animate-fade-in space-y-8">
-              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium">
-                <span className="w-2 h-2 bg-success rounded-full animate-pulse"></span>
+          <div className="grid lg:grid-cols-2 gap-10 items-center">
+            <div className="animate-fade-in space-y-5">
+              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-medium">
+                <span className="w-1.5 h-1.5 bg-success rounded-full animate-pulse"></span>
                 Trusted by 10,000+ learners worldwide
               </div>
               
-              <h1 className="font-heading font-bold text-5xl lg:text-7xl leading-tight">
+              <h1 className="font-heading font-bold text-3xl lg:text-5xl leading-tight">
                 Master New Skills,{" "}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-white/80">
                   Transform Your Career
                 </span>
               </h1>
               
-              <p className="text-lg lg:text-xl text-white/90 max-w-xl leading-relaxed">
+              <p className="text-base lg:text-lg text-white/90 max-w-xl leading-relaxed">
                 Learn at your own pace with industry-recognized courses designed by experts. Get certified and advance your career with practical, hands-on training.
               </p>
 
-              <div className="flex flex-wrap gap-4">
-                <Button size="lg" className="bg-white text-primary hover:bg-white/90 font-semibold shadow-xl h-14 px-8 text-lg">
-                  Get Started Free <ArrowRight className="ml-2 w-5 h-5" />
+              <div className="flex flex-wrap gap-3">
+                <Button size="default" className="bg-white text-primary hover:bg-white/90 font-semibold shadow-xl">
+                  Get Started Free <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
-                <Button size="lg" variant="outline" className="border-2 border-white/30 hover:bg-white/10 text-white font-semibold h-14 px-8 backdrop-blur-sm">
+                <Button size="default" variant="outline" className="border-2 border-white/30 hover:bg-white/10 text-white font-semibold backdrop-blur-sm">
                   View Programs
                 </Button>
               </div>
 
-              <div className="flex items-center gap-8 pt-4">
+              <div className="flex items-center gap-6 pt-2">
                 <div>
-                  <div className="font-heading font-bold text-3xl">50+</div>
-                  <div className="text-sm text-white/80">Expert Courses</div>
+                  <div className="font-heading font-bold text-2xl">50+</div>
+                  <div className="text-xs text-white/80">Expert Courses</div>
                 </div>
-                <div className="w-px h-12 bg-white/20"></div>
+                <div className="w-px h-10 bg-white/20"></div>
                 <div>
-                  <div className="font-heading font-bold text-3xl">95%</div>
-                  <div className="text-sm text-white/80">Success Rate</div>
+                  <div className="font-heading font-bold text-2xl">95%</div>
+                  <div className="text-xs text-white/80">Success Rate</div>
                 </div>
-                <div className="w-px h-12 bg-white/20"></div>
+                <div className="w-px h-10 bg-white/20"></div>
                 <div>
-                  <div className="font-heading font-bold text-3xl">24/7</div>
-                  <div className="text-sm text-white/80">Learning Access</div>
+                  <div className="font-heading font-bold text-2xl">24/7</div>
+                  <div className="text-xs text-white/80">Learning Access</div>
                 </div>
               </div>
             </div>
 
             <div className="relative animate-scale-in">
-              <div className="absolute -inset-4 bg-gradient-to-r from-white/20 to-white/5 rounded-3xl blur-2xl"></div>
+              <div className="absolute -inset-3 bg-gradient-to-r from-white/20 to-white/5 rounded-2xl blur-xl"></div>
               <img
                 src={heroStudent}
                 alt="Students engaging in modern online learning"
-                className="relative rounded-3xl shadow-2xl ring-1 ring-white/20"
+                className="relative rounded-2xl shadow-xl ring-1 ring-white/20"
               />
             </div>
           </div>
