@@ -143,26 +143,26 @@ const Index = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 lg:py-32">
+      <section className="py-16 lg:py-20">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16 max-w-3xl mx-auto">
-            <h2 className="font-heading font-bold text-4xl lg:text-5xl mb-6">
+          <div className="text-center mb-12 max-w-2xl mx-auto">
+            <h2 className="font-heading font-bold text-3xl lg:text-4xl mb-3">
               Why Choose <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">ODEL</span>
             </h2>
-            <p className="text-lg text-muted-foreground">
+            <p className="text-base text-muted-foreground">
               Experience a learning platform designed for your success with features that adapt to your goals
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
             {features.map((feature, index) => (
-              <Card key={index} className="group border-border/50 bg-card-gradient hover:shadow-card-hover transition-all duration-300 hover:-translate-y-2 cursor-pointer overflow-hidden relative">
+              <Card key={index} className="group border-border/50 bg-card-gradient hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 cursor-pointer overflow-hidden relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                <CardContent className="p-8 text-center relative">
-                  <div className="w-16 h-16 bg-gradient-to-br from-primary/10 to-accent/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-                    <feature.icon className="w-8 h-8 text-primary" />
+                <CardContent className="p-6 text-center relative">
+                  <div className="w-12 h-12 bg-gradient-to-br from-primary/10 to-accent/10 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                    <feature.icon className="w-6 h-6 text-primary" />
                   </div>
-                  <h3 className="font-heading font-bold text-xl mb-3 text-foreground">{feature.title}</h3>
+                  <h3 className="font-heading font-bold text-lg mb-2 text-foreground">{feature.title}</h3>
                   <p className="text-muted-foreground leading-relaxed text-sm">{feature.description}</p>
                 </CardContent>
               </Card>
