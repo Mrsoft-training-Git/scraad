@@ -9,47 +9,55 @@ All colors MUST be HSL.
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 210 85% 15%;
+    --foreground: 240 10% 10%;
 
     --card: 0 0% 100%;
-    --card-foreground: 210 85% 15%;
+    --card-foreground: 240 10% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 210 85% 15%;
+    --popover-foreground: 240 10% 10%;
 
-    --primary: 210 80% 25%;
+    --primary: 262 83% 58%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 15% 92%;
-    --secondary-foreground: 210 80% 25%;
+    --secondary: 240 5% 96%;
+    --secondary-foreground: 240 10% 10%;
 
-    --muted: 210 15% 95%;
-    --muted-foreground: 210 15% 45%;
+    --muted: 240 5% 96%;
+    --muted-foreground: 240 4% 46%;
 
-    --accent: 210 100% 55%;
+    --accent: 262 83% 58%;
     --accent-foreground: 0 0% 100%;
+
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 210 20% 88%;
-    --input: 210 20% 88%;
-    --ring: 210 100% 55%;
+    --border: 240 6% 90%;
+    --input: 240 6% 90%;
+    --ring: 262 83% 58%;
 
     --radius: 0.75rem;
 
-    --sidebar-background: 210 85% 15%;
-    --sidebar-foreground: 210 15% 92%;
-    --sidebar-primary: 210 100% 55%;
+    --sidebar-background: 240 10% 10%;
+    --sidebar-foreground: 240 5% 96%;
+    --sidebar-primary: 262 83% 58%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 80% 20%;
+    --sidebar-accent: 240 8% 15%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 210 75% 20%;
-    --sidebar-ring: 210 100% 55%;
+    --sidebar-border: 240 8% 20%;
+    --sidebar-ring: 262 83% 58%;
 
-    --hero-gradient: linear-gradient(135deg, hsl(210 80% 25%) 0%, hsl(210 85% 35%) 100%);
-    --card-shadow: 0 4px 20px -4px hsl(210 80% 25% / 0.15);
-    --card-shadow-hover: 0 8px 30px -4px hsl(210 80% 25% / 0.25);
+    --hero-gradient: linear-gradient(135deg, hsl(262 83% 58%) 0%, hsl(252 95% 66%) 50%, hsl(242 85% 68%) 100%);
+    --card-gradient: linear-gradient(to bottom right, hsl(0 0% 100%), hsl(240 5% 98%));
+    --card-shadow: 0 2px 20px -2px hsl(262 83% 58% / 0.08);
+    --card-shadow-hover: 0 8px 40px -4px hsl(262 83% 58% / 0.2);
+    --glow: 0 0 40px hsl(262 83% 58% / 0.3);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
