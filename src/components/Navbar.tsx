@@ -29,7 +29,7 @@ export const Navbar = () => {
             <Link to="/" className="text-foreground hover:text-primary transition-colors font-medium text-sm">
               Home
             </Link>
-            <Link to="/online-degree" className="text-foreground hover:text-primary transition-colors font-medium text-sm">
+            <Link to="/programs" className="text-foreground hover:text-primary transition-colors font-medium text-sm">
               Programs
             </Link>
             <Link to="/career" className="text-foreground hover:text-primary transition-colors font-medium text-sm">
@@ -45,11 +45,11 @@ export const Navbar = () => {
               />
             </div>
 
-            <Button variant="ghost" className="text-foreground hover:text-primary hover:bg-muted/50">
-              Login
+            <Button variant="ghost" className="text-foreground hover:text-primary hover:bg-muted/50" asChild>
+              <Link to="/auth">Login</Link>
             </Button>
-            <Button className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white shadow-lg shadow-primary/30 font-semibold">
-              Sign Up Free
+            <Button className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white shadow-lg shadow-primary/30 font-semibold" asChild>
+              <Link to="/auth">Sign Up Free</Link>
             </Button>
           </div>
 
@@ -68,18 +68,18 @@ export const Navbar = () => {
             <Link to="/" className="block py-2 hover:text-accent transition-colors">
               Home
             </Link>
-            <Link to="/online-degree" className="block py-2 hover:text-accent transition-colors">
-              Online Degree
+            <Link to="/programs" className="block py-2 hover:text-accent transition-colors">
+              Programs
             </Link>
             <Link to="/career" className="block py-2 hover:text-accent transition-colors">
               Career
             </Link>
             <div className="pt-2 space-y-2">
-              <Button variant="outline" className="w-full border-primary-foreground/20">
-                Login
+              <Button variant="outline" className="w-full border-primary-foreground/20" asChild>
+                <Link to="/auth">Login</Link>
               </Button>
-              <Button variant="default" className="w-full bg-accent hover:bg-accent/90">
-                Sign Up
+              <Button variant="default" className="w-full bg-accent hover:bg-accent/90" asChild>
+                <Link to="/auth">Sign Up</Link>
               </Button>
             </div>
           </div>
