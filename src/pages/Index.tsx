@@ -82,61 +82,78 @@ const Index = () => {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative bg-hero-gradient text-white py-16 lg:py-20 overflow-hidden">
+      <section className="relative bg-hero-gradient text-white py-12 lg:py-16 overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent"></div>
         <div className="container mx-auto px-4 relative">
-          <div className="grid lg:grid-cols-2 gap-10 items-center">
-            <div className="animate-fade-in space-y-5">
-              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-medium">
+          <div className="grid lg:grid-cols-2 gap-6 items-stretch">
+            {/* Left Hero */}
+            <div className="animate-fade-in space-y-4 flex flex-col justify-center bg-white/5 backdrop-blur-sm rounded-2xl p-6 lg:p-8 border border-white/10">
+              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-medium w-fit">
                 <span className="w-1.5 h-1.5 bg-success rounded-full animate-pulse"></span>
-                Trusted by 10,000+ learners worldwide
+                Trusted by 10,000+ learners
               </div>
               
-              <h1 className="font-heading font-bold text-3xl lg:text-5xl leading-tight">
-                Master New Skills,{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-white/80">
-                  Transform Your Career
-                </span>
-              </h1>
+              <h2 className="font-heading font-bold text-2xl lg:text-3xl leading-tight">
+                Master New Skills
+              </h2>
               
-              <p className="text-base lg:text-lg text-white/90 max-w-xl leading-relaxed">
-                Learn at your own pace with industry-recognized courses designed by experts. Get certified and advance your career with practical, hands-on training.
+              <p className="text-sm lg:text-base text-white/90 leading-relaxed">
+                Learn at your own pace with industry-recognized courses designed by experts.
               </p>
 
               <div className="flex flex-wrap gap-3">
-                <Button size="default" className="bg-white text-primary hover:bg-white/90 font-semibold shadow-xl">
-                  Get Started Free <ArrowRight className="ml-2 w-4 h-4" />
-                </Button>
-                <Button size="default" variant="outline" className="border-2 border-white/30 hover:bg-white/10 text-white font-semibold backdrop-blur-sm">
-                  View Programs
+                <Button size="sm" className="bg-white text-primary hover:bg-white/90 font-semibold shadow-xl">
+                  Get Started Free <ArrowRight className="ml-2 w-3 h-3" />
                 </Button>
               </div>
 
-              <div className="flex items-center gap-6 pt-2">
+              <div className="flex items-center gap-4 pt-2">
                 <div>
-                  <div className="font-heading font-bold text-2xl">50+</div>
-                  <div className="text-xs text-white/80">Expert Courses</div>
+                  <div className="font-heading font-bold text-xl">50+</div>
+                  <div className="text-xs text-white/80">Courses</div>
                 </div>
-                <div className="w-px h-10 bg-white/20"></div>
+                <div className="w-px h-8 bg-white/20"></div>
                 <div>
-                  <div className="font-heading font-bold text-2xl">95%</div>
-                  <div className="text-xs text-white/80">Success Rate</div>
+                  <div className="font-heading font-bold text-xl">95%</div>
+                  <div className="text-xs text-white/80">Success</div>
                 </div>
-                <div className="w-px h-10 bg-white/20"></div>
+                <div className="w-px h-8 bg-white/20"></div>
                 <div>
-                  <div className="font-heading font-bold text-2xl">24/7</div>
-                  <div className="text-xs text-white/80">Learning Access</div>
+                  <div className="font-heading font-bold text-xl">24/7</div>
+                  <div className="text-xs text-white/80">Access</div>
                 </div>
               </div>
             </div>
 
-            <div className="relative animate-scale-in">
-              <div className="absolute -inset-3 bg-gradient-to-r from-white/20 to-white/5 rounded-2xl blur-xl"></div>
-              <img
-                src={heroStudent}
-                alt="Students engaging in modern online learning"
-                className="relative rounded-2xl shadow-xl ring-1 ring-white/20"
-              />
+            {/* Right Hero */}
+            <div className="animate-fade-in space-y-4 flex flex-col justify-center bg-white/5 backdrop-blur-sm rounded-2xl p-6 lg:p-8 border border-white/10">
+              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-medium w-fit">
+                <GraduationCap className="w-3 h-3" />
+                Career Advancement
+              </div>
+              
+              <h2 className="font-heading font-bold text-2xl lg:text-3xl leading-tight">
+                Transform Your Career
+              </h2>
+              
+              <p className="text-sm lg:text-base text-white/90 leading-relaxed">
+                Get certified and advance your career with practical, hands-on training.
+              </p>
+
+              <div className="flex flex-wrap gap-3">
+                <Button size="sm" variant="outline" className="border-2 border-white/30 hover:bg-white/10 text-white font-semibold backdrop-blur-sm">
+                  View Programs
+                </Button>
+              </div>
+
+              <div className="relative animate-scale-in mt-4">
+                <div className="absolute -inset-2 bg-gradient-to-r from-white/20 to-white/5 rounded-xl blur-lg"></div>
+                <img
+                  src={heroStudent}
+                  alt="Students engaging in modern online learning"
+                  className="relative rounded-xl shadow-lg ring-1 ring-white/20 w-full h-48 object-cover"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -185,7 +202,7 @@ const Index = () => {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
             {courses.map((course, index) => (
-              <Card key={index} className="group overflow-hidden border-border/50 bg-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-2 cursor-pointer">
+              <Card key={index} className="group overflow-hidden border-border/50 bg-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-2 cursor-pointer flex flex-col">
                 <div className="aspect-video overflow-hidden relative">
                   <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-primary z-10">
                     Popular
@@ -196,14 +213,14 @@ const Index = () => {
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
                 </div>
-                <CardContent className="p-6">
+                <CardContent className="p-6 flex flex-col flex-grow">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-semibold">
                       Business
                     </div>
                   </div>
-                  <h3 className="font-heading font-bold text-lg mb-4 line-clamp-2 group-hover:text-primary transition-colors">{course.title}</h3>
-                  <div className="flex items-center justify-between mb-5">
+                  <h3 className="font-heading font-bold text-lg mb-4 line-clamp-2 group-hover:text-primary transition-colors min-h-[3.5rem]">{course.title}</h3>
+                  <div className="flex items-center justify-between mb-5 mt-auto">
                     <span className="text-2xl font-bold text-primary">{course.price}</span>
                     <div className="flex items-center gap-3 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
@@ -220,9 +237,11 @@ const Index = () => {
           </div>
 
           <div className="text-center">
-            <Button size="lg" className="bg-foreground text-background hover:bg-foreground/90 shadow-xl font-semibold px-8">
-              View All Courses <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
+            <Link to="/courses">
+              <Button size="lg" className="bg-foreground text-background hover:bg-foreground/90 shadow-xl font-semibold px-8">
+                View All Courses <ArrowRight className="ml-2 w-5 h-5" />
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
