@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -7,10 +7,119 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  // Login state
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+
+  // Signup state
+  const [signupName, setSignupName] = useState("");
+  const [signupEmail, setSignupEmail] = useState("");
+  const [signupPassword, setSignupPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  useEffect(() => {
+    // Check if user is already logged in
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        navigate("/dashboard");
+      }
+    };
+    checkUser();
+  }, [navigate]);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: loginEmail,
+        password: loginPassword,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Welcome back!",
+        description: "You've successfully logged in.",
+      });
+
+      navigate("/dashboard");
+    } catch (error: any) {
+      toast({
+        title: "Login failed",
+        description: error.message || "Please check your credentials and try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (signupPassword !== confirmPassword) {
+      toast({
+        title: "Passwords don't match",
+        description: "Please make sure both passwords are the same.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (signupPassword.length < 6) {
+      toast({
+        title: "Password too short",
+        description: "Password must be at least 6 characters long.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: signupEmail,
+        password: signupPassword,
+        options: {
+          data: {
+            full_name: signupName,
+          },
+          emailRedirectTo: `${window.location.origin}/dashboard`,
+        },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Account created!",
+        description: "Welcome to the platform. You're now logged in.",
+      });
+
+      navigate("/dashboard");
+    } catch (error: any) {
+      toast({
+        title: "Signup failed",
+        description: error.message || "Please try again with different credentials.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -37,7 +146,7 @@ const Auth = () => {
               {/* Login Form */}
               <TabsContent value="login">
                 <div className="bg-card border border-border rounded-xl p-8 shadow-lg">
-                  <form className="space-y-6">
+                  <form onSubmit={handleLogin} className="space-y-6">
                     <div className="space-y-2">
                       <Label htmlFor="login-email">Email</Label>
                       <div className="relative">
@@ -47,6 +156,9 @@ const Auth = () => {
                           type="email"
                           placeholder="your.email@example.com"
                           className="pl-10"
+                          value={loginEmail}
+                          onChange={(e) => setLoginEmail(e.target.value)}
+                          required
                         />
                       </div>
                     </div>
@@ -60,6 +172,9 @@ const Auth = () => {
                           type={showPassword ? "text" : "password"}
                           placeholder="Enter your password"
                           className="pl-10 pr-10"
+                          value={loginPassword}
+                          onChange={(e) => setLoginPassword(e.target.value)}
+                          required
                         />
                         <button
                           type="button"
@@ -71,18 +186,12 @@ const Auth = () => {
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between text-sm">
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" className="rounded" />
-                        <span className="text-muted-foreground">Remember me</span>
-                      </label>
-                      <Link to="/forgot-password" className="text-primary hover:underline">
-                        Forgot password?
-                      </Link>
-                    </div>
-
-                    <Button type="submit" className="w-full bg-gradient-to-r from-primary to-accent text-white">
-                      Sign In
+                    <Button 
+                      type="submit" 
+                      className="w-full bg-gradient-to-r from-primary to-accent text-white"
+                      disabled={loading}
+                    >
+                      {loading ? "Signing in..." : "Sign In"}
                     </Button>
                   </form>
                 </div>
@@ -91,7 +200,7 @@ const Auth = () => {
               {/* Sign Up Form */}
               <TabsContent value="signup">
                 <div className="bg-card border border-border rounded-xl p-8 shadow-lg">
-                  <form className="space-y-6">
+                  <form onSubmit={handleSignup} className="space-y-6">
                     <div className="space-y-2">
                       <Label htmlFor="signup-name">Full Name</Label>
                       <div className="relative">
@@ -101,6 +210,9 @@ const Auth = () => {
                           type="text"
                           placeholder="John Doe"
                           className="pl-10"
+                          value={signupName}
+                          onChange={(e) => setSignupName(e.target.value)}
+                          required
                         />
                       </div>
                     </div>
@@ -114,6 +226,9 @@ const Auth = () => {
                           type="email"
                           placeholder="your.email@example.com"
                           className="pl-10"
+                          value={signupEmail}
+                          onChange={(e) => setSignupEmail(e.target.value)}
+                          required
                         />
                       </div>
                     </div>
@@ -127,6 +242,10 @@ const Auth = () => {
                           type={showPassword ? "text" : "password"}
                           placeholder="Create a password"
                           className="pl-10 pr-10"
+                          value={signupPassword}
+                          onChange={(e) => setSignupPassword(e.target.value)}
+                          required
+                          minLength={6}
                         />
                         <button
                           type="button"
@@ -147,6 +266,9 @@ const Auth = () => {
                           type={showConfirmPassword ? "text" : "password"}
                           placeholder="Confirm your password"
                           className="pl-10 pr-10"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          required
                         />
                         <button
                           type="button"
@@ -158,19 +280,12 @@ const Auth = () => {
                       </div>
                     </div>
 
-                    <div className="text-sm text-muted-foreground">
-                      By signing up, you agree to our{" "}
-                      <Link to="/terms" className="text-primary hover:underline">
-                        Terms of Service
-                      </Link>{" "}
-                      and{" "}
-                      <Link to="/privacy" className="text-primary hover:underline">
-                        Privacy Policy
-                      </Link>
-                    </div>
-
-                    <Button type="submit" className="w-full bg-gradient-to-r from-primary to-accent text-white">
-                      Create Account
+                    <Button 
+                      type="submit" 
+                      className="w-full bg-gradient-to-r from-primary to-accent text-white"
+                      disabled={loading}
+                    >
+                      {loading ? "Creating account..." : "Create Account"}
                     </Button>
                   </form>
                 </div>
