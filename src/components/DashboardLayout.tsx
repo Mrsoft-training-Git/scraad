@@ -27,10 +27,11 @@ export const DashboardLayout = ({ children, user, userRole }: DashboardLayoutPro
   };
 
   return (
-    <div className="flex min-h-screen bg-muted/30">
+    <div className="flex h-screen bg-muted/30 overflow-hidden">
       <DashboardSidebar userRole={userRole} />
-      <main className="flex-1 overflow-auto">
-        <div className="bg-card border-b border-border px-8 py-6 flex justify-between items-center">
+      <main className="flex-1 flex flex-col">
+        {/* Sticky top bar */}
+        <div className="sticky top-0 z-30 bg-card border-b border-border px-8 py-6 flex justify-between items-center">
           <div>
             <div className="inline-block px-4 py-1 bg-primary text-primary-foreground rounded-lg text-sm font-semibold mb-2">
               Dashboard
@@ -43,7 +44,7 @@ export const DashboardLayout = ({ children, user, userRole }: DashboardLayoutPro
               <button className="flex items-center gap-3 px-4 py-2.5 hover:bg-accent/10 rounded-lg transition-all cursor-pointer border-2 border-border hover:border-primary bg-background shadow-sm">
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                   <span className="text-sm font-bold text-primary">
-                    {user?.email?.split("@")[0].charAt(0).toUpperCase() || "U"}
+                    {(user?.email?.split("@")[0]?.charAt(0).toUpperCase()) || "U"}
                   </span>
                 </div>
                 <div className="text-left">
@@ -72,7 +73,8 @@ export const DashboardLayout = ({ children, user, userRole }: DashboardLayoutPro
           </DropdownMenu>
         </div>
         
-        <div className="p-8">
+        {/* Scrollable content area */}
+        <div className="flex-1 overflow-y-auto p-8">
           {children}
         </div>
       </main>
