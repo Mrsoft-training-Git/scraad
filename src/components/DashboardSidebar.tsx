@@ -43,7 +43,7 @@ export const DashboardSidebar = ({ userRole }: DashboardSidebarProps) => {
   return (
     <aside
       className={cn(
-        "bg-sidebar text-sidebar-foreground min-h-screen transition-all duration-300 flex flex-col",
+        "bg-sidebar text-sidebar-foreground h-screen sticky top-0 flex flex-col transition-all duration-300",
         collapsed ? "w-20" : "w-64"
       )}
     >
