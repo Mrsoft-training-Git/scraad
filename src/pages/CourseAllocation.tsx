@@ -1,5 +1,8 @@
-import { useState } from "react";
-import { DashboardSidebar } from "@/components/DashboardSidebar";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { User } from "@supabase/supabase-js";
+import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +13,29 @@ import { Plus, Search } from "lucide-react";
 
 const CourseAllocation = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [user, setUser] = useState<User | null>(null);
+  const [userRole, setUserRole] = useState<string>("student");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/auth");
+        return;
+      }
+      setUser(session.user);
+      
+      const { data: roleData } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id)
+        .single();
+      
+      setUserRole(roleData?.role || "student");
+    };
+    checkAuth();
+  }, [navigate]);
 
   const allocations = [
     { id: 1, course: "Introduction to Programming", student: "John Doe", instructor: "Dr. Smith", status: "Active" },
@@ -18,17 +44,8 @@ const CourseAllocation = () => {
   ];
 
   return (
-    <div className="flex min-h-screen bg-muted/30">
-      <DashboardSidebar />
-      <main className="flex-1 overflow-auto">
-        <div className="bg-card border-b border-border px-8 py-6">
-          <div className="inline-block px-4 py-1 bg-primary text-primary-foreground rounded-lg text-sm font-semibold mb-2">
-            Course Allocation
-          </div>
-          <p className="text-muted-foreground">Manage course assignments for students</p>
-        </div>
-
-        <div className="p-8 space-y-6">
+    <DashboardLayout user={user} userRole={userRole}>
+      <div className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>Allocate Course</CardTitle>
@@ -133,8 +150,7 @@ const CourseAllocation = () => {
             </CardContent>
           </Card>
         </div>
-      </main>
-    </div>
+    </DashboardLayout>
   );
 };
 

@@ -1,4 +1,8 @@
-import { DashboardSidebar } from "@/components/DashboardSidebar";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { User } from "@supabase/supabase-js";
+import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,18 +12,33 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { FileText, Video, Link as LinkIcon } from "lucide-react";
 
 const CreateContent = () => {
-  return (
-    <div className="flex min-h-screen bg-muted/30">
-      <DashboardSidebar />
-      <main className="flex-1 overflow-auto">
-        <div className="bg-card border-b border-border px-8 py-6">
-          <div className="inline-block px-4 py-1 bg-primary text-primary-foreground rounded-lg text-sm font-semibold mb-2">
-            Create Content
-          </div>
-          <p className="text-muted-foreground">Create new learning materials</p>
-        </div>
+  const [user, setUser] = useState<User | null>(null);
+  const [userRole, setUserRole] = useState<string>("student");
+  const navigate = useNavigate();
 
-        <div className="p-8 space-y-6">
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/auth");
+        return;
+      }
+      setUser(session.user);
+      
+      const { data: roleData } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id)
+        .single();
+      
+      setUserRole(roleData?.role || "student");
+    };
+    checkAuth();
+  }, [navigate]);
+
+  return (
+    <DashboardLayout user={user} userRole={userRole}>
+      <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card className="cursor-pointer hover:border-primary transition-colors">
               <CardHeader>
@@ -100,8 +119,7 @@ const CreateContent = () => {
             </CardContent>
           </Card>
         </div>
-      </main>
-    </div>
+    </DashboardLayout>
   );
 };
 

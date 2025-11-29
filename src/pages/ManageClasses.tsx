@@ -1,5 +1,8 @@
-import { useState } from "react";
-import { DashboardSidebar } from "@/components/DashboardSidebar";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { User } from "@supabase/supabase-js";
+import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +11,29 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Calendar, Clock, Users, Plus } from "lucide-react";
 
 const ManageClasses = () => {
+  const [user, setUser] = useState<User | null>(null);
+  const [userRole, setUserRole] = useState<string>("student");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/auth");
+        return;
+      }
+      setUser(session.user);
+      
+      const { data: roleData } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id)
+        .single();
+      
+      setUserRole(roleData?.role || "student");
+    };
+    checkAuth();
+  }, [navigate]);
   const classes = [
     { id: 1, course: "Introduction to Programming", date: "2024-01-15", time: "10:00 AM", instructor: "Dr. Smith", students: 45, room: "Room 101" },
     { id: 2, course: "Data Structures", date: "2024-01-16", time: "2:00 PM", instructor: "Prof. Johnson", students: 38, room: "Room 205" },
@@ -15,17 +41,8 @@ const ManageClasses = () => {
   ];
 
   return (
-    <div className="flex min-h-screen bg-muted/30">
-      <DashboardSidebar />
-      <main className="flex-1 overflow-auto">
-        <div className="bg-card border-b border-border px-8 py-6">
-          <div className="inline-block px-4 py-1 bg-primary text-primary-foreground rounded-lg text-sm font-semibold mb-2">
-            Manage Classes
-          </div>
-          <p className="text-muted-foreground">Schedule and manage class sessions</p>
-        </div>
-
-        <div className="p-8 space-y-6">
+    <DashboardLayout user={user} userRole={userRole}>
+      <div className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>Schedule New Class</CardTitle>
@@ -118,8 +135,7 @@ const ManageClasses = () => {
             </CardContent>
           </Card>
         </div>
-      </main>
-    </div>
+    </DashboardLayout>
   );
 };
 

@@ -1,10 +1,37 @@
-import { DashboardSidebar } from "@/components/DashboardSidebar";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { User } from "@supabase/supabase-js";
+import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Video, FileText, CheckCircle2 } from "lucide-react";
 
 const Learning = () => {
+  const [user, setUser] = useState<User | null>(null);
+  const [userRole, setUserRole] = useState<string>("student");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/auth");
+        return;
+      }
+      setUser(session.user);
+      
+      const { data: roleData } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id)
+        .single();
+      
+      setUserRole(roleData?.role || "student");
+    };
+    checkAuth();
+  }, [navigate]);
   const materials = [
     { id: 1, type: "video", title: "Introduction to Variables", course: "Programming 101", progress: 100, completed: true },
     { id: 2, type: "document", title: "Data Types Guide", course: "Programming 101", progress: 75, completed: false },
@@ -24,18 +51,8 @@ const Learning = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-muted/30">
-      <DashboardSidebar />
-      <main className="flex-1 overflow-auto">
-        <div className="bg-card border-b border-border px-8 py-6">
-          <div className="inline-block px-4 py-1 bg-primary text-primary-foreground rounded-lg text-sm font-semibold mb-2">
-            Learning
-          </div>
-          <p className="text-muted-foreground">Continue your learning journey</p>
-        </div>
-
-        <div className="p-8 space-y-6">
-          <Card>
+    <DashboardLayout user={user} userRole={userRole}>
+      <Card>
             <CardHeader>
               <CardTitle>My Learning Materials</CardTitle>
               <CardDescription>Access your course content and track progress</CardDescription>
@@ -71,9 +88,7 @@ const Learning = () => {
               ))}
             </CardContent>
           </Card>
-        </div>
-      </main>
-    </div>
+    </DashboardLayout>
   );
 };
 

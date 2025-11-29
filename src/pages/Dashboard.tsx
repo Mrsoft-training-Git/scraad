@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { DashboardSidebar } from "@/components/DashboardSidebar";
+import { supabase } from "@/integrations/supabase/client";
+import { User, Session } from "@supabase/supabase-js";
+import { Skeleton } from "@/components/ui/skeleton";
+import { DashboardLayout } from "@/components/DashboardLayout";
 import { AdminDashboard } from "@/components/AdminDashboard";
 import { StudentDashboard } from "@/components/StudentDashboard";
-import { Users } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { Skeleton } from "@/components/ui/skeleton";
 
 const Dashboard = () => {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<any>(null);
-  const [userRole, setUserRole] = useState<"admin" | "student" | null>(null);
+  const [userRole, setUserRole] = useState<string>("student");
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -63,54 +63,23 @@ const Dashboard = () => {
   if (loading) {
     return (
       <div className="flex min-h-screen bg-muted/30">
-        <DashboardSidebar />
-        <main className="flex-1 overflow-auto">
-          <div className="bg-card border-b border-border px-8 py-6">
-            <Skeleton className="h-8 w-32" />
-          </div>
-          <div className="p-8 space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[1, 2, 3, 4].map((i) => (
-                <Skeleton key={i} className="h-32" />
-              ))}
-            </div>
+        <div className="w-64 bg-sidebar">
+          <Skeleton className="h-full" />
+        </div>
+        <main className="flex-1">
+          <Skeleton className="h-20" />
+          <div className="p-8">
+            <Skeleton className="h-64" />
           </div>
         </main>
       </div>
     );
   }
 
-  const userName = profile?.full_name || user?.email?.split("@")[0] || "User";
-  const isAdmin = userRole === "admin";
-
   return (
-    <div className="flex min-h-screen bg-muted/30">
-      <DashboardSidebar />
-
-      <main className="flex-1 overflow-auto">
-        {/* Header */}
-        <div className="bg-card border-b border-border px-8 py-6 flex items-center justify-between">
-          <div>
-            <div className="inline-block px-4 py-1 bg-primary text-primary-foreground rounded-lg text-sm font-semibold mb-2">
-              Dashboard
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-accent rounded-full flex items-center justify-center">
-              <Users className="w-5 h-5 text-accent-foreground" />
-            </div>
-            <div>
-              <div className="font-semibold">{userName}</div>
-              <div className="text-sm text-muted-foreground">{isAdmin ? "Admin" : "Student"}</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="p-8">
-          {isAdmin ? <AdminDashboard /> : <StudentDashboard userName={userName} />}
-        </div>
-      </main>
-    </div>
+    <DashboardLayout user={user} userRole={userRole}>
+      {userRole === "admin" ? <AdminDashboard /> : <StudentDashboard userName={profile?.full_name || user?.email?.split("@")[0] || "User"} />}
+    </DashboardLayout>
   );
 };
 

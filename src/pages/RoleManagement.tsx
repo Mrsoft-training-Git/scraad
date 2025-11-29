@@ -1,4 +1,8 @@
-import { DashboardSidebar } from "@/components/DashboardSidebar";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { User } from "@supabase/supabase-js";
+import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -6,6 +10,29 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Shield, Users, Crown } from "lucide-react";
 
 const RoleManagement = () => {
+  const [user, setUser] = useState<User | null>(null);
+  const [userRole, setUserRole] = useState<string>("student");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/auth");
+        return;
+      }
+      setUser(session.user);
+      
+      const { data: roleData } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id)
+        .single();
+      
+      setUserRole(roleData?.role || "student");
+    };
+    checkAuth();
+  }, [navigate]);
   const roles = [
     { id: 1, name: "Admin", users: 3, permissions: "Full access", icon: Crown, color: "text-yellow-600" },
     { id: 2, name: "Student", users: 245, permissions: "View courses, submit assignments", icon: Users, color: "text-blue-600" },
@@ -20,17 +47,8 @@ const RoleManagement = () => {
   ];
 
   return (
-    <div className="flex min-h-screen bg-muted/30">
-      <DashboardSidebar />
-      <main className="flex-1 overflow-auto">
-        <div className="bg-card border-b border-border px-8 py-6">
-          <div className="inline-block px-4 py-1 bg-primary text-primary-foreground rounded-lg text-sm font-semibold mb-2">
-            Role Management
-          </div>
-          <p className="text-muted-foreground">Manage user roles and permissions</p>
-        </div>
-
-        <div className="p-8 space-y-6">
+    <DashboardLayout user={user} userRole={userRole}>
+      <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {roles.map((role) => {
               const Icon = role.icon;
@@ -96,8 +114,7 @@ const RoleManagement = () => {
             </CardContent>
           </Card>
         </div>
-      </main>
-    </div>
+    </DashboardLayout>
   );
 };
 
