@@ -39,21 +39,34 @@ export const DashboardLayout = ({ children, user, userRole }: DashboardLayoutPro
           </div>
           
           <DropdownMenu>
-            <DropdownMenuTrigger className="flex items-center gap-2 px-4 py-2 hover:bg-muted rounded-lg transition-colors">
-              <div className="text-right">
-                <div className="font-semibold text-sm">
-                  {user?.email?.split("@")[0] || "User"}
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-3 px-4 py-2.5 hover:bg-accent/10 rounded-lg transition-all cursor-pointer border-2 border-border hover:border-primary bg-background shadow-sm">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <span className="text-sm font-bold text-primary">
+                    {user?.email?.split("@")[0].charAt(0).toUpperCase() || "U"}
+                  </span>
                 </div>
-                <div className="text-xs text-muted-foreground capitalize">{userRole}</div>
-              </div>
-              <ChevronDown className="w-4 h-4" />
+                <div className="text-left">
+                  <div className="font-semibold text-sm text-foreground">
+                    {user?.email?.split("@")[0] || "User"}
+                  </div>
+                  <div className="text-xs text-muted-foreground capitalize">{userRole}</div>
+                </div>
+                <ChevronDown className="w-4 h-4 text-muted-foreground" />
+              </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>
-                Profile
+            <DropdownMenuContent align="end" className="w-56 z-[100] bg-popover border-2 shadow-lg">
+              <DropdownMenuItem 
+                onClick={() => navigate("/dashboard/profile")} 
+                className="cursor-pointer hover:bg-accent focus:bg-accent px-4 py-3"
+              >
+                <span className="font-medium">Profile Settings</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleLogout} className="text-destructive">
-                Logout
+              <DropdownMenuItem 
+                onClick={handleLogout} 
+                className="text-destructive cursor-pointer hover:bg-destructive/10 focus:bg-destructive/10 px-4 py-3"
+              >
+                <span className="font-medium">Logout</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
