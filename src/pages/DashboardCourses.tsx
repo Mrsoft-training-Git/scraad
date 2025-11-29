@@ -1,5 +1,8 @@
-import { useState } from "react";
-import { DashboardSidebar } from "@/components/DashboardSidebar";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { User } from "@supabase/supabase-js";
+import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +11,29 @@ import { Plus, Search, Edit, Trash2 } from "lucide-react";
 
 const DashboardCourses = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [user, setUser] = useState<User | null>(null);
+  const [userRole, setUserRole] = useState<string>("student");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/auth");
+        return;
+      }
+      setUser(session.user);
+      
+      const { data: roleData } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id)
+        .single();
+      
+      setUserRole(roleData?.role || "student");
+    };
+    checkAuth();
+  }, [navigate]);
 
   const courses = [
     { id: 1, name: "Introduction to Programming", code: "CS101", students: 45, duration: "12 weeks", status: "Active" },
@@ -17,17 +43,8 @@ const DashboardCourses = () => {
   ];
 
   return (
-    <div className="flex min-h-screen bg-muted/30">
-      <DashboardSidebar />
-      <main className="flex-1 overflow-auto">
-        <div className="bg-card border-b border-border px-8 py-6">
-          <div className="inline-block px-4 py-1 bg-primary text-primary-foreground rounded-lg text-sm font-semibold mb-2">
-            Courses
-          </div>
-          <p className="text-muted-foreground">Manage all courses</p>
-        </div>
-
-        <div className="p-8 space-y-6">
+    <DashboardLayout user={user} userRole={userRole}>
+      <div className="space-y-6">
           <div className="flex justify-between items-center">
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
@@ -92,8 +109,7 @@ const DashboardCourses = () => {
             </CardContent>
           </Card>
         </div>
-      </main>
-    </div>
+    </DashboardLayout>
   );
 };
 

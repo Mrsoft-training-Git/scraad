@@ -16,23 +16,29 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
-const menuItems = [
-  { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
-  { icon: BookOpen, label: "Course Allocation", path: "/dashboard/course-allocation" },
-  { icon: FileText, label: "Courses", path: "/dashboard/courses" },
-  { icon: FileText, label: "Create Content", path: "/dashboard/create-content" },
-  { icon: GraduationCap, label: "Learning", path: "/dashboard/learning" },
-  { icon: Calendar, label: "Manage Classes", path: "/dashboard/classes" },
-  { icon: CreditCard, label: "Payments", path: "/dashboard/payments" },
-  { icon: User, label: "Profile Update", path: "/dashboard/profile" },
-  { icon: BookMarked, label: "References", path: "/dashboard/references" },
-  { icon: Shield, label: "Role Management", path: "/dashboard/roles" },
-  { icon: Users, label: "User Management", path: "/dashboard/users" },
+const allMenuItems = [
+  { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard", roles: ["admin", "student"] },
+  { icon: BookOpen, label: "Course Allocation", path: "/dashboard/course-allocation", roles: ["admin"] },
+  { icon: FileText, label: "Courses", path: "/dashboard/courses", roles: ["admin"] },
+  { icon: FileText, label: "Create Content", path: "/dashboard/create-content", roles: ["admin"] },
+  { icon: GraduationCap, label: "Learning", path: "/dashboard/learning", roles: ["admin", "student"] },
+  { icon: Calendar, label: "Manage Classes", path: "/dashboard/classes", roles: ["admin"] },
+  { icon: CreditCard, label: "Payments", path: "/dashboard/payments", roles: ["admin"] },
+  { icon: User, label: "Profile Update", path: "/dashboard/profile", roles: ["admin", "student"] },
+  { icon: BookMarked, label: "References", path: "/dashboard/references", roles: ["admin"] },
+  { icon: Shield, label: "Role Management", path: "/dashboard/roles", roles: ["admin"] },
+  { icon: Users, label: "User Management", path: "/dashboard/users", roles: ["admin"] },
 ];
 
-export const DashboardSidebar = () => {
+interface DashboardSidebarProps {
+  userRole: string;
+}
+
+export const DashboardSidebar = ({ userRole }: DashboardSidebarProps) => {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
+
+  const menuItems = allMenuItems.filter(item => item.roles.includes(userRole));
 
   return (
     <aside
@@ -93,20 +99,6 @@ export const DashboardSidebar = () => {
         })}
       </nav>
 
-      {/* User Profile */}
-      <div className="p-4 border-t border-sidebar-border">
-        <div className={cn("flex items-center gap-3", collapsed && "justify-center")}>
-          <div className="w-10 h-10 bg-sidebar-primary rounded-full flex items-center justify-center">
-            <User className="w-5 h-5" />
-          </div>
-          {!collapsed && (
-            <div className="flex-1 min-w-0">
-              <div className="font-semibold text-sm truncate">Ngozi</div>
-              <div className="text-xs opacity-70">Admin</div>
-            </div>
-          )}
-        </div>
-      </div>
     </aside>
   );
 };

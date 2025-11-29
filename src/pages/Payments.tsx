@@ -1,9 +1,36 @@
-import { DashboardSidebar } from "@/components/DashboardSidebar";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { User } from "@supabase/supabase-js";
+import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DollarSign, CreditCard, TrendingUp, AlertCircle } from "lucide-react";
 
 const Payments = () => {
+  const [user, setUser] = useState<User | null>(null);
+  const [userRole, setUserRole] = useState<string>("student");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/auth");
+        return;
+      }
+      setUser(session.user);
+      
+      const { data: roleData } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id)
+        .single();
+      
+      setUserRole(roleData?.role || "student");
+    };
+    checkAuth();
+  }, [navigate]);
   const stats = [
     { label: "Total Revenue", value: "₦2,450,000", icon: DollarSign, change: "+12.5%" },
     { label: "Pending Payments", value: "₦340,000", icon: AlertCircle, change: "23 students" },
@@ -19,17 +46,8 @@ const Payments = () => {
   ];
 
   return (
-    <div className="flex min-h-screen bg-muted/30">
-      <DashboardSidebar />
-      <main className="flex-1 overflow-auto">
-        <div className="bg-card border-b border-border px-8 py-6">
-          <div className="inline-block px-4 py-1 bg-primary text-primary-foreground rounded-lg text-sm font-semibold mb-2">
-            Payments
-          </div>
-          <p className="text-muted-foreground">Track and manage financial transactions</p>
-        </div>
-
-        <div className="p-8 space-y-6">
+    <DashboardLayout user={user} userRole={userRole}>
+      <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {stats.map((stat, index) => {
               const Icon = stat.icon;
@@ -89,8 +107,7 @@ const Payments = () => {
             </CardContent>
           </Card>
         </div>
-      </main>
-    </div>
+    </DashboardLayout>
   );
 };
 

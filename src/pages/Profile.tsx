@@ -1,25 +1,44 @@
-import { DashboardSidebar } from "@/components/DashboardSidebar";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { User as UserIcon } from "lucide-react";
+import { User } from "@supabase/supabase-js";
+import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User } from "lucide-react";
 
 const Profile = () => {
-  return (
-    <div className="flex min-h-screen bg-muted/30">
-      <DashboardSidebar />
-      <main className="flex-1 overflow-auto">
-        <div className="bg-card border-b border-border px-8 py-6">
-          <div className="inline-block px-4 py-1 bg-primary text-primary-foreground rounded-lg text-sm font-semibold mb-2">
-            Profile Update
-          </div>
-          <p className="text-muted-foreground">Manage your account information</p>
-        </div>
+  const [user, setUser] = useState<User | null>(null);
+  const [userRole, setUserRole] = useState<string>("student");
+  const navigate = useNavigate();
 
-        <div className="p-8 space-y-6">
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/auth");
+        return;
+      }
+      setUser(session.user);
+      
+      const { data: roleData } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id)
+        .single();
+      
+      setUserRole(roleData?.role || "student");
+    };
+    checkAuth();
+  }, [navigate]);
+
+  return (
+    <DashboardLayout user={user} userRole={userRole}>
+      <div className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>Profile Picture</CardTitle>
@@ -29,7 +48,7 @@ const Profile = () => {
               <Avatar className="w-24 h-24">
                 <AvatarImage src="" />
                 <AvatarFallback>
-                  <User className="w-12 h-12" />
+                  <UserIcon className="w-12 h-12" />
                 </AvatarFallback>
               </Avatar>
               <div className="space-y-2">
@@ -95,8 +114,7 @@ const Profile = () => {
             </CardContent>
           </Card>
         </div>
-      </main>
-    </div>
+    </DashboardLayout>
   );
 };
 
