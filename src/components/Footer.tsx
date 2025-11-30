@@ -1,5 +1,6 @@
 import { Facebook, Twitter, Instagram, Mail, Phone, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
+import logo from "@/assets/uniport-logo.png";
 
 export const Footer = () => {
   return (
@@ -8,9 +9,7 @@ export const Footer = () => {
         {/* Logo and Social */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-3 mb-6">
-            <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center font-bold text-2xl">
-              ODEL
-            </div>
+            <img src={logo} alt="UNIPORT Logo" className="w-16 h-16 object-contain" />
             <div className="text-left">
               <div className="font-heading font-bold text-xl">
                 Open Distance and e-Learning Centre

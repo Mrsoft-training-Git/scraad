@@ -15,6 +15,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import logo from "@/assets/uniport-logo.png";
 
 const allMenuItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard", roles: ["admin", "student"] },
@@ -51,9 +52,7 @@ export const DashboardSidebar = ({ userRole }: DashboardSidebarProps) => {
       <div className="p-6 border-b border-sidebar-border flex items-center justify-between">
         {!collapsed && (
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-sidebar-primary rounded-full flex items-center justify-center font-bold">
-              ODEL
-            </div>
+            <img src={logo} alt="UNIPORT Logo" className="w-10 h-10 object-contain" />
             <div className="text-sm">
               <div className="font-bold">University of</div>
               <div className="text-xs opacity-80">Port Harcourt</div>

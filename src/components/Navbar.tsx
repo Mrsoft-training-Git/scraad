@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Search, Menu } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import logo from "@/assets/uniport-logo.png";
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -13,9 +14,7 @@ export const Navbar = () => {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center font-bold text-xl text-white shadow-lg shadow-primary/30 group-hover:shadow-xl group-hover:shadow-primary/40 transition-all">
-              OD
-            </div>
+            <img src={logo} alt="UNIPORT Logo" className="w-12 h-12 object-contain group-hover:scale-105 transition-transform" />
             <div className="hidden md:block">
               <div className="font-heading font-bold text-xl leading-tight text-foreground">
                 ODEL
