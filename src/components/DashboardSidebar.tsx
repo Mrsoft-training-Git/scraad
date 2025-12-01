@@ -50,13 +50,17 @@ export const DashboardSidebar = ({ userRole }: DashboardSidebarProps) => {
     >
       {/* Header */}
       <div className="p-6 border-b border-sidebar-border flex items-center justify-between">
-        {!collapsed && (
+        {!collapsed ? (
           <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <img src={logo} alt="UNIPORT Logo" className="w-10 h-10 object-contain" />
             <div className="text-sm">
               <div className="font-bold">University of</div>
               <div className="text-xs opacity-80">Port Harcourt</div>
             </div>
+          </Link>
+        ) : (
+          <Link to="/" className="hover:opacity-80 transition-opacity">
+            <img src={logo} alt="UNIPORT Logo" className="w-8 h-8 object-contain" />
           </Link>
         )}
         <Button
