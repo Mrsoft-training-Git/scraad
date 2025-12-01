@@ -3,81 +3,109 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { GraduationCap, Clock, Users, Award, BookOpen, CheckCircle } from "lucide-react";
 
 const Programs = () => {
   const programs = [
     {
+      id: "full-stack-web-dev",
       title: "Full Stack Web Development",
       duration: "12 Weeks",
       students: "2,500+",
       level: "Tech Skills",
+      price: "₦150,000",
       description: "Build modern web applications with React, Node.js, and databases. Perfect for career switchers.",
-      highlights: ["React & TypeScript", "Backend APIs", "Database Design", "Deployment & DevOps"]
+      highlights: ["React & TypeScript", "Backend APIs", "Database Design", "Deployment & DevOps"],
+      image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&q=80"
     },
     {
+      id: "data-science-analytics",
       title: "Data Science & Analytics",
       duration: "16 Weeks",
       students: "1,800+",
       level: "Tech Skills",
+      price: "₦180,000",
       description: "Master data analysis, visualization, and machine learning for business insights.",
-      highlights: ["Python & SQL", "Data Visualization", "Machine Learning", "Business Intelligence"]
+      highlights: ["Python & SQL", "Data Visualization", "Machine Learning", "Business Intelligence"],
+      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80"
     },
     {
+      id: "digital-marketing",
       title: "Digital Marketing Mastery",
       duration: "8 Weeks",
       students: "3,200+",
       level: "Business",
+      price: "₦120,000",
       description: "Learn SEO, social media marketing, and paid advertising to grow businesses online.",
-      highlights: ["SEO & Content Marketing", "Social Media Strategy", "Google Ads", "Analytics & ROI"]
+      highlights: ["SEO & Content Marketing", "Social Media Strategy", "Google Ads", "Analytics & ROI"],
+      image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80"
     },
     {
+      id: "cybersecurity",
       title: "Cybersecurity Fundamentals",
       duration: "10 Weeks",
       students: "1,400+",
       level: "Tech Skills",
+      price: "₦160,000",
       description: "Protect systems and networks from cyber threats. High-demand career path.",
-      highlights: ["Network Security", "Ethical Hacking", "Risk Management", "Security Tools"]
+      highlights: ["Network Security", "Ethical Hacking", "Risk Management", "Security Tools"],
+      image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&q=80"
     },
     {
+      id: "project-management",
       title: "Project Management Professional",
       duration: "8 Weeks",
       students: "2,100+",
       level: "Business",
+      price: "₦130,000",
       description: "Master agile and traditional project management methodologies for any industry.",
-      highlights: ["Agile & Scrum", "Risk Management", "Stakeholder Management", "PMP Prep"]
+      highlights: ["Agile & Scrum", "Risk Management", "Stakeholder Management", "PMP Prep"],
+      image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80"
     },
     {
+      id: "business-analytics",
       title: "Business Analytics & Strategy",
       duration: "12 Weeks",
       students: "1,900+",
       level: "Business",
+      price: "₦140,000",
       description: "Use data to drive strategic business decisions and competitive advantage.",
-      highlights: ["Business Intelligence", "Strategic Planning", "Financial Analysis", "Market Research"]
+      highlights: ["Business Intelligence", "Strategic Planning", "Financial Analysis", "Market Research"],
+      image: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&q=80"
     },
     {
+      id: "cloud-computing",
       title: "Cloud Computing (AWS/Azure)",
       duration: "10 Weeks",
       students: "1,600+",
       level: "Tech Skills",
+      price: "₦170,000",
       description: "Deploy and manage scalable cloud infrastructure. Essential for modern tech careers.",
-      highlights: ["Cloud Architecture", "AWS/Azure Services", "DevOps Practices", "Cost Optimization"]
+      highlights: ["Cloud Architecture", "AWS/Azure Services", "DevOps Practices", "Cost Optimization"],
+      image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80"
     },
     {
+      id: "entrepreneurship",
       title: "Entrepreneurship & Startup Essentials",
       duration: "6 Weeks",
       students: "2,800+",
       level: "Business",
+      price: "₦100,000",
       description: "Learn to validate ideas, build MVPs, and launch successful businesses.",
-      highlights: ["Business Planning", "MVP Development", "Fundraising", "Growth Strategies"]
+      highlights: ["Business Planning", "MVP Development", "Fundraising", "Growth Strategies"],
+      image: "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800&q=80"
     },
     {
+      id: "ux-ui-design",
       title: "UX/UI Design Professional",
       duration: "10 Weeks",
       students: "2,200+",
       level: "Tech Skills",
+      price: "₦145,000",
       description: "Design beautiful, user-centered digital experiences that convert.",
-      highlights: ["User Research", "Wireframing & Prototyping", "Visual Design", "Usability Testing"]
+      highlights: ["User Research", "Wireframing & Prototyping", "Visual Design", "Usability Testing"],
+      image: "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&q=80"
     }
   ];
 
@@ -111,42 +139,51 @@ const Programs = () => {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {programs.map((program, index) => (
-              <div key={index} className="bg-card border border-border rounded-xl p-6 hover:shadow-xl transition-all group">
-                <Badge variant="secondary" className="mb-4">
-                  {program.level}
-                </Badge>
-                <h3 className="font-heading text-2xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors">
-                  {program.title}
-                </h3>
-                <p className="text-muted-foreground mb-4">
-                  {program.description}
-                </p>
-                
-                <div className="flex items-center gap-4 mb-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-4 h-4" />
-                    {program.duration}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Users className="w-4 h-4" />
-                    {program.students} students
-                  </div>
+            {programs.map((program) => (
+              <Card key={program.id} className="group overflow-hidden border-border/50 bg-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-2 cursor-pointer flex flex-col">
+                <div className="aspect-video overflow-hidden relative">
+                  <Badge className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm text-primary border-0 z-10">
+                    {program.level}
+                  </Badge>
+                  <img
+                    src={program.image}
+                    alt={program.title}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
                 </div>
-
-                <div className="space-y-2 mb-6">
-                  {program.highlights.map((highlight, idx) => (
-                    <div key={idx} className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="w-4 h-4 text-primary" />
-                      <span className="text-foreground">{highlight}</span>
+                <CardContent className="p-6 flex flex-col flex-grow">
+                  <h3 className="font-heading font-bold text-xl mb-3 group-hover:text-primary transition-colors min-h-[3.5rem]">
+                    {program.title}
+                  </h3>
+                  <p className="text-muted-foreground mb-4 text-sm line-clamp-2">
+                    {program.description}
+                  </p>
+                  
+                  <div className="flex items-center gap-4 mb-4 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-4 h-4" />
+                      {program.duration}
                     </div>
-                  ))}
-                </div>
+                    <div className="flex items-center gap-1">
+                      <Users className="w-4 h-4" />
+                      {program.students}
+                    </div>
+                  </div>
 
-                <Button className="w-full" variant="outline" asChild>
-                  <Link to="/auth">Apply Now</Link>
-                </Button>
-              </div>
+                  <div className="flex items-center justify-between mb-5 mt-auto">
+                    <span className="text-2xl font-bold text-primary">{program.price}</span>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <Button className="flex-1 bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white shadow-lg shadow-primary/20 font-semibold" asChild>
+                      <Link to="/auth">Apply Now</Link>
+                    </Button>
+                    <Button variant="outline" className="flex-1" asChild>
+                      <Link to={`/programs/${program.id}`}>View Details</Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
