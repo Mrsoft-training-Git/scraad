@@ -9,6 +9,7 @@ import Courses from "./pages/Courses";
 import IndividualLearner from "./pages/IndividualLearner";
 import BusinessTeams from "./pages/BusinessTeams";
 import Programs from "./pages/Programs";
+import ProgramDetails from "./pages/ProgramDetails";
 import Career from "./pages/Career";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -48,6 +49,7 @@ const App = () => (
           <Route path="/signup/individual" element={<IndividualLearner />} />
           <Route path="/signup/organization" element={<BusinessTeams />} />
           <Route path="/programs" element={<Programs />} />
+          <Route path="/programs/:id" element={<ProgramDetails />} />
           <Route path="/career" element={<Career />} />
           <Route path="/auth" element={<Auth />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
