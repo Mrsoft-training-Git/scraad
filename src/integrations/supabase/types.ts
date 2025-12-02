@@ -41,6 +41,66 @@ export type Database = {
         }
         Relationships: []
       }
+      courses: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string | null
+          duration: string | null
+          featured: boolean | null
+          id: string
+          image_url: string | null
+          instructor: string | null
+          level: string | null
+          price: number
+          published: boolean | null
+          requirements: string[] | null
+          students_count: number | null
+          syllabus: Json | null
+          title: string
+          updated_at: string | null
+          what_you_learn: string[] | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          description?: string | null
+          duration?: string | null
+          featured?: boolean | null
+          id?: string
+          image_url?: string | null
+          instructor?: string | null
+          level?: string | null
+          price: number
+          published?: boolean | null
+          requirements?: string[] | null
+          students_count?: number | null
+          syllabus?: Json | null
+          title: string
+          updated_at?: string | null
+          what_you_learn?: string[] | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          duration?: string | null
+          featured?: boolean | null
+          id?: string
+          image_url?: string | null
+          instructor?: string | null
+          level?: string | null
+          price?: number
+          published?: boolean | null
+          requirements?: string[] | null
+          students_count?: number | null
+          syllabus?: Json | null
+          title?: string
+          updated_at?: string | null
+          what_you_learn?: string[] | null
+        }
+        Relationships: []
+      }
       enrolled_courses: {
         Row: {
           course_name: string

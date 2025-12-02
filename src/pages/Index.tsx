@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -6,38 +7,42 @@ import { ArrowRight, Award, BookOpen, Clock, GraduationCap, TrendingUp, Users, C
 import { Link } from "react-router-dom";
 import heroStudent from "@/assets/hero-student.jpg";
 import businessTraining from "@/assets/business-training.jpg";
+import { supabase } from "@/integrations/supabase/client";
+
+interface Course {
+  id: string;
+  title: string;
+  description: string | null;
+  price: number;
+  image_url: string | null;
+  category: string;
+  students_count: number;
+  featured: boolean;
+}
 
 const Index = () => {
-  const courses = [
-    {
-      title: "E-Business Model",
-      price: "₦40,000",
-      students: 1,
-      likes: 0,
-      image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80",
-    },
-    {
-      title: "National Sustainable and Entrepreneurship Program (NSEP)",
-      price: "₦40,000",
-      students: 2,
-      likes: 1,
-      image: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&q=80",
-    },
-    {
-      title: "Resource Acquisition",
-      price: "₦35,000",
-      students: 0,
-      likes: 0,
-      image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80",
-    },
-    {
-      title: "Human Resource and Management",
-      price: "₦40,300",
-      students: 13,
-      likes: 0,
-      image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&q=80",
-    },
-  ];
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchFeaturedCourses();
+  }, []);
+
+  const fetchFeaturedCourses = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("courses")
+      .select("*")
+      .eq("published", true)
+      .eq("featured", true)
+      .order("created_at", { ascending: false })
+      .limit(4);
+    
+    if (!error && data) {
+      setCourses(data);
+    }
+    setLoading(false);
+  };
 
   const features = [
     {
@@ -200,41 +205,52 @@ const Index = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-            {courses.map((course, index) => (
-              <Card key={index} className="group overflow-hidden border-border/50 bg-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-2 cursor-pointer flex flex-col">
-                <div className="aspect-video overflow-hidden relative">
-                  <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-primary z-10">
-                    Popular
-                  </div>
-                  <img
-                    src={course.image}
-                    alt={course.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
-                </div>
-                <CardContent className="p-6 flex flex-col flex-grow">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-semibold">
-                      Business
+          {loading ? (
+            <div className="text-center py-12">Loading courses...</div>
+          ) : courses.length === 0 ? (
+            <div className="text-center py-12">No featured courses yet</div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+              {courses.map((course) => (
+                <Card key={course.id} className="group overflow-hidden border-border/50 bg-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-2 cursor-pointer flex flex-col">
+                  <div className="aspect-video overflow-hidden relative">
+                    <div className="absolute top-4 right-4 bg-background/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-primary z-10">
+                      Featured
                     </div>
+                    <img
+                      src={course.image_url || "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80"}
+                      alt={course.title}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
                   </div>
-                  <h3 className="font-heading font-bold text-lg mb-4 line-clamp-2 group-hover:text-primary transition-colors min-h-[3.5rem]">{course.title}</h3>
-                  <div className="flex items-center justify-between mb-5 mt-auto">
-                    <span className="text-2xl font-bold text-primary">{course.price}</span>
-                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Users className="w-4 h-4" /> {course.students}
-                      </span>
+                  <CardContent className="p-6 flex flex-col flex-grow">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-semibold">
+                        {course.category}
+                      </div>
                     </div>
-                  </div>
-                  <Button className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white shadow-lg shadow-primary/20 font-semibold">
-                    Enroll Now
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                    <h3 className="font-heading font-bold text-lg mb-4 line-clamp-2 group-hover:text-primary transition-colors min-h-[3.5rem]">{course.title}</h3>
+                    <div className="flex items-center justify-between mb-5 mt-auto">
+                      <span className="text-2xl font-bold text-primary">₦{course.price.toLocaleString()}</span>
+                      <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Users className="w-4 h-4" /> {course.students_count}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground shadow-lg shadow-primary/20 font-semibold">
+                        Enroll Now
+                      </Button>
+                      <Button variant="outline" className="border-2 hover:bg-accent/10" asChild>
+                        <Link to={`/programs/${course.id}`}>View Details</Link>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
 
           <div className="text-center">
             <Link to="/courses">
