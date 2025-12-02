@@ -27,6 +27,10 @@ const Auth = () => {
   const [signupPassword, setSignupPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  // Forgot password state
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetSent, setResetSent] = useState(false);
+
   useEffect(() => {
     // Check if user is already logged in
     const checkUser = async () => {
@@ -121,6 +125,33 @@ const Auth = () => {
     }
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}/auth`,
+      });
+
+      if (error) throw error;
+
+      setResetSent(true);
+      toast({
+        title: "Password reset email sent",
+        description: "Check your email for the password reset link.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Reset failed",
+        description: error.message || "Please check your email and try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -138,9 +169,10 @@ const Auth = () => {
             </div>
 
             <Tabs defaultValue="login" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-8">
+              <TabsList className="grid w-full grid-cols-3 mb-8">
                 <TabsTrigger value="login">Login</TabsTrigger>
                 <TabsTrigger value="signup">Sign Up</TabsTrigger>
+                <TabsTrigger value="forgot">Reset Password</TabsTrigger>
               </TabsList>
 
               {/* Login Form */}
@@ -194,6 +226,63 @@ const Auth = () => {
                       {loading ? "Signing in..." : "Sign In"}
                     </Button>
                   </form>
+                </div>
+              </TabsContent>
+
+              {/* Forgot Password Form */}
+              <TabsContent value="forgot">
+                <div className="bg-card border border-border rounded-xl p-8 shadow-lg">
+                  {resetSent ? (
+                    <div className="text-center space-y-4">
+                      <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+                        <Mail className="w-8 h-8 text-green-600" />
+                      </div>
+                      <h3 className="text-xl font-bold">Check your email</h3>
+                      <p className="text-muted-foreground">
+                        We've sent a password reset link to <strong>{resetEmail}</strong>
+                      </p>
+                      <Button
+                        onClick={() => setResetSent(false)}
+                        variant="outline"
+                        className="w-full"
+                      >
+                        Back to Reset
+                      </Button>
+                    </div>
+                  ) : (
+                    <form onSubmit={handleForgotPassword} className="space-y-6">
+                      <div className="text-center space-y-2 mb-6">
+                        <h3 className="text-xl font-bold">Reset your password</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Enter your email address and we'll send you a link to reset your password.
+                        </p>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="reset-email">Email</Label>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                          <Input
+                            id="reset-email"
+                            type="email"
+                            placeholder="your.email@example.com"
+                            className="pl-10"
+                            value={resetEmail}
+                            onChange={(e) => setResetEmail(e.target.value)}
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <Button 
+                        type="submit" 
+                        className="w-full bg-gradient-to-r from-primary to-accent text-white"
+                        disabled={loading}
+                      >
+                        {loading ? "Sending reset link..." : "Send Reset Link"}
+                      </Button>
+                    </form>
+                  )}
                 </div>
               </TabsContent>
 
