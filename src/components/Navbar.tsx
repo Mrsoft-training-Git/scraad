@@ -1,15 +1,12 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Search, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import logo from "@/assets/uniport-logo.png";
-
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  return (
-    <nav className="bg-background/80 backdrop-blur-xl border-b border-border sticky top-0 z-50 shadow-sm">
+  return <nav className="bg-background/80 backdrop-blur-xl border-b border-border sticky top-0 z-50 shadow-sm">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
@@ -28,20 +25,15 @@ export const Navbar = () => {
             <Link to="/" className="text-foreground hover:text-primary transition-colors font-medium text-sm">
               Home
             </Link>
-            <Link to="/programs" className="text-foreground hover:text-primary transition-colors font-medium text-sm">
-              Programs
-            </Link>
+            <Link to="/programs" className="text-foreground hover:text-primary transition-colors font-medium text-sm">Explore Courses</Link>
             <Link to="/career" className="text-foreground hover:text-primary transition-colors font-medium text-sm">
               Career
             </Link>
             
             {/* Search */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="Search courses..."
-                className="pl-10 w-64 bg-muted/50 border-border/50 focus:border-primary/50 text-foreground placeholder:text-muted-foreground transition-all"
-              />
+              
+              
             </div>
 
             <Button variant="ghost" className="text-foreground hover:text-primary hover:bg-muted/50" asChild>
@@ -53,17 +45,13 @@ export const Navbar = () => {
           </div>
 
           {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="lg:hidden"
-          >
+          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="lg:hidden">
             <Menu className="w-6 h-6" />
           </button>
         </div>
 
         {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div className="lg:hidden pb-4 space-y-3">
+        {isMenuOpen && <div className="lg:hidden pb-4 space-y-3">
             <Link to="/" className="block py-2 hover:text-accent transition-colors">
               Home
             </Link>
@@ -81,8 +69,7 @@ export const Navbar = () => {
                 <Link to="/auth">Sign Up</Link>
               </Button>
             </div>
-          </div>
-        )}
+          </div>}
       </div>
 
       {/* Sign Up Options Bar */}
@@ -99,6 +86,5 @@ export const Navbar = () => {
           </Link>
         </div>
       </div>
-    </nav>
-  );
+    </nav>;
 };
