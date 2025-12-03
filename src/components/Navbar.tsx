@@ -25,7 +25,7 @@ export const Navbar = () => {
             <Link to="/" className="text-foreground hover:text-primary transition-colors font-medium text-sm">
               Home
             </Link>
-            <Link to="/programs" className="text-foreground hover:text-primary transition-colors font-medium text-sm">Explore Courses</Link>
+            <Link to="/programs" className="text-foreground hover:text-primary transition-colors font-medium text-sm">Top Rated Courses</Link>
             <Link to="/career" className="text-foreground hover:text-primary transition-colors font-medium text-sm">
               Career
             </Link>
