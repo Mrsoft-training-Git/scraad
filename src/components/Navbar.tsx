@@ -13,9 +13,7 @@ export const Navbar = () => {
           <Link to="/" className="flex items-center gap-3 group">
             <img src={logo} alt="UNIPORT Logo" className="w-12 h-12 object-contain group-hover:scale-105 transition-transform" />
             <div className="hidden md:block">
-              <div className="font-heading font-bold text-xl leading-tight text-foreground">
-                ODEL
-              </div>
+              <div className="font-heading font-bold text-xl leading-tight text-foreground">ODe-L</div>
               <div className="text-xs text-muted-foreground">University of Port Harcourt</div>
             </div>
           </Link>
