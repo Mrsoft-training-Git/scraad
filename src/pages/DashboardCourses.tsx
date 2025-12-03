@@ -1,18 +1,16 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, Users, Edit, Eye, EyeOff, Star } from "lucide-react";
-import { Link } from "react-router-dom";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Plus, Search, Users, Edit, Eye, EyeOff, Star, Award } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Switch } from "@/components/ui/switch";
+import { CourseFormDialog } from "@/components/CourseFormDialog";
+import { useEnrollment } from "@/hooks/useEnrollment";
 
 interface Course {
   id: string;
@@ -23,10 +21,14 @@ interface Course {
   category: string;
   published: boolean;
   featured: boolean;
+  top_rated: boolean;
   instructor: string | null;
   duration: string | null;
   students_count: number;
   level: string | null;
+  what_you_learn: string[] | null;
+  requirements: string[] | null;
+  syllabus: any;
 }
 
 const DashboardCourses = () => {
@@ -37,18 +39,9 @@ const DashboardCourses = () => {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    price: "",
-    image_url: "",
-    category: "",
-    instructor: "",
-    duration: "",
-    level: "Beginner"
-  });
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { enrollInCourse, enrolling } = useEnrollment();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -87,77 +80,8 @@ const DashboardCourses = () => {
   };
 
   const handleOpenDialog = (course?: Course) => {
-    if (course) {
-      setEditingCourse(course);
-      setFormData({
-        title: course.title,
-        description: course.description || "",
-        price: course.price.toString(),
-        image_url: course.image_url || "",
-        category: course.category,
-        instructor: course.instructor || "",
-        duration: course.duration || "",
-        level: course.level || "Beginner"
-      });
-    } else {
-      setEditingCourse(null);
-      setFormData({
-        title: "",
-        description: "",
-        price: "",
-        image_url: "",
-        category: "",
-        instructor: "",
-        duration: "",
-        level: "Beginner"
-      });
-    }
+    setEditingCourse(course || null);
     setDialogOpen(true);
-  };
-
-  const handleSaveCourse = async () => {
-    if (!formData.title || !formData.price || !formData.category) {
-      toast({ title: "Error", description: "Please fill in required fields", variant: "destructive" });
-      return;
-    }
-
-    const courseData = {
-      title: formData.title,
-      description: formData.description,
-      price: parseFloat(formData.price),
-      image_url: formData.image_url,
-      category: formData.category,
-      instructor: formData.instructor,
-      duration: formData.duration,
-      level: formData.level
-    };
-
-    if (editingCourse) {
-      const { error } = await supabase
-        .from("courses")
-        .update(courseData)
-        .eq("id", editingCourse.id);
-      
-      if (error) {
-        toast({ title: "Error", description: "Failed to update course", variant: "destructive" });
-      } else {
-        toast({ title: "Success", description: "Course updated successfully" });
-        fetchCourses();
-        setDialogOpen(false);
-      }
-    } else {
-      const { error } = await supabase
-        .from("courses")
-        .insert([courseData]);
-      
-      if (error) {
-        toast({ title: "Error", description: "Failed to create course", variant: "destructive" });
-      } else {
-        toast({ title: "Success", description: "Course created successfully" });
-        fetchCourses();
-        setDialogOpen(false);
-      }
-    }
   };
 
   const togglePublish = async (course: Course) => {
@@ -194,6 +118,30 @@ const DashboardCourses = () => {
     }
   };
 
+  const toggleTopRated = async (course: Course) => {
+    const { error } = await supabase
+      .from("courses")
+      .update({ top_rated: !course.top_rated })
+      .eq("id", course.id);
+    
+    if (error) {
+      toast({ title: "Error", description: "Failed to update course", variant: "destructive" });
+    } else {
+      toast({ 
+        title: "Success", 
+        description: `Course ${!course.top_rated ? "marked as top rated" : "removed from top rated"} successfully` 
+      });
+      fetchCourses();
+    }
+  };
+
+  const handleEnroll = async (courseId: string) => {
+    const course = courses.find(c => c.id === courseId);
+    if (course) {
+      await enrollInCourse(courseId, course.title);
+    }
+  };
+
   const filteredCourses = courses.filter((course) =>
     course.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -204,97 +152,10 @@ const DashboardCourses = () => {
         <div className="flex justify-between items-center">
           <h2 className="font-heading text-3xl font-bold">Course Catalog</h2>
           {userRole === "admin" && (
-            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-              <DialogTrigger asChild>
-                <Button onClick={() => handleOpenDialog()}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Course
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>{editingCourse ? "Edit Course" : "Add New Course"}</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="title">Title *</Label>
-                    <Input
-                      id="title"
-                      value={formData.title}
-                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea
-                      id="description"
-                      value={formData.description}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                      rows={4}
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="price">Price (₦) *</Label>
-                      <Input
-                        id="price"
-                        type="number"
-                        value={formData.price}
-                        onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="category">Category *</Label>
-                      <Input
-                        id="category"
-                        value={formData.category}
-                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                        placeholder="e.g., Business, Technology"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <Label htmlFor="image_url">Image URL</Label>
-                    <Input
-                      id="image_url"
-                      value={formData.image_url}
-                      onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                      placeholder="https://..."
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="instructor">Instructor</Label>
-                      <Input
-                        id="instructor"
-                        value={formData.instructor}
-                        onChange={(e) => setFormData({ ...formData, instructor: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="duration">Duration</Label>
-                      <Input
-                        id="duration"
-                        value={formData.duration}
-                        onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                        placeholder="e.g., 8 weeks"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <Label htmlFor="level">Level</Label>
-                    <Input
-                      id="level"
-                      value={formData.level}
-                      onChange={(e) => setFormData({ ...formData, level: e.target.value })}
-                    />
-                  </div>
-                  <Button onClick={handleSaveCourse} className="w-full">
-                    {editingCourse ? "Update Course" : "Create Course"}
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+            <Button onClick={() => handleOpenDialog()}>
+              <Plus className="w-4 h-4 mr-2" />
+              Add Course
+            </Button>
           )}
         </div>
 
@@ -321,12 +182,13 @@ const DashboardCourses = () => {
               >
                 <div className="aspect-video overflow-hidden relative">
                   {userRole === "admin" && (
-                    <div className="absolute top-4 left-4 flex gap-2 z-10">
+                    <div className="absolute top-4 left-4 flex gap-1 z-10 flex-wrap max-w-[calc(100%-80px)]">
                       <Button
                         size="icon"
                         variant={course.published ? "default" : "secondary"}
                         onClick={() => togglePublish(course)}
                         className="h-8 w-8"
+                        title={course.published ? "Unpublish" : "Publish"}
                       >
                         {course.published ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                       </Button>
@@ -335,22 +197,39 @@ const DashboardCourses = () => {
                         variant={course.featured ? "default" : "secondary"}
                         onClick={() => toggleFeatured(course)}
                         className="h-8 w-8"
+                        title={course.featured ? "Unfeature" : "Feature"}
                       >
                         <Star className={course.featured ? "w-4 h-4 fill-current" : "w-4 h-4"} />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant={course.top_rated ? "default" : "secondary"}
+                        onClick={() => toggleTopRated(course)}
+                        className="h-8 w-8 bg-yellow-500 hover:bg-yellow-600"
+                        title={course.top_rated ? "Remove Top Rated" : "Mark Top Rated"}
+                      >
+                        <Award className={course.top_rated ? "w-4 h-4 fill-current" : "w-4 h-4"} />
                       </Button>
                       <Button
                         size="icon"
                         variant="secondary"
                         onClick={() => handleOpenDialog(course)}
                         className="h-8 w-8"
+                        title="Edit"
                       >
                         <Edit className="w-4 h-4" />
                       </Button>
                     </div>
                   )}
-                  <div className="absolute top-4 right-4 bg-background/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-primary z-10">
+                  <Badge className="absolute top-4 right-4 bg-background/90 backdrop-blur-sm text-primary border-0 z-10">
                     {course.category}
-                  </div>
+                  </Badge>
+                  {course.top_rated && (
+                    <Badge className="absolute bottom-4 left-4 bg-yellow-500 text-white border-0 z-10">
+                      <Award className="w-3 h-3 mr-1" />
+                      Top Rated
+                    </Badge>
+                  )}
                   <img
                     src={course.image_url || "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80"}
                     alt={course.title}
@@ -358,19 +237,19 @@ const DashboardCourses = () => {
                   />
                 </div>
                 <CardContent className="p-6 flex flex-col flex-grow">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-semibold">
+                  <div className="flex items-center gap-2 mb-3 flex-wrap">
+                    <Badge variant="secondary" className="bg-primary/10 text-primary">
                       {course.category}
-                    </div>
+                    </Badge>
                     {!course.published && (
-                      <div className="px-3 py-1 bg-muted text-muted-foreground rounded-full text-xs font-semibold">
+                      <Badge variant="outline" className="text-muted-foreground">
                         Draft
-                      </div>
+                      </Badge>
                     )}
                     {course.featured && (
-                      <div className="px-3 py-1 bg-accent/10 text-accent rounded-full text-xs font-semibold">
+                      <Badge className="bg-accent/10 text-accent border-0">
                         Featured
-                      </div>
+                      </Badge>
                     )}
                   </div>
                   <h3 className="font-heading font-bold text-lg mb-4 line-clamp-2 group-hover:text-primary transition-colors min-h-[3.5rem]">
@@ -380,12 +259,16 @@ const DashboardCourses = () => {
                     <span className="text-2xl font-bold text-primary">₦{course.price.toLocaleString()}</span>
                     <div className="flex items-center gap-3 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
-                        <Users className="w-4 h-4" /> {course.students_count}
+                        <Users className="w-4 h-4" /> {course.students_count || 0}
                       </span>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
-                    <Button className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground shadow-lg shadow-primary/20 font-semibold">
+                    <Button 
+                      className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground shadow-lg shadow-primary/20 font-semibold"
+                      onClick={() => handleEnroll(course.id)}
+                      disabled={enrolling}
+                    >
                       Apply Now
                     </Button>
                     <Button
@@ -402,6 +285,13 @@ const DashboardCourses = () => {
           </div>
         )}
       </div>
+
+      <CourseFormDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        editingCourse={editingCourse}
+        onSave={fetchCourses}
+      />
     </DashboardLayout>
   );
 };

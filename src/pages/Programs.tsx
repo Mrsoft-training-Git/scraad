@@ -5,8 +5,9 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { GraduationCap, Clock, Users, Award, BookOpen, CheckCircle } from "lucide-react";
+import { Clock, Users, Award, BookOpen, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useEnrollment } from "@/hooks/useEnrollment";
 
 interface Course {
   id: string;
@@ -19,11 +20,13 @@ interface Course {
   duration: string | null;
   students_count: number;
   level: string | null;
+  top_rated: boolean;
 }
 
 const Programs = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
+  const { enrollInCourse, enrolling } = useEnrollment();
 
   useEffect(() => {
     fetchCourses();
@@ -31,16 +34,22 @@ const Programs = () => {
 
   const fetchCourses = async () => {
     setLoading(true);
+    // Programs page shows top_rated courses
     const { data, error } = await supabase
       .from("courses")
       .select("*")
       .eq("published", true)
+      .eq("top_rated", true)
       .order("created_at", { ascending: false });
     
     if (!error && data) {
       setCourses(data);
     }
     setLoading(false);
+  };
+
+  const handleEnroll = async (course: Course) => {
+    await enrollInCourse(course.id, course.title);
   };
 
   return (
@@ -51,19 +60,19 @@ const Programs = () => {
       <section className="py-20 bg-gradient-to-br from-primary/10 via-accent/10 to-background">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">
-              <Award className="w-4 h-4 mr-1" />
-              Certificate Programs
+            <Badge className="mb-4 bg-yellow-500/10 text-yellow-600 border-yellow-500/20">
+              <Star className="w-4 h-4 mr-1 fill-current" />
+              Top Rated Programs
             </Badge>
             <h1 className="font-heading text-5xl md:text-6xl font-bold text-foreground mb-6">
-              Professional
+              Our Best
               <span className="block bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                Certificate Programs
+                Rated Programs
               </span>
             </h1>
             <p className="text-xl text-muted-foreground mb-8">
-              Fast-track your career with industry-relevant certificates. Perfect for working professionals, 
-              career switchers, and anyone looking to upskill in tech and business.
+              Discover our highest-rated certificate programs chosen by thousands of learners. 
+              Perfect for working professionals, career switchers, and anyone looking to upskill.
             </p>
           </div>
         </div>
@@ -75,7 +84,12 @@ const Programs = () => {
           {loading ? (
             <div className="text-center py-12">Loading programs...</div>
           ) : courses.length === 0 ? (
-            <div className="text-center py-12">No programs available</div>
+            <div className="text-center py-12">
+              <p className="text-muted-foreground mb-4">No top rated programs available yet</p>
+              <Button asChild>
+                <Link to="/courses">Browse All Courses</Link>
+              </Button>
+            </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {courses.map((course) => (
@@ -83,6 +97,10 @@ const Programs = () => {
                   <div className="aspect-video overflow-hidden relative">
                     <Badge className="absolute top-4 right-4 bg-background/90 backdrop-blur-sm text-primary border-0 z-10">
                       {course.category}
+                    </Badge>
+                    <Badge className="absolute top-4 left-4 bg-yellow-500 text-white border-0 z-10">
+                      <Star className="w-3 h-3 mr-1 fill-current" />
+                      Top Rated
                     </Badge>
                     <img
                       src={course.image_url || "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80"}
@@ -119,11 +137,15 @@ const Programs = () => {
                       <span className="text-2xl font-bold text-primary">₦{course.price.toLocaleString()}</span>
                     </div>
 
-                    <div className="flex gap-3">
-                      <Button className="flex-1 bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground shadow-lg shadow-primary/20 font-semibold" asChild>
-                        <Link to="/auth">Apply Now</Link>
+                    <div className="grid grid-cols-2 gap-3">
+                      <Button 
+                        className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground shadow-lg shadow-primary/20 font-semibold"
+                        onClick={() => handleEnroll(course)}
+                        disabled={enrolling}
+                      >
+                        Apply Now
                       </Button>
-                      <Button variant="outline" className="flex-1" asChild>
+                      <Button variant="outline" asChild>
                         <Link to={`/programs/${course.id}`}>View Details</Link>
                       </Button>
                     </div>
