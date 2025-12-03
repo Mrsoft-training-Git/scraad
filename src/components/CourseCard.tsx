@@ -47,7 +47,13 @@ export const CourseCard = ({ course, onEnroll, showEnrollButton = true }: Course
           <p className="text-muted-foreground text-sm mb-4 line-clamp-2">{course.description}</p>
         )}
         <div className="flex items-center justify-between mb-5 mt-auto">
-          <span className="text-2xl font-bold text-primary">₦{course.price.toLocaleString()}</span>
+          {course.price === 0 ? (
+            <Badge className="bg-green-500/10 text-green-600 border-green-500/20 text-lg px-3 py-1">
+              Free
+            </Badge>
+          ) : (
+            <span className="text-2xl font-bold text-primary">₦{course.price.toLocaleString()}</span>
+          )}
           <div className="flex items-center gap-1 text-sm text-muted-foreground">
             <Users className="w-4 h-4" />
             <span>{course.students_count || 0}</span>
