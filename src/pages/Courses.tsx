@@ -1,82 +1,64 @@
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Users, Filter } from "lucide-react";
-import { useState } from "react";
+import { Search, Users, Filter, Star, Award } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useEnrollment } from "@/hooks/useEnrollment";
+
+interface Course {
+  id: string;
+  title: string;
+  description: string | null;
+  price: number;
+  image_url: string | null;
+  category: string;
+  students_count: number;
+  top_rated: boolean;
+}
 
 const Courses = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { enrollInCourse, enrolling } = useEnrollment();
 
-  const allCourses = [
-    {
-      title: "E-Business Model",
-      price: "₦40,000",
-      students: 1,
-      category: "Business",
-      image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80",
-    },
-    {
-      title: "National Sustainable and Entrepreneurship Program (NSEP)",
-      price: "₦40,000",
-      students: 2,
-      category: "Business",
-      image: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&q=80",
-    },
-    {
-      title: "Resource Acquisition",
-      price: "₦35,000",
-      students: 0,
-      category: "Business",
-      image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80",
-    },
-    {
-      title: "Human Resource and Management",
-      price: "₦40,300",
-      students: 13,
-      category: "Business",
-      image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&q=80",
-    },
-    {
-      title: "Digital Marketing Fundamentals",
-      price: "₦38,000",
-      students: 25,
-      category: "Marketing",
-      image: "https://images.unsplash.com/photo-1432888622747-4eb9a8f2c293?w=800&q=80",
-    },
-    {
-      title: "Financial Management for Startups",
-      price: "₦42,000",
-      students: 18,
-      category: "Finance",
-      image: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&q=80",
-    },
-    {
-      title: "Project Management Professional",
-      price: "₦45,000",
-      students: 30,
-      category: "Management",
-      image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80",
-    },
-    {
-      title: "Data Analytics and Visualization",
-      price: "₦50,000",
-      students: 22,
-      category: "Technology",
-      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80",
-    },
-  ];
+  useEffect(() => {
+    fetchCourses();
+  }, []);
 
-  const categories = ["All", "Business", "Marketing", "Finance", "Management", "Technology"];
+  const fetchCourses = async () => {
+    setLoading(true);
+    // Courses page shows all published courses
+    const { data, error } = await supabase
+      .from("courses")
+      .select("*")
+      .eq("published", true)
+      .order("created_at", { ascending: false });
+    
+    if (!error && data) {
+      setCourses(data);
+    }
+    setLoading(false);
+  };
 
-  const filteredCourses = allCourses.filter((course) => {
+  // Get unique categories from courses
+  const categories = ["All", ...new Set(courses.map(c => c.category))];
+
+  const filteredCourses = courses.filter((course) => {
     const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === "All" || course.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+  const handleEnroll = async (course: Course) => {
+    await enrollInCourse(course.id, course.title);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -135,46 +117,65 @@ const Courses = () => {
           </div>
 
           {/* Courses Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {filteredCourses.map((course, index) => (
-              <Card key={index} className="group overflow-hidden border-border/50 bg-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-2 cursor-pointer flex flex-col">
-                <div className="aspect-video overflow-hidden relative">
-                  <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-primary z-10">
-                    {course.category}
-                  </div>
-                  <img
-                    src={course.image}
-                    alt={course.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
-                </div>
-                <CardContent className="p-6 flex flex-col flex-grow">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-semibold">
+          {loading ? (
+            <div className="text-center py-12">Loading courses...</div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {filteredCourses.map((course) => (
+                <Card key={course.id} className="group overflow-hidden border-border/50 bg-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-2 cursor-pointer flex flex-col">
+                  <div className="aspect-video overflow-hidden relative">
+                    <Badge className="absolute top-4 right-4 bg-background/90 backdrop-blur-sm text-primary border-0 z-10">
                       {course.category}
-                    </div>
+                    </Badge>
+                    {course.top_rated && (
+                      <Badge className="absolute top-4 left-4 bg-yellow-500 text-white border-0 z-10">
+                        <Star className="w-3 h-3 mr-1 fill-current" />
+                        Top Rated
+                      </Badge>
+                    )}
+                    <img
+                      src={course.image_url || "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80"}
+                      alt={course.title}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
                   </div>
-                  <h3 className="font-heading font-bold text-lg mb-4 line-clamp-2 group-hover:text-primary transition-colors min-h-[3.5rem]">
-                    {course.title}
-                  </h3>
-                  <div className="flex items-center justify-between mb-5 mt-auto">
-                    <span className="text-2xl font-bold text-primary">{course.price}</span>
-                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Users className="w-4 h-4" /> {course.students}
-                      </span>
+                  <CardContent className="p-6 flex flex-col flex-grow">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Badge variant="secondary" className="bg-primary/10 text-primary">
+                        {course.category}
+                      </Badge>
                     </div>
-                  </div>
-                  <Button className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white shadow-lg shadow-primary/20 font-semibold">
-                    Enroll Now
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                    <h3 className="font-heading font-bold text-lg mb-4 line-clamp-2 group-hover:text-primary transition-colors min-h-[3.5rem]">
+                      {course.title}
+                    </h3>
+                    <div className="flex items-center justify-between mb-5 mt-auto">
+                      <span className="text-2xl font-bold text-primary">₦{course.price.toLocaleString()}</span>
+                      <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Users className="w-4 h-4" /> {course.students_count || 0}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button 
+                        className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground shadow-lg shadow-primary/20 font-semibold"
+                        onClick={() => handleEnroll(course)}
+                        disabled={enrolling}
+                      >
+                        Apply Now
+                      </Button>
+                      <Button variant="outline" className="border-2 hover:bg-accent/10" asChild>
+                        <Link to={`/programs/${course.id}`}>View Details</Link>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
 
           {/* No Results */}
-          {filteredCourses.length === 0 && (
+          {!loading && filteredCourses.length === 0 && (
             <div className="text-center py-16">
               <p className="text-muted-foreground text-lg">No courses found. Try adjusting your search or filters.</p>
             </div>

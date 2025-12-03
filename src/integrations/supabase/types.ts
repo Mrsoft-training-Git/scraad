@@ -58,6 +58,7 @@ export type Database = {
           students_count: number | null
           syllabus: Json | null
           title: string
+          top_rated: boolean | null
           updated_at: string | null
           what_you_learn: string[] | null
         }
@@ -77,6 +78,7 @@ export type Database = {
           students_count?: number | null
           syllabus?: Json | null
           title: string
+          top_rated?: boolean | null
           updated_at?: string | null
           what_you_learn?: string[] | null
         }
@@ -96,6 +98,7 @@ export type Database = {
           students_count?: number | null
           syllabus?: Json | null
           title?: string
+          top_rated?: boolean | null
           updated_at?: string | null
           what_you_learn?: string[] | null
         }
@@ -103,6 +106,7 @@ export type Database = {
       }
       enrolled_courses: {
         Row: {
+          course_id: string | null
           course_name: string
           enrolled_at: string | null
           id: string
@@ -110,6 +114,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          course_id?: string | null
           course_name: string
           enrolled_at?: string | null
           id?: string
@@ -117,13 +122,22 @@ export type Database = {
           user_id: string
         }
         Update: {
+          course_id?: string | null
           course_name?: string
           enrolled_at?: string | null
           id?: string
           progress?: number | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "enrolled_courses_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
