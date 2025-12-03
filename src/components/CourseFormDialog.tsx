@@ -14,6 +14,7 @@ interface CourseFormData {
   title: string;
   description: string;
   price: string;
+  is_free: boolean;
   image_url: string;
   category: string;
   instructor: string;
@@ -41,6 +42,7 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave }: 
     title: "",
     description: "",
     price: "",
+    is_free: false,
     image_url: "",
     category: "",
     instructor: "",
@@ -61,6 +63,7 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave }: 
         title: editingCourse.title || "",
         description: editingCourse.description || "",
         price: editingCourse.price?.toString() || "",
+        is_free: editingCourse.price === 0,
         image_url: editingCourse.image_url || "",
         category: editingCourse.category || "",
         instructor: editingCourse.instructor || "",
@@ -76,6 +79,7 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave }: 
         title: "",
         description: "",
         price: "",
+        is_free: false,
         image_url: "",
         category: "",
         instructor: "",
@@ -160,7 +164,7 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave }: 
   };
 
   const handleSave = async () => {
-    if (!formData.title || !formData.price || !formData.category) {
+    if (!formData.title || !formData.category || (!formData.is_free && !formData.price)) {
       toast({ title: "Error", description: "Please fill in required fields", variant: "destructive" });
       return;
     }
@@ -168,7 +172,7 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave }: 
     const courseData = {
       title: formData.title,
       description: formData.description,
-      price: parseFloat(formData.price),
+      price: formData.is_free ? 0 : parseFloat(formData.price),
       image_url: formData.image_url,
       category: formData.category,
       instructor: formData.instructor,
@@ -286,14 +290,34 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave }: 
               </div>
 
               <div>
-                <Label htmlFor="price">Price (₦) *</Label>
-                <Input
-                  id="price"
-                  type="number"
-                  value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                  className="mt-1"
-                />
+                <Label className="mb-2 block">Pricing *</Label>
+                <div className="flex gap-2 mb-3">
+                  <Button
+                    type="button"
+                    variant={formData.is_free ? "default" : "outline"}
+                    onClick={() => setFormData({ ...formData, is_free: true, price: "" })}
+                    className={formData.is_free ? "bg-primary text-primary-foreground" : ""}
+                  >
+                    Free
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={!formData.is_free ? "default" : "outline"}
+                    onClick={() => setFormData({ ...formData, is_free: false })}
+                    className={!formData.is_free ? "bg-primary text-primary-foreground" : ""}
+                  >
+                    Paid
+                  </Button>
+                </div>
+                {!formData.is_free && (
+                  <Input
+                    id="price"
+                    type="number"
+                    value={formData.price}
+                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    placeholder="Enter price in ₦"
+                  />
+                )}
               </div>
 
               <div>
