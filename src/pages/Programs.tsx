@@ -134,7 +134,13 @@ const Programs = () => {
                     )}
 
                     <div className="flex items-center justify-between mb-5 mt-auto">
-                      <span className="text-2xl font-bold text-primary">₦{course.price.toLocaleString()}</span>
+                      {course.price === 0 ? (
+                        <Badge className="bg-green-500/10 text-green-600 border-green-500/20 text-lg px-3 py-1">
+                          Free
+                        </Badge>
+                      ) : (
+                        <span className="text-2xl font-bold text-primary">₦{course.price.toLocaleString()}</span>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
