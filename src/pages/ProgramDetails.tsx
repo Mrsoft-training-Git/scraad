@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Clock, Users, Award, CheckCircle, BookOpen, Video, ArrowLeft } from "lucide-react";
+import { Clock, Users, Award, CheckCircle, BookOpen, Video, ArrowLeft, Share2, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface Course {
   id: string;
@@ -29,6 +30,27 @@ const ProgramDetails = () => {
   const { id } = useParams();
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
+  const { toast } = useToast();
+
+  const handleShare = async () => {
+    const courseUrl = window.location.href;
+    try {
+      await navigator.clipboard.writeText(courseUrl);
+      setCopied(true);
+      toast({
+        title: "Link copied!",
+        description: "Course link has been copied to clipboard.",
+      });
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast({
+        title: "Failed to copy",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   useEffect(() => {
     if (id) {
@@ -137,7 +159,13 @@ const ProgramDetails = () => {
               )}
               
               <div className="flex items-baseline gap-4">
-                <span className="text-4xl font-bold text-primary">₦{course.price.toLocaleString()}</span>
+                {course.price === 0 ? (
+                  <Badge className="bg-green-500/10 text-green-600 border-green-500/20 text-2xl px-4 py-2">
+                    Free
+                  </Badge>
+                ) : (
+                  <span className="text-4xl font-bold text-primary">₦{course.price.toLocaleString()}</span>
+                )}
               </div>
             </div>
 
@@ -266,12 +294,29 @@ const ProgramDetails = () => {
                   <div className="space-y-6">
                     <div>
                       <p className="text-sm text-muted-foreground mb-2">Price</p>
-                      <p className="text-4xl font-bold text-primary">₦{course.price.toLocaleString()}</p>
+                      {course.price === 0 ? (
+                        <Badge className="bg-green-500/10 text-green-600 border-green-500/20 text-2xl px-4 py-2">
+                          Free
+                        </Badge>
+                      ) : (
+                        <p className="text-4xl font-bold text-primary">₦{course.price.toLocaleString()}</p>
+                      )}
                     </div>
 
-                    <Button className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground shadow-lg font-semibold py-6 text-lg" asChild>
-                      <Link to="/auth">Enroll Now</Link>
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button className="flex-1 bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground shadow-lg font-semibold py-6 text-lg" asChild>
+                        <Link to="/auth">Enroll Now</Link>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={handleShare}
+                        className="h-auto py-6 px-4"
+                        title="Share course"
+                      >
+                        {copied ? <Check className="w-5 h-5 text-green-500" /> : <Share2 className="w-5 h-5" />}
+                      </Button>
+                    </div>
 
                     <div className="space-y-3 pt-4 border-t">
                       <h3 className="font-heading font-bold">This program includes:</h3>
