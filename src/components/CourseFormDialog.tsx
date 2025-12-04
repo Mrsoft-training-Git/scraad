@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,9 +56,9 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave }: 
   const [newSkill, setNewSkill] = useState("");
   const [newRequirement, setNewRequirement] = useState("");
 
-  // Reset form when dialog opens
-  const handleOpenChange = (isOpen: boolean) => {
-    if (isOpen && editingCourse) {
+  // Populate form when editingCourse changes
+  useEffect(() => {
+    if (open && editingCourse) {
       setFormData({
         title: editingCourse.title || "",
         description: editingCourse.description || "",
@@ -74,7 +74,7 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave }: 
         syllabus: editingCourse.syllabus?.length ? editingCourse.syllabus : [{ title: "", description: "", lessons: "", duration: "" }]
       });
       setImagePreview(editingCourse.image_url || "");
-    } else if (isOpen) {
+    } else if (open && !editingCourse) {
       setFormData({
         title: "",
         description: "",
@@ -91,6 +91,10 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave }: 
       });
       setImagePreview("");
     }
+  }, [open, editingCourse]);
+
+  // Reset form when dialog closes
+  const handleOpenChange = (isOpen: boolean) => {
     onOpenChange(isOpen);
   };
 
