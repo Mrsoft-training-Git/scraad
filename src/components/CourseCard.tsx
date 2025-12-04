@@ -2,8 +2,9 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Users, Star } from "lucide-react";
-
+import { Users, Star, Share2, Check } from "lucide-react";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 interface CourseCardProps {
   course: {
     id: string;
@@ -21,6 +22,28 @@ interface CourseCardProps {
 }
 
 export const CourseCard = ({ course, onEnroll, showEnrollButton = true }: CourseCardProps) => {
+  const [copied, setCopied] = useState(false);
+  const { toast } = useToast();
+
+  const handleShare = async () => {
+    const courseUrl = `${window.location.origin}/programs/${course.id}`;
+    try {
+      await navigator.clipboard.writeText(courseUrl);
+      setCopied(true);
+      toast({
+        title: "Link copied!",
+        description: "Course link has been copied to clipboard.",
+      });
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast({
+        title: "Failed to copy",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Card className="group overflow-hidden border-border/50 bg-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-2 flex flex-col">
       <div className="aspect-video overflow-hidden relative">
@@ -59,10 +82,10 @@ export const CourseCard = ({ course, onEnroll, showEnrollButton = true }: Course
             <span>{course.students_count || 0}</span>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="flex gap-2">
           {showEnrollButton && (
             <Button 
-              className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground shadow-lg shadow-primary/20 font-semibold"
+              className="flex-1 bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground shadow-lg shadow-primary/20 font-semibold"
               onClick={() => onEnroll?.(course.id)}
             >
               Apply Now
@@ -70,7 +93,16 @@ export const CourseCard = ({ course, onEnroll, showEnrollButton = true }: Course
           )}
           <Button
             variant="outline"
-            className={`border-2 hover:bg-accent/10 ${!showEnrollButton ? 'col-span-2' : ''}`}
+            size="icon"
+            onClick={handleShare}
+            className="shrink-0"
+            title="Share course"
+          >
+            {copied ? <Check className="w-4 h-4 text-green-500" /> : <Share2 className="w-4 h-4" />}
+          </Button>
+          <Button
+            variant="outline"
+            className={`${!showEnrollButton ? 'flex-1' : ''}`}
             asChild
           >
             <Link to={`/programs/${course.id}`}>View Details</Link>
