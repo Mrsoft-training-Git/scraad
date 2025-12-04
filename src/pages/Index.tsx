@@ -3,6 +3,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Award, BookOpen, Clock, GraduationCap, TrendingUp, Users, CheckCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import heroStudent from "@/assets/hero-student.jpg";
@@ -231,7 +232,13 @@ const Index = () => {
                     </div>
                     <h3 className="font-heading font-bold text-lg mb-4 line-clamp-2 group-hover:text-primary transition-colors min-h-[3.5rem]">{course.title}</h3>
                     <div className="flex items-center justify-between mb-5 mt-auto">
-                      <span className="text-2xl font-bold text-primary">₦{course.price.toLocaleString()}</span>
+                      {course.price === 0 ? (
+                        <Badge className="bg-green-500/10 text-green-600 border-green-500/20 text-lg px-3 py-1">
+                          Free
+                        </Badge>
+                      ) : (
+                        <span className="text-2xl font-bold text-primary">₦{course.price.toLocaleString()}</span>
+                      )}
                       <div className="flex items-center gap-3 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Users className="w-4 h-4" /> {course.students_count}
