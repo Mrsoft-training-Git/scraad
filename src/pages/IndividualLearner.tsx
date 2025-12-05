@@ -56,11 +56,11 @@ const IndividualLearner = () => {
               high-quality online education from the University of Port Harcourt.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="bg-gradient-to-r from-primary to-accent text-white hover:opacity-90 shadow-xl shadow-primary/30">
-                Get Started Free <ArrowRight className="ml-2 w-5 h-5" />
+              <Button size="lg" className="bg-gradient-to-r from-primary to-accent text-white hover:opacity-90 shadow-xl shadow-primary/30" asChild>
+                <Link to="/auth">Get Started Free <ArrowRight className="ml-2 w-5 h-5" /></Link>
               </Button>
-              <Button size="lg" variant="outline">
-                Browse Courses
+              <Button size="lg" variant="outline" asChild>
+                <Link to="/courses">View Programs</Link>
               </Button>
             </div>
           </div>
