@@ -41,6 +41,38 @@ export type Database = {
         }
         Relationships: []
       }
+      content_progress: {
+        Row: {
+          completed_at: string | null
+          content_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          content_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          content_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_progress_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "course_content"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       course_content: {
         Row: {
           content_type: string
