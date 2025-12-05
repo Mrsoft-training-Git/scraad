@@ -110,15 +110,15 @@ const CourseViewer = () => {
       setUserRole(roleData?.role || "student");
       
       if (courseId) {
-        await checkEnrollment(session.user.id, courseId);
-        await fetchCourseData(courseId);
-        await fetchCompletedItems(session.user.id);
+        const enrollId = await checkEnrollment(session.user.id, courseId);
+        const courseContents = await fetchCourseData(courseId);
+        await fetchCompletedItems(session.user.id, courseContents, enrollId);
       }
     };
     checkAuth();
   }, [navigate, courseId]);
 
-  const checkEnrollment = async (userId: string, courseId: string) => {
+  const checkEnrollment = async (userId: string, courseId: string): Promise<string | null> => {
     const { data } = await supabase
       .from("enrolled_courses")
       .select("id, progress")
@@ -128,20 +128,33 @@ const CourseViewer = () => {
     
     setIsEnrolled(!!data);
     setEnrollmentId(data?.id || null);
+    return data?.id || null;
   };
 
-  const fetchCompletedItems = async (userId: string) => {
+  const fetchCompletedItems = async (userId: string, courseContents: CourseContent[], enrollId: string | null) => {
     const { data } = await supabase
       .from("content_progress")
       .select("content_id")
       .eq("user_id", userId);
     
     if (data) {
-      setCompletedItems(new Set(data.map(item => item.content_id)));
+      // Filter to only include completed items that still exist in current course content
+      const courseContentIds = new Set(courseContents.map(c => c.id));
+      const validCompletedItems = data.filter(item => courseContentIds.has(item.content_id));
+      setCompletedItems(new Set(validCompletedItems.map(item => item.content_id)));
+      
+      // Recalculate and update progress based on current content count
+      if (enrollId && courseContents.length > 0) {
+        const progressPercent = Math.round((validCompletedItems.length / courseContents.length) * 100);
+        await supabase
+          .from("enrolled_courses")
+          .update({ progress: progressPercent })
+          .eq("id", enrollId);
+      }
     }
   };
 
-  const fetchCourseData = async (courseId: string) => {
+  const fetchCourseData = async (courseId: string): Promise<CourseContent[]> => {
     setLoading(true);
     
     const { data: courseData } = await supabase
@@ -182,6 +195,7 @@ const CourseViewer = () => {
     }
 
     setLoading(false);
+    return contentsData || [];
   };
 
   const markAsCompleted = async (contentId: string) => {
