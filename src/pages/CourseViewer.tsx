@@ -346,90 +346,83 @@ const CourseViewer = () => {
     const url = selectedContent.content_url;
     const isCompleted = completedItems.has(selectedContent.id);
 
-    // YouTube Video
+    // YouTube Video - auto-marks as completed when selected
     if (selectedContent.content_type === "video" && isYouTubeUrl(url)) {
       const videoId = getYouTubeVideoId(url);
       if (videoId) {
+        // Auto-mark video as completed when viewed
+        if (!isCompleted) {
+          markAsCompleted(selectedContent.id);
+        }
         return (
-          <div className="space-y-4">
-            <div className="aspect-video w-full rounded-lg overflow-hidden bg-black">
-              <iframe
-                src={`https://www.youtube.com/embed/${videoId}?rel=0`}
-                title={selectedContent.title}
-                className="w-full h-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            </div>
-            {!isCompleted && (
-              <Button onClick={() => markAsCompleted(selectedContent.id)} className="w-full">
-                <CheckCircle2 className="w-4 h-4 mr-2" />
-                Mark as Completed
-              </Button>
-            )}
+          <div className="aspect-video w-full rounded-lg overflow-hidden bg-black">
+            <iframe
+              src={`https://www.youtube.com/embed/${videoId}?rel=0`}
+              title={selectedContent.title}
+              className="w-full h-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
           </div>
         );
       }
     }
 
-    // Native Video with custom controls
+    // Native Video with custom controls - auto-marks as completed when video ends
     if (selectedContent.content_type === "video") {
       return (
-        <div className="space-y-4">
-          <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-black group">
-            <video
-              ref={videoRef}
-              src={url}
-              className="w-full h-full"
-              onTimeUpdate={handleVideoProgress}
-              onLoadedMetadata={() => {
-                if (videoRef.current) {
-                  setVideoDuration(videoRef.current.duration);
-                }
-              }}
-              onEnded={() => setIsPlaying(false)}
+        <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-black group">
+          <video
+            ref={videoRef}
+            src={url}
+            className="w-full h-full"
+            onTimeUpdate={handleVideoProgress}
+            onLoadedMetadata={() => {
+              if (videoRef.current) {
+                setVideoDuration(videoRef.current.duration);
+              }
+            }}
+            onEnded={() => {
+              setIsPlaying(false);
+              if (!isCompleted) {
+                markAsCompleted(selectedContent.id);
+              }
+            }}
+          />
+          {/* Custom Video Controls Overlay */}
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+            {/* Progress Bar */}
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={videoProgress}
+              onChange={handleVideoSeek}
+              className="w-full h-1 bg-white/30 rounded-full appearance-none cursor-pointer mb-3"
             />
-            {/* Custom Video Controls Overlay */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-              {/* Progress Bar */}
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={videoProgress}
-                onChange={handleVideoSeek}
-                className="w-full h-1 bg-white/30 rounded-full appearance-none cursor-pointer mb-3"
-              />
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="icon" onClick={() => skipVideo(-10)} className="text-white hover:bg-white/20">
-                    <SkipBack className="w-5 h-5" />
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={togglePlay} className="text-white hover:bg-white/20">
-                    {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={() => skipVideo(10)} className="text-white hover:bg-white/20">
-                    <SkipForward className="w-5 h-5" />
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={toggleMute} className="text-white hover:bg-white/20">
-                    {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-                  </Button>
-                  <span className="text-white text-sm ml-2">
-                    {videoRef.current ? formatTime(videoRef.current.currentTime) : '0:00'} / {formatTime(videoDuration)}
-                  </span>
-                </div>
-                <Button variant="ghost" size="icon" onClick={toggleFullscreen} className="text-white hover:bg-white/20">
-                  <Maximize className="w-5 h-5" />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="icon" onClick={() => skipVideo(-10)} className="text-white hover:bg-white/20">
+                  <SkipBack className="w-5 h-5" />
                 </Button>
+                <Button variant="ghost" size="icon" onClick={togglePlay} className="text-white hover:bg-white/20">
+                  {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
+                </Button>
+                <Button variant="ghost" size="icon" onClick={() => skipVideo(10)} className="text-white hover:bg-white/20">
+                  <SkipForward className="w-5 h-5" />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={toggleMute} className="text-white hover:bg-white/20">
+                  {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                </Button>
+                <span className="text-white text-sm ml-2">
+                  {videoRef.current ? formatTime(videoRef.current.currentTime) : '0:00'} / {formatTime(videoDuration)}
+                </span>
               </div>
+              <Button variant="ghost" size="icon" onClick={toggleFullscreen} className="text-white hover:bg-white/20">
+                <Maximize className="w-5 h-5" />
+              </Button>
             </div>
           </div>
-          {!isCompleted && (
-            <Button onClick={() => markAsCompleted(selectedContent.id)} className="w-full">
-              <CheckCircle2 className="w-4 h-4 mr-2" />
-              Mark as Completed
-            </Button>
-          )}
         </div>
       );
     }
