@@ -23,6 +23,7 @@ import Profile from "./pages/Profile";
 import References from "./pages/References";
 import RoleManagement from "./pages/RoleManagement";
 import UserManagement from "./pages/UserManagement";
+import ScrollToTop from "./components/ScrollToTop";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/dashboard" element={<Dashboard />} />
