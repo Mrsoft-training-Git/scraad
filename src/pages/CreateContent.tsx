@@ -12,18 +12,28 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Video, Link as LinkIcon, Upload, Trash2, Edit, Plus, Eye, EyeOff } from "lucide-react";
+import { FileText, Video, Link as LinkIcon, Trash2, Edit, Eye, EyeOff, Play, FolderPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ContentPreview } from "@/components/ContentPreview";
 
 interface Course {
   id: string;
   title: string;
 }
 
+interface CourseModule {
+  id: string;
+  course_id: string;
+  title: string;
+  description: string | null;
+  order_index: number;
+}
+
 interface CourseContent {
   id: string;
   course_id: string;
+  module_id: string | null;
   title: string;
   description: string | null;
   content_type: string;
@@ -33,22 +43,28 @@ interface CourseContent {
   is_published: boolean;
   created_at: string;
   courses?: { title: string };
+  course_modules?: { title: string } | null;
 }
 
 const CreateContent = () => {
   const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<string>("student");
   const [courses, setCourses] = useState<Course[]>([]);
+  const [modules, setModules] = useState<CourseModule[]>([]);
   const [contents, setContents] = useState<CourseContent[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [moduleDialogOpen, setModuleDialogOpen] = useState(false);
   const [editingContent, setEditingContent] = useState<CourseContent | null>(null);
   const [selectedContentType, setSelectedContentType] = useState<string>("document");
   const [filterCourse, setFilterCourse] = useState<string>("all");
+  const [previewContent, setPreviewContent] = useState<CourseContent | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
   
   const [formData, setFormData] = useState({
     course_id: "",
+    module_id: "",
     title: "",
     description: "",
     content_type: "document",
@@ -56,6 +72,12 @@ const CreateContent = () => {
     is_published: false,
   });
   const [file, setFile] = useState<File | null>(null);
+  
+  const [newModule, setNewModule] = useState({
+    course_id: "",
+    title: "",
+    description: "",
+  });
   
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -79,6 +101,7 @@ const CreateContent = () => {
       
       if (roleData?.role === "admin") {
         fetchCourses();
+        fetchModules();
         fetchContents();
       }
       setLoading(false);
@@ -97,10 +120,21 @@ const CreateContent = () => {
     }
   };
 
+  const fetchModules = async () => {
+    const { data, error } = await supabase
+      .from("course_modules")
+      .select("*")
+      .order("order_index");
+    
+    if (!error && data) {
+      setModules(data);
+    }
+  };
+
   const fetchContents = async () => {
     const { data, error } = await supabase
       .from("course_content")
-      .select("*, courses(title)")
+      .select("*, courses(title), course_modules(title)")
       .order("created_at", { ascending: false });
     
     if (!error && data) {
@@ -119,6 +153,7 @@ const CreateContent = () => {
   const resetForm = () => {
     setFormData({
       course_id: "",
+      module_id: "",
       title: "",
       description: "",
       content_type: selectedContentType,
@@ -132,6 +167,7 @@ const CreateContent = () => {
     setEditingContent(content);
     setFormData({
       course_id: content.course_id,
+      module_id: content.module_id || "",
       title: content.title,
       description: content.description || "",
       content_type: content.content_type,
@@ -182,7 +218,6 @@ const CreateContent = () => {
     let filePath: string | null = null;
     let fileUrl: string | null = formData.content_url || null;
     
-    // Upload file if selected
     if (file) {
       const fileExt = file.name.split(".").pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
@@ -204,6 +239,7 @@ const CreateContent = () => {
     
     const contentData = {
       course_id: formData.course_id,
+      module_id: formData.module_id || null,
       title: formData.title,
       description: formData.description || null,
       content_type: formData.content_type,
@@ -239,9 +275,42 @@ const CreateContent = () => {
     }
   };
 
+  const handleCreateModule = async () => {
+    if (!newModule.course_id || !newModule.title) {
+      toast({ title: "Error", description: "Please fill in required fields", variant: "destructive" });
+      return;
+    }
+
+    const { error } = await supabase
+      .from("course_modules")
+      .insert({
+        course_id: newModule.course_id,
+        title: newModule.title,
+        description: newModule.description || null,
+      });
+
+    if (error) {
+      toast({ title: "Error", description: "Failed to create module", variant: "destructive" });
+    } else {
+      toast({ title: "Success", description: "Module created successfully" });
+      setModuleDialogOpen(false);
+      setNewModule({ course_id: "", title: "", description: "" });
+      fetchModules();
+    }
+  };
+
+  const handlePreview = (content: CourseContent) => {
+    setPreviewContent(content);
+    setPreviewOpen(true);
+  };
+
   const filteredContents = filterCourse === "all" 
     ? contents 
     : contents.filter(c => c.course_id === filterCourse);
+
+  const filteredModules = formData.course_id 
+    ? modules.filter(m => m.course_id === formData.course_id)
+    : [];
 
   const getContentTypeIcon = (type: string) => {
     switch (type) {
@@ -278,7 +347,13 @@ const CreateContent = () => {
       <div className="space-y-6">
         {/* Content Type Selection */}
         <div>
-          <h2 className="text-lg font-semibold mb-4">Create New Content</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold">Create New Content</h2>
+            <Button variant="outline" onClick={() => setModuleDialogOpen(true)}>
+              <FolderPlus className="w-4 h-4 mr-2" />
+              Create Module
+            </Button>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card 
               className="cursor-pointer hover:border-primary transition-colors"
@@ -343,6 +418,7 @@ const CreateContent = () => {
                   <TableRow>
                     <TableHead>Type</TableHead>
                     <TableHead>Title</TableHead>
+                    <TableHead>Module</TableHead>
                     <TableHead>Course</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
@@ -358,6 +434,11 @@ const CreateContent = () => {
                         </div>
                       </TableCell>
                       <TableCell className="font-medium">{content.title}</TableCell>
+                      <TableCell>
+                        {content.course_modules?.title || (
+                          <span className="text-muted-foreground">No module</span>
+                        )}
+                      </TableCell>
                       <TableCell>{content.courses?.title || "N/A"}</TableCell>
                       <TableCell>
                         <Badge variant={content.is_published ? "default" : "secondary"}>
@@ -365,7 +446,15 @@ const CreateContent = () => {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-2">
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handlePreview(content)}
+                            title="Preview"
+                          >
+                            <Play className="w-4 h-4" />
+                          </Button>
                           <Button
                             variant="ghost"
                             size="icon"
@@ -412,7 +501,7 @@ const CreateContent = () => {
                 <Label>Course *</Label>
                 <Select 
                   value={formData.course_id} 
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, course_id: value }))}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, course_id: value, module_id: "" }))}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select course" />
@@ -423,6 +512,39 @@ const CreateContent = () => {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Module</Label>
+                <Select 
+                  value={formData.module_id} 
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, module_id: value }))}
+                  disabled={!formData.course_id}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={formData.course_id ? "Select module (optional)" : "Select a course first"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">No module</SelectItem>
+                    {filteredModules.map(module => (
+                      <SelectItem key={module.id} value={module.id}>{module.title}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {formData.course_id && filteredModules.length === 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    No modules for this course.{" "}
+                    <button 
+                      className="text-primary hover:underline"
+                      onClick={() => {
+                        setNewModule(prev => ({ ...prev, course_id: formData.course_id }));
+                        setModuleDialogOpen(true);
+                      }}
+                    >
+                      Create one
+                    </button>
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -463,7 +585,7 @@ const CreateContent = () => {
                   />
                   {selectedContentType === "video" && (
                     <>
-                      <p className="text-xs text-muted-foreground">Or enter a video URL:</p>
+                      <p className="text-xs text-muted-foreground">Or enter a YouTube URL:</p>
                       <Input 
                         placeholder="https://youtube.com/watch?v=..."
                         value={formData.content_url}
@@ -493,6 +615,72 @@ const CreateContent = () => {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Module Dialog */}
+        <Dialog open={moduleDialogOpen} onOpenChange={setModuleDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Create New Module</DialogTitle>
+              <DialogDescription>
+                Modules help organize course content into logical sections.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Course *</Label>
+                <Select 
+                  value={newModule.course_id} 
+                  onValueChange={(value) => setNewModule(prev => ({ ...prev, course_id: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select course" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {courses.map(course => (
+                      <SelectItem key={course.id} value={course.id}>{course.title}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Module Title *</Label>
+                <Input 
+                  placeholder="e.g., Introduction to Python"
+                  value={newModule.title}
+                  onChange={(e) => setNewModule(prev => ({ ...prev, title: e.target.value }))}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Textarea 
+                  placeholder="Brief description of this module"
+                  rows={3}
+                  value={newModule.description}
+                  onChange={(e) => setNewModule(prev => ({ ...prev, description: e.target.value }))}
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <Button onClick={handleCreateModule} className="flex-1">
+                  Create Module
+                </Button>
+                <Button variant="outline" onClick={() => setModuleDialogOpen(false)}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Content Preview */}
+        <ContentPreview 
+          open={previewOpen}
+          onOpenChange={setPreviewOpen}
+          content={previewContent}
+        />
       </div>
     </DashboardLayout>
   );
