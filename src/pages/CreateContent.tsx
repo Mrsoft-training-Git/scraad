@@ -516,16 +516,16 @@ const CreateContent = () => {
 
               <div className="space-y-2">
                 <Label>Module</Label>
-                <Select 
-                  value={formData.module_id} 
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, module_id: value }))}
+              <Select 
+                  value={formData.module_id || "none"} 
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, module_id: value === "none" ? "" : value }))}
                   disabled={!formData.course_id}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder={formData.course_id ? "Select module (optional)" : "Select a course first"} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No module</SelectItem>
+                    <SelectItem value="none">No module</SelectItem>
                     {filteredModules.map(module => (
                       <SelectItem key={module.id} value={module.id}>{module.title}</SelectItem>
                     ))}
