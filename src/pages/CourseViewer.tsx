@@ -2,23 +2,20 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
-import { DashboardLayout } from "@/components/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { ContentPreview } from "@/components/ContentPreview";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
-  ArrowLeft, 
-  BookOpen, 
+  X,
   Video, 
   FileText, 
   Link as LinkIcon, 
-  Play, 
   CheckCircle2,
-  Clock,
-  User as UserIcon
+  ChevronDown,
+  ChevronUp,
+  ArrowRight,
+  BookOpen,
+  ExternalLink
 } from "lucide-react";
 
 interface Course {
@@ -47,6 +44,21 @@ interface CourseContent {
   order_index: number;
 }
 
+// Helper functions for YouTube
+const getYouTubeVideoId = (url: string): string | null => {
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+  const match = url.match(regExp);
+  return match && match[2].length === 11 ? match[2] : null;
+};
+
+const isYouTubeUrl = (url: string): boolean => {
+  return url.includes('youtube.com') || url.includes('youtu.be');
+};
+
+const isPdfUrl = (url: string): boolean => {
+  return url.toLowerCase().endsWith('.pdf');
+};
+
 const CourseViewer = () => {
   const { courseId } = useParams<{ courseId: string }>();
   const [user, setUser] = useState<User | null>(null);
@@ -56,9 +68,10 @@ const CourseViewer = () => {
   const [contents, setContents] = useState<CourseContent[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEnrolled, setIsEnrolled] = useState(false);
-  const [previewContent, setPreviewContent] = useState<CourseContent | null>(null);
-  const [previewOpen, setPreviewOpen] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [selectedContent, setSelectedContent] = useState<CourseContent | null>(null);
+  const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
+  const [completedItems, setCompletedItems] = useState<Set<string>>(new Set());
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -101,7 +114,6 @@ const CourseViewer = () => {
   const fetchCourseData = async (courseId: string) => {
     setLoading(true);
     
-    // Fetch course details
     const { data: courseData } = await supabase
       .from("courses")
       .select("id, title, description, image_url, instructor, duration")
@@ -112,7 +124,6 @@ const CourseViewer = () => {
       setCourse(courseData);
     }
 
-    // Fetch modules
     const { data: modulesData } = await supabase
       .from("course_modules")
       .select("*")
@@ -121,9 +132,12 @@ const CourseViewer = () => {
     
     if (modulesData) {
       setModules(modulesData);
+      // Expand first module by default
+      if (modulesData.length > 0) {
+        setExpandedModules(new Set([modulesData[0].id]));
+      }
     }
 
-    // Fetch content
     const { data: contentsData } = await supabase
       .from("course_content")
       .select("id, module_id, title, description, content_type, content_url, order_index")
@@ -133,16 +147,23 @@ const CourseViewer = () => {
     
     if (contentsData) {
       setContents(contentsData);
+      // Select first content by default
+      if (contentsData.length > 0) {
+        setSelectedContent(contentsData[0]);
+      }
     }
 
     setLoading(false);
   };
 
-  const getContentIcon = (type: string) => {
+  const getContentIcon = (type: string, isCompleted: boolean) => {
+    if (isCompleted) {
+      return <CheckCircle2 className="w-5 h-5 text-green-500" />;
+    }
     switch (type) {
-      case "video": return <Video className="w-4 h-4" />;
-      case "link": return <LinkIcon className="w-4 h-4" />;
-      default: return <FileText className="w-4 h-4" />;
+      case "video": return <Video className="w-5 h-5 text-muted-foreground" />;
+      case "link": return <LinkIcon className="w-5 h-5 text-muted-foreground" />;
+      default: return <FileText className="w-5 h-5 text-muted-foreground" />;
     }
   };
 
@@ -154,208 +175,310 @@ const CourseViewer = () => {
     return contents.filter(c => !c.module_id);
   };
 
-  const handlePlayContent = (content: CourseContent) => {
-    setPreviewContent(content);
-    setPreviewOpen(true);
+  const toggleModule = (moduleId: string) => {
+    const newExpanded = new Set(expandedModules);
+    if (newExpanded.has(moduleId)) {
+      newExpanded.delete(moduleId);
+    } else {
+      newExpanded.add(moduleId);
+    }
+    setExpandedModules(newExpanded);
+  };
+
+  const handleSelectContent = (content: CourseContent) => {
+    setSelectedContent(content);
+    // Mark as completed when viewed
+    setCompletedItems(prev => new Set([...prev, content.id]));
+  };
+
+  const getAllContents = () => {
+    const allContents: CourseContent[] = [];
+    modules.forEach(module => {
+      allContents.push(...getModuleContents(module.id));
+    });
+    allContents.push(...getUnassignedContents());
+    return allContents;
+  };
+
+  const goToNextItem = () => {
+    const allContents = getAllContents();
+    const currentIndex = allContents.findIndex(c => c.id === selectedContent?.id);
+    if (currentIndex < allContents.length - 1) {
+      handleSelectContent(allContents[currentIndex + 1]);
+    }
+  };
+
+  const renderContentPlayer = () => {
+    if (!selectedContent || !selectedContent.content_url) {
+      return (
+        <div className="flex items-center justify-center h-[400px] bg-muted rounded-lg">
+          <div className="text-center text-muted-foreground">
+            <BookOpen className="w-12 h-12 mx-auto mb-2" />
+            <p>Select a lesson to start learning</p>
+          </div>
+        </div>
+      );
+    }
+
+    const url = selectedContent.content_url;
+
+    if (selectedContent.content_type === "video" || isYouTubeUrl(url)) {
+      if (isYouTubeUrl(url)) {
+        const videoId = getYouTubeVideoId(url);
+        if (videoId) {
+          return (
+            <div className="aspect-video w-full rounded-lg overflow-hidden bg-black">
+              <iframe
+                src={`https://www.youtube.com/embed/${videoId}?rel=0`}
+                title={selectedContent.title}
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+          );
+        }
+      }
+      return (
+        <div className="aspect-video w-full rounded-lg overflow-hidden bg-black">
+          <video
+            src={url}
+            controls
+            className="w-full h-full"
+            title={selectedContent.title}
+          />
+        </div>
+      );
+    }
+
+    if (selectedContent.content_type === "document" || isPdfUrl(url)) {
+      return (
+        <div className="w-full h-[500px] rounded-lg overflow-hidden border">
+          <iframe
+            src={url}
+            title={selectedContent.title}
+            className="w-full h-full"
+          />
+        </div>
+      );
+    }
+
+    // Link type
+    return (
+      <div className="flex items-center justify-center h-[300px] bg-muted rounded-lg">
+        <div className="text-center">
+          <LinkIcon className="w-12 h-12 mx-auto mb-4 text-primary" />
+          <h3 className="font-semibold mb-2">{selectedContent.title}</h3>
+          <p className="text-muted-foreground mb-4">{selectedContent.description}</p>
+          <Button asChild>
+            <a href={url} target="_blank" rel="noopener noreferrer">
+              Open Resource <ExternalLink className="w-4 h-4 ml-2" />
+            </a>
+          </Button>
+        </div>
+      </div>
+    );
   };
 
   if (loading) {
     return (
-      <DashboardLayout user={user} userRole={userRole}>
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
-      </DashboardLayout>
+      <div className="flex items-center justify-center h-screen bg-background">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
     );
   }
 
   if (!course) {
     return (
-      <DashboardLayout user={user} userRole={userRole}>
-        <Card>
-          <CardContent className="py-12 text-center">
-            <BookOpen className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="font-heading font-bold text-xl mb-2">Course Not Found</h3>
-            <p className="text-muted-foreground mb-4">The course you're looking for doesn't exist.</p>
-            <Button asChild>
-              <Link to="/dashboard/learning">Back to My Learning</Link>
-            </Button>
-          </CardContent>
-        </Card>
-      </DashboardLayout>
+      <div className="flex items-center justify-center h-screen bg-background">
+        <div className="text-center">
+          <BookOpen className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+          <h3 className="font-heading font-bold text-xl mb-2">Course Not Found</h3>
+          <Button asChild>
+            <Link to="/dashboard/learning">Back to My Learning</Link>
+          </Button>
+        </div>
+      </div>
     );
   }
 
   if (!isEnrolled && userRole !== "admin") {
     return (
-      <DashboardLayout user={user} userRole={userRole}>
-        <Card>
-          <CardContent className="py-12 text-center">
-            <BookOpen className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="font-heading font-bold text-xl mb-2">Not Enrolled</h3>
-            <p className="text-muted-foreground mb-4">You need to enroll in this course to access the content.</p>
-            <div className="flex gap-3 justify-center">
-              <Button asChild variant="outline">
-                <Link to="/dashboard/learning">Back to My Learning</Link>
-              </Button>
-              <Button asChild>
-                <Link to={`/programs/${courseId}`}>View Course Details</Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </DashboardLayout>
+      <div className="flex items-center justify-center h-screen bg-background">
+        <div className="text-center">
+          <BookOpen className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+          <h3 className="font-heading font-bold text-xl mb-2">Not Enrolled</h3>
+          <p className="text-muted-foreground mb-4">You need to enroll to access this course.</p>
+          <div className="flex gap-3 justify-center">
+            <Button asChild variant="outline">
+              <Link to="/dashboard/learning">Back to Learning</Link>
+            </Button>
+            <Button asChild>
+              <Link to={`/programs/${courseId}`}>Enroll Now</Link>
+            </Button>
+          </div>
+        </div>
+      </div>
     );
   }
 
-  const unassignedContents = getUnassignedContents();
+  const allContents = getAllContents();
+  const completedCount = completedItems.size;
+  const totalCount = allContents.length;
+  const currentIndex = allContents.findIndex(c => c.id === selectedContent?.id);
+  const hasNext = currentIndex < allContents.length - 1;
 
   return (
-    <DashboardLayout user={user} userRole={userRole}>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-start gap-4">
-          <Button variant="ghost" size="icon" asChild>
-            <Link to="/dashboard/learning">
-              <ArrowLeft className="w-5 h-5" />
-            </Link>
-          </Button>
-          <div className="flex-1">
-            <h1 className="font-heading text-2xl font-bold">{course.title}</h1>
-            <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground flex-wrap">
-              {course.instructor && (
-                <span className="flex items-center gap-1">
-                  <UserIcon className="w-4 h-4" />
-                  {course.instructor}
-                </span>
-              )}
-              {course.duration && (
-                <span className="flex items-center gap-1">
-                  <Clock className="w-4 h-4" />
-                  {course.duration}
-                </span>
-              )}
-            </div>
-          </div>
+    <div className="h-screen flex flex-col bg-background">
+      {/* Top Progress Bar */}
+      <div className="border-b bg-card px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-muted-foreground">
+            {completedCount}/{totalCount} learning items
+          </span>
+          <Progress value={(completedCount / Math.max(totalCount, 1)) * 100} className="w-48 h-2" />
         </div>
-
-        {/* Progress Card */}
-        <Card>
-          <CardContent className="py-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium">Course Progress</span>
-              <span className="text-sm font-bold text-primary">{progress}%</span>
-            </div>
-            <Progress value={progress} className="h-2" />
-          </CardContent>
-        </Card>
-
-        {/* Course Content */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BookOpen className="w-5 h-5" />
-              Course Content
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {modules.length === 0 && contents.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                No content available for this course yet.
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {/* Modules with Accordion */}
-                {modules.length > 0 && (
-                  <Accordion type="multiple" className="w-full" defaultValue={modules.map(m => m.id)}>
-                    {modules.map((module) => {
-                      const moduleContents = getModuleContents(module.id);
-                      return (
-                        <AccordionItem key={module.id} value={module.id}>
-                          <AccordionTrigger className="hover:no-underline">
-                            <div className="flex items-center gap-3 text-left">
-                              <Badge variant="secondary">{moduleContents.length} items</Badge>
-                              <span className="font-semibold">{module.title}</span>
-                            </div>
-                          </AccordionTrigger>
-                          <AccordionContent>
-                            {module.description && (
-                              <p className="text-sm text-muted-foreground mb-4 pl-4">{module.description}</p>
-                            )}
-                            {moduleContents.length === 0 ? (
-                              <p className="text-sm text-muted-foreground pl-4">No content in this module yet.</p>
-                            ) : (
-                              <div className="space-y-2">
-                                {moduleContents.map((content) => (
-                                  <div 
-                                    key={content.id}
-                                    className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors cursor-pointer"
-                                    onClick={() => handlePlayContent(content)}
-                                  >
-                                    <div className="p-2 rounded-md bg-primary/10 text-primary">
-                                      {getContentIcon(content.content_type)}
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                      <p className="font-medium truncate">{content.title}</p>
-                                      {content.description && (
-                                        <p className="text-sm text-muted-foreground truncate">{content.description}</p>
-                                      )}
-                                    </div>
-                                    <Button size="sm" variant="ghost">
-                                      <Play className="w-4 h-4" />
-                                    </Button>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </AccordionContent>
-                        </AccordionItem>
-                      );
-                    })}
-                  </Accordion>
-                )}
-
-                {/* Unassigned Content */}
-                {unassignedContents.length > 0 && (
-                  <div className="space-y-2">
-                    {modules.length > 0 && (
-                      <h4 className="font-semibold text-sm text-muted-foreground mt-4 mb-2">Other Content</h4>
-                    )}
-                    {unassignedContents.map((content) => (
-                      <div 
-                        key={content.id}
-                        className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors cursor-pointer"
-                        onClick={() => handlePlayContent(content)}
-                      >
-                        <div className="p-2 rounded-md bg-primary/10 text-primary">
-                          {getContentIcon(content.content_type)}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate">{content.title}</p>
-                          {content.description && (
-                            <p className="text-sm text-muted-foreground truncate">{content.description}</p>
-                          )}
-                        </div>
-                        <Button size="sm" variant="ghost">
-                          <Play className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <Button variant="ghost" size="icon" asChild>
+          <Link to="/dashboard/learning">
+            <X className="w-5 h-5" />
+          </Link>
+        </Button>
       </div>
 
-      {/* Content Preview */}
-      <ContentPreview
-        open={previewOpen}
-        onOpenChange={setPreviewOpen}
-        content={previewContent}
-      />
-    </DashboardLayout>
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left Sidebar */}
+        <div className="w-80 border-r bg-card flex flex-col">
+          <div className="p-4 border-b">
+            <Link to="/dashboard/learning" className="text-primary hover:underline font-semibold text-lg">
+              {course.title}
+            </Link>
+          </div>
+          
+          <ScrollArea className="flex-1">
+            <div className="p-2">
+              {modules.map((module, moduleIndex) => {
+                const moduleContents = getModuleContents(module.id);
+                const isExpanded = expandedModules.has(module.id);
+                
+                return (
+                  <div key={module.id} className="mb-1">
+                    <button
+                      onClick={() => toggleModule(module.id)}
+                      className="w-full flex items-center justify-between p-3 hover:bg-accent rounded-lg text-left"
+                    >
+                      <div>
+                        <span className="text-xs text-muted-foreground">Module {moduleIndex + 1}</span>
+                        <p className="font-medium text-sm">{module.title}</p>
+                      </div>
+                      {isExpanded ? (
+                        <ChevronUp className="w-5 h-5 text-muted-foreground" />
+                      ) : (
+                        <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                      )}
+                    </button>
+                    
+                    {isExpanded && (
+                      <div className="ml-2 border-l-2 border-muted">
+                        {moduleContents.map((content) => {
+                          const isSelected = selectedContent?.id === content.id;
+                          const isCompleted = completedItems.has(content.id);
+                          
+                          return (
+                            <button
+                              key={content.id}
+                              onClick={() => handleSelectContent(content)}
+                              className={`w-full flex items-start gap-3 p-3 text-left hover:bg-accent rounded-r-lg transition-colors ${
+                                isSelected ? 'bg-accent border-l-2 border-primary -ml-[2px]' : ''
+                              }`}
+                            >
+                              {getContentIcon(content.content_type, isCompleted)}
+                              <div className="flex-1 min-w-0">
+                                <p className={`text-sm ${isSelected ? 'font-semibold' : ''}`}>
+                                  {content.title}
+                                </p>
+                                <span className="text-xs text-muted-foreground capitalize">
+                                  {content.content_type}
+                                </span>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+
+              {/* Unassigned Content */}
+              {getUnassignedContents().length > 0 && (
+                <div className="mt-2">
+                  {getUnassignedContents().map((content) => {
+                    const isSelected = selectedContent?.id === content.id;
+                    const isCompleted = completedItems.has(content.id);
+                    
+                    return (
+                      <button
+                        key={content.id}
+                        onClick={() => handleSelectContent(content)}
+                        className={`w-full flex items-start gap-3 p-3 text-left hover:bg-accent rounded-lg transition-colors ${
+                          isSelected ? 'bg-accent' : ''
+                        }`}
+                      >
+                        {getContentIcon(content.content_type, isCompleted)}
+                        <div className="flex-1 min-w-0">
+                          <p className={`text-sm ${isSelected ? 'font-semibold' : ''}`}>
+                            {content.title}
+                          </p>
+                          <span className="text-xs text-muted-foreground capitalize">
+                            {content.content_type}
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {allContents.length === 0 && (
+                <div className="p-4 text-center text-muted-foreground text-sm">
+                  No content available yet.
+                </div>
+              )}
+            </div>
+          </ScrollArea>
+        </div>
+
+        {/* Main Content Area */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <ScrollArea className="flex-1">
+            <div className="max-w-4xl mx-auto p-6">
+              {renderContentPlayer()}
+              
+              {/* Content Title & Description */}
+              {selectedContent && (
+                <div className="mt-6">
+                  <h1 className="text-2xl font-bold">{selectedContent.title}</h1>
+                  {selectedContent.description && (
+                    <p className="text-muted-foreground mt-2">{selectedContent.description}</p>
+                  )}
+                </div>
+              )}
+            </div>
+          </ScrollArea>
+
+          {/* Bottom Navigation */}
+          <div className="border-t bg-card p-4 flex justify-end">
+            <Button 
+              onClick={goToNextItem} 
+              disabled={!hasNext}
+              className="gap-2"
+            >
+              Go to next item <ArrowRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
