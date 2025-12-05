@@ -24,11 +24,7 @@ import {
   Maximize,
   SkipBack,
   SkipForward,
-  Download,
-  ZoomIn,
-  ZoomOut,
-  ChevronLeft,
-  ChevronRight
+  Download
 } from "lucide-react";
 
 interface Course {
@@ -95,9 +91,6 @@ const CourseViewer = () => {
   const [videoProgress, setVideoProgress] = useState(0);
   const [videoDuration, setVideoDuration] = useState(0);
 
-  // Document viewer state
-  const [pdfPage, setPdfPage] = useState(1);
-  const [pdfZoom, setPdfZoom] = useState(100);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -252,8 +245,6 @@ const CourseViewer = () => {
 
   const handleSelectContent = (content: CourseContent) => {
     setSelectedContent(content);
-    setPdfPage(1);
-    setPdfZoom(100);
     setIsPlaying(false);
     setVideoProgress(0);
   };
@@ -427,95 +418,48 @@ const CourseViewer = () => {
       );
     }
 
-    // Document/PDF Viewer - Coursera Style
+    // Document/PDF Viewer - Coursera Style (using Google Docs Viewer for compatibility)
     if (selectedContent.content_type === "document" || isPdfUrl(url)) {
+      // Use Google Docs viewer for better browser compatibility
+      const googleDocsViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`;
+      
       return (
         <div className="space-y-4">
           {/* Document Controls Bar */}
-          <div className="flex items-center justify-between bg-muted p-3 rounded-t-lg border border-b-0">
-            {/* Pagination */}
+          <div className="flex items-center justify-between bg-muted p-3 rounded-lg border">
             <div className="flex items-center gap-2">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => setPdfPage(Math.max(1, pdfPage - 1))}
-                disabled={pdfPage <= 1}
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </Button>
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  value={pdfPage}
-                  onChange={(e) => setPdfPage(Math.max(1, Number(e.target.value)))}
-                  className="w-12 h-8 text-center border rounded bg-background"
-                  min="1"
-                />
-                <span className="text-muted-foreground">/ 2</span>
-              </div>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => setPdfPage(pdfPage + 1)}
-              >
-                <ChevronRight className="w-5 h-5" />
-              </Button>
-            </div>
-
-            {/* Zoom Controls */}
-            <div className="flex items-center gap-2">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => setPdfZoom(Math.max(50, pdfZoom - 25))}
-              >
-                <ZoomOut className="w-5 h-5" />
-              </Button>
-              <span className="text-sm w-14 text-center">{pdfZoom}%</span>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => setPdfZoom(Math.min(200, pdfZoom + 25))}
-              >
-                <ZoomIn className="w-5 h-5" />
-              </Button>
+              <FileText className="w-5 h-5 text-muted-foreground" />
+              <span className="font-medium">{selectedContent.title}</span>
             </div>
 
             {/* Actions */}
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" asChild>
-                <a href={url} download target="_blank" rel="noopener noreferrer">
-                  <Download className="w-5 h-5" />
+              <Button variant="ghost" size="sm" asChild>
+                <a href={url} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  Open in New Tab
                 </a>
               </Button>
-              <Button 
-                variant="ghost" 
-                size="icon"
-                onClick={() => {
-                  const iframe = document.querySelector('.pdf-iframe') as HTMLIFrameElement;
-                  if (iframe) {
-                    iframe.requestFullscreen();
-                  }
-                }}
-              >
-                <Maximize className="w-5 h-5" />
+              <Button variant="ghost" size="sm" asChild>
+                <a href={url} download target="_blank" rel="noopener noreferrer">
+                  <Download className="w-4 h-4 mr-2" />
+                  Download
+                </a>
               </Button>
             </div>
           </div>
 
-          {/* PDF Viewer */}
+          {/* Document Viewer using Google Docs */}
           <div 
-            className="w-full border rounded-b-lg overflow-auto bg-muted/50"
-            style={{ height: '600px' }}
+            className="w-full border rounded-lg overflow-hidden bg-white"
+            style={{ height: '650px' }}
           >
-            <div style={{ transform: `scale(${pdfZoom / 100})`, transformOrigin: 'top center' }}>
-              <iframe
-                src={`${url}#page=${pdfPage}`}
-                title={selectedContent.title}
-                className="pdf-iframe w-full"
-                style={{ height: `${600 * (100 / pdfZoom)}px`, minWidth: '100%' }}
-              />
-            </div>
+            <iframe
+              src={googleDocsViewerUrl}
+              title={selectedContent.title}
+              className="w-full h-full"
+              frameBorder="0"
+            />
           </div>
 
           {/* Mark as Completed Button */}
