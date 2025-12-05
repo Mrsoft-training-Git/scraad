@@ -108,8 +108,8 @@ const Index = () => {
               </p>
 
               <div className="flex flex-wrap gap-3">
-                <Button size="sm" className="bg-white text-primary hover:bg-white/90 font-semibold shadow-xl">
-                  Get Started Free <ArrowRight className="ml-2 w-3 h-3" />
+                <Button size="sm" className="bg-white text-primary hover:bg-white/90 font-semibold shadow-xl" asChild>
+                  <Link to="/auth">Get Started Free <ArrowRight className="ml-2 w-3 h-3" /></Link>
                 </Button>
               </div>
 
@@ -147,8 +147,8 @@ const Index = () => {
               </p>
 
               <div className="flex flex-wrap gap-3">
-                <Button size="sm" variant="outline" className="border-2 border-white/30 hover:bg-white/10 text-white font-semibold backdrop-blur-sm">
-                  View Programs
+                <Button size="sm" variant="outline" className="border-2 border-white/30 hover:bg-white/10 text-white font-semibold backdrop-blur-sm" asChild>
+                  <Link to="/courses">View Programs</Link>
                 </Button>
               </div>
 
