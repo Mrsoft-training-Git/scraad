@@ -486,7 +486,7 @@ const CreateContent = () => {
 
         {/* Content Dialog */}
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogContent className="max-w-lg">
+          <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {editingContent ? "Edit" : "Create"} {selectedContentType.charAt(0).toUpperCase() + selectedContentType.slice(1)} Content
