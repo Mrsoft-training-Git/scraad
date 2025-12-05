@@ -174,9 +174,12 @@ const Learning = () => {
                       <Button 
                         variant={buttonState.variant}
                         className={buttonState.variant === "default" ? "bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground shadow-lg shadow-primary/20 font-semibold" : ""}
+                        asChild
                       >
-                        <ButtonIcon className="w-4 h-4 mr-2" />
-                        {buttonState.label}
+                        <Link to={`/dashboard/learn/${enrollment.course_id}`}>
+                          <ButtonIcon className="w-4 h-4 mr-2" />
+                          {buttonState.label}
+                        </Link>
                       </Button>
                       <Button
                         variant="outline"
