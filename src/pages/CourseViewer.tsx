@@ -16,6 +16,7 @@ import {
   ChevronDown,
   ChevronUp,
   ArrowRight,
+  ArrowLeft,
   BookOpen,
   ExternalLink,
   Play,
@@ -561,6 +562,13 @@ const CourseViewer = () => {
   const totalCount = allContents.length;
   const currentIndex = allContents.findIndex(c => c.id === selectedContent?.id);
   const hasNext = currentIndex < allContents.length - 1;
+  const hasPrevious = currentIndex > 0;
+
+  const goToPreviousItem = () => {
+    if (hasPrevious) {
+      handleSelectContent(allContents[currentIndex - 1]);
+    }
+  };
 
 
   // Sidebar content component for reuse
@@ -727,14 +735,23 @@ const CourseViewer = () => {
           </ScrollArea>
 
           {/* Bottom Navigation */}
-          <div className="border-t bg-card p-2 sm:p-4 flex justify-end">
+          <div className="border-t bg-card p-2 sm:p-4 flex justify-between">
+            <Button 
+              onClick={goToPreviousItem} 
+              disabled={!hasPrevious}
+              variant="outline"
+              className="gap-2 text-sm sm:text-base"
+              size="sm"
+            >
+              <ArrowLeft className="w-4 h-4" /> <span className="hidden xs:inline">Previous</span>
+            </Button>
             <Button 
               onClick={goToNextItem} 
               disabled={!hasNext}
               className="gap-2 text-sm sm:text-base"
               size="sm"
             >
-              <span className="hidden xs:inline">Go to</span> next <ArrowRight className="w-4 h-4" />
+              <span className="hidden xs:inline">Next</span> <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
         </div>
