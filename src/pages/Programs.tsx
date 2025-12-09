@@ -8,7 +8,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Clock, Users, Award, BookOpen, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useEnrollment } from "@/hooks/useEnrollment";
-
 interface Course {
   id: string;
   title: string;
@@ -22,38 +21,34 @@ interface Course {
   level: string | null;
   top_rated: boolean;
 }
-
 const Programs = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
-  const { enrollInCourse, enrolling } = useEnrollment();
-
+  const {
+    enrollInCourse,
+    enrolling
+  } = useEnrollment();
   useEffect(() => {
     fetchCourses();
   }, []);
-
   const fetchCourses = async () => {
     setLoading(true);
     // Programs page shows top_rated courses
-    const { data, error } = await supabase
-      .from("courses")
-      .select("*")
-      .eq("published", true)
-      .eq("top_rated", true)
-      .order("created_at", { ascending: false });
-    
+    const {
+      data,
+      error
+    } = await supabase.from("courses").select("*").eq("published", true).eq("top_rated", true).order("created_at", {
+      ascending: false
+    });
     if (!error && data) {
       setCourses(data);
     }
     setLoading(false);
   };
-
   const handleEnroll = async (course: Course) => {
     await enrollInCourse(course.id, course.title);
   };
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       <Navbar />
       
       {/* Hero Section */}
@@ -81,19 +76,13 @@ const Programs = () => {
       {/* Programs Grid */}
       <section className="py-20">
         <div className="container mx-auto px-4">
-          {loading ? (
-            <div className="text-center py-12">Loading programs...</div>
-          ) : courses.length === 0 ? (
-            <div className="text-center py-12">
+          {loading ? <div className="text-center py-12">Loading programs...</div> : courses.length === 0 ? <div className="text-center py-12">
               <p className="text-muted-foreground mb-4">No top rated programs available yet</p>
               <Button asChild>
                 <Link to="/courses">Browse All Courses</Link>
               </Button>
-            </div>
-          ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {courses.map((course) => (
-                <Card key={course.id} className="group overflow-hidden border-border/50 bg-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-2 cursor-pointer flex flex-col">
+            </div> : <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {courses.map(course => <Card key={course.id} className="group overflow-hidden border-border/50 bg-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-2 cursor-pointer flex flex-col">
                   <div className="aspect-video overflow-hidden relative">
                     <Badge className="absolute top-4 right-4 bg-background/90 backdrop-blur-sm text-primary border-0 z-10">
                       {course.category}
@@ -102,11 +91,7 @@ const Programs = () => {
                       <Star className="w-3 h-3 mr-1 fill-current" />
                       Top Rated
                     </Badge>
-                    <img
-                      src={course.image_url || "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80"}
-                      alt={course.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
+                    <img src={course.image_url || "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80"} alt={course.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                   </div>
                   <CardContent className="p-6 flex flex-col flex-grow">
                     <h3 className="font-heading font-bold text-xl mb-3 group-hover:text-primary transition-colors min-h-[3.5rem]">
@@ -116,39 +101,25 @@ const Programs = () => {
                       {course.description}
                     </p>
                     
-                    {(course.duration || course.students_count > 0) && (
-                      <div className="flex items-center gap-4 mb-4 text-sm text-muted-foreground">
-                        {course.duration && (
-                          <div className="flex items-center gap-1">
+                    {(course.duration || course.students_count > 0) && <div className="flex items-center gap-4 mb-4 text-sm text-muted-foreground">
+                        {course.duration && <div className="flex items-center gap-1">
                             <Clock className="w-4 h-4" />
                             {course.duration}
-                          </div>
-                        )}
-                        {course.students_count > 0 && (
-                          <div className="flex items-center gap-1">
+                          </div>}
+                        {course.students_count > 0 && <div className="flex items-center gap-1">
                             <Users className="w-4 h-4" />
                             {course.students_count}+
-                          </div>
-                        )}
-                      </div>
-                    )}
+                          </div>}
+                      </div>}
 
                     <div className="flex items-center justify-between mb-5 mt-auto">
-                      {course.price === 0 ? (
-                        <Badge className="bg-green-500/10 text-green-600 border-green-500/20 text-lg px-3 py-1">
+                      {course.price === 0 ? <Badge className="bg-green-500/10 text-green-600 border-green-500/20 text-lg px-3 py-1">
                           Free
-                        </Badge>
-                      ) : (
-                        <span className="text-2xl font-bold text-primary">₦{course.price.toLocaleString()}</span>
-                      )}
+                        </Badge> : <span className="text-2xl font-bold text-primary">₦{course.price.toLocaleString()}</span>}
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
-                      <Button 
-                        className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground shadow-lg shadow-primary/20 font-semibold"
-                        onClick={() => handleEnroll(course)}
-                        disabled={enrolling}
-                      >
+                      <Button className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground shadow-lg shadow-primary/20 font-semibold" onClick={() => handleEnroll(course)} disabled={enrolling}>
                         Apply Now
                       </Button>
                       <Button variant="outline" asChild>
@@ -156,10 +127,8 @@ const Programs = () => {
                       </Button>
                     </div>
                   </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+                </Card>)}
+            </div>}
         </div>
       </section>
 
@@ -219,7 +188,7 @@ const Programs = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" variant="secondary" asChild>
-                <Link to="/auth">Enroll Now</Link>
+                
               </Button>
               <Button size="lg" variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20" asChild>
                 <Link to="/courses">Browse All Courses</Link>
@@ -230,8 +199,6 @@ const Programs = () => {
       </section>
 
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default Programs;
