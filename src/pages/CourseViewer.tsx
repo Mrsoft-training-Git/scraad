@@ -5,6 +5,7 @@ import { User } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
 import { 
   X,
@@ -24,7 +25,8 @@ import {
   Maximize,
   SkipBack,
   SkipForward,
-  Download
+  Download,
+  Menu
 } from "lucide-react";
 
 interface Course {
@@ -339,10 +341,10 @@ const CourseViewer = () => {
   const renderContentPlayer = () => {
     if (!selectedContent || !selectedContent.content_url) {
       return (
-        <div className="flex items-center justify-center h-[400px] bg-muted rounded-lg">
-          <div className="text-center text-muted-foreground">
-            <BookOpen className="w-12 h-12 mx-auto mb-2" />
-            <p>Select a lesson to start learning</p>
+        <div className="flex items-center justify-center h-[200px] sm:h-[300px] md:h-[400px] bg-muted rounded-lg">
+          <div className="text-center text-muted-foreground px-4">
+            <BookOpen className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2" />
+            <p className="text-sm sm:text-base">Select a lesson to start learning</p>
           </div>
         </div>
       );
@@ -395,7 +397,7 @@ const CourseViewer = () => {
             }}
           />
           {/* Custom Video Controls Overlay */}
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2 sm:p-4 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
             {/* Progress Bar */}
             <input
               type="range"
@@ -403,28 +405,28 @@ const CourseViewer = () => {
               max="100"
               value={videoProgress}
               onChange={handleVideoSeek}
-              className="w-full h-1 bg-white/30 rounded-full appearance-none cursor-pointer mb-3"
+              className="w-full h-1 bg-white/30 rounded-full appearance-none cursor-pointer mb-2 sm:mb-3"
             />
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon" onClick={() => skipVideo(-10)} className="text-white hover:bg-white/20">
-                  <SkipBack className="w-5 h-5" />
+              <div className="flex items-center gap-1 sm:gap-2">
+                <Button variant="ghost" size="icon" onClick={() => skipVideo(-10)} className="text-white hover:bg-white/20 h-8 w-8 sm:h-10 sm:w-10">
+                  <SkipBack className="w-4 h-4 sm:w-5 sm:h-5" />
                 </Button>
-                <Button variant="ghost" size="icon" onClick={togglePlay} className="text-white hover:bg-white/20">
-                  {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
+                <Button variant="ghost" size="icon" onClick={togglePlay} className="text-white hover:bg-white/20 h-8 w-8 sm:h-10 sm:w-10">
+                  {isPlaying ? <Pause className="w-5 h-5 sm:w-6 sm:h-6" /> : <Play className="w-5 h-5 sm:w-6 sm:h-6" />}
                 </Button>
-                <Button variant="ghost" size="icon" onClick={() => skipVideo(10)} className="text-white hover:bg-white/20">
-                  <SkipForward className="w-5 h-5" />
+                <Button variant="ghost" size="icon" onClick={() => skipVideo(10)} className="text-white hover:bg-white/20 h-8 w-8 sm:h-10 sm:w-10">
+                  <SkipForward className="w-4 h-4 sm:w-5 sm:h-5" />
                 </Button>
-                <Button variant="ghost" size="icon" onClick={toggleMute} className="text-white hover:bg-white/20">
-                  {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                <Button variant="ghost" size="icon" onClick={toggleMute} className="text-white hover:bg-white/20 h-8 w-8 sm:h-10 sm:w-10">
+                  {isMuted ? <VolumeX className="w-4 h-4 sm:w-5 sm:h-5" /> : <Volume2 className="w-4 h-4 sm:w-5 sm:h-5" />}
                 </Button>
-                <span className="text-white text-sm ml-2">
+                <span className="text-white text-xs sm:text-sm ml-1 sm:ml-2 hidden xs:inline">
                   {videoRef.current ? formatTime(videoRef.current.currentTime) : '0:00'} / {formatTime(videoDuration)}
                 </span>
               </div>
-              <Button variant="ghost" size="icon" onClick={toggleFullscreen} className="text-white hover:bg-white/20">
-                <Maximize className="w-5 h-5" />
+              <Button variant="ghost" size="icon" onClick={toggleFullscreen} className="text-white hover:bg-white/20 h-8 w-8 sm:h-10 sm:w-10">
+                <Maximize className="w-4 h-4 sm:w-5 sm:h-5" />
               </Button>
             </div>
           </div>
@@ -438,26 +440,26 @@ const CourseViewer = () => {
       const googleDocsViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`;
       
       return (
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {/* Document Controls Bar */}
-          <div className="flex items-center justify-between bg-muted p-3 rounded-lg border">
-            <div className="flex items-center gap-2">
-              <FileText className="w-5 h-5 text-muted-foreground" />
-              <span className="font-medium">{selectedContent.title}</span>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0 bg-muted p-2 sm:p-3 rounded-lg border">
+            <div className="flex items-center gap-2 min-w-0">
+              <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground flex-shrink-0" />
+              <span className="font-medium text-sm sm:text-base truncate">{selectedContent.title}</span>
             </div>
 
             {/* Actions */}
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm" asChild>
+            <div className="flex items-center gap-1 sm:gap-2">
+              <Button variant="ghost" size="sm" asChild className="text-xs sm:text-sm px-2 sm:px-3">
                 <a href={url} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                  Open in New Tab
+                  <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  <span className="hidden xs:inline">Open</span>
                 </a>
               </Button>
-              <Button variant="ghost" size="sm" asChild>
+              <Button variant="ghost" size="sm" asChild className="text-xs sm:text-sm px-2 sm:px-3">
                 <a href={url} download target="_blank" rel="noopener noreferrer">
-                  <Download className="w-4 h-4 mr-2" />
-                  Download
+                  <Download className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  <span className="hidden xs:inline">Download</span>
                 </a>
               </Button>
             </div>
@@ -465,8 +467,7 @@ const CourseViewer = () => {
 
           {/* Document Viewer using Google Docs */}
           <div 
-            className="w-full border rounded-lg overflow-hidden bg-white"
-            style={{ height: '650px' }}
+            className="w-full border rounded-lg overflow-hidden bg-white h-[350px] sm:h-[450px] md:h-[550px] lg:h-[650px]"
           >
             <iframe
               src={googleDocsViewerUrl}
@@ -478,7 +479,7 @@ const CourseViewer = () => {
 
           {/* Mark as Completed Button */}
           {!isCompleted && (
-            <Button onClick={() => markAsCompleted(selectedContent.id)} className="w-full">
+            <Button onClick={() => markAsCompleted(selectedContent.id)} className="w-full text-sm sm:text-base">
               <CheckCircle2 className="w-4 h-4 mr-2" />
               Mark as Completed
             </Button>
@@ -489,13 +490,13 @@ const CourseViewer = () => {
 
     // Link type
     return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-center h-[300px] bg-muted rounded-lg">
-          <div className="text-center">
-            <LinkIcon className="w-12 h-12 mx-auto mb-4 text-primary" />
-            <h3 className="font-semibold mb-2">{selectedContent.title}</h3>
-            <p className="text-muted-foreground mb-4">{selectedContent.description}</p>
-            <Button asChild>
+      <div className="space-y-3 sm:space-y-4">
+        <div className="flex items-center justify-center h-[200px] sm:h-[250px] md:h-[300px] bg-muted rounded-lg">
+          <div className="text-center px-4">
+            <LinkIcon className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 text-primary" />
+            <h3 className="font-semibold mb-2 text-sm sm:text-base">{selectedContent.title}</h3>
+            <p className="text-muted-foreground mb-4 text-xs sm:text-sm">{selectedContent.description}</p>
+            <Button asChild size="sm" className="sm:text-base">
               <a href={url} target="_blank" rel="noopener noreferrer">
                 Open Resource <ExternalLink className="w-4 h-4 ml-2" />
               </a>
@@ -503,7 +504,7 @@ const CourseViewer = () => {
           </div>
         </div>
         {!isCompleted && (
-          <Button onClick={() => markAsCompleted(selectedContent.id)} className="w-full">
+          <Button onClick={() => markAsCompleted(selectedContent.id)} className="w-full text-sm sm:text-base">
             <CheckCircle2 className="w-4 h-4 mr-2" />
             Mark as Completed
           </Button>
@@ -560,17 +561,141 @@ const CourseViewer = () => {
   const currentIndex = allContents.findIndex(c => c.id === selectedContent?.id);
   const hasNext = currentIndex < allContents.length - 1;
 
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Sidebar content component for reuse
+  const SidebarContent = ({ onItemSelect }: { onItemSelect?: () => void }) => (
+    <>
+      <div className="p-3 sm:p-4 border-b">
+        <Link to="/dashboard/learning" className="text-primary hover:underline font-semibold text-base sm:text-lg line-clamp-2">
+          {course.title}
+        </Link>
+      </div>
+      
+      <ScrollArea className="flex-1">
+        <div className="p-2">
+          {modules.map((module, moduleIndex) => {
+            const moduleContents = getModuleContents(module.id);
+            const isExpanded = expandedModules.has(module.id);
+            
+            return (
+              <div key={module.id} className="mb-1">
+                <button
+                  onClick={() => toggleModule(module.id)}
+                  className="w-full flex items-center justify-between p-2 sm:p-3 hover:bg-accent rounded-lg text-left"
+                >
+                  <div className="min-w-0 flex-1">
+                    <span className="text-xs text-muted-foreground">Module {moduleIndex + 1}</span>
+                    <p className="font-medium text-xs sm:text-sm truncate">{module.title}</p>
+                  </div>
+                  {isExpanded ? (
+                    <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground flex-shrink-0" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground flex-shrink-0" />
+                  )}
+                </button>
+                
+                {isExpanded && (
+                  <div className="ml-2 border-l-2 border-muted">
+                    {moduleContents.map((content) => {
+                      const isSelected = selectedContent?.id === content.id;
+                      const isCompleted = completedItems.has(content.id);
+                      
+                      return (
+                        <button
+                          key={content.id}
+                          onClick={() => {
+                            handleSelectContent(content);
+                            onItemSelect?.();
+                          }}
+                          className={`w-full flex items-start gap-2 sm:gap-3 p-2 sm:p-3 text-left hover:bg-accent rounded-r-lg transition-colors ${
+                            isSelected ? 'bg-accent border-l-2 border-primary -ml-[2px]' : ''
+                          }`}
+                        >
+                          {getContentIcon(content.content_type, isCompleted)}
+                          <div className="flex-1 min-w-0">
+                            <p className={`text-xs sm:text-sm ${isSelected ? 'font-semibold' : ''} line-clamp-2`}>
+                              {content.title}
+                            </p>
+                            <span className="text-xs text-muted-foreground capitalize">
+                              {content.content_type}
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+
+          {/* Unassigned Content */}
+          {getUnassignedContents().length > 0 && (
+            <div className="mt-2">
+              {getUnassignedContents().map((content) => {
+                const isSelected = selectedContent?.id === content.id;
+                const isCompleted = completedItems.has(content.id);
+                
+                return (
+                  <button
+                    key={content.id}
+                    onClick={() => {
+                      handleSelectContent(content);
+                      onItemSelect?.();
+                    }}
+                    className={`w-full flex items-start gap-2 sm:gap-3 p-2 sm:p-3 text-left hover:bg-accent rounded-lg transition-colors ${
+                      isSelected ? 'bg-accent' : ''
+                    }`}
+                  >
+                    {getContentIcon(content.content_type, isCompleted)}
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-xs sm:text-sm ${isSelected ? 'font-semibold' : ''} line-clamp-2`}>
+                        {content.title}
+                      </p>
+                      <span className="text-xs text-muted-foreground capitalize">
+                        {content.content_type}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {allContents.length === 0 && (
+            <div className="p-4 text-center text-muted-foreground text-sm">
+              No content available yet.
+            </div>
+          )}
+        </div>
+      </ScrollArea>
+    </>
+  );
+
   return (
     <div className="h-screen flex flex-col bg-background">
       {/* Top Progress Bar */}
-      <div className="border-b bg-card px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-muted-foreground">
-            {completedCount}/{totalCount} learning items
+      <div className="border-b bg-card px-2 sm:px-4 py-2 sm:py-3 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
+          {/* Mobile Menu Button */}
+          <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden flex-shrink-0">
+                <Menu className="w-5 h-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-[280px] sm:w-[320px] p-0 flex flex-col">
+              <SidebarContent onItemSelect={() => setSidebarOpen(false)} />
+            </SheetContent>
+          </Sheet>
+          
+          <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
+            {completedCount}/{totalCount} items
           </span>
-          <Progress value={(completedCount / Math.max(totalCount, 1)) * 100} className="w-48 h-2" />
+          <Progress value={(completedCount / Math.max(totalCount, 1)) * 100} className="w-20 sm:w-32 md:w-48 h-2" />
         </div>
-        <Button variant="ghost" size="icon" asChild>
+        <Button variant="ghost" size="icon" asChild className="flex-shrink-0">
           <Link to="/dashboard/learning">
             <X className="w-5 h-5" />
           </Link>
@@ -578,134 +703,38 @@ const CourseViewer = () => {
       </div>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Left Sidebar */}
-        <div className="w-80 border-r bg-card flex flex-col">
-          <div className="p-4 border-b">
-            <Link to="/dashboard/learning" className="text-primary hover:underline font-semibold text-lg">
-              {course.title}
-            </Link>
-          </div>
-          
-          <ScrollArea className="flex-1">
-            <div className="p-2">
-              {modules.map((module, moduleIndex) => {
-                const moduleContents = getModuleContents(module.id);
-                const isExpanded = expandedModules.has(module.id);
-                
-                return (
-                  <div key={module.id} className="mb-1">
-                    <button
-                      onClick={() => toggleModule(module.id)}
-                      className="w-full flex items-center justify-between p-3 hover:bg-accent rounded-lg text-left"
-                    >
-                      <div>
-                        <span className="text-xs text-muted-foreground">Module {moduleIndex + 1}</span>
-                        <p className="font-medium text-sm">{module.title}</p>
-                      </div>
-                      {isExpanded ? (
-                        <ChevronUp className="w-5 h-5 text-muted-foreground" />
-                      ) : (
-                        <ChevronDown className="w-5 h-5 text-muted-foreground" />
-                      )}
-                    </button>
-                    
-                    {isExpanded && (
-                      <div className="ml-2 border-l-2 border-muted">
-                        {moduleContents.map((content) => {
-                          const isSelected = selectedContent?.id === content.id;
-                          const isCompleted = completedItems.has(content.id);
-                          
-                          return (
-                            <button
-                              key={content.id}
-                              onClick={() => handleSelectContent(content)}
-                              className={`w-full flex items-start gap-3 p-3 text-left hover:bg-accent rounded-r-lg transition-colors ${
-                                isSelected ? 'bg-accent border-l-2 border-primary -ml-[2px]' : ''
-                              }`}
-                            >
-                              {getContentIcon(content.content_type, isCompleted)}
-                              <div className="flex-1 min-w-0">
-                                <p className={`text-sm ${isSelected ? 'font-semibold' : ''}`}>
-                                  {content.title}
-                                </p>
-                                <span className="text-xs text-muted-foreground capitalize">
-                                  {content.content_type}
-                                </span>
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-
-              {/* Unassigned Content */}
-              {getUnassignedContents().length > 0 && (
-                <div className="mt-2">
-                  {getUnassignedContents().map((content) => {
-                    const isSelected = selectedContent?.id === content.id;
-                    const isCompleted = completedItems.has(content.id);
-                    
-                    return (
-                      <button
-                        key={content.id}
-                        onClick={() => handleSelectContent(content)}
-                        className={`w-full flex items-start gap-3 p-3 text-left hover:bg-accent rounded-lg transition-colors ${
-                          isSelected ? 'bg-accent' : ''
-                        }`}
-                      >
-                        {getContentIcon(content.content_type, isCompleted)}
-                        <div className="flex-1 min-w-0">
-                          <p className={`text-sm ${isSelected ? 'font-semibold' : ''}`}>
-                            {content.title}
-                          </p>
-                          <span className="text-xs text-muted-foreground capitalize">
-                            {content.content_type}
-                          </span>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-
-              {allContents.length === 0 && (
-                <div className="p-4 text-center text-muted-foreground text-sm">
-                  No content available yet.
-                </div>
-              )}
-            </div>
-          </ScrollArea>
+        {/* Left Sidebar - Desktop */}
+        <div className="hidden md:flex w-72 lg:w-80 border-r bg-card flex-col">
+          <SidebarContent />
         </div>
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col overflow-hidden">
           <ScrollArea className="flex-1">
-            <div className="max-w-4xl mx-auto p-6">
+            <div className="max-w-4xl mx-auto p-3 sm:p-4 md:p-6">
               {/* Content Title */}
               {selectedContent && (
-                <h1 className="text-2xl font-bold mb-6">{selectedContent.title}</h1>
+                <h1 className="text-lg sm:text-xl md:text-2xl font-bold mb-3 sm:mb-4 md:mb-6">{selectedContent.title}</h1>
               )}
               
               {renderContentPlayer()}
               
               {/* Content Description */}
               {selectedContent?.description && (
-                <p className="text-muted-foreground mt-4">{selectedContent.description}</p>
+                <p className="text-muted-foreground mt-3 sm:mt-4 text-sm sm:text-base">{selectedContent.description}</p>
               )}
             </div>
           </ScrollArea>
 
           {/* Bottom Navigation */}
-          <div className="border-t bg-card p-4 flex justify-end">
+          <div className="border-t bg-card p-2 sm:p-4 flex justify-end">
             <Button 
               onClick={goToNextItem} 
               disabled={!hasNext}
-              className="gap-2"
+              className="gap-2 text-sm sm:text-base"
+              size="sm"
             >
-              Go to next item <ArrowRight className="w-4 h-4" />
+              <span className="hidden xs:inline">Go to</span> next <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
         </div>
