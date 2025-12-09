@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Award, BookOpen, Clock, GraduationCap, TrendingUp, Users, CheckCircle } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import heroStudent from "@/assets/hero-student.jpg";
 import businessTraining from "@/assets/business-training.jpg";
 import { supabase } from "@/integrations/supabase/client";
+import { useEnrollment } from "@/hooks/useEnrollment";
 
 interface Course {
   id: string;
@@ -24,10 +25,36 @@ interface Course {
 const Index = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
+  const [enrolledCourseIds, setEnrolledCourseIds] = useState<string[]>([]);
+  const { enrollInCourse, enrolling } = useEnrollment();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchFeaturedCourses();
+    checkEnrollmentStatus();
   }, []);
+
+  const checkEnrollmentStatus = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data } = await supabase
+        .from("enrolled_courses")
+        .select("course_id")
+        .eq("user_id", user.id);
+      if (data) {
+        setEnrolledCourseIds(data.map(e => e.course_id).filter(Boolean) as string[]);
+      }
+    }
+  };
+
+  const handleEnroll = async (course: Course) => {
+    const success = await enrollInCourse(course.id, course.title);
+    if (success) {
+      setEnrolledCourseIds(prev => [...prev, course.id]);
+    }
+  };
+
+  const isEnrolled = (courseId: string) => enrolledCourseIds.includes(courseId);
 
   const fetchFeaturedCourses = async () => {
     setLoading(true);
@@ -246,9 +273,22 @@ const Index = () => {
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
-                      <Button className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground shadow-lg shadow-primary/20 font-semibold text-xs md:text-sm">
-                        Enroll Now
-                      </Button>
+                      {isEnrolled(course.id) ? (
+                        <Button 
+                          className="bg-green-600 hover:bg-green-700 text-white font-semibold text-xs md:text-sm"
+                          onClick={() => navigate("/dashboard/learning")}
+                        >
+                          Go to Course
+                        </Button>
+                      ) : (
+                        <Button 
+                          className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground shadow-lg shadow-primary/20 font-semibold text-xs md:text-sm"
+                          onClick={() => handleEnroll(course)}
+                          disabled={enrolling}
+                        >
+                          Enroll Now
+                        </Button>
+                      )}
                       <Button variant="outline" className="border-2 hover:bg-accent/10 text-xs md:text-sm" asChild>
                         <Link to={`/programs/${course.id}`}>View Details</Link>
                       </Button>
