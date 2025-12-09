@@ -71,16 +71,18 @@ export const Navbar = () => {
       </div>
 
       {/* Sign Up Options Bar */}
-      <div className="bg-muted/30 text-foreground py-3 text-center text-sm border-t border-border/50">
-        <div className="container mx-auto px-4 flex justify-center gap-8 items-center">
+      <div className="bg-muted/30 text-foreground py-2 md:py-3 text-center text-xs md:text-sm border-t border-border/50">
+        <div className="container mx-auto px-4 flex justify-center gap-4 md:gap-8 items-center flex-wrap">
           <Link to="/signup/individual" className="hover:text-primary transition-colors font-medium flex items-center gap-2">
             <span className="w-2 h-2 bg-primary rounded-full"></span>
-            Individual Learner
+            <span className="hidden sm:inline">Individual Learner</span>
+            <span className="sm:hidden">Individual</span>
           </Link>
           <span className="text-muted-foreground">•</span>
           <Link to="/signup/organization" className="hover:text-primary transition-colors font-medium flex items-center gap-2">
             <span className="w-2 h-2 bg-accent rounded-full"></span>
-            Business & Teams
+            <span className="hidden sm:inline">Business & Teams</span>
+            <span className="sm:hidden">Business</span>
           </Link>
         </div>
       </div>

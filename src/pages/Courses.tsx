@@ -120,15 +120,15 @@ const Courses = () => {
           {loading ? (
             <div className="text-center py-12">Loading courses...</div>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
               {filteredCourses.map((course) => (
                 <Card key={course.id} className="group overflow-hidden border-border/50 bg-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-2 cursor-pointer flex flex-col">
                   <div className="aspect-video overflow-hidden relative">
-                    <Badge className="absolute top-4 right-4 bg-background/90 backdrop-blur-sm text-primary border-0 z-10">
+                    <Badge className="absolute top-3 md:top-4 right-3 md:right-4 bg-background/90 backdrop-blur-sm text-primary border-0 z-10 text-xs">
                       {course.category}
                     </Badge>
                     {course.top_rated && (
-                      <Badge className="absolute top-4 left-4 bg-yellow-500 text-white border-0 z-10">
+                      <Badge className="absolute top-3 md:top-4 left-3 md:left-4 bg-yellow-500 text-white border-0 z-10 text-xs">
                         <Star className="w-3 h-3 mr-1 fill-current" />
                         Top Rated
                       </Badge>
@@ -139,38 +139,38 @@ const Courses = () => {
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                   </div>
-                  <CardContent className="p-6 flex flex-col flex-grow">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Badge variant="secondary" className="bg-primary/10 text-primary">
+                  <CardContent className="p-4 md:p-6 flex flex-col flex-grow">
+                    <div className="flex items-center gap-2 mb-2 md:mb-3">
+                      <Badge variant="secondary" className="bg-primary/10 text-primary text-xs">
                         {course.category}
                       </Badge>
                     </div>
-                    <h3 className="font-heading font-bold text-lg mb-4 line-clamp-2 group-hover:text-primary transition-colors min-h-[3.5rem]">
+                    <h3 className="font-heading font-bold text-base md:text-lg mb-3 md:mb-4 line-clamp-2 group-hover:text-primary transition-colors min-h-[2.5rem] md:min-h-[3.5rem]">
                       {course.title}
                     </h3>
-                    <div className="flex items-center justify-between mb-5 mt-auto">
+                    <div className="flex items-center justify-between mb-4 md:mb-5 mt-auto">
                       {course.price === 0 ? (
-                        <Badge className="bg-green-500/10 text-green-600 border-green-500/20 text-lg px-3 py-1">
+                        <Badge className="bg-green-500/10 text-green-600 border-green-500/20 text-sm md:text-lg px-2 md:px-3 py-1">
                           Free
                         </Badge>
                       ) : (
-                        <span className="text-2xl font-bold text-primary">₦{course.price.toLocaleString()}</span>
+                        <span className="text-lg md:text-2xl font-bold text-primary">₦{course.price.toLocaleString()}</span>
                       )}
-                      <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-3 text-xs md:text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
-                          <Users className="w-4 h-4" /> {course.students_count || 0}
+                          <Users className="w-3 h-3 md:w-4 md:h-4" /> {course.students_count || 0}
                         </span>
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <Button 
-                        className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground shadow-lg shadow-primary/20 font-semibold"
+                        className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground shadow-lg shadow-primary/20 font-semibold text-xs md:text-sm"
                         onClick={() => handleEnroll(course)}
                         disabled={enrolling}
                       >
                         Apply Now
                       </Button>
-                      <Button variant="outline" className="border-2 hover:bg-accent/10" asChild>
+                      <Button variant="outline" className="border-2 hover:bg-accent/10 text-xs md:text-sm" asChild>
                         <Link to={`/programs/${course.id}`}>View Details</Link>
                       </Button>
                     </div>

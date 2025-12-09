@@ -148,11 +148,11 @@ const DashboardCourses = () => {
 
   return (
     <DashboardLayout user={user} userRole={userRole}>
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h2 className="font-heading text-3xl font-bold">Course Catalog</h2>
+      <div className="space-y-4 md:space-y-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <h2 className="font-heading text-2xl md:text-3xl font-bold">Course Catalog</h2>
           {userRole === "admin" && (
-            <Button onClick={() => handleOpenDialog()}>
+            <Button onClick={() => handleOpenDialog()} className="w-full sm:w-auto">
               <Plus className="w-4 h-4 mr-2" />
               Add Course
             </Button>
@@ -174,7 +174,7 @@ const DashboardCourses = () => {
         ) : filteredCourses.length === 0 ? (
           <div className="text-center py-12">No courses found</div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {filteredCourses.map((course) => (
               <Card
                 key={course.id}
