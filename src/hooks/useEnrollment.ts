@@ -49,19 +49,8 @@ export const useEnrollment = () => {
 
       if (error) throw error;
 
-      // Increment students count
-      const { data: courseData } = await supabase
-        .from("courses")
-        .select("students_count")
-        .eq("id", courseId)
-        .single();
-      
-      if (courseData) {
-        await supabase
-          .from("courses")
-          .update({ students_count: (courseData.students_count || 0) + 1 })
-          .eq("id", courseId);
-      }
+      // Atomically increment students count using database function
+      await supabase.rpc('increment_students_count', { course_id_input: courseId });
 
       toast({
         title: "Enrolled Successfully",
