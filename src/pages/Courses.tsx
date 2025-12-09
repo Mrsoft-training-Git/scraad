@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Users, Filter, Star, Award } from "lucide-react";
+import { Search, Users, Filter, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useEnrollment } from "@/hooks/useEnrollment";
 
@@ -26,11 +26,27 @@ const Courses = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
+  const [enrolledCourseIds, setEnrolledCourseIds] = useState<string[]>([]);
   const { enrollInCourse, enrolling } = useEnrollment();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchCourses();
+    checkEnrollmentStatus();
   }, []);
+
+  const checkEnrollmentStatus = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data } = await supabase
+        .from("enrolled_courses")
+        .select("course_id")
+        .eq("user_id", user.id);
+      if (data) {
+        setEnrolledCourseIds(data.map(e => e.course_id).filter(Boolean) as string[]);
+      }
+    }
+  };
 
   const fetchCourses = async () => {
     setLoading(true);
@@ -57,8 +73,13 @@ const Courses = () => {
   });
 
   const handleEnroll = async (course: Course) => {
-    await enrollInCourse(course.id, course.title);
+    const success = await enrollInCourse(course.id, course.title);
+    if (success) {
+      setEnrolledCourseIds(prev => [...prev, course.id]);
+    }
   };
+
+  const isEnrolled = (courseId: string) => enrolledCourseIds.includes(courseId);
 
   return (
     <div className="min-h-screen bg-background">
@@ -163,13 +184,22 @@ const Courses = () => {
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
-                      <Button 
-                        className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground shadow-lg shadow-primary/20 font-semibold text-xs md:text-sm"
-                        onClick={() => handleEnroll(course)}
-                        disabled={enrolling}
-                      >
-                        Apply Now
-                      </Button>
+                      {isEnrolled(course.id) ? (
+                        <Button 
+                          className="bg-green-600 hover:bg-green-700 text-white font-semibold text-xs md:text-sm"
+                          onClick={() => navigate("/dashboard/learning")}
+                        >
+                          Go to Course
+                        </Button>
+                      ) : (
+                        <Button 
+                          className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground shadow-lg shadow-primary/20 font-semibold text-xs md:text-sm"
+                          onClick={() => handleEnroll(course)}
+                          disabled={enrolling}
+                        >
+                          Apply Now
+                        </Button>
+                      )}
                       <Button variant="outline" className="border-2 hover:bg-accent/10 text-xs md:text-sm" asChild>
                         <Link to={`/programs/${course.id}`}>View Details</Link>
                       </Button>
