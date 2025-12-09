@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Clock, Users, Award, BookOpen, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useEnrollment } from "@/hooks/useEnrollment";
+
 interface Course {
   id: string;
   title: string;
@@ -21,16 +22,35 @@ interface Course {
   level: string | null;
   top_rated: boolean;
 }
+
 const Programs = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
+  const [enrolledCourseIds, setEnrolledCourseIds] = useState<string[]>([]);
+  const navigate = useNavigate();
   const {
     enrollInCourse,
     enrolling
   } = useEnrollment();
+
   useEffect(() => {
     fetchCourses();
+    checkEnrollmentStatus();
   }, []);
+
+  const checkEnrollmentStatus = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data } = await supabase
+        .from("enrolled_courses")
+        .select("course_id")
+        .eq("user_id", user.id);
+      if (data) {
+        setEnrolledCourseIds(data.map(e => e.course_id).filter(Boolean) as string[]);
+      }
+    }
+  };
+
   const fetchCourses = async () => {
     setLoading(true);
     // Programs page shows top_rated courses
@@ -45,8 +65,12 @@ const Programs = () => {
     }
     setLoading(false);
   };
+
   const handleEnroll = async (course: Course) => {
-    await enrollInCourse(course.id, course.title);
+    const success = await enrollInCourse(course.id, course.title);
+    if (success) {
+      setEnrolledCourseIds(prev => [...prev, course.id]);
+    }
   };
   return <div className="min-h-screen bg-background">
       <Navbar />
@@ -119,9 +143,22 @@ const Programs = () => {
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
-                      <Button className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground shadow-lg shadow-primary/20 font-semibold" onClick={() => handleEnroll(course)} disabled={enrolling}>
-                        Apply Now
-                      </Button>
+                      {enrolledCourseIds.includes(course.id) ? (
+                        <Button 
+                          className="bg-gradient-to-r from-green-500 to-green-600 hover:opacity-90 text-white shadow-lg shadow-green-500/20 font-semibold"
+                          onClick={() => navigate("/dashboard/learning")}
+                        >
+                          Go to Course
+                        </Button>
+                      ) : (
+                        <Button 
+                          className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground shadow-lg shadow-primary/20 font-semibold" 
+                          onClick={() => handleEnroll(course)} 
+                          disabled={enrolling}
+                        >
+                          Apply Now
+                        </Button>
+                      )}
                       <Button variant="outline" asChild>
                         <Link to={`/programs/${course.id}`}>View Details</Link>
                       </Button>
