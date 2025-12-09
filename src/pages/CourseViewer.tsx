@@ -92,6 +92,7 @@ const CourseViewer = () => {
   const [isMuted, setIsMuted] = useState(false);
   const [videoProgress, setVideoProgress] = useState(0);
   const [videoDuration, setVideoDuration] = useState(0);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
 
   useEffect(() => {
@@ -561,7 +562,6 @@ const CourseViewer = () => {
   const currentIndex = allContents.findIndex(c => c.id === selectedContent?.id);
   const hasNext = currentIndex < allContents.length - 1;
 
-  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Sidebar content component for reuse
   const SidebarContent = ({ onItemSelect }: { onItemSelect?: () => void }) => (
