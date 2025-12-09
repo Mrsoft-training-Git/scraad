@@ -320,6 +320,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_students_count: {
+        Args: { course_id_input: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "student"
