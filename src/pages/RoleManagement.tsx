@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Shield, Users, Crown, Loader2 } from "lucide-react";
+import { Shield, Users, Crown, Loader2, GraduationCap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -124,17 +124,19 @@ const RoleManagement = () => {
 
   // Calculate role counts from real data
   const adminCount = users.filter(u => u.role === "admin").length;
+  const instructorCount = users.filter(u => u.role === "instructor").length;
   const studentCount = users.filter(u => u.role === "student").length;
 
   const roles = [
     { id: 1, name: "Admin", users: adminCount, permissions: "Full access", icon: Crown, color: "text-yellow-600" },
-    { id: 2, name: "Student", users: studentCount, permissions: "View courses, submit assignments", icon: Users, color: "text-blue-600" },
+    { id: 2, name: "Instructor", users: instructorCount, permissions: "Manage assigned courses", icon: GraduationCap, color: "text-green-600" },
+    { id: 3, name: "Student", users: studentCount, permissions: "View courses, submit assignments", icon: Users, color: "text-blue-600" },
   ];
 
   return (
     <DashboardLayout user={user} userRole={userRole}>
       <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {roles.map((role) => {
             const Icon = role.icon;
             return (
@@ -188,7 +190,9 @@ const RoleManagement = () => {
                           <span className={`px-2 py-1 rounded-full text-xs capitalize ${
                             userData.role === "admin" 
                               ? "bg-yellow-100 text-yellow-800" 
-                              : "bg-muted"
+                              : userData.role === "instructor"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-muted"
                           }`}>
                             {userData.role}
                           </span>
@@ -208,6 +212,7 @@ const RoleManagement = () => {
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="admin">Admin</SelectItem>
+                              <SelectItem value="instructor">Instructor</SelectItem>
                               <SelectItem value="student">Student</SelectItem>
                             </SelectContent>
                           </Select>

@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { AdminDashboard } from "@/components/AdminDashboard";
 import { StudentDashboard } from "@/components/StudentDashboard";
+import { InstructorDashboard } from "@/components/InstructorDashboard";
 
 const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -76,9 +77,22 @@ const Dashboard = () => {
     );
   }
 
+  const renderDashboard = () => {
+    const userName = profile?.full_name || user?.email?.split("@")[0] || "User";
+    
+    switch (userRole) {
+      case "admin":
+        return <AdminDashboard />;
+      case "instructor":
+        return <InstructorDashboard userName={userName} userId={user?.id || ""} />;
+      default:
+        return <StudentDashboard userName={userName} />;
+    }
+  };
+
   return (
     <DashboardLayout user={user} userRole={userRole}>
-      {userRole === "admin" ? <AdminDashboard /> : <StudentDashboard userName={profile?.full_name || user?.email?.split("@")[0] || "User"} />}
+      {renderDashboard()}
     </DashboardLayout>
   );
 };
