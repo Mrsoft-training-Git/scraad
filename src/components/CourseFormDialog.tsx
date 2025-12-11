@@ -47,9 +47,10 @@ interface CourseFormDialogProps {
   onOpenChange: (open: boolean) => void;
   editingCourse: any | null;
   onSave: () => void;
+  userRole?: string;
 }
 
-export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave }: CourseFormDialogProps) => {
+export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave, userRole }: CourseFormDialogProps) => {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -190,7 +191,10 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave }: 
       return;
     }
 
-    const courseData = {
+    // Get current user for instructor_id
+    const { data: { user } } = await supabase.auth.getUser();
+
+    const courseData: any = {
       title: formData.title,
       description: formData.description,
       price: formData.is_free ? 0 : parseFloat(formData.price),
@@ -204,7 +208,20 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave }: 
       syllabus: formData.syllabus.filter(m => m.title.trim())
     };
 
+    // If instructor is creating a course, auto-assign themselves
+    if (userRole === 'instructor' && !editingCourse && user) {
+      courseData.instructor_id = user.id;
+      courseData.published = false; // Instructors can't publish, only admins can
+    }
+
     if (editingCourse) {
+      // Instructors can't change publish status
+      if (userRole === 'instructor') {
+        delete courseData.published;
+        delete courseData.featured;
+        delete courseData.top_rated;
+      }
+      
       const { error } = await supabase
         .from("courses")
         .update(courseData)
@@ -224,7 +241,12 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave }: 
         toast({ title: "Error", description: "Failed to create course", variant: "destructive" });
         return;
       }
-      toast({ title: "Success", description: "Course created successfully" });
+      toast({ 
+        title: "Success", 
+        description: userRole === 'instructor' 
+          ? "Course created successfully. An admin will review and publish it." 
+          : "Course created successfully" 
+      });
     }
     
     onSave();

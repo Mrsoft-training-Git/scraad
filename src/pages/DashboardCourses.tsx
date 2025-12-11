@@ -164,7 +164,7 @@ const DashboardCourses = () => {
       <div className="space-y-4 md:space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <h2 className="font-heading text-2xl md:text-3xl font-bold">Course Catalog</h2>
-          {userRole === "admin" && (
+          {(userRole === "admin" || userRole === "instructor") && (
             <Button onClick={() => handleOpenDialog()} className="w-full sm:w-auto">
               <Plus className="w-4 h-4 mr-2" />
               Add Course
@@ -223,6 +223,19 @@ const DashboardCourses = () => {
                       >
                         <Award className={course.top_rated ? "w-4 h-4 fill-current" : "w-4 h-4"} />
                       </Button>
+                      <Button
+                        size="icon"
+                        variant="secondary"
+                        onClick={() => handleOpenDialog(course)}
+                        className="h-8 w-8"
+                        title="Edit"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  )}
+                  {userRole === "instructor" && (
+                    <div className="absolute top-4 left-4 flex gap-1 z-10">
                       <Button
                         size="icon"
                         variant="secondary"
@@ -310,6 +323,7 @@ const DashboardCourses = () => {
         onOpenChange={setDialogOpen}
         editingCourse={editingCourse}
         onSave={refreshCourses}
+        userRole={userRole}
       />
     </DashboardLayout>
   );
