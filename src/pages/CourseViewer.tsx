@@ -71,6 +71,66 @@ const isPdfUrl = (url: string): boolean => {
   return url.toLowerCase().endsWith('.pdf');
 };
 
+// YouTube Progress Tracker Component - estimates watch progress over time
+const YouTubeProgressTracker = ({ 
+  videoId, 
+  title, 
+  contentId, 
+  savedProgress, 
+  isCompleted,
+  onProgressUpdate 
+}: { 
+  videoId: string; 
+  title: string; 
+  contentId: string; 
+  savedProgress: number;
+  isCompleted: boolean;
+  onProgressUpdate: (contentId: string, progress: number) => Promise<void>;
+}) => {
+  const [estimatedProgress, setEstimatedProgress] = useState(savedProgress);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  
+  useEffect(() => {
+    // Assume average video is ~5 minutes (300 seconds), update every 15 seconds = ~5% progress
+    if (!isCompleted && estimatedProgress < 100) {
+      intervalRef.current = setInterval(() => {
+        setEstimatedProgress(prev => {
+          const newProgress = Math.min(prev + 5, 100);
+          onProgressUpdate(contentId, newProgress);
+          if (newProgress >= 100) {
+            if (intervalRef.current) clearInterval(intervalRef.current);
+          }
+          return newProgress;
+        });
+      }, 15000); // Every 15 seconds
+    }
+    
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [contentId, isCompleted]);
+
+  return (
+    <div className="space-y-2">
+      <div className="aspect-video w-full rounded-lg overflow-hidden bg-black">
+        <iframe
+          src={`https://www.youtube.com/embed/${videoId}?rel=0`}
+          title={title}
+          className="w-full h-full"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        />
+      </div>
+      {!isCompleted && (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Progress value={estimatedProgress} className="h-1 flex-1" />
+          <span>{Math.round(estimatedProgress)}%</span>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const CourseViewer = () => {
   const { courseId } = useParams<{ courseId: string }>();
   const [user, setUser] = useState<User | null>(null);
@@ -84,6 +144,7 @@ const CourseViewer = () => {
   const [selectedContent, setSelectedContent] = useState<CourseContent | null>(null);
   const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
   const [completedItems, setCompletedItems] = useState<Set<string>>(new Set());
+  const [contentProgress, setContentProgress] = useState<Map<string, number>>(new Map());
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -94,6 +155,7 @@ const CourseViewer = () => {
   const [videoProgress, setVideoProgress] = useState(0);
   const [videoDuration, setVideoDuration] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const lastSavedProgress = useRef<number>(0);
 
 
   useEffect(() => {
@@ -138,21 +200,32 @@ const CourseViewer = () => {
   const fetchCompletedItems = async (userId: string, courseContents: CourseContent[], enrollId: string | null) => {
     const { data } = await supabase
       .from("content_progress")
-      .select("content_id")
+      .select("content_id, watch_progress")
       .eq("user_id", userId);
     
     if (data) {
-      // Filter to only include completed items that still exist in current course content
+      // Filter to only include items that still exist in current course content
       const courseContentIds = new Set(courseContents.map(c => c.id));
-      const validCompletedItems = data.filter(item => courseContentIds.has(item.content_id));
-      setCompletedItems(new Set(validCompletedItems.map(item => item.content_id)));
+      const validItems = data.filter(item => courseContentIds.has(item.content_id));
       
-      // Recalculate and update progress based on current content count
+      // Track completed items (100% progress)
+      const completed = validItems.filter(item => (item.watch_progress || 0) >= 100);
+      setCompletedItems(new Set(completed.map(item => item.content_id)));
+      
+      // Track all progress
+      const progressMap = new Map<string, number>();
+      validItems.forEach(item => {
+        progressMap.set(item.content_id, item.watch_progress || 0);
+      });
+      setContentProgress(progressMap);
+      
+      // Calculate overall course progress based on sum of all partial progress
       if (enrollId && courseContents.length > 0) {
-        const progressPercent = Math.round((validCompletedItems.length / courseContents.length) * 100);
+        const totalProgress = validItems.reduce((sum, item) => sum + (item.watch_progress || 0), 0);
+        const overallPercent = Math.round(totalProgress / courseContents.length);
         await supabase
           .from("enrolled_courses")
-          .update({ progress: progressPercent })
+          .update({ progress: Math.min(overallPercent, 100) })
           .eq("id", enrollId);
       }
     }
@@ -204,31 +277,69 @@ const CourseViewer = () => {
 
   const markAsCompleted = async (contentId: string) => {
     if (!user || completedItems.has(contentId)) return;
+    await updateContentProgress(contentId, 100);
+  };
+
+  const updateContentProgress = async (contentId: string, progress: number) => {
+    if (!user) return;
+
+    const isComplete = progress >= 100;
+    const currentProgress = contentProgress.get(contentId) || 0;
+    
+    // Only update if progress increased
+    if (progress <= currentProgress) return;
 
     const { error } = await supabase
       .from("content_progress")
-      .insert({
+      .upsert({
         user_id: user.id,
-        content_id: contentId
+        content_id: contentId,
+        watch_progress: Math.min(progress, 100),
+        completed_at: isComplete ? new Date().toISOString() : null
+      }, {
+        onConflict: 'user_id,content_id'
       });
 
     if (!error) {
-      const newCompleted = new Set([...completedItems, contentId]);
-      setCompletedItems(newCompleted);
+      // Update local state
+      const newProgressMap = new Map(contentProgress);
+      newProgressMap.set(contentId, progress);
+      setContentProgress(newProgressMap);
+
+      if (isComplete) {
+        const newCompleted = new Set([...completedItems, contentId]);
+        setCompletedItems(newCompleted);
+      }
       
-      // Update enrollment progress
+      // Update overall enrollment progress
       if (enrollmentId && contents.length > 0) {
-        const progressPercent = Math.round((newCompleted.size / contents.length) * 100);
+        const totalProgress = Array.from(newProgressMap.values()).reduce((sum, p) => sum + p, 0);
+        const overallPercent = Math.round(totalProgress / contents.length);
         await supabase
           .from("enrolled_courses")
-          .update({ progress: progressPercent })
+          .update({ progress: Math.min(overallPercent, 100) })
           .eq("id", enrollmentId);
       }
 
-      toast({
-        title: "Progress saved",
-        description: "This item has been marked as completed.",
-      });
+      if (isComplete) {
+        toast({
+          title: "Progress saved",
+          description: "This item has been marked as completed.",
+        });
+      }
+    }
+  };
+
+  // Save video progress periodically (every 5% change)
+  const saveVideoProgress = async (currentProgress: number) => {
+    if (!selectedContent || selectedContent.content_type !== "video") return;
+    
+    const progressPercent = Math.round(currentProgress);
+    
+    // Save every 5% progress or at completion
+    if (progressPercent - lastSavedProgress.current >= 5 || progressPercent >= 95) {
+      lastSavedProgress.current = progressPercent;
+      await updateContentProgress(selectedContent.id, progressPercent >= 95 ? 100 : progressPercent);
     }
   };
 
@@ -265,6 +376,7 @@ const CourseViewer = () => {
     setSelectedContent(content);
     setIsPlaying(false);
     setVideoProgress(0);
+    lastSavedProgress.current = contentProgress.get(content.id) || 0;
   };
 
   const getAllContents = () => {
@@ -307,6 +419,7 @@ const CourseViewer = () => {
     if (videoRef.current) {
       const progress = (videoRef.current.currentTime / videoRef.current.duration) * 100;
       setVideoProgress(progress);
+      saveVideoProgress(progress);
     }
   };
 
@@ -354,25 +467,21 @@ const CourseViewer = () => {
 
     const url = selectedContent.content_url;
     const isCompleted = completedItems.has(selectedContent.id);
+    const savedProgress = contentProgress.get(selectedContent.id) || 0;
 
-    // YouTube Video - auto-marks as completed when selected
+    // YouTube Video - tracks progress over time
     if (selectedContent.content_type === "video" && isYouTubeUrl(url)) {
       const videoId = getYouTubeVideoId(url);
       if (videoId) {
-        // Auto-mark video as completed when viewed
-        if (!isCompleted) {
-          markAsCompleted(selectedContent.id);
-        }
         return (
-          <div className="aspect-video w-full rounded-lg overflow-hidden bg-black">
-            <iframe
-              src={`https://www.youtube.com/embed/${videoId}?rel=0`}
-              title={selectedContent.title}
-              className="w-full h-full"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
-          </div>
+          <YouTubeProgressTracker
+            videoId={videoId}
+            title={selectedContent.title}
+            contentId={selectedContent.id}
+            savedProgress={savedProgress}
+            isCompleted={isCompleted}
+            onProgressUpdate={updateContentProgress}
+          />
         );
       }
     }
@@ -389,6 +498,10 @@ const CourseViewer = () => {
             onLoadedMetadata={() => {
               if (videoRef.current) {
                 setVideoDuration(videoRef.current.duration);
+                // Resume from saved progress
+                if (savedProgress > 0 && savedProgress < 100) {
+                  videoRef.current.currentTime = (savedProgress / 100) * videoRef.current.duration;
+                }
               }
             }}
             onEnded={() => {
