@@ -343,7 +343,7 @@ const CourseViewer = () => {
   const renderContentPlayer = () => {
     if (!selectedContent || !selectedContent.content_url) {
       return (
-        <div className="flex items-center justify-center h-[200px] sm:h-[300px] md:h-[400px] bg-muted rounded-lg">
+        <div className="flex items-center justify-center h-full bg-muted rounded-lg">
           <div className="text-center text-muted-foreground px-4">
             <BookOpen className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2" />
             <p className="text-sm sm:text-base">Select a lesson to start learning</p>
@@ -364,7 +364,7 @@ const CourseViewer = () => {
           markAsCompleted(selectedContent.id);
         }
         return (
-          <div className="aspect-video w-full rounded-lg overflow-hidden bg-black">
+          <div className="w-full h-full rounded-lg overflow-hidden bg-black">
             <iframe
               src={`https://www.youtube.com/embed/${videoId}?rel=0`}
               title={selectedContent.title}
@@ -380,7 +380,7 @@ const CourseViewer = () => {
     // Native Video with custom controls - auto-marks as completed when video ends
     if (selectedContent.content_type === "video") {
       return (
-        <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-black group">
+        <div className="relative w-full h-full rounded-lg overflow-hidden bg-black group">
           <video
             ref={videoRef}
             src={url}
@@ -718,21 +718,24 @@ const CourseViewer = () => {
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          <ScrollArea className="flex-1">
-            <div className="max-w-4xl mx-auto p-3 sm:p-4 md:p-6">
+          <div className="flex-1 flex flex-col p-3 sm:p-4 md:p-6 overflow-hidden">
+            <div className="max-w-4xl mx-auto w-full flex flex-col flex-1 overflow-hidden">
               {/* Content Title */}
               {selectedContent && (
-                <h1 className="text-lg sm:text-xl md:text-2xl font-bold mb-3 sm:mb-4 md:mb-6">{selectedContent.title}</h1>
+                <h1 className="text-lg sm:text-xl md:text-2xl font-bold mb-3 sm:mb-4 flex-shrink-0">{selectedContent.title}</h1>
               )}
               
-              {renderContentPlayer()}
+              {/* Video/Content Player - fits available space */}
+              <div className="flex-1 min-h-0">
+                {renderContentPlayer()}
+              </div>
               
               {/* Content Description */}
               {selectedContent?.description && (
-                <p className="text-muted-foreground mt-3 sm:mt-4 text-sm sm:text-base">{selectedContent.description}</p>
+                <p className="text-muted-foreground mt-3 sm:mt-4 text-sm sm:text-base flex-shrink-0 line-clamp-2">{selectedContent.description}</p>
               )}
             </div>
-          </ScrollArea>
+          </div>
 
           {/* Bottom Navigation */}
           <div className="border-t bg-card p-2 sm:p-4 flex justify-between">
