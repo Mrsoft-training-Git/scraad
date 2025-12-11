@@ -145,10 +145,18 @@ const CreateContent = () => {
 
   const handleContentTypeSelect = (type: string) => {
     setSelectedContentType(type);
-    setFormData(prev => ({ ...prev, content_type: type }));
-    setDialogOpen(true);
     setEditingContent(null);
-    resetForm();
+    setFormData({
+      course_id: "",
+      module_id: "",
+      title: "",
+      description: "",
+      content_type: type,
+      content_url: "",
+      is_published: false,
+    });
+    setFile(null);
+    setDialogOpen(true);
   };
 
   const resetForm = () => {
@@ -157,7 +165,7 @@ const CreateContent = () => {
       module_id: "",
       title: "",
       description: "",
-      content_type: selectedContentType,
+      content_type: "document",
       content_url: "",
       is_published: false,
     });
