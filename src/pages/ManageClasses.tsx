@@ -28,6 +28,8 @@ interface EnrolledStudent {
   enrolled_at: string;
   profile?: {
     full_name: string | null;
+    email: string | null;
+    phone: string | null;
   };
 }
 
@@ -103,14 +105,14 @@ const ManageClasses = () => {
       const userIds = (data || []).map(d => d.user_id);
       const { data: profilesData } = await supabase
         .from("profiles")
-        .select("id, full_name")
+        .select("id, full_name, email, phone")
         .in("id", userIds);
 
       const profilesMap = new Map((profilesData || []).map(p => [p.id, p]));
       
       const studentsWithProfiles = (data || []).map(enrollment => ({
         ...enrollment,
-        profile: profilesMap.get(enrollment.user_id) || { full_name: null }
+        profile: profilesMap.get(enrollment.user_id) || { full_name: null, email: null, phone: null }
       }));
       
       setEnrolledStudents(studentsWithProfiles);
@@ -179,6 +181,8 @@ const ManageClasses = () => {
                       <TableRow>
                         <TableHead className="w-12">#</TableHead>
                         <TableHead>Student Name</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Phone</TableHead>
                         <TableHead>Enrolled Date</TableHead>
                         <TableHead>Progress</TableHead>
                         <TableHead className="text-right">Completion %</TableHead>
@@ -197,6 +201,12 @@ const ManageClasses = () => {
                               </div>
                               {student.profile?.full_name || "Unknown User"}
                             </div>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {student.profile?.email || "—"}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {student.profile?.phone || "—"}
                           </TableCell>
                           <TableCell>{formatDate(student.enrolled_at)}</TableCell>
                           <TableCell className="w-48">
