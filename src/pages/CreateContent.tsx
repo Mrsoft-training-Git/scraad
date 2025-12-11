@@ -57,6 +57,7 @@ const CreateContent = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [moduleDialogOpen, setModuleDialogOpen] = useState(false);
   const [editingContent, setEditingContent] = useState<CourseContent | null>(null);
+  const [editingModule, setEditingModule] = useState<CourseModule | null>(null);
   const [selectedContentType, setSelectedContentType] = useState<string>("document");
   const [filterCourse, setFilterCourse] = useState<string>("all");
   const [previewContent, setPreviewContent] = useState<CourseContent | null>(null);
@@ -281,22 +282,52 @@ const CreateContent = () => {
       return;
     }
 
-    const { error } = await supabase
-      .from("course_modules")
-      .insert({
-        course_id: newModule.course_id,
-        title: newModule.title,
-        description: newModule.description || null,
-      });
+    let error;
+    if (editingModule) {
+      const { error: updateError } = await supabase
+        .from("course_modules")
+        .update({
+          title: newModule.title,
+          description: newModule.description || null,
+        })
+        .eq("id", editingModule.id);
+      error = updateError;
+    } else {
+      const { error: insertError } = await supabase
+        .from("course_modules")
+        .insert({
+          course_id: newModule.course_id,
+          title: newModule.title,
+          description: newModule.description || null,
+        });
+      error = insertError;
+    }
 
     if (error) {
-      toast({ title: "Error", description: "Failed to create module", variant: "destructive" });
+      toast({ title: "Error", description: `Failed to ${editingModule ? "update" : "create"} module`, variant: "destructive" });
     } else {
-      toast({ title: "Success", description: "Module created successfully" });
+      toast({ title: "Success", description: `Module ${editingModule ? "updated" : "created"} successfully` });
       setModuleDialogOpen(false);
+      setEditingModule(null);
       setNewModule({ course_id: "", title: "", description: "" });
       fetchModules();
     }
+  };
+
+  const handleEditModule = (module: CourseModule) => {
+    setEditingModule(module);
+    setNewModule({
+      course_id: module.course_id,
+      title: module.title,
+      description: module.description || "",
+    });
+    setModuleDialogOpen(true);
+  };
+
+  const openCreateModuleDialog = () => {
+    setEditingModule(null);
+    setNewModule({ course_id: "", title: "", description: "" });
+    setModuleDialogOpen(true);
   };
 
   const handlePreview = (content: CourseContent) => {
@@ -349,7 +380,7 @@ const CreateContent = () => {
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold">Create New Content</h2>
-            <Button variant="outline" onClick={() => setModuleDialogOpen(true)}>
+            <Button variant="outline" onClick={openCreateModuleDialog}>
               <FolderPlus className="w-4 h-4 mr-2" />
               Create Module
             </Button>
@@ -435,7 +466,18 @@ const CreateContent = () => {
                       </TableCell>
                       <TableCell className="font-medium">{content.title}</TableCell>
                       <TableCell>
-                        {content.course_modules?.title || (
+                        {content.course_modules?.title ? (
+                          <button 
+                            className="text-left hover:text-primary hover:underline cursor-pointer"
+                            onClick={() => {
+                              const module = modules.find(m => m.id === content.module_id);
+                              if (module) handleEditModule(module);
+                            }}
+                            title="Click to edit module"
+                          >
+                            {content.course_modules.title}
+                          </button>
+                        ) : (
                           <span className="text-muted-foreground">No module</span>
                         )}
                       </TableCell>
@@ -617,12 +659,20 @@ const CreateContent = () => {
         </Dialog>
 
         {/* Module Dialog */}
-        <Dialog open={moduleDialogOpen} onOpenChange={setModuleDialogOpen}>
+        <Dialog open={moduleDialogOpen} onOpenChange={(open) => {
+          setModuleDialogOpen(open);
+          if (!open) {
+            setEditingModule(null);
+            setNewModule({ course_id: "", title: "", description: "" });
+          }
+        }}>
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle>Create New Module</DialogTitle>
+              <DialogTitle>{editingModule ? "Edit Module" : "Create New Module"}</DialogTitle>
               <DialogDescription>
-                Modules help organize course content into logical sections.
+                {editingModule 
+                  ? "Update the module title or description." 
+                  : "Modules help organize course content into logical sections."}
               </DialogDescription>
             </DialogHeader>
             
@@ -632,6 +682,7 @@ const CreateContent = () => {
                 <Select 
                   value={newModule.course_id} 
                   onValueChange={(value) => setNewModule(prev => ({ ...prev, course_id: value }))}
+                  disabled={!!editingModule}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select course" />
@@ -665,7 +716,7 @@ const CreateContent = () => {
 
               <div className="flex gap-3 pt-4">
                 <Button onClick={handleCreateModule} className="flex-1">
-                  Create Module
+                  {editingModule ? "Update Module" : "Create Module"}
                 </Button>
                 <Button variant="outline" onClick={() => setModuleDialogOpen(false)}>
                   Cancel
