@@ -59,21 +59,29 @@ const ManageClasses = () => {
         .eq("user_id", session.user.id)
         .maybeSingle();
       
-      setUserRole(roleData?.role || "student");
-      fetchCoursesWithEnrollments();
+      const role = roleData?.role || "student";
+      setUserRole(role);
+      fetchCoursesWithEnrollments(session.user.id, role);
     };
     checkAuth();
   }, [navigate]);
 
-  const fetchCoursesWithEnrollments = async () => {
+  const fetchCoursesWithEnrollments = async (userId: string, role: string) => {
     setLoading(true);
     
-    // Get all courses
-    const { data: coursesData, error: coursesError } = await supabase
+    // Build query based on role
+    let query = supabase
       .from("courses")
       .select("id, title, category, image_url, students_count, price")
       .eq("published", true)
       .order("students_count", { ascending: false });
+    
+    // Instructors only see their assigned courses
+    if (role === "instructor") {
+      query = query.eq("instructor_id", userId);
+    }
+
+    const { data: coursesData, error: coursesError } = await query;
 
     if (coursesError) {
       toast({ title: "Error", description: "Failed to fetch courses", variant: "destructive" });

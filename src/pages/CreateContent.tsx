@@ -98,49 +98,107 @@ const CreateContent = () => {
         .eq("user_id", session.user.id)
         .single();
       
-      setUserRole(roleData?.role || "student");
+      const role = roleData?.role || "student";
+      setUserRole(role);
       
-      if (roleData?.role === "admin") {
-        fetchCourses();
-        fetchModules();
-        fetchContents();
+      if (role === "admin" || role === "instructor") {
+        fetchCourses(session.user.id, role);
+        fetchModulesData(session.user.id, role);
+        fetchContentsData(session.user.id, role);
       }
       setLoading(false);
     };
     checkAuth();
   }, [navigate]);
 
-  const fetchCourses = async () => {
-    const { data, error } = await supabase
-      .from("courses")
-      .select("id, title")
-      .order("title");
+  const fetchCourses = async (userId: string, role: string) => {
+    let query = supabase.from("courses").select("id, title").order("title");
+    
+    // Instructors only see their assigned courses
+    if (role === "instructor") {
+      query = query.eq("instructor_id", userId);
+    }
+    
+    const { data, error } = await query;
     
     if (!error && data) {
       setCourses(data);
     }
   };
 
-  const fetchModules = async () => {
-    const { data, error } = await supabase
-      .from("course_modules")
-      .select("*")
-      .order("order_index");
-    
-    if (!error && data) {
-      setModules(data);
+  const fetchModulesData = async (userId: string, role: string) => {
+    if (role === "instructor") {
+      // For instructors, only fetch modules for their courses
+      const { data: instructorCourses } = await supabase
+        .from("courses")
+        .select("id")
+        .eq("instructor_id", userId);
+      
+      const courseIds = instructorCourses?.map(c => c.id) || [];
+      
+      if (courseIds.length > 0) {
+        const { data, error } = await supabase
+          .from("course_modules")
+          .select("*")
+          .in("course_id", courseIds)
+          .order("order_index");
+        
+        if (!error && data) {
+          setModules(data);
+        }
+      }
+    } else {
+      const { data, error } = await supabase
+        .from("course_modules")
+        .select("*")
+        .order("order_index");
+      
+      if (!error && data) {
+        setModules(data);
+      }
     }
   };
 
-  const fetchContents = async () => {
-    const { data, error } = await supabase
-      .from("course_content")
-      .select("*, courses(title), course_modules(title)")
-      .order("created_at", { ascending: false });
-    
-    if (!error && data) {
-      setContents(data as CourseContent[]);
+  const fetchContentsData = async (userId: string, role: string) => {
+    if (role === "instructor") {
+      // For instructors, only fetch content for their courses
+      const { data: instructorCourses } = await supabase
+        .from("courses")
+        .select("id")
+        .eq("instructor_id", userId);
+      
+      const courseIds = instructorCourses?.map(c => c.id) || [];
+      
+      if (courseIds.length > 0) {
+        const { data, error } = await supabase
+          .from("course_content")
+          .select("*, courses(title), course_modules(title)")
+          .in("course_id", courseIds)
+          .order("created_at", { ascending: false });
+        
+        if (!error && data) {
+          setContents(data as CourseContent[]);
+        }
+      }
+    } else {
+      const { data, error } = await supabase
+        .from("course_content")
+        .select("*, courses(title), course_modules(title)")
+        .order("created_at", { ascending: false });
+      
+      if (!error && data) {
+        setContents(data as CourseContent[]);
+      }
     }
+  };
+
+  // Wrapper functions that use current state
+  const refreshModules = () => {
+    if (user?.id) fetchModulesData(user.id, userRole);
+  };
+
+  const refreshContents = () => {
+    if (user?.id) fetchContentsData(user.id, userRole);
   };
 
   const handleContentTypeSelect = (type: string) => {
@@ -200,7 +258,7 @@ const CreateContent = () => {
       toast({ title: "Error", description: "Failed to delete content", variant: "destructive" });
     } else {
       toast({ title: "Success", description: "Content deleted successfully" });
-      fetchContents();
+      refreshContents();
     }
   };
 
@@ -213,7 +271,7 @@ const CreateContent = () => {
     if (error) {
       toast({ title: "Error", description: "Failed to update status", variant: "destructive" });
     } else {
-      fetchContents();
+      refreshContents();
     }
   };
 
@@ -280,7 +338,7 @@ const CreateContent = () => {
       toast({ title: "Success", description: `Content ${editingContent ? "updated" : "created"} successfully` });
       setDialogOpen(false);
       resetForm();
-      fetchContents();
+      refreshContents();
     }
   };
 
@@ -318,7 +376,7 @@ const CreateContent = () => {
       setModuleDialogOpen(false);
       setEditingModule(null);
       setNewModule({ course_id: "", title: "", description: "" });
-      fetchModules();
+      refreshModules();
     }
   };
 
@@ -369,7 +427,7 @@ const CreateContent = () => {
     );
   }
 
-  if (userRole !== "admin") {
+  if (userRole !== "admin" && userRole !== "instructor") {
     return (
       <DashboardLayout user={user} userRole={userRole}>
         <Card>

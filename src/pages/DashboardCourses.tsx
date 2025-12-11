@@ -58,18 +58,27 @@ const DashboardCourses = () => {
         .eq("user_id", session.user.id)
         .single();
       
-      setUserRole(roleData?.role || "student");
-      fetchCourses();
+      const role = roleData?.role || "student";
+      setUserRole(role);
+      fetchCourses(session.user.id, role);
     };
     checkAuth();
   }, [navigate]);
 
-  const fetchCourses = async () => {
+  const fetchCourses = async (userId: string, role: string) => {
     setLoading(true);
-    const { data, error } = await supabase
+    
+    let query = supabase
       .from("courses")
       .select("*")
       .order("created_at", { ascending: false });
+    
+    // Instructors only see their assigned courses
+    if (role === "instructor") {
+      query = query.eq("instructor_id", userId);
+    }
+    
+    const { data, error } = await query;
     
     if (error) {
       toast({ title: "Error", description: "Failed to fetch courses", variant: "destructive" });
@@ -77,6 +86,10 @@ const DashboardCourses = () => {
       setCourses(data || []);
     }
     setLoading(false);
+  };
+
+  const refreshCourses = () => {
+    if (user?.id) fetchCourses(user.id, userRole);
   };
 
   const handleOpenDialog = (course?: Course) => {
@@ -97,7 +110,7 @@ const DashboardCourses = () => {
         title: "Success", 
         description: `Course ${!course.published ? "published" : "unpublished"} successfully` 
       });
-      fetchCourses();
+      refreshCourses();
     }
   };
 
@@ -114,7 +127,7 @@ const DashboardCourses = () => {
         title: "Success", 
         description: `Course ${!course.featured ? "featured" : "unfeatured"} successfully` 
       });
-      fetchCourses();
+      refreshCourses();
     }
   };
 
@@ -131,7 +144,7 @@ const DashboardCourses = () => {
         title: "Success", 
         description: `Course ${!course.top_rated ? "marked as top rated" : "removed from top rated"} successfully` 
       });
-      fetchCourses();
+      refreshCourses();
     }
   };
 
@@ -296,7 +309,7 @@ const DashboardCourses = () => {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         editingCourse={editingCourse}
-        onSave={fetchCourses}
+        onSave={refreshCourses}
       />
     </DashboardLayout>
   );

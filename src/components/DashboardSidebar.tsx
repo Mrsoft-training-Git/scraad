@@ -18,14 +18,14 @@ import { useState } from "react";
 import logo from "@/assets/uniport-logo.png";
 
 const allMenuItems = [
-  { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard", roles: ["admin", "student"] },
+  { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard", roles: ["admin", "student", "instructor"] },
   { icon: BookOpen, label: "Course Allocation", path: "/dashboard/course-allocation", roles: ["admin"] },
-  { icon: FileText, label: "Courses", path: "/dashboard/courses", roles: ["admin"] },
-  { icon: FileText, label: "Create Content", path: "/dashboard/create-content", roles: ["admin"] },
-  { icon: GraduationCap, label: "Learning", path: "/dashboard/learning", roles: ["admin", "student"] },
-  { icon: Calendar, label: "Manage Classes", path: "/dashboard/classes", roles: ["admin"] },
+  { icon: FileText, label: "Courses", path: "/dashboard/courses", roles: ["admin", "instructor"] },
+  { icon: FileText, label: "Create Content", path: "/dashboard/create-content", roles: ["admin", "instructor"] },
+  { icon: GraduationCap, label: "Learning", path: "/dashboard/learning", roles: ["admin", "student", "instructor"] },
+  { icon: Calendar, label: "Manage Classes", path: "/dashboard/classes", roles: ["admin", "instructor"] },
   { icon: CreditCard, label: "Payments", path: "/dashboard/payments", roles: ["admin"] },
-  { icon: User, label: "Profile Update", path: "/dashboard/profile", roles: ["admin", "student"] },
+  { icon: User, label: "Profile Update", path: "/dashboard/profile", roles: ["admin", "student", "instructor"] },
   { icon: BookMarked, label: "References", path: "/dashboard/references", roles: ["admin"] },
   { icon: Shield, label: "Role Management", path: "/dashboard/roles", roles: ["admin"] },
   { icon: Users, label: "User Management", path: "/dashboard/users", roles: ["admin"] },
