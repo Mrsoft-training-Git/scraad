@@ -6,9 +6,26 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Upload, X, Plus, BookOpen, CheckCircle, List } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+
+const COURSE_CATEGORIES = [
+  "Technology",
+  "Business",
+  "Data Science",
+  "Digital Marketing",
+  "Project Management",
+  "Finance & Accounting",
+  "Design",
+  "Leadership",
+  "Communication",
+  "Entrepreneurship",
+  "Human Resources",
+  "Healthcare",
+  "Other"
+];
 
 interface CourseFormData {
   title: string;
@@ -326,13 +343,21 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave }: 
 
               <div>
                 <Label htmlFor="category">Category *</Label>
-                <Input
-                  id="category"
+                <Select
                   value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  placeholder="e.g., Business, Technology"
-                  className="mt-1"
-                />
+                  onValueChange={(value) => setFormData({ ...formData, category: value })}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {COURSE_CATEGORIES.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div>
