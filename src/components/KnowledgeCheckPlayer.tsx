@@ -19,15 +19,19 @@ interface Question {
 interface KnowledgeCheckPlayerProps {
   questions: Question[];
   contentTitle: string;
-  onComplete: (score: number, total: number) => void;
+  onComplete: (score: number, total: number, passed: boolean) => void;
+  onProceed?: () => void;
   previousAttempt?: { score: number; total_questions: number } | null;
+  passingScore?: number; // Default 80%
 }
 
 export const KnowledgeCheckPlayer = ({
   questions,
   contentTitle,
   onComplete,
+  onProceed,
   previousAttempt,
+  passingScore = 80,
 }: KnowledgeCheckPlayerProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
@@ -59,7 +63,9 @@ export const KnowledgeCheckPlayer = ({
       setShowResult(false);
     } else {
       setQuizCompleted(true);
-      onComplete(score + (isCorrect ? 1 : 0), sortedQuestions.length);
+      const finalScore = score + (isCorrect ? 1 : 0);
+      const percentage = Math.round((finalScore / sortedQuestions.length) * 100);
+      onComplete(finalScore, sortedQuestions.length, percentage >= passingScore);
     }
   };
 
@@ -84,7 +90,7 @@ export const KnowledgeCheckPlayer = ({
   if (quizCompleted) {
     const finalScore = score + (isCorrect ? 1 : 0);
     const percentage = Math.round((finalScore / sortedQuestions.length) * 100);
-    const passed = percentage >= 70;
+    const passed = percentage >= passingScore;
 
     return (
       <Card className="max-w-2xl mx-auto">
@@ -92,18 +98,18 @@ export const KnowledgeCheckPlayer = ({
           <div
             className={cn(
               "w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center",
-              passed ? "bg-green-100 text-green-600" : "bg-amber-100 text-amber-600"
+              passed ? "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400" : "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
             )}
           >
             <Trophy className="w-8 h-8" />
           </div>
           <CardTitle className="text-xl">
-            {passed ? "Congratulations!" : "Keep Learning!"}
+            {passed ? "Congratulations!" : "Not Quite There Yet"}
           </CardTitle>
           <CardDescription>
             {passed
-              ? "You've successfully completed this knowledge check."
-              : "You can retry to improve your score."}
+              ? "You've passed this knowledge check and can proceed to the next item."
+              : `You need at least ${passingScore}% to pass. Please retry to continue.`}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -111,18 +117,32 @@ export const KnowledgeCheckPlayer = ({
             <div className="text-4xl font-bold mb-2">
               {finalScore}/{sortedQuestions.length}
             </div>
-            <p className="text-muted-foreground">
-              Score: {percentage}% {passed ? "✓ Passed" : ""}
+            <p className={cn("font-medium", passed ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400")}>
+              Score: {percentage}% {passed ? "✓ Passed" : `✗ Need ${passingScore}%`}
             </p>
           </div>
 
-          <Progress value={percentage} className="h-3" />
+          <Progress value={percentage} className={cn("h-3", passed ? "[&>div]:bg-green-500" : "[&>div]:bg-red-500")} />
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Button variant="outline" onClick={handleRetry}>
-              <RotateCcw className="w-4 h-4 mr-2" />
-              Retry Quiz
-            </Button>
+            {!passed && (
+              <Button onClick={handleRetry} variant="default">
+                <RotateCcw className="w-4 h-4 mr-2" />
+                Retry Quiz
+              </Button>
+            )}
+            {passed && onProceed && (
+              <Button onClick={onProceed}>
+                Continue to Next Item
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            )}
+            {passed && (
+              <Button variant="outline" onClick={handleRetry}>
+                <RotateCcw className="w-4 h-4 mr-2" />
+                Retake Quiz
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>

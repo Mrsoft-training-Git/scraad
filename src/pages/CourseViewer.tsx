@@ -149,6 +149,7 @@ const CourseViewer = () => {
   const [contentProgress, setContentProgress] = useState<Map<string, number>>(new Map());
   const [quizQuestions, setQuizQuestions] = useState<any[]>([]);
   const [previousAttempt, setPreviousAttempt] = useState<{ score: number; total_questions: number } | null>(null);
+  const [passedQuizzes, setPassedQuizzes] = useState<Set<string>>(new Set());
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -503,7 +504,8 @@ const CourseViewer = () => {
 
     // Knowledge Check / Quiz
     if (selectedContent.content_type === "knowledge_check") {
-      const handleQuizComplete = async (score: number, total: number) => {
+      const PASSING_SCORE = 80;
+      const handleQuizComplete = async (score: number, total: number, passed: boolean) => {
         if (!user) return;
         
         // Save attempt
@@ -515,18 +517,28 @@ const CourseViewer = () => {
           answers: {},
         });
         
-        // Mark as completed (100% progress)
-        await updateContentProgress(selectedContent.id, 100);
+        // Only mark as completed if passed
+        if (passed) {
+          await updateContentProgress(selectedContent.id, 100);
+          setPassedQuizzes(prev => new Set([...prev, selectedContent.id]));
+        }
         
         setPreviousAttempt({ score, total_questions: total });
       };
+
+      const allContentsForNav = getAllContents();
+      const currentIdx = allContentsForNav.findIndex(c => c.id === selectedContent.id);
+      const hasNextItem = currentIdx < allContentsForNav.length - 1;
+      const hasPassed = passedQuizzes.has(selectedContent.id) || completedItems.has(selectedContent.id);
 
       return (
         <KnowledgeCheckPlayer
           questions={quizQuestions}
           contentTitle={selectedContent.title}
           onComplete={handleQuizComplete}
+          onProceed={hasNextItem && hasPassed ? goToNextItem : undefined}
           previousAttempt={previousAttempt}
+          passingScore={PASSING_SCORE}
         />
       );
     }
@@ -750,6 +762,13 @@ const CourseViewer = () => {
   const currentIndex = allContents.findIndex(c => c.id === selectedContent?.id);
   const hasNext = currentIndex < allContents.length - 1;
   const hasPrevious = currentIndex > 0;
+  
+  // Check if current content is a knowledge check that needs passing
+  const isCurrentQuizBlocking = selectedContent?.content_type === "knowledge_check" && 
+    !passedQuizzes.has(selectedContent.id) && 
+    !completedItems.has(selectedContent.id);
+  
+  const canProceedToNext = hasNext && !isCurrentQuizBlocking;
 
   const goToPreviousItem = () => {
     if (hasPrevious) {
@@ -937,9 +956,10 @@ const CourseViewer = () => {
             </Button>
             <Button 
               onClick={goToNextItem} 
-              disabled={!hasNext}
+              disabled={!canProceedToNext}
               className="gap-2 text-sm sm:text-base"
               size="sm"
+              title={isCurrentQuizBlocking ? "Pass the quiz to proceed (80% required)" : undefined}
             >
               <span className="hidden xs:inline">Next</span> <ArrowRight className="w-4 h-4" />
             </Button>
