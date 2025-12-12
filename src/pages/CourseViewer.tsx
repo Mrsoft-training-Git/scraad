@@ -27,8 +27,10 @@ import {
   SkipBack,
   SkipForward,
   Download,
-  Menu
+  Menu,
+  ClipboardCheck
 } from "lucide-react";
+import { KnowledgeCheckPlayer } from "@/components/KnowledgeCheckPlayer";
 
 interface Course {
   id: string;
@@ -145,6 +147,8 @@ const CourseViewer = () => {
   const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
   const [completedItems, setCompletedItems] = useState<Set<string>>(new Set());
   const [contentProgress, setContentProgress] = useState<Map<string, number>>(new Map());
+  const [quizQuestions, setQuizQuestions] = useState<any[]>([]);
+  const [previousAttempt, setPreviousAttempt] = useState<{ score: number; total_questions: number } | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -350,6 +354,7 @@ const CourseViewer = () => {
     switch (type) {
       case "video": return <Video className="w-5 h-5 text-muted-foreground" />;
       case "link": return <LinkIcon className="w-5 h-5 text-muted-foreground" />;
+      case "knowledge_check": return <ClipboardCheck className="w-5 h-5 text-muted-foreground" />;
       default: return <FileText className="w-5 h-5 text-muted-foreground" />;
     }
   };
@@ -372,11 +377,39 @@ const CourseViewer = () => {
     setExpandedModules(newExpanded);
   };
 
-  const handleSelectContent = (content: CourseContent) => {
+  const handleSelectContent = async (content: CourseContent) => {
     setSelectedContent(content);
     setIsPlaying(false);
     setVideoProgress(0);
     lastSavedProgress.current = contentProgress.get(content.id) || 0;
+    
+    // Load quiz questions if knowledge check
+    if (content.content_type === "knowledge_check") {
+      const { data: questions } = await supabase
+        .from("knowledge_check_questions")
+        .select("*")
+        .eq("content_id", content.id)
+        .order("order_index");
+      
+      setQuizQuestions(questions || []);
+      
+      // Load previous attempt
+      if (user) {
+        const { data: attempt } = await supabase
+          .from("knowledge_check_attempts")
+          .select("score, total_questions")
+          .eq("user_id", user.id)
+          .eq("content_id", content.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        
+        setPreviousAttempt(attempt);
+      }
+    } else {
+      setQuizQuestions([]);
+      setPreviousAttempt(null);
+    }
   };
 
   const getAllContents = () => {
@@ -454,7 +487,7 @@ const CourseViewer = () => {
   };
 
   const renderContentPlayer = () => {
-    if (!selectedContent || !selectedContent.content_url) {
+    if (!selectedContent) {
       return (
         <div className="flex items-center justify-center aspect-video bg-muted rounded-lg">
           <div className="text-center text-muted-foreground px-4">
@@ -465,10 +498,51 @@ const CourseViewer = () => {
       );
     }
 
-    const url = selectedContent.content_url;
     const isCompleted = completedItems.has(selectedContent.id);
     const savedProgress = contentProgress.get(selectedContent.id) || 0;
 
+    // Knowledge Check / Quiz
+    if (selectedContent.content_type === "knowledge_check") {
+      const handleQuizComplete = async (score: number, total: number) => {
+        if (!user) return;
+        
+        // Save attempt
+        await supabase.from("knowledge_check_attempts").insert({
+          user_id: user.id,
+          content_id: selectedContent.id,
+          score,
+          total_questions: total,
+          answers: {},
+        });
+        
+        // Mark as completed (100% progress)
+        await updateContentProgress(selectedContent.id, 100);
+        
+        setPreviousAttempt({ score, total_questions: total });
+      };
+
+      return (
+        <KnowledgeCheckPlayer
+          questions={quizQuestions}
+          contentTitle={selectedContent.title}
+          onComplete={handleQuizComplete}
+          previousAttempt={previousAttempt}
+        />
+      );
+    }
+
+    if (!selectedContent.content_url) {
+      return (
+        <div className="flex items-center justify-center aspect-video bg-muted rounded-lg">
+          <div className="text-center text-muted-foreground px-4">
+            <BookOpen className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2" />
+            <p className="text-sm sm:text-base">No content available</p>
+          </div>
+        </div>
+      );
+    }
+
+    const url = selectedContent.content_url;
     // YouTube Video - tracks progress over time
     if (selectedContent.content_type === "video" && isYouTubeUrl(url)) {
       const videoId = getYouTubeVideoId(url);

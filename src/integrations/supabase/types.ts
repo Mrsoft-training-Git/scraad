@@ -278,6 +278,91 @@ export type Database = {
           },
         ]
       }
+      knowledge_check_attempts: {
+        Row: {
+          answers: Json
+          completed_at: string | null
+          content_id: string
+          created_at: string
+          id: string
+          score: number | null
+          total_questions: number | null
+          user_id: string
+        }
+        Insert: {
+          answers?: Json
+          completed_at?: string | null
+          content_id: string
+          created_at?: string
+          id?: string
+          score?: number | null
+          total_questions?: number | null
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          completed_at?: string | null
+          content_id?: string
+          created_at?: string
+          id?: string
+          score?: number | null
+          total_questions?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_check_attempts_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "course_content"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      knowledge_check_questions: {
+        Row: {
+          content_id: string
+          correct_answer: number
+          created_at: string
+          explanation: string | null
+          id: string
+          options: Json
+          order_index: number | null
+          question: string
+          updated_at: string
+        }
+        Insert: {
+          content_id: string
+          correct_answer: number
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          options?: Json
+          order_index?: number | null
+          question: string
+          updated_at?: string
+        }
+        Update: {
+          content_id?: string
+          correct_answer?: number
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          options?: Json
+          order_index?: number | null
+          question?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_check_questions_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "course_content"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null

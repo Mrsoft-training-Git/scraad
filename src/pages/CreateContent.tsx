@@ -12,10 +12,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Video, Link as LinkIcon, Trash2, Edit, Eye, EyeOff, Play, FolderPlus } from "lucide-react";
+import { FileText, Video, Link as LinkIcon, Trash2, Edit, Eye, EyeOff, Play, FolderPlus, ClipboardCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ContentPreview } from "@/components/ContentPreview";
+import { KnowledgeCheckBuilder, QuizQuestion } from "@/components/KnowledgeCheckBuilder";
 
 interface Course {
   id: string;
@@ -73,6 +74,7 @@ const CreateContent = () => {
     is_published: false,
   });
   const [file, setFile] = useState<File | null>(null);
+  const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
   
   const [newModule, setNewModule] = useState({
     course_id: "",
@@ -228,9 +230,10 @@ const CreateContent = () => {
       is_published: false,
     });
     setFile(null);
+    setQuizQuestions([]);
   };
 
-  const handleEdit = (content: CourseContent) => {
+  const handleEdit = async (content: CourseContent) => {
     setEditingContent(content);
     setFormData({
       course_id: content.course_id,
@@ -242,6 +245,29 @@ const CreateContent = () => {
       is_published: content.is_published,
     });
     setSelectedContentType(content.content_type);
+    
+    // Load quiz questions if editing a knowledge check
+    if (content.content_type === "knowledge_check") {
+      const { data: questions } = await supabase
+        .from("knowledge_check_questions")
+        .select("*")
+        .eq("content_id", content.id)
+        .order("order_index");
+      
+      if (questions) {
+        setQuizQuestions(questions.map(q => ({
+          id: q.id,
+          question: q.question,
+          options: q.options as string[],
+          correct_answer: q.correct_answer,
+          explanation: q.explanation || "",
+          order_index: q.order_index,
+        })));
+      }
+    } else {
+      setQuizQuestions([]);
+    }
+    
     setDialogOpen(true);
   };
 
@@ -281,6 +307,12 @@ const CreateContent = () => {
       return;
     }
     
+    // Validate knowledge check has questions
+    if (formData.content_type === "knowledge_check" && quizQuestions.length === 0) {
+      toast({ title: "Error", description: "Please add at least one question", variant: "destructive" });
+      return;
+    }
+    
     setSaving(true);
     let filePath: string | null = null;
     let fileUrl: string | null = formData.content_url || null;
@@ -317,17 +349,51 @@ const CreateContent = () => {
     };
     
     let error;
+    let contentId: string | null = null;
+    
     if (editingContent) {
       const { error: updateError } = await supabase
         .from("course_content")
         .update(contentData)
         .eq("id", editingContent.id);
       error = updateError;
+      contentId = editingContent.id;
     } else {
-      const { error: insertError } = await supabase
+      const { data: insertData, error: insertError } = await supabase
         .from("course_content")
-        .insert(contentData);
+        .insert(contentData)
+        .select("id")
+        .single();
       error = insertError;
+      contentId = insertData?.id || null;
+    }
+    
+    // Save quiz questions for knowledge check content
+    if (!error && contentId && formData.content_type === "knowledge_check") {
+      // Delete existing questions if editing
+      if (editingContent) {
+        await supabase.from("knowledge_check_questions").delete().eq("content_id", contentId);
+      }
+      
+      // Insert new questions
+      const questionsToInsert = quizQuestions.map((q, index) => ({
+        content_id: contentId,
+        question: q.question,
+        options: q.options,
+        correct_answer: q.correct_answer,
+        explanation: q.explanation || null,
+        order_index: index,
+      }));
+      
+      if (questionsToInsert.length > 0) {
+        const { error: questionsError } = await supabase
+          .from("knowledge_check_questions")
+          .insert(questionsToInsert);
+        
+        if (questionsError) {
+          toast({ title: "Warning", description: "Content saved but failed to save some questions", variant: "destructive" });
+        }
+      }
     }
     
     setSaving(false);
@@ -413,6 +479,7 @@ const CreateContent = () => {
     switch (type) {
       case "video": return <Video className="w-4 h-4" />;
       case "link": return <LinkIcon className="w-4 h-4" />;
+      case "knowledge_check": return <ClipboardCheck className="w-4 h-4" />;
       default: return <FileText className="w-4 h-4" />;
     }
   };
@@ -451,7 +518,7 @@ const CreateContent = () => {
               Create Module
             </Button>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card 
               className="cursor-pointer hover:border-primary transition-colors"
               onClick={() => handleContentTypeSelect("document")}
@@ -480,6 +547,16 @@ const CreateContent = () => {
                 <LinkIcon className="w-10 h-10 text-primary mx-auto mb-2" />
                 <CardTitle className="text-base">Resource Link</CardTitle>
                 <CardDescription className="text-sm">Add external resources and links</CardDescription>
+              </CardHeader>
+            </Card>
+            <Card 
+              className="cursor-pointer hover:border-primary transition-colors"
+              onClick={() => handleContentTypeSelect("knowledge_check")}
+            >
+              <CardHeader className="text-center">
+                <ClipboardCheck className="w-10 h-10 text-primary mx-auto mb-2" />
+                <CardTitle className="text-base">Knowledge Check</CardTitle>
+                <CardDescription className="text-sm">Create quizzes to test understanding</CardDescription>
               </CardHeader>
             </Card>
           </div>
@@ -674,7 +751,15 @@ const CreateContent = () => {
                 />
               </div>
 
-              {selectedContentType === "link" ? (
+              {selectedContentType === "knowledge_check" ? (
+                <div className="space-y-2">
+                  <Label>Questions *</Label>
+                  <KnowledgeCheckBuilder 
+                    questions={quizQuestions} 
+                    onChange={setQuizQuestions} 
+                  />
+                </div>
+              ) : selectedContentType === "link" ? (
                 <div className="space-y-2">
                   <Label>URL *</Label>
                   <Input 
