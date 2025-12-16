@@ -40,7 +40,7 @@ interface CourseFormData {
   level: string;
   what_you_learn: string[];
   requirements: string[];
-  syllabus: { title: string; topics: string[] }[];
+  syllabus: { title: string; description: string; topics: string[] }[];
 }
 
 interface CourseFormDialogProps {
@@ -70,7 +70,7 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave, us
     level: "Beginner",
     what_you_learn: [""],
     requirements: [""],
-    syllabus: [{ title: "", topics: [] }]
+    syllabus: [{ title: "", description: "", topics: [] }]
   });
 
   const [newSkill, setNewSkill] = useState("");
@@ -93,8 +93,8 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave, us
         what_you_learn: editingCourse.what_you_learn?.length ? editingCourse.what_you_learn : [""],
         requirements: editingCourse.requirements?.length ? editingCourse.requirements : [""],
         syllabus: editingCourse.syllabus?.length 
-          ? editingCourse.syllabus.map((m: any) => ({ title: m.title || "", topics: m.topics || [] }))
-          : [{ title: "", topics: [] }]
+          ? editingCourse.syllabus.map((m: any) => ({ title: m.title || "", description: m.description || "", topics: m.topics || [] }))
+          : [{ title: "", description: "", topics: [] }]
       });
       setImagePreview(editingCourse.image_url || "");
     } else if (open && !editingCourse) {
@@ -111,7 +111,7 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave, us
         level: "Beginner",
         what_you_learn: [""],
         requirements: [""],
-        syllabus: [{ title: "", topics: [] }]
+        syllabus: [{ title: "", description: "", topics: [] }]
       });
       setImagePreview("");
     }
@@ -177,7 +177,7 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave, us
   const addModule = () => {
     setFormData({
       ...formData,
-      syllabus: [...formData.syllabus, { title: "", topics: [] }]
+      syllabus: [...formData.syllabus, { title: "", description: "", topics: [] }]
     });
   };
 
@@ -511,6 +511,18 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave, us
                           onChange={(e) => updateModule(index, 'title', e.target.value)}
                           placeholder="Module title"
                         />
+                        
+                        <div>
+                          <Label className="text-xs text-muted-foreground mb-1 block">
+                            Description <span className="text-muted-foreground/60">(supports **bold**, *italic*, - lists)</span>
+                          </Label>
+                          <Textarea
+                            value={module.description}
+                            onChange={(e) => updateModule(index, 'description', e.target.value)}
+                            placeholder="Module description with rich formatting..."
+                            rows={2}
+                          />
+                        </div>
                         
                         <div>
                           <Label className="text-xs text-muted-foreground mb-2 block">Topics</Label>
