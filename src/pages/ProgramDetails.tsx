@@ -129,6 +129,11 @@ const ProgramDetails = () => {
               <h1 className="font-heading text-4xl md:text-5xl font-bold mb-4">
                 {course.title}
               </h1>
+              {course.overview && (
+                <p className="text-lg text-muted-foreground mb-4">
+                  {course.overview}
+                </p>
+              )}
               <p className="text-xl text-muted-foreground mb-6">
                 {course.description}
               </p>
@@ -212,7 +217,7 @@ const ProgramDetails = () => {
                   <div>
                     <h2 className="font-heading text-2xl font-bold mb-4">About This Course</h2>
                     <p className="text-muted-foreground leading-relaxed">
-                      {course.overview || "This comprehensive program will equip you with the skills and knowledge needed to excel in your field. Learn from industry experts and gain practical, hands-on experience."}
+                      {course.description || "This comprehensive program will equip you with the skills and knowledge needed to excel in your field. Learn from industry experts and gain practical, hands-on experience."}
                     </p>
                   </div>
                 </TabsContent>
