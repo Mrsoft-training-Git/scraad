@@ -130,13 +130,10 @@ const ProgramDetails = () => {
                 {course.title}
               </h1>
               {course.overview && (
-                <p className="text-lg text-muted-foreground mb-4">
+                <p className="text-xl text-muted-foreground mb-6">
                   {course.overview}
                 </p>
               )}
-              <p className="text-xl text-muted-foreground mb-6">
-                {course.description}
-              </p>
               
               <div className="flex flex-wrap items-center gap-6 mb-6">
                 {course.duration && (
