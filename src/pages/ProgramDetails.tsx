@@ -225,9 +225,22 @@ const ProgramDetails = () => {
                     <div className="space-y-6">
                       {course.syllabus.map((module: any, index: number) => (
                         <div key={index} className="border-l-4 border-primary/30 pl-4">
-                          <h3 className="font-heading font-bold text-lg mb-3">
+                          <h3 className="font-heading font-bold text-lg mb-2">
                             Module {index + 1}: {module.title || module.name || `Module ${index + 1}`}
                           </h3>
+                          {module.description && (
+                            <div 
+                              className="text-muted-foreground text-sm mb-3 prose prose-sm max-w-none"
+                              dangerouslySetInnerHTML={{ 
+                                __html: module.description
+                                  .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                                  .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                                  .replace(/^- (.*)$/gm, '<li>$1</li>')
+                                  .replace(/(<li>.*<\/li>)/s, '<ul class="list-disc list-inside">$1</ul>')
+                                  .replace(/\n/g, '<br/>')
+                              }}
+                            />
+                          )}
                           {module.topics && Array.isArray(module.topics) && module.topics.length > 0 && (
                             <div className="ml-2">
                               <p className="text-sm font-medium text-muted-foreground mb-2">Topics:</p>
