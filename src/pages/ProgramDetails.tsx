@@ -222,36 +222,25 @@ const ProgramDetails = () => {
                 <TabsContent value="curriculum" className="mt-8">
                   <h2 className="font-heading text-2xl font-bold mb-6">Course Curriculum</h2>
                   {course.syllabus && Array.isArray(course.syllabus) && course.syllabus.length > 0 ? (
-                    <div className="space-y-4">
+                    <div className="space-y-6">
                       {course.syllabus.map((module: any, index: number) => (
-                        <Card key={index} className="border-border/50">
-                          <CardContent className="p-6">
-                            <div className="flex items-start justify-between gap-4">
-                              <div className="flex-1">
-                                <h3 className="font-heading font-bold text-lg mb-2">
-                                  Module {index + 1}: {module.title || module.name || `Module ${index + 1}`}
-                                </h3>
-                                {module.description && (
-                                  <p className="text-muted-foreground text-sm mb-3">{module.description}</p>
-                                )}
-                                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                                  {module.lessons && (
-                                    <div className="flex items-center gap-1">
-                                      <Video className="w-4 h-4" />
-                                      {module.lessons} lessons
-                                    </div>
-                                  )}
-                                  {module.duration && (
-                                    <div className="flex items-center gap-1">
-                                      <Clock className="w-4 h-4" />
-                                      {module.duration}
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
+                        <div key={index} className="border-l-4 border-primary/30 pl-4">
+                          <h3 className="font-heading font-bold text-lg mb-3">
+                            Module {index + 1}: {module.title || module.name || `Module ${index + 1}`}
+                          </h3>
+                          {module.topics && Array.isArray(module.topics) && module.topics.length > 0 && (
+                            <div className="ml-2">
+                              <p className="text-sm font-medium text-muted-foreground mb-2">Topics:</p>
+                              <ol className="list-decimal list-inside space-y-1 ml-4">
+                                {module.topics.map((topic: string, topicIndex: number) => (
+                                  <li key={topicIndex} className="text-muted-foreground text-sm">
+                                    {topic}
+                                  </li>
+                                ))}
+                              </ol>
                             </div>
-                          </CardContent>
-                        </Card>
+                          )}
+                        </div>
                       ))}
                     </div>
                   ) : (
