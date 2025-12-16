@@ -14,6 +14,7 @@ interface Course {
   id: string;
   title: string;
   description: string | null;
+  overview: string | null;
   price: number;
   image_url: string | null;
   category: string;
@@ -211,7 +212,7 @@ const ProgramDetails = () => {
                   <div>
                     <h2 className="font-heading text-2xl font-bold mb-4">About This Course</h2>
                     <p className="text-muted-foreground leading-relaxed">
-                      {course.description || "This comprehensive program will equip you with the skills and knowledge needed to excel in your field. Learn from industry experts and gain practical, hands-on experience."}
+                      {course.overview || "This comprehensive program will equip you with the skills and knowledge needed to excel in your field. Learn from industry experts and gain practical, hands-on experience."}
                     </p>
                   </div>
                 </TabsContent>

@@ -30,6 +30,7 @@ const COURSE_CATEGORIES = [
 interface CourseFormData {
   title: string;
   description: string;
+  overview: string;
   price: string;
   is_free: boolean;
   image_url: string;
@@ -59,6 +60,7 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave, us
   const [formData, setFormData] = useState<CourseFormData>({
     title: "",
     description: "",
+    overview: "",
     price: "",
     is_free: false,
     image_url: "",
@@ -80,6 +82,7 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave, us
       setFormData({
         title: editingCourse.title || "",
         description: editingCourse.description || "",
+        overview: editingCourse.overview || "",
         price: editingCourse.price?.toString() || "",
         is_free: editingCourse.price === 0,
         image_url: editingCourse.image_url || "",
@@ -96,6 +99,7 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave, us
       setFormData({
         title: "",
         description: "",
+        overview: "",
         price: "",
         is_free: false,
         image_url: "",
@@ -197,6 +201,7 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave, us
     const courseData: any = {
       title: formData.title,
       description: formData.description,
+      overview: formData.overview,
       price: formData.is_free ? 0 : parseFloat(formData.price),
       image_url: formData.image_url,
       category: formData.category,
@@ -321,13 +326,25 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave, us
               </div>
 
               <div className="col-span-2">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description">Full Description</Label>
                 <Textarea
                   id="description"
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Describe what students will learn..."
+                  placeholder="Detailed course description (shown in hero section)..."
                   rows={4}
+                  className="mt-1"
+                />
+              </div>
+
+              <div className="col-span-2">
+                <Label htmlFor="overview">Overview (About This Course)</Label>
+                <Textarea
+                  id="overview"
+                  value={formData.overview}
+                  onChange={(e) => setFormData({ ...formData, overview: e.target.value })}
+                  placeholder="Short overview displayed in the About section..."
+                  rows={3}
                   className="mt-1"
                 />
               </div>
