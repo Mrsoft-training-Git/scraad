@@ -40,7 +40,7 @@ interface CourseFormData {
   level: string;
   what_you_learn: string[];
   requirements: string[];
-  syllabus: { title: string; description: string; lessons: string; duration: string }[];
+  syllabus: { title: string; topics: string[] }[];
 }
 
 interface CourseFormDialogProps {
@@ -70,7 +70,7 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave, us
     level: "Beginner",
     what_you_learn: [""],
     requirements: [""],
-    syllabus: [{ title: "", description: "", lessons: "", duration: "" }]
+    syllabus: [{ title: "", topics: [] }]
   });
 
   const [newSkill, setNewSkill] = useState("");
@@ -92,7 +92,9 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave, us
         level: editingCourse.level || "Beginner",
         what_you_learn: editingCourse.what_you_learn?.length ? editingCourse.what_you_learn : [""],
         requirements: editingCourse.requirements?.length ? editingCourse.requirements : [""],
-        syllabus: editingCourse.syllabus?.length ? editingCourse.syllabus : [{ title: "", description: "", lessons: "", duration: "" }]
+        syllabus: editingCourse.syllabus?.length 
+          ? editingCourse.syllabus.map((m: any) => ({ title: m.title || "", topics: m.topics || [] }))
+          : [{ title: "", topics: [] }]
       });
       setImagePreview(editingCourse.image_url || "");
     } else if (open && !editingCourse) {
@@ -109,7 +111,7 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave, us
         level: "Beginner",
         what_you_learn: [""],
         requirements: [""],
-        syllabus: [{ title: "", description: "", lessons: "", duration: "" }]
+        syllabus: [{ title: "", topics: [] }]
       });
       setImagePreview("");
     }
@@ -175,13 +177,26 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave, us
   const addModule = () => {
     setFormData({
       ...formData,
-      syllabus: [...formData.syllabus, { title: "", description: "", lessons: "", duration: "" }]
+      syllabus: [...formData.syllabus, { title: "", topics: [] }]
     });
   };
 
   const updateModule = (index: number, field: string, value: string) => {
     const updated = [...formData.syllabus];
     updated[index] = { ...updated[index], [field]: value };
+    setFormData({ ...formData, syllabus: updated });
+  };
+
+  const addTopic = (moduleIndex: number, topic: string) => {
+    if (!topic.trim()) return;
+    const updated = [...formData.syllabus];
+    updated[moduleIndex] = { ...updated[moduleIndex], topics: [...updated[moduleIndex].topics, topic.trim()] };
+    setFormData({ ...formData, syllabus: updated });
+  };
+
+  const removeTopic = (moduleIndex: number, topicIndex: number) => {
+    const updated = [...formData.syllabus];
+    updated[moduleIndex] = { ...updated[moduleIndex], topics: updated[moduleIndex].topics.filter((_, i) => i !== topicIndex) };
     setFormData({ ...formData, syllabus: updated });
   };
 
@@ -490,31 +505,52 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave, us
                           </Button>
                         )}
                       </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="col-span-2">
-                          <Input
-                            value={module.title}
-                            onChange={(e) => updateModule(index, 'title', e.target.value)}
-                            placeholder="Module title"
-                          />
-                        </div>
-                        <div className="col-span-2">
-                          <Input
-                            value={module.description}
-                            onChange={(e) => updateModule(index, 'description', e.target.value)}
-                            placeholder="Module description"
-                          />
-                        </div>
+                      <div className="space-y-3">
                         <Input
-                          value={module.lessons}
-                          onChange={(e) => updateModule(index, 'lessons', e.target.value)}
-                          placeholder="Number of lessons"
+                          value={module.title}
+                          onChange={(e) => updateModule(index, 'title', e.target.value)}
+                          placeholder="Module title"
                         />
-                        <Input
-                          value={module.duration}
-                          onChange={(e) => updateModule(index, 'duration', e.target.value)}
-                          placeholder="Duration (e.g., 2 hours)"
-                        />
+                        
+                        <div>
+                          <Label className="text-xs text-muted-foreground mb-2 block">Topics</Label>
+                          <div className="flex gap-2 mb-2">
+                            <Input
+                              placeholder="Add a topic"
+                              onKeyPress={(e) => {
+                                if (e.key === 'Enter') {
+                                  addTopic(index, (e.target as HTMLInputElement).value);
+                                  (e.target as HTMLInputElement).value = '';
+                                }
+                              }}
+                            />
+                            <Button
+                              type="button"
+                              size="sm"
+                              onClick={(e) => {
+                                const input = (e.target as HTMLElement).parentElement?.querySelector('input');
+                                if (input) {
+                                  addTopic(index, input.value);
+                                  input.value = '';
+                                }
+                              }}
+                            >
+                              <Plus className="w-4 h-4" />
+                            </Button>
+                          </div>
+                          {module.topics.length > 0 && (
+                            <ol className="list-decimal list-inside space-y-1 bg-muted/30 rounded p-2">
+                              {module.topics.map((topic, topicIndex) => (
+                                <li key={topicIndex} className="flex items-center justify-between text-sm">
+                                  <span>{topic}</span>
+                                  <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => removeTopic(index, topicIndex)}>
+                                    <X className="w-3 h-3" />
+                                  </Button>
+                                </li>
+                              ))}
+                            </ol>
+                          )}
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
