@@ -483,14 +483,9 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave, us
 
           <TabsContent value="curriculum" className="space-y-6">
             <div>
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <BookOpen className="w-5 h-5 text-primary" />
-                  <h3 className="font-heading font-bold text-lg">Course Curriculum</h3>
-                </div>
-                <Button onClick={addModule} variant="outline" size="sm">
-                  <Plus className="w-4 h-4 mr-1" /> Add Module
-                </Button>
+              <div className="flex items-center gap-2 mb-4">
+                <BookOpen className="w-5 h-5 text-primary" />
+                <h3 className="font-heading font-bold text-lg">Course Curriculum</h3>
               </div>
 
               <div className="space-y-4">
@@ -568,6 +563,10 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave, us
                   </Card>
                 ))}
               </div>
+
+              <Button onClick={addModule} variant="outline" className="w-full mt-4">
+                <Plus className="w-4 h-4 mr-1" /> Add Module
+              </Button>
             </div>
           </TabsContent>
 
