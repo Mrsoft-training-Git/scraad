@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle2, XCircle, ArrowRight, RotateCcw, Trophy } from "lucide-react";
+import { ArrowRight, RotateCcw, Trophy, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Question {
@@ -34,48 +34,57 @@ export const KnowledgeCheckPlayer = ({
   passingScore = 80,
 }: KnowledgeCheckPlayerProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
-  const [showResult, setShowResult] = useState(false);
-  const [answers, setAnswers] = useState<Map<string, { selected: number; correct: boolean }>>(new Map());
+  const [answers, setAnswers] = useState<Map<string, number>>(new Map());
   const [quizCompleted, setQuizCompleted] = useState(false);
 
   const sortedQuestions = [...questions].sort((a, b) => a.order_index - b.order_index);
   const currentQuestion = sortedQuestions[currentIndex];
-  const isCorrect = selectedAnswer === currentQuestion?.correct_answer;
-  const score = Array.from(answers.values()).filter((a) => a.correct).length;
+  const selectedAnswer = answers.get(currentQuestion?.id);
 
-  const handleSubmitAnswer = () => {
-    if (selectedAnswer === null) return;
-
-    const newAnswers = new Map(answers);
-    newAnswers.set(currentQuestion.id, {
-      selected: selectedAnswer,
-      correct: selectedAnswer === currentQuestion.correct_answer,
+  const calculateScore = () => {
+    let correct = 0;
+    sortedQuestions.forEach((q) => {
+      const answer = answers.get(q.id);
+      if (answer === q.correct_answer) {
+        correct++;
+      }
     });
+    return correct;
+  };
+
+  const handleSelectAnswer = (value: number) => {
+    const newAnswers = new Map(answers);
+    newAnswers.set(currentQuestion.id, value);
     setAnswers(newAnswers);
-    setShowResult(true);
   };
 
   const handleNext = () => {
     if (currentIndex < sortedQuestions.length - 1) {
       setCurrentIndex(currentIndex + 1);
-      setSelectedAnswer(null);
-      setShowResult(false);
-    } else {
-      setQuizCompleted(true);
-      const finalScore = score + (isCorrect ? 1 : 0);
-      const percentage = Math.round((finalScore / sortedQuestions.length) * 100);
-      onComplete(finalScore, sortedQuestions.length, percentage >= passingScore);
     }
+  };
+
+  const handlePrevious = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+    }
+  };
+
+  const handleSubmitQuiz = () => {
+    const finalScore = calculateScore();
+    const percentage = Math.round((finalScore / sortedQuestions.length) * 100);
+    setQuizCompleted(true);
+    onComplete(finalScore, sortedQuestions.length, percentage >= passingScore);
   };
 
   const handleRetry = () => {
     setCurrentIndex(0);
-    setSelectedAnswer(null);
-    setShowResult(false);
     setAnswers(new Map());
     setQuizCompleted(false);
   };
+
+  const allQuestionsAnswered = answers.size === sortedQuestions.length;
+  const isLastQuestion = currentIndex === sortedQuestions.length - 1;
 
   if (questions.length === 0) {
     return (
@@ -88,7 +97,7 @@ export const KnowledgeCheckPlayer = ({
   }
 
   if (quizCompleted) {
-    const finalScore = score + (isCorrect ? 1 : 0);
+    const finalScore = calculateScore();
     const percentage = Math.round((finalScore / sortedQuestions.length) * 100);
     const passed = percentage >= passingScore;
 
@@ -167,79 +176,56 @@ export const KnowledgeCheckPlayer = ({
         </CardHeader>
         <CardContent className="space-y-4">
           <RadioGroup
-            value={selectedAnswer !== null ? String(selectedAnswer) : undefined}
-            onValueChange={(val) => !showResult && setSelectedAnswer(parseInt(val))}
-            disabled={showResult}
+            value={selectedAnswer !== undefined ? String(selectedAnswer) : undefined}
+            onValueChange={(val) => handleSelectAnswer(parseInt(val))}
           >
-            {(currentQuestion.options as string[]).map((option, index) => {
-              const isSelected = selectedAnswer === index;
-              const isCorrectOption = index === currentQuestion.correct_answer;
-
-              let optionClass = "";
-              if (showResult) {
-                if (isCorrectOption) {
-                  optionClass = "border-green-500 bg-green-50 dark:bg-green-950/30";
-                } else if (isSelected && !isCorrectOption) {
-                  optionClass = "border-red-500 bg-red-50 dark:bg-red-950/30";
-                }
-              }
-
-              return (
-                <div
-                  key={index}
-                  className={cn(
-                    "flex items-center space-x-3 p-3 rounded-lg border transition-colors",
-                    !showResult && "hover:bg-muted cursor-pointer",
-                    optionClass
-                  )}
-                >
-                  <RadioGroupItem value={String(index)} id={`option-${index}`} />
-                  <Label
-                    htmlFor={`option-${index}`}
-                    className="flex-1 cursor-pointer flex items-center justify-between"
-                  >
-                    <span>{option}</span>
-                    {showResult && isCorrectOption && (
-                      <CheckCircle2 className="w-5 h-5 text-green-500" />
-                    )}
-                    {showResult && isSelected && !isCorrectOption && (
-                      <XCircle className="w-5 h-5 text-red-500" />
-                    )}
-                  </Label>
-                </div>
-              );
-            })}
+            {(currentQuestion.options as string[]).map((option, index) => (
+              <div
+                key={index}
+                className={cn(
+                  "flex items-center space-x-3 p-3 rounded-lg border transition-colors hover:bg-muted cursor-pointer",
+                  selectedAnswer === index && "border-primary bg-primary/5"
+                )}
+              >
+                <RadioGroupItem value={String(index)} id={`option-${index}`} />
+                <Label htmlFor={`option-${index}`} className="flex-1 cursor-pointer">
+                  {option}
+                </Label>
+              </div>
+            ))}
           </RadioGroup>
 
-          {/* Explanation */}
-          {showResult && currentQuestion.explanation && (
-            <div className="p-4 rounded-lg bg-muted border">
-              <p className="text-sm font-medium mb-1">Explanation:</p>
-              <p className="text-sm text-muted-foreground">{currentQuestion.explanation}</p>
-            </div>
-          )}
-
           {/* Actions */}
-          <div className="flex justify-end gap-3 pt-2">
-            {!showResult ? (
-              <Button onClick={handleSubmitAnswer} disabled={selectedAnswer === null}>
-                Check Answer
-              </Button>
-            ) : (
-              <Button onClick={handleNext}>
-                {currentIndex < sortedQuestions.length - 1 ? (
-                  <>
-                    Next Question
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </>
-                ) : (
-                  "See Results"
-                )}
-              </Button>
-            )}
+          <div className="flex justify-between gap-3 pt-2">
+            <Button
+              variant="outline"
+              onClick={handlePrevious}
+              disabled={currentIndex === 0}
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Previous
+            </Button>
+
+            <div className="flex gap-3">
+              {!isLastQuestion ? (
+                <Button onClick={handleNext} disabled={selectedAnswer === undefined}>
+                  Next
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              ) : (
+                <Button onClick={handleSubmitQuiz} disabled={!allQuestionsAnswered}>
+                  Submit Quiz
+                </Button>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
+
+      {/* Answered count */}
+      <p className="text-center text-sm text-muted-foreground">
+        {answers.size} of {sortedQuestions.length} questions answered
+      </p>
 
       {/* Previous Attempt Info */}
       {previousAttempt && (
