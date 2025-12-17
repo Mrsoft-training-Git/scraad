@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { ArrowRight, RotateCcw, Trophy, ArrowLeft } from "lucide-react";
+import { ArrowRight, RotateCcw, Trophy, ArrowLeft, Lock, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Question {
@@ -19,23 +19,78 @@ interface Question {
 interface KnowledgeCheckPlayerProps {
   questions: Question[];
   contentTitle: string;
+  contentId: string;
   onComplete: (score: number, total: number, passed: boolean) => void;
   onProceed?: () => void;
+  onGoBack?: () => void;
   previousAttempt?: { score: number; total_questions: number } | null;
-  passingScore?: number; // Default 80%
+  passingScore?: number;
 }
+
+const COOLDOWN_MINUTES = 5;
+const MAX_ATTEMPTS = 3;
 
 export const KnowledgeCheckPlayer = ({
   questions,
   contentTitle,
+  contentId,
   onComplete,
   onProceed,
+  onGoBack,
   previousAttempt,
   passingScore = 80,
 }: KnowledgeCheckPlayerProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Map<string, number>>(new Map());
   const [quizCompleted, setQuizCompleted] = useState(false);
+  const [attemptCount, setAttemptCount] = useState(0);
+  const [lastAttemptTime, setLastAttemptTime] = useState<number | null>(null);
+  const [remainingTime, setRemainingTime] = useState(0);
+  const [isLocked, setIsLocked] = useState(false);
+
+  const storageKey = `quiz_attempts_${contentId}`;
+
+  // Load attempt data from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem(storageKey);
+    if (stored) {
+      const data = JSON.parse(stored);
+      setAttemptCount(data.attempts || 0);
+      setLastAttemptTime(data.lastAttemptTime || null);
+    }
+  }, [storageKey]);
+
+  // Check lock status and countdown
+  useEffect(() => {
+    if (attemptCount >= MAX_ATTEMPTS && lastAttemptTime) {
+      const cooldownEnd = lastAttemptTime + COOLDOWN_MINUTES * 60 * 1000;
+      const now = Date.now();
+      
+      if (now < cooldownEnd) {
+        setIsLocked(true);
+        setRemainingTime(Math.ceil((cooldownEnd - now) / 1000));
+        
+        const interval = setInterval(() => {
+          const newRemaining = Math.ceil((cooldownEnd - Date.now()) / 1000);
+          if (newRemaining <= 0) {
+            setIsLocked(false);
+            setAttemptCount(0);
+            localStorage.setItem(storageKey, JSON.stringify({ attempts: 0, lastAttemptTime: null }));
+            clearInterval(interval);
+          } else {
+            setRemainingTime(newRemaining);
+          }
+        }, 1000);
+        
+        return () => clearInterval(interval);
+      } else {
+        // Cooldown expired, reset attempts
+        setAttemptCount(0);
+        setIsLocked(false);
+        localStorage.setItem(storageKey, JSON.stringify({ attempts: 0, lastAttemptTime: null }));
+      }
+    }
+  }, [attemptCount, lastAttemptTime, storageKey]);
 
   const sortedQuestions = [...questions].sort((a, b) => a.order_index - b.order_index);
   const currentQuestion = sortedQuestions[currentIndex];
@@ -73,18 +128,42 @@ export const KnowledgeCheckPlayer = ({
   const handleSubmitQuiz = () => {
     const finalScore = calculateScore();
     const percentage = Math.round((finalScore / sortedQuestions.length) * 100);
+    const passed = percentage >= passingScore;
+    
     setQuizCompleted(true);
-    onComplete(finalScore, sortedQuestions.length, percentage >= passingScore);
+    
+    if (!passed) {
+      const newAttemptCount = attemptCount + 1;
+      const now = Date.now();
+      setAttemptCount(newAttemptCount);
+      setLastAttemptTime(now);
+      localStorage.setItem(storageKey, JSON.stringify({ attempts: newAttemptCount, lastAttemptTime: now }));
+    } else {
+      // Reset attempts on pass
+      localStorage.setItem(storageKey, JSON.stringify({ attempts: 0, lastAttemptTime: null }));
+    }
+    
+    onComplete(finalScore, sortedQuestions.length, passed);
   };
 
   const handleRetry = () => {
+    if (attemptCount >= MAX_ATTEMPTS) {
+      return;
+    }
     setCurrentIndex(0);
     setAnswers(new Map());
     setQuizCompleted(false);
   };
 
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
   const allQuestionsAnswered = answers.size === sortedQuestions.length;
   const isLastQuestion = currentIndex === sortedQuestions.length - 1;
+  const attemptsRemaining = MAX_ATTEMPTS - attemptCount;
 
   if (questions.length === 0) {
     return (
@@ -96,10 +175,50 @@ export const KnowledgeCheckPlayer = ({
     );
   }
 
+  // Locked state - exceeded attempts and in cooldown
+  if (isLocked) {
+    return (
+      <Card className="max-w-2xl mx-auto">
+        <CardHeader className="text-center pb-2">
+          <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400">
+            <Lock className="w-8 h-8" />
+          </div>
+          <CardTitle className="text-xl">Quiz Temporarily Locked</CardTitle>
+          <CardDescription>
+            You've used all {MAX_ATTEMPTS} attempts. Please review the course material before trying again.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="text-center">
+            <div className="text-4xl font-bold mb-2 text-orange-600 dark:text-orange-400">
+              {formatTime(remainingTime)}
+            </div>
+            <p className="text-muted-foreground">Time until you can retry</p>
+          </div>
+
+          <div className="bg-muted/50 rounded-lg p-4 text-center">
+            <BookOpen className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">
+              Use this time to go back and review the course materials to better prepare for your next attempt.
+            </p>
+          </div>
+
+          {onGoBack && (
+            <Button onClick={onGoBack} variant="outline" className="w-full">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Go Back to Study Material
+            </Button>
+          )}
+        </CardContent>
+      </Card>
+    );
+  }
+
   if (quizCompleted) {
     const finalScore = calculateScore();
     const percentage = Math.round((finalScore / sortedQuestions.length) * 100);
     const passed = percentage >= passingScore;
+    const maxAttemptsReached = attemptCount >= MAX_ATTEMPTS;
 
     return (
       <Card className="max-w-2xl mx-auto">
@@ -113,12 +232,14 @@ export const KnowledgeCheckPlayer = ({
             <Trophy className="w-8 h-8" />
           </div>
           <CardTitle className="text-xl">
-            {passed ? "Congratulations!" : "Not Quite There Yet"}
+            {passed ? "Congratulations!" : maxAttemptsReached ? "Maximum Attempts Reached" : "Not Quite There Yet"}
           </CardTitle>
           <CardDescription>
             {passed
               ? "You've passed this knowledge check and can proceed to the next item."
-              : `You need at least ${passingScore}% to pass. Please retry to continue.`}
+              : maxAttemptsReached
+              ? `Please go back and study the material again. Quiz will be available in ${COOLDOWN_MINUTES} minutes.`
+              : `You need at least ${passingScore}% to pass. ${attemptsRemaining} attempt${attemptsRemaining !== 1 ? 's' : ''} remaining.`}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -133,11 +254,23 @@ export const KnowledgeCheckPlayer = ({
 
           <Progress value={percentage} className={cn("h-3", passed ? "[&>div]:bg-green-500" : "[&>div]:bg-red-500")} />
 
+          {!passed && !maxAttemptsReached && (
+            <p className="text-center text-sm text-muted-foreground">
+              Attempts used: {attemptCount} of {MAX_ATTEMPTS}
+            </p>
+          )}
+
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            {!passed && (
+            {!passed && !maxAttemptsReached && (
               <Button onClick={handleRetry} variant="default">
                 <RotateCcw className="w-4 h-4 mr-2" />
-                Retry Quiz
+                Retry Quiz ({attemptsRemaining} left)
+              </Button>
+            )}
+            {!passed && maxAttemptsReached && onGoBack && (
+              <Button onClick={onGoBack} variant="default">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Go Back to Study Material
               </Button>
             )}
             {passed && onProceed && (
@@ -222,10 +355,17 @@ export const KnowledgeCheckPlayer = ({
         </CardContent>
       </Card>
 
-      {/* Answered count */}
-      <p className="text-center text-sm text-muted-foreground">
-        {answers.size} of {sortedQuestions.length} questions answered
-      </p>
+      {/* Answered count and attempts info */}
+      <div className="text-center space-y-1">
+        <p className="text-sm text-muted-foreground">
+          {answers.size} of {sortedQuestions.length} questions answered
+        </p>
+        {attemptCount > 0 && (
+          <p className="text-sm text-orange-600 dark:text-orange-400">
+            Attempts used: {attemptCount} of {MAX_ATTEMPTS}
+          </p>
+        )}
+      </div>
 
       {/* Previous Attempt Info */}
       {previousAttempt && (

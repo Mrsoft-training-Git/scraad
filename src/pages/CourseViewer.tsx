@@ -443,7 +443,13 @@ const CourseViewer = () => {
       const currentIdx = allContentsForNav.findIndex(c => c.id === selectedContent.id);
       const hasNextItem = currentIdx < allContentsForNav.length - 1;
       const hasPassed = passedQuizzes.has(selectedContent.id) || completedItems.has(selectedContent.id);
-      return <KnowledgeCheckPlayer questions={quizQuestions} contentTitle={selectedContent.title} onComplete={handleQuizComplete} onProceed={hasNextItem && hasPassed ? goToNextItem : undefined} previousAttempt={previousAttempt} passingScore={PASSING_SCORE} />;
+      const hasPreviousItem = currentIdx > 0;
+      const goToPrevious = () => {
+        if (hasPreviousItem) {
+          handleSelectContent(allContentsForNav[currentIdx - 1]);
+        }
+      };
+      return <KnowledgeCheckPlayer questions={quizQuestions} contentTitle={selectedContent.title} contentId={selectedContent.id} onComplete={handleQuizComplete} onProceed={hasNextItem && hasPassed ? goToNextItem : undefined} onGoBack={hasPreviousItem ? goToPrevious : undefined} previousAttempt={previousAttempt} passingScore={PASSING_SCORE} />;
     }
     if (!selectedContent.content_url) {
       return <div className="flex items-center justify-center aspect-video bg-muted rounded-lg">
