@@ -201,7 +201,7 @@ const CourseViewer = () => {
     }
     const {
       data: modulesData
-    } = await supabase.from("course_modules").select("*").eq("course_id", courseId).order("order_index");
+    } = await supabase.from("course_modules").select("*").eq("course_id", courseId).order("order_index", { ascending: true }).order("created_at", { ascending: true });
     if (modulesData) {
       setModules(modulesData);
       if (modulesData.length > 0) {

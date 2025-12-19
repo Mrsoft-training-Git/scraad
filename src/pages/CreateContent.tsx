@@ -144,7 +144,8 @@ const CreateContent = () => {
           .from("course_modules")
           .select("*")
           .in("course_id", courseIds)
-          .order("order_index");
+          .order("order_index", { ascending: true })
+          .order("created_at", { ascending: true });
         
         if (!error && data) {
           setModules(data);
@@ -154,7 +155,8 @@ const CreateContent = () => {
       const { data, error } = await supabase
         .from("course_modules")
         .select("*")
-        .order("order_index");
+        .order("order_index", { ascending: true })
+        .order("created_at", { ascending: true });
       
       if (!error && data) {
         setModules(data);
@@ -451,12 +453,20 @@ const CreateContent = () => {
         .eq("id", editingModule.id);
       error = updateError;
     } else {
+      // Calculate the next order_index for the new module
+      const existingModules = modules.filter(m => m.course_id === newModule.course_id);
+      const maxOrderIndex = existingModules.length > 0 
+        ? Math.max(...existingModules.map(m => m.order_index || 0)) 
+        : -1;
+      const nextOrderIndex = maxOrderIndex + 1;
+
       const { error: insertError } = await supabase
         .from("course_modules")
         .insert({
           course_id: newModule.course_id,
           title: newModule.title,
           description: newModule.description || null,
+          order_index: nextOrderIndex,
         });
       error = insertError;
     }
