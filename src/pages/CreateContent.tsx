@@ -72,6 +72,7 @@ const CreateContent = () => {
     content_type: "document",
     content_url: "",
     is_published: false,
+    place_after_content_id: "", // For positioning knowledge checks
   });
   const [file, setFile] = useState<File | null>(null);
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
@@ -214,6 +215,7 @@ const CreateContent = () => {
       content_type: type,
       content_url: "",
       is_published: false,
+      place_after_content_id: "",
     });
     setFile(null);
     setDialogOpen(true);
@@ -228,6 +230,7 @@ const CreateContent = () => {
       content_type: "document",
       content_url: "",
       is_published: false,
+      place_after_content_id: "",
     });
     setFile(null);
     setQuizQuestions([]);
@@ -243,6 +246,7 @@ const CreateContent = () => {
       content_type: content.content_type,
       content_url: content.content_url || "",
       is_published: content.is_published,
+      place_after_content_id: "",
     });
     setSelectedContentType(content.content_type);
     
@@ -336,6 +340,27 @@ const CreateContent = () => {
       fileUrl = urlData.publicUrl;
     }
     
+    // Calculate order_index for knowledge checks based on placement
+    let orderIndex = 0;
+    if (formData.content_type === "knowledge_check" && formData.place_after_content_id) {
+      const selectedContent = contents.find(c => c.id === formData.place_after_content_id);
+      if (selectedContent) {
+        orderIndex = (selectedContent.order_index || 0) + 1;
+        // Shift all content after this position
+        const contentsToShift = contents.filter(
+          c => c.module_id === formData.module_id && 
+               (c.order_index || 0) >= orderIndex && 
+               c.id !== editingContent?.id
+        );
+        for (const content of contentsToShift) {
+          await supabase
+            .from("course_content")
+            .update({ order_index: (content.order_index || 0) + 1 })
+            .eq("id", content.id);
+        }
+      }
+    }
+    
     const contentData = {
       course_id: formData.course_id,
       module_id: formData.module_id || null,
@@ -346,6 +371,7 @@ const CreateContent = () => {
       file_path: filePath,
       is_published: formData.is_published,
       created_by: user?.id,
+      order_index: orderIndex,
     };
     
     let error;
@@ -473,6 +499,13 @@ const CreateContent = () => {
 
   const filteredModules = formData.course_id 
     ? modules.filter(m => m.course_id === formData.course_id)
+    : [];
+
+  // Get contents in the selected module for positioning knowledge checks
+  const moduleContents = formData.module_id 
+    ? contents
+        .filter(c => c.module_id === formData.module_id && c.id !== editingContent?.id)
+        .sort((a, b) => (a.order_index || 0) - (b.order_index || 0))
     : [];
 
   const getContentTypeIcon = (type: string) => {
@@ -716,7 +749,7 @@ const CreateContent = () => {
                     ))}
                   </SelectContent>
                 </Select>
-                {formData.course_id && filteredModules.length === 0 && (
+              {formData.course_id && filteredModules.length === 0 && (
                   <p className="text-xs text-muted-foreground">
                     No modules for this course.{" "}
                     <button 
@@ -731,6 +764,32 @@ const CreateContent = () => {
                   </p>
                 )}
               </div>
+
+              {/* Place After dropdown - only for knowledge checks with a module selected */}
+              {selectedContentType === "knowledge_check" && formData.module_id && moduleContents.length > 0 && (
+                <div className="space-y-2">
+                  <Label>Place After</Label>
+                  <Select 
+                    value={formData.place_after_content_id || "first"} 
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, place_after_content_id: value === "first" ? "" : value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select content position" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="first">At the beginning of module</SelectItem>
+                      {moduleContents.map(content => (
+                        <SelectItem key={content.id} value={content.id}>
+                          After: {content.title}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Choose where this knowledge check should appear in the module
+                  </p>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label>Title *</Label>
