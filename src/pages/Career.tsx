@@ -1,61 +1,128 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Briefcase, MapPin, Clock, DollarSign, ArrowRight } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Briefcase, MapPin, DollarSign, ArrowRight, Upload, Loader2, CheckCircle } from "lucide-react";
+import { toast } from "sonner";
+
+interface JobOpening {
+  id: string;
+  title: string;
+  department: string;
+  location: string;
+  type: string;
+  salary_range: string | null;
+  description: string | null;
+  requirements: string[] | null;
+  responsibilities: string[] | null;
+}
 
 const Career = () => {
-  const jobs = [
-    {
-      title: "Academic Coordinator",
-      department: "Distance Learning",
-      location: "Port Harcourt, Nigeria",
-      type: "Full-time",
-      salary: "₦200,000 - ₦350,000",
-      description: "Coordinate online learning programs and support student success."
+  const [selectedJob, setSelectedJob] = useState<JobOpening | null>(null);
+  const [isApplyDialogOpen, setIsApplyDialogOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [applicationData, setApplicationData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    coverLetter: "",
+    cvFile: null as File | null,
+  });
+
+  // Fetch active job openings
+  const { data: jobs = [], isLoading } = useQuery({
+    queryKey: ["job-openings"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("job_openings")
+        .select("*")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data as JobOpening[];
     },
-    {
-      title: "Instructional Designer",
-      department: "E-Learning",
-      location: "Remote",
-      type: "Contract",
-      salary: "₦150,000 - ₦250,000",
-      description: "Design engaging online course materials and learning experiences."
+  });
+
+  const applyMutation = useMutation({
+    mutationFn: async () => {
+      if (!selectedJob || !applicationData.cvFile) {
+        throw new Error("Please fill all required fields");
+      }
+
+      setIsUploading(true);
+
+      // Upload CV
+      const fileExt = applicationData.cvFile.name.split(".").pop();
+      const fileName = `${Date.now()}-${applicationData.name.replace(/\s+/g, "-")}.${fileExt}`;
+      const filePath = `cvs/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("cv-uploads")
+        .upload(filePath, applicationData.cvFile);
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: urlData } = supabase.storage.from("cv-uploads").getPublicUrl(filePath);
+
+      // Submit application
+      const { error: insertError } = await supabase.from("job_applications").insert({
+        job_id: selectedJob.id,
+        applicant_name: applicationData.name,
+        applicant_email: applicationData.email,
+        applicant_phone: applicationData.phone || null,
+        cv_url: urlData.publicUrl,
+        cover_letter: applicationData.coverLetter || null,
+      });
+
+      if (insertError) throw insertError;
     },
-    {
-      title: "Student Success Advisor",
-      department: "Student Services",
-      location: "Port Harcourt, Nigeria",
-      type: "Full-time",
-      salary: "₦180,000 - ₦280,000",
-      description: "Guide students through their academic journey and provide support."
+    onSuccess: () => {
+      toast.success("Application submitted successfully! We'll be in touch soon.");
+      setIsApplyDialogOpen(false);
+      setSelectedJob(null);
+      setApplicationData({
+        name: "",
+        email: "",
+        phone: "",
+        coverLetter: "",
+        cvFile: null,
+      });
     },
-    {
-      title: "Technical Support Specialist",
-      department: "IT Services",
-      location: "Hybrid",
-      type: "Full-time",
-      salary: "₦150,000 - ₦220,000",
-      description: "Provide technical assistance to students and staff using online platforms."
+    onError: (error) => {
+      toast.error("Failed to submit application: " + error.message);
     },
-    {
-      title: "Content Developer",
-      department: "Academic Affairs",
-      location: "Remote",
-      type: "Part-time",
-      salary: "₦100,000 - ₦180,000",
-      description: "Create and curate educational content for online courses."
+    onSettled: () => {
+      setIsUploading(false);
     },
-    {
-      title: "Marketing Manager",
-      department: "Marketing & Communications",
-      location: "Port Harcourt, Nigeria",
-      type: "Full-time",
-      salary: "₦250,000 - ₦400,000",
-      description: "Lead marketing strategies to promote online programs and courses."
+  });
+
+  const handleApply = (job: JobOpening) => {
+    setSelectedJob(job);
+    setIsApplyDialogOpen(true);
+  };
+
+  const handleSubmitApplication = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!applicationData.name || !applicationData.email || !applicationData.cvFile) {
+      toast.error("Please fill in all required fields and upload your CV");
+      return;
     }
-  ];
+    applyMutation.mutate();
+  };
 
   const benefits = [
     "Competitive salary packages",
@@ -63,13 +130,13 @@ const Career = () => {
     "Flexible working arrangements",
     "Health insurance coverage",
     "Annual leave and holidays",
-    "Collaborative work environment"
+    "Collaborative work environment",
   ];
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
+
       {/* Hero Section */}
       <section className="py-20 bg-gradient-to-br from-primary/10 via-accent/10 to-background">
         <div className="container mx-auto px-4">
@@ -85,8 +152,8 @@ const Career = () => {
               </span>
             </h1>
             <p className="text-xl text-muted-foreground mb-8">
-              Join the University of Port Harcourt's distance learning team and help shape 
-              the future of online education in Nigeria.
+              Join the University of Port Harcourt's distance learning team and help shape the
+              future of online education in Nigeria.
             </p>
           </div>
         </div>
@@ -99,40 +166,58 @@ const Career = () => {
             Current Openings
           </h2>
           <div className="max-w-5xl mx-auto space-y-6">
-            {jobs.map((job, index) => (
-              <div key={index} className="bg-card border border-border rounded-xl p-6 hover:shadow-lg transition-all group">
-                <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex flex-wrap items-center gap-2 mb-2">
-                      <h3 className="font-heading text-2xl font-bold text-foreground group-hover:text-primary transition-colors">
-                        {job.title}
-                      </h3>
-                      <Badge variant="secondary">{job.type}</Badge>
-                    </div>
-                    <p className="text-muted-foreground mb-4">{job.description}</p>
-                    <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Briefcase className="w-4 h-4" />
-                        {job.department}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <MapPin className="w-4 h-4" />
-                        {job.location}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <DollarSign className="w-4 h-4" />
-                        {job.salary}
-                      </div>
-                    </div>
-                  </div>
-                  <Button className="lg:mt-4" asChild>
-                    <Link to="/auth">
-                      Apply Now <ArrowRight className="ml-2 w-4 h-4" />
-                    </Link>
-                  </Button>
-                </div>
+            {isLoading ? (
+              <div className="text-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
+                <p className="text-muted-foreground mt-2">Loading openings...</p>
               </div>
-            ))}
+            ) : jobs.length === 0 ? (
+              <div className="text-center py-12 bg-card border border-border rounded-xl">
+                <Briefcase className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-xl font-semibold text-foreground mb-2">No Openings Available</h3>
+                <p className="text-muted-foreground">
+                  Check back later for new opportunities or submit your resume below.
+                </p>
+              </div>
+            ) : (
+              jobs.map((job) => (
+                <div
+                  key={job.id}
+                  className="bg-card border border-border rounded-xl p-6 hover:shadow-lg transition-all group"
+                >
+                  <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
+                        <h3 className="font-heading text-2xl font-bold text-foreground group-hover:text-primary transition-colors">
+                          {job.title}
+                        </h3>
+                        <Badge variant="secondary">{job.type}</Badge>
+                      </div>
+                      <p className="text-muted-foreground mb-4">{job.description}</p>
+                      <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <Briefcase className="w-4 h-4" />
+                          {job.department}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <MapPin className="w-4 h-4" />
+                          {job.location}
+                        </div>
+                        {job.salary_range && (
+                          <div className="flex items-center gap-1">
+                            <DollarSign className="w-4 h-4" />
+                            {job.salary_range}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <Button className="lg:mt-4" onClick={() => handleApply(job)}>
+                      Apply Now <ArrowRight className="ml-2 w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </section>
@@ -146,11 +231,12 @@ const Career = () => {
             </h2>
             <div className="grid md:grid-cols-2 gap-6">
               {benefits.map((benefit, index) => (
-                <div key={index} className="flex items-start gap-3 bg-card border border-border rounded-lg p-4">
+                <div
+                  key={index}
+                  className="flex items-start gap-3 bg-card border border-border rounded-lg p-4"
+                >
                   <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
+                    <CheckCircle className="w-4 h-4 text-primary-foreground" />
                   </div>
                   <p className="text-foreground text-lg">{benefit}</p>
                 </div>
@@ -176,6 +262,115 @@ const Career = () => {
           </div>
         </div>
       </section>
+
+      {/* Application Dialog */}
+      <Dialog open={isApplyDialogOpen} onOpenChange={setIsApplyDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Apply for {selectedJob?.title}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmitApplication} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Full Name *</Label>
+              <Input
+                id="name"
+                value={applicationData.name}
+                onChange={(e) => setApplicationData({ ...applicationData, name: e.target.value })}
+                placeholder="John Doe"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="email">Email Address *</Label>
+              <Input
+                id="email"
+                type="email"
+                value={applicationData.email}
+                onChange={(e) => setApplicationData({ ...applicationData, email: e.target.value })}
+                placeholder="john@example.com"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number</Label>
+              <Input
+                id="phone"
+                value={applicationData.phone}
+                onChange={(e) => setApplicationData({ ...applicationData, phone: e.target.value })}
+                placeholder="+234 800 000 0000"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="cv">Upload CV/Resume *</Label>
+              <div className="border-2 border-dashed border-border rounded-lg p-4 text-center">
+                <input
+                  id="cv"
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setApplicationData({ ...applicationData, cvFile: file });
+                    }
+                  }}
+                />
+                <label
+                  htmlFor="cv"
+                  className="cursor-pointer flex flex-col items-center gap-2"
+                >
+                  <Upload className="w-8 h-8 text-muted-foreground" />
+                  {applicationData.cvFile ? (
+                    <span className="text-sm text-primary font-medium">
+                      {applicationData.cvFile.name}
+                    </span>
+                  ) : (
+                    <span className="text-sm text-muted-foreground">
+                      Click to upload PDF, DOC, or DOCX (max 10MB)
+                    </span>
+                  )}
+                </label>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="coverLetter">Cover Letter (Optional)</Label>
+              <Textarea
+                id="coverLetter"
+                value={applicationData.coverLetter}
+                onChange={(e) =>
+                  setApplicationData({ ...applicationData, coverLetter: e.target.value })
+                }
+                placeholder="Tell us why you're interested in this position..."
+                rows={4}
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsApplyDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={applyMutation.isPending || isUploading}>
+                {applyMutation.isPending || isUploading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  "Submit Application"
+                )}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       <Footer />
     </div>

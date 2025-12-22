@@ -11,6 +11,7 @@ import BusinessTeams from "./pages/BusinessTeams";
 import Programs from "./pages/Programs";
 import ProgramDetails from "./pages/ProgramDetails";
 import Career from "./pages/Career";
+import CareerManagement from "./pages/CareerManagement";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import CourseAllocation from "./pages/CourseAllocation";
@@ -38,6 +39,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard/career" element={<CareerManagement />} />
           <Route path="/dashboard/course-allocation" element={<CourseAllocation />} />
           <Route path="/dashboard/courses" element={<DashboardCourses />} />
           <Route path="/dashboard/create-content" element={<CreateContent />} />
