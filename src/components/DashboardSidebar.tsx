@@ -11,6 +11,7 @@ import {
   Shield,
   Users,
   ChevronLeft,
+  Briefcase,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ import logo from "@/assets/uniport-logo.png";
 
 const allMenuItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard", roles: ["admin", "student", "instructor"] },
+  { icon: Briefcase, label: "Career", path: "/dashboard/career", roles: ["admin"] },
   { icon: BookOpen, label: "Course Allocation", path: "/dashboard/course-allocation", roles: ["admin"] },
   { icon: FileText, label: "Courses", path: "/dashboard/courses", roles: ["admin", "instructor"] },
   { icon: FileText, label: "Create Content", path: "/dashboard/create-content", roles: ["admin", "instructor"] },
