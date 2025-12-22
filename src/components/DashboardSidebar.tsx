@@ -50,7 +50,7 @@ export const DashboardSidebar = ({ userRole }: DashboardSidebarProps) => {
       )}
     >
       {/* Header */}
-      <div className="p-4 lg:p-6 border-b border-sidebar-border flex items-center justify-between">
+      <div className="px-4 lg:px-6 py-4 md:py-6 border-b border-sidebar-border flex items-center justify-between">
         {!collapsed ? (
           <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <img src={logo} alt="UNIPORT Logo" className="w-8 h-8 lg:w-10 lg:h-10 object-contain" />
