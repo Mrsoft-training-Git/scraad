@@ -1,9 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, ShieldCheck, GraduationCap, BookOpen, CreditCard } from "lucide-react";
+import { Users, ShieldCheck, GraduationCap, BookOpen, CreditCard, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell } from "recharts";
 
 interface DashboardStats {
   totalUsers: number;
@@ -18,10 +20,10 @@ interface RecentStudent {
   date: string;
 }
 
-interface RecentEnrollment {
-  user: string;
-  date: string;
-  course: string;
+interface CourseEnrollmentData {
+  courseName: string;
+  enrollmentCount: number;
+  avgCompletion: number;
 }
 
 export const AdminDashboard = () => {
@@ -33,8 +35,9 @@ export const AdminDashboard = () => {
     enrollments: 0,
   });
   const [recentStudents, setRecentStudents] = useState<RecentStudent[]>([]);
-  const [recentEnrollments, setRecentEnrollments] = useState<RecentEnrollment[]>([]);
+  const [courseEnrollments, setCourseEnrollments] = useState<CourseEnrollmentData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showAllCourses, setShowAllCourses] = useState(false);
 
   useEffect(() => {
     fetchDashboardData();
@@ -93,36 +96,52 @@ export const AdminDashboard = () => {
         );
       }
 
-      // Fetch recent enrollments
-      const { data: recentEnrollmentData } = await supabase
+      // Fetch course enrollments grouped by course with average completion
+      const { data: enrollmentData } = await supabase
         .from("enrolled_courses")
-        .select("course_name, enrolled_at, user_id")
-        .order("enrolled_at", { ascending: false })
-        .limit(4);
+        .select("course_name, progress");
 
-      if (recentEnrollmentData) {
-        // Get user names for enrollments
-        const userIds = recentEnrollmentData.map((e) => e.user_id);
-        const { data: profiles } = await supabase
-          .from("profiles")
-          .select("id, full_name")
-          .in("id", userIds);
+      if (enrollmentData) {
+        // Group by course and calculate stats
+        const courseMap = new Map<string, { count: number; totalProgress: number }>();
+        
+        enrollmentData.forEach((enrollment) => {
+          const courseName = enrollment.course_name;
+          const progress = enrollment.progress || 0;
+          
+          if (courseMap.has(courseName)) {
+            const existing = courseMap.get(courseName)!;
+            existing.count += 1;
+            existing.totalProgress += progress;
+          } else {
+            courseMap.set(courseName, { count: 1, totalProgress: progress });
+          }
+        });
 
-        const profileMap = new Map(profiles?.map((p) => [p.id, p.full_name]) || []);
-
-        setRecentEnrollments(
-          recentEnrollmentData.map((e) => ({
-            user: profileMap.get(e.user_id) || "Unknown",
-            date: e.enrolled_at ? format(new Date(e.enrolled_at), "MMM d, yyyy") : "N/A",
-            course: e.course_name,
+        const courseData: CourseEnrollmentData[] = Array.from(courseMap.entries())
+          .map(([courseName, data]) => ({
+            courseName,
+            enrollmentCount: data.count,
+            avgCompletion: Math.round(data.totalProgress / data.count),
           }))
-        );
+          .sort((a, b) => b.enrollmentCount - a.enrollmentCount);
+
+        setCourseEnrollments(courseData);
       }
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const displayedCourses = showAllCourses ? courseEnrollments : courseEnrollments.slice(0, 10);
+
+  const chartConfig = {
+    avgCompletion: {
+      label: "Avg Completion",
+      color: "hsl(var(--primary))",
+    },
   };
 
   const statsConfig = [
@@ -209,50 +228,86 @@ export const AdminDashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Recent Enrollments */}
+        {/* Course Enrollments Chart */}
         <Card className="border-none shadow-card">
           <CardHeader className="bg-foreground text-background p-4 md:p-6">
-            <CardTitle className="text-base md:text-lg font-heading">Recent Enrollments</CardTitle>
+            <CardTitle className="text-base md:text-lg font-heading">
+              Top Enrolled Courses
+            </CardTitle>
           </CardHeader>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[400px]">
-                <thead className="bg-muted">
-                  <tr>
-                    <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold">Student</th>
-                    <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold hidden md:table-cell">Course</th>
-                    <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold">Date</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {recentEnrollments.length === 0 && !loading ? (
-                    <tr>
-                      <td colSpan={3} className="px-3 md:px-6 py-6 text-center text-muted-foreground">
-                        No enrollments yet
-                      </td>
-                    </tr>
-                  ) : (
-                    recentEnrollments.map((enrollment, index) => (
-                      <tr key={index} className="hover:bg-muted/50 transition-colors">
-                        <td className="px-3 md:px-6 py-3 md:py-4">
-                          <div className="flex items-center gap-2 md:gap-3">
-                            <div className="w-6 h-6 md:w-8 md:h-8 bg-accent rounded-full flex-shrink-0"></div>
-                            <span className="font-medium text-sm md:text-base">{enrollment.user}</span>
-                          </div>
-                        </td>
-                        <td className="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm max-w-[150px] truncate hidden md:table-cell">{enrollment.course}</td>
-                        <td className="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm text-muted-foreground">{enrollment.date}</td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-            <div className="p-3 md:p-4 border-t border-border">
-              <Button variant="link" className="text-accent text-sm">
-                See All
-              </Button>
-            </div>
+          <CardContent className="p-4 md:p-6">
+            {courseEnrollments.length === 0 && !loading ? (
+              <div className="py-8 text-center text-muted-foreground">
+                No enrollments yet
+              </div>
+            ) : (
+              <>
+                <ChartContainer config={chartConfig} className="h-[300px] w-full">
+                  <BarChart
+                    data={displayedCourses}
+                    layout="vertical"
+                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <XAxis type="number" domain={[0, 100]} tickFormatter={(value) => `${value}%`} />
+                    <YAxis 
+                      type="category" 
+                      dataKey="courseName" 
+                      width={150}
+                      tickFormatter={(value) => value.length > 20 ? `${value.substring(0, 20)}...` : value}
+                    />
+                    <ChartTooltip
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          const data = payload[0].payload as CourseEnrollmentData;
+                          return (
+                            <div className="bg-background border border-border rounded-lg p-3 shadow-lg">
+                              <p className="font-medium text-sm mb-1">{data.courseName}</p>
+                              <p className="text-xs text-muted-foreground">
+                                Enrollments: <span className="font-semibold text-foreground">{data.enrollmentCount}</span>
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                Avg Completion: <span className="font-semibold text-foreground">{data.avgCompletion}%</span>
+                              </p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <Bar dataKey="avgCompletion" radius={[0, 4, 4, 0]}>
+                      {displayedCourses.map((entry, index) => (
+                        <Cell 
+                          key={`cell-${index}`} 
+                          fill={`hsl(var(--primary) / ${0.4 + (entry.avgCompletion / 100) * 0.6})`}
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ChartContainer>
+
+                {courseEnrollments.length > 10 && (
+                  <div className="mt-4 border-t border-border pt-4">
+                    <Button
+                      variant="ghost"
+                      className="w-full flex items-center justify-center gap-2 text-accent"
+                      onClick={() => setShowAllCourses(!showAllCourses)}
+                    >
+                      {showAllCourses ? (
+                        <>
+                          <ChevronUp className="w-4 h-4" />
+                          Show Top 10 Only
+                        </>
+                      ) : (
+                        <>
+                          <ChevronDown className="w-4 h-4" />
+                          Show All {courseEnrollments.length} Courses
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
