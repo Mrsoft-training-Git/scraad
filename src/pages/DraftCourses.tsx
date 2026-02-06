@@ -187,20 +187,9 @@ const DraftCourses = () => {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => navigate(`/dashboard/learn/${course.id}`)}>
-                          <Eye className="w-4 h-4 mr-2" />
-                          Review
-                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleOpenDialog(course)}>
                           <Edit className="w-4 h-4 mr-2" />
                           Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          onClick={() => publishCourse(course)}
-                          className="text-green-600"
-                        >
-                          <Check className="w-4 h-4 mr-2" />
-                          Publish
                         </DropdownMenuItem>
                         <DropdownMenuItem 
                           onClick={() => rejectCourse(course)}
