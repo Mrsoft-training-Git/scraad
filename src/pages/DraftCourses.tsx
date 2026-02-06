@@ -274,13 +274,22 @@ const DraftCourses = () => {
                       </span>
                     </div>
                   </div>
-                  <Button 
-                    className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold"
-                    onClick={() => publishCourse(course)}
-                  >
-                    <Eye className="w-4 h-4 mr-2" />
-                    Publish Course
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => navigate(`/course/${course.id}`)}
+                    >
+                      <Eye className="w-4 h-4 mr-2" />
+                      Review
+                    </Button>
+                    <Button 
+                      className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold"
+                      onClick={() => publishCourse(course)}
+                    >
+                      Publish
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             ))}
