@@ -263,15 +263,6 @@ const DashboardCourses = () => {
                       >
                         <Edit className="w-4 h-4" />
                       </Button>
-                      <Button
-                        size="icon"
-                        variant="secondary"
-                        onClick={() => navigate(`/dashboard/learn/${course.id}`)}
-                        className="h-8 w-8"
-                        title="Preview Course"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </Button>
                     </div>
                   )}
                   <Badge className="absolute top-4 right-4 bg-background/90 backdrop-blur-sm text-primary border-0 z-10">
@@ -333,9 +324,10 @@ const DashboardCourses = () => {
                         <Button 
                           variant="outline"
                           className="flex-1"
-                          onClick={() => navigate(`/dashboard/create-content`)}
+                          onClick={() => navigate(`/dashboard/learn/${course.id}`)}
                         >
-                          Add Content
+                          <Eye className="w-4 h-4 mr-2" />
+                          Preview
                         </Button>
                         {course.pending_review ? (
                           <Button 
