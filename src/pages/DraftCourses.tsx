@@ -7,7 +7,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Users, Edit, Eye, Star, Award, User as UserIcon } from "lucide-react";
+import { Search, Users, Edit, Eye, X, User as UserIcon, MoreVertical, Check } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { CourseFormDialog } from "@/components/CourseFormDialog";
 
@@ -113,35 +119,18 @@ const DraftCourses = () => {
     }
   };
 
-  const toggleFeatured = async (course: Course) => {
+  const rejectCourse = async (course: Course) => {
     const { error } = await supabase
       .from("courses")
-      .update({ featured: !course.featured })
+      .update({ pending_review: false })
       .eq("id", course.id);
     
     if (error) {
-      toast({ title: "Error", description: "Failed to update course", variant: "destructive" });
+      toast({ title: "Error", description: "Failed to reject course", variant: "destructive" });
     } else {
       toast({ 
-        title: "Success", 
-        description: `Course ${!course.featured ? "featured" : "unfeatured"} successfully` 
-      });
-      fetchDraftCourses();
-    }
-  };
-
-  const toggleTopRated = async (course: Course) => {
-    const { error } = await supabase
-      .from("courses")
-      .update({ top_rated: !course.top_rated })
-      .eq("id", course.id);
-    
-    if (error) {
-      toast({ title: "Error", description: "Failed to update course", variant: "destructive" });
-    } else {
-      toast({ 
-        title: "Success", 
-        description: `Course ${!course.top_rated ? "marked as top rated" : "removed from top rated"} successfully` 
+        title: "Course Rejected", 
+        description: "Course has been sent back to the instructor" 
       });
       fetchDraftCourses();
     }
@@ -190,45 +179,40 @@ const DraftCourses = () => {
                 className="group overflow-hidden border-border/50 bg-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-2 flex flex-col"
               >
                 <div className="aspect-video overflow-hidden relative">
-                  <div className="absolute top-4 left-4 flex gap-1 z-10 flex-wrap max-w-[calc(100%-80px)]">
-                    <Button
-                      size="icon"
-                      variant="default"
-                      onClick={() => publishCourse(course)}
-                      className="h-8 w-8 bg-green-600 hover:bg-green-700"
-                      title="Publish Course"
-                    >
-                      <Eye className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant={course.featured ? "default" : "secondary"}
-                      onClick={() => toggleFeatured(course)}
-                      className="h-8 w-8"
-                      title={course.featured ? "Unfeature" : "Feature"}
-                    >
-                      <Star className={course.featured ? "w-4 h-4 fill-current" : "w-4 h-4"} />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant={course.top_rated ? "default" : "secondary"}
-                      onClick={() => toggleTopRated(course)}
-                      className="h-8 w-8 bg-yellow-500 hover:bg-yellow-600"
-                      title={course.top_rated ? "Remove Top Rated" : "Mark Top Rated"}
-                    >
-                      <Award className={course.top_rated ? "w-4 h-4 fill-current" : "w-4 h-4"} />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="secondary"
-                      onClick={() => handleOpenDialog(course)}
-                      className="h-8 w-8"
-                      title="Edit"
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Button>
+                  <div className="absolute top-4 right-4 z-10">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button size="icon" variant="secondary" className="h-8 w-8">
+                          <MoreVertical className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => navigate(`/dashboard/learn/${course.id}`)}>
+                          <Eye className="w-4 h-4 mr-2" />
+                          Review
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleOpenDialog(course)}>
+                          <Edit className="w-4 h-4 mr-2" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => publishCourse(course)}
+                          className="text-green-600"
+                        >
+                          <Check className="w-4 h-4 mr-2" />
+                          Publish
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => rejectCourse(course)}
+                          className="text-destructive"
+                        >
+                          <X className="w-4 h-4 mr-2" />
+                          Reject
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
-                  <Badge className="absolute top-4 right-4 bg-orange-500 text-white border-0 z-10">
+                  <Badge className="absolute top-4 left-4 bg-orange-500 text-white border-0 z-10">
                     Pending Review
                   </Badge>
                   <img
@@ -238,22 +222,9 @@ const DraftCourses = () => {
                   />
                 </div>
                 <CardContent className="p-6 flex flex-col flex-grow">
-                  <div className="flex items-center gap-2 mb-3 flex-wrap">
-                    <Badge variant="secondary" className="bg-primary/10 text-primary">
-                      {course.category}
-                    </Badge>
-                    {course.featured && (
-                      <Badge className="bg-accent/10 text-accent border-0">
-                        Featured
-                      </Badge>
-                    )}
-                    {course.top_rated && (
-                      <Badge className="bg-yellow-500/10 text-yellow-600 border-0">
-                        <Award className="w-3 h-3 mr-1" />
-                        Top Rated
-                      </Badge>
-                    )}
-                  </div>
+                  <Badge variant="secondary" className="bg-primary/10 text-primary w-fit mb-3">
+                    {course.category}
+                  </Badge>
                   <h3 className="font-heading font-bold text-lg mb-2 line-clamp-2 group-hover:text-primary transition-colors min-h-[3.5rem]">
                     {course.title}
                   </h3>
@@ -287,9 +258,10 @@ const DraftCourses = () => {
                       Review
                     </Button>
                     <Button 
-                      className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold"
+                      className="flex-1"
                       onClick={() => publishCourse(course)}
                     >
+                      <Check className="w-4 h-4 mr-2" />
                       Publish
                     </Button>
                   </div>
