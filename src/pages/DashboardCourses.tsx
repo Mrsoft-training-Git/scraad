@@ -344,7 +344,7 @@ const DashboardCourses = () => {
                               onClick={() => sendForReview(course)}
                             >
                               <Send className="w-4 h-4 mr-2" />
-                              Send for Review
+                              Send Review
                             </Button>
                           )
                         )}
