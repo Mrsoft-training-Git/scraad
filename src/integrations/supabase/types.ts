@@ -190,6 +190,7 @@ export type Database = {
           instructor_id: string | null
           level: string | null
           overview: string | null
+          pending_review: boolean | null
           price: number
           published: boolean | null
           requirements: string[] | null
@@ -212,6 +213,7 @@ export type Database = {
           instructor_id?: string | null
           level?: string | null
           overview?: string | null
+          pending_review?: boolean | null
           price: number
           published?: boolean | null
           requirements?: string[] | null
@@ -234,6 +236,7 @@ export type Database = {
           instructor_id?: string | null
           level?: string | null
           overview?: string | null
+          pending_review?: boolean | null
           price?: number
           published?: boolean | null
           requirements?: string[] | null

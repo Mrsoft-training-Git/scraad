@@ -29,6 +29,7 @@ interface Course {
   what_you_learn: string[] | null;
   requirements: string[] | null;
   syllabus: any;
+  pending_review: boolean;
 }
 
 const DashboardCourses = () => {
@@ -156,11 +157,20 @@ const DashboardCourses = () => {
   };
 
   const sendForReview = async (course: Course) => {
-    // Course is already unpublished, we just notify the user it's ready for admin review
-    toast({ 
-      title: "Sent for Review", 
-      description: `"${course.title}" has been sent to admin for review and publishing.` 
-    });
+    const { error } = await supabase
+      .from("courses")
+      .update({ pending_review: true })
+      .eq("id", course.id);
+    
+    if (error) {
+      toast({ title: "Error", description: "Failed to send course for review", variant: "destructive" });
+    } else {
+      toast({ 
+        title: "Sent for Review", 
+        description: `"${course.title}" has been sent to admin for review and publishing.` 
+      });
+      refreshCourses();
+    }
   };
 
   const filteredCourses = courses.filter((course) =>
@@ -284,9 +294,14 @@ const DashboardCourses = () => {
                     <Badge variant="secondary" className="bg-primary/10 text-primary">
                       {course.category}
                     </Badge>
-                    {!course.published && (
+                    {!course.published && !course.pending_review && (
                       <Badge variant="outline" className="text-muted-foreground">
                         Draft
+                      </Badge>
+                    )}
+                    {course.pending_review && !course.published && (
+                      <Badge className="bg-orange-500/10 text-orange-600 border-orange-500/20">
+                        Pending Review
                       </Badge>
                     )}
                     {course.featured && (
@@ -322,13 +337,23 @@ const DashboardCourses = () => {
                         >
                           Add Content
                         </Button>
-                        <Button 
-                          className="bg-green-600 hover:bg-green-700 text-white font-semibold"
-                          onClick={() => sendForReview(course)}
-                        >
-                          <Send className="w-4 h-4 mr-2" />
-                          Send for Review
-                        </Button>
+                        {course.pending_review ? (
+                          <Button 
+                            className="bg-orange-500 hover:bg-orange-600 text-white font-semibold"
+                            disabled
+                          >
+                            <Send className="w-4 h-4 mr-2" />
+                            Under Review
+                          </Button>
+                        ) : (
+                          <Button 
+                            className="bg-green-600 hover:bg-green-700 text-white font-semibold"
+                            onClick={() => sendForReview(course)}
+                          >
+                            <Send className="w-4 h-4 mr-2" />
+                            Send for Review
+                          </Button>
+                        )}
                       </>
                     ) : (
                       <>
