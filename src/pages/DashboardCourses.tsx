@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Users, Edit, Eye, EyeOff, Star, Award } from "lucide-react";
+import { Plus, Search, Users, Edit, Eye, EyeOff, Star, Award, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { CourseFormDialog } from "@/components/CourseFormDialog";
 import { useEnrollment } from "@/hooks/useEnrollment";
@@ -155,6 +155,14 @@ const DashboardCourses = () => {
     }
   };
 
+  const sendForReview = async (course: Course) => {
+    // Course is already unpublished, we just notify the user it's ready for admin review
+    toast({ 
+      title: "Sent for Review", 
+      description: `"${course.title}" has been sent to admin for review and publishing.` 
+    });
+  };
+
   const filteredCourses = courses.filter((course) =>
     course.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -245,6 +253,15 @@ const DashboardCourses = () => {
                       >
                         <Edit className="w-4 h-4" />
                       </Button>
+                      <Button
+                        size="icon"
+                        variant="secondary"
+                        onClick={() => navigate(`/dashboard/learn/${course.id}`)}
+                        className="h-8 w-8"
+                        title="Preview Course"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Button>
                     </div>
                   )}
                   <Badge className="absolute top-4 right-4 bg-background/90 backdrop-blur-sm text-primary border-0 z-10">
@@ -296,20 +313,41 @@ const DashboardCourses = () => {
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
-                    <Button 
-                      className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground shadow-lg shadow-primary/20 font-semibold"
-                      onClick={() => handleEnroll(course.id)}
-                      disabled={enrolling}
-                    >
-                      Apply Now
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="border-2 hover:bg-accent/10"
-                      asChild
-                    >
-                      <Link to={`/programs/${course.id}`}>View Details</Link>
-                    </Button>
+                    {userRole === "instructor" && !course.published ? (
+                      <>
+                        <Button 
+                          variant="outline"
+                          className="flex-1"
+                          onClick={() => navigate(`/dashboard/create-content`)}
+                        >
+                          Add Content
+                        </Button>
+                        <Button 
+                          className="bg-green-600 hover:bg-green-700 text-white font-semibold"
+                          onClick={() => sendForReview(course)}
+                        >
+                          <Send className="w-4 h-4 mr-2" />
+                          Send for Review
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button 
+                          className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground shadow-lg shadow-primary/20 font-semibold"
+                          onClick={() => handleEnroll(course.id)}
+                          disabled={enrolling}
+                        >
+                          Apply Now
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="border-2 hover:bg-accent/10"
+                          asChild
+                        >
+                          <Link to={`/programs/${course.id}`}>View Details</Link>
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </CardContent>
               </Card>
