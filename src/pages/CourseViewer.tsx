@@ -617,7 +617,7 @@ const CourseViewer = () => {
         </div>
       </div>;
   }
-  if (!isEnrolled && userRole !== "admin") {
+  if (!isEnrolled && !isInstructorOrAdmin) {
     return <div className="flex items-center justify-center h-screen bg-background">
         <div className="text-center">
           <BookOpen className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
