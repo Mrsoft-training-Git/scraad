@@ -278,7 +278,7 @@ const DraftCourses = () => {
                     <Button 
                       variant="outline"
                       className="flex-1"
-                      onClick={() => navigate(`/course/${course.id}`)}
+                      onClick={() => navigate(`/dashboard/learn/${course.id}`)}
                     >
                       <Eye className="w-4 h-4 mr-2" />
                       Review
