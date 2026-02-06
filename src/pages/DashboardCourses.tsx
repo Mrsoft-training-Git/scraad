@@ -319,7 +319,7 @@ const DashboardCourses = () => {
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
-                    {userRole === "instructor" && !course.published ? (
+                    {userRole === "instructor" ? (
                       <>
                         <Button 
                           variant="outline"
@@ -329,21 +329,32 @@ const DashboardCourses = () => {
                           <Eye className="w-4 h-4 mr-2" />
                           Preview
                         </Button>
-                        {course.pending_review ? (
-                          <Button 
-                            className="bg-orange-500 hover:bg-orange-600 text-white font-semibold"
-                            disabled
+                        {!course.published && (
+                          course.pending_review ? (
+                            <Button 
+                              className="bg-orange-500 hover:bg-orange-600 text-white font-semibold"
+                              disabled
+                            >
+                              <Send className="w-4 h-4 mr-2" />
+                              Under Review
+                            </Button>
+                          ) : (
+                            <Button 
+                              className="bg-green-600 hover:bg-green-700 text-white font-semibold"
+                              onClick={() => sendForReview(course)}
+                            >
+                              <Send className="w-4 h-4 mr-2" />
+                              Send for Review
+                            </Button>
+                          )
+                        )}
+                        {course.published && (
+                          <Button
+                            variant="outline"
+                            className="border-2 hover:bg-accent/10"
+                            asChild
                           >
-                            <Send className="w-4 h-4 mr-2" />
-                            Under Review
-                          </Button>
-                        ) : (
-                          <Button 
-                            className="bg-green-600 hover:bg-green-700 text-white font-semibold"
-                            onClick={() => sendForReview(course)}
-                          >
-                            <Send className="w-4 h-4 mr-2" />
-                            Send for Review
+                            <Link to={`/programs/${course.id}`}>View Details</Link>
                           </Button>
                         )}
                       </>
