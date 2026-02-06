@@ -4,6 +4,7 @@ import { Progress } from "@/components/ui/progress";
 import { BookOpen, Clock, CheckCircle, Trophy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 interface EnrolledCourse {
   id: string;
@@ -135,7 +136,9 @@ export const StudentDashboard = ({ userName }: { userName: string }) => {
           ) : courses.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-muted-foreground mb-4">You haven't enrolled in any courses yet.</p>
-              <Button>Browse Courses</Button>
+              <Button asChild>
+                <Link to="/courses">Browse Courses</Link>
+              </Button>
             </div>
           ) : (
             <div className="space-y-6">
