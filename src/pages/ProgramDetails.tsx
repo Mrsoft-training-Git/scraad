@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { AboutCourseSection } from "@/components/AboutCourseSection";
 import { useParams, Link } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -6,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Clock, Users, Award, CheckCircle, BookOpen, Video, ArrowLeft, Share2, Check } from "lucide-react";
+import { Clock, Users, Award, CheckCircle, BookOpen, Video, ArrowLeft, Share2, Check, ChevronDown, ChevronUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -211,12 +212,7 @@ const ProgramDetails = () => {
                     </div>
                   )}
 
-                  <div>
-                    <h2 className="font-heading text-2xl font-bold mb-4">About This Course</h2>
-                    <p className="text-muted-foreground leading-relaxed">
-                      {course.description || "This comprehensive program will equip you with the skills and knowledge needed to excel in your field. Learn from industry experts and gain practical, hands-on experience."}
-                    </p>
-                  </div>
+                  <AboutCourseSection description={course.description} />
                 </TabsContent>
 
                 <TabsContent value="curriculum" className="mt-8">
