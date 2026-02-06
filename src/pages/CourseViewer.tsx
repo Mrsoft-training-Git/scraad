@@ -100,6 +100,7 @@ const CourseViewer = () => {
   }>();
   const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<string>("student");
+  const [isInstructorOrAdmin, setIsInstructorOrAdmin] = useState(false);
   const [course, setCourse] = useState<Course | null>(null);
   const [modules, setModules] = useState<CourseModule[]>([]);
   const [contents, setContents] = useState<CourseContent[]>([]);
@@ -144,10 +145,22 @@ const CourseViewer = () => {
       const {
         data: roleData
       } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id).maybeSingle();
-      setUserRole(roleData?.role || "student");
+      const role = roleData?.role || "student";
+      setUserRole(role);
+      
       if (courseId) {
+        // Check if user is instructor of this course or admin
+        const { data: courseData } = await supabase
+          .from("courses")
+          .select("instructor_id")
+          .eq("id", courseId)
+          .maybeSingle();
+        
+        const isOwnerOrAdmin = role === "admin" || (role === "instructor" && courseData?.instructor_id === session.user.id);
+        setIsInstructorOrAdmin(isOwnerOrAdmin);
+        
         const enrollId = await checkEnrollment(session.user.id, courseId);
-        const courseContents = await fetchCourseData(courseId);
+        const courseContents = await fetchCourseData(courseId, isOwnerOrAdmin);
         await fetchCompletedItems(session.user.id, courseContents, enrollId);
       }
     };
@@ -191,7 +204,7 @@ const CourseViewer = () => {
       }
     }
   };
-  const fetchCourseData = async (courseId: string): Promise<CourseContent[]> => {
+  const fetchCourseData = async (courseId: string, canViewAllContent: boolean = false): Promise<CourseContent[]> => {
     setLoading(true);
     const {
       data: courseData
@@ -208,9 +221,20 @@ const CourseViewer = () => {
         setExpandedModules(new Set([modulesData[0].id]));
       }
     }
-    const {
-      data: contentsData
-    } = await supabase.from("course_content").select("id, module_id, title, description, content_type, content_url, order_index").eq("course_id", courseId).eq("is_published", true).order("order_index");
+    
+    // Instructors and admins can see all content (including unpublished), students only see published
+    let contentQuery = supabase
+      .from("course_content")
+      .select("id, module_id, title, description, content_type, content_url, order_index")
+      .eq("course_id", courseId)
+      .order("order_index");
+    
+    if (!canViewAllContent) {
+      contentQuery = contentQuery.eq("is_published", true);
+    }
+    
+    const { data: contentsData } = await contentQuery;
+    
     if (contentsData) {
       setContents(contentsData);
       if (contentsData.length > 0) {
