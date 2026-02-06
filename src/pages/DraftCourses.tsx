@@ -29,6 +29,7 @@ interface Course {
   what_you_learn: string[] | null;
   requirements: string[] | null;
   syllabus: any;
+  pending_review: boolean;
 }
 
 const DraftCourses = () => {
@@ -74,10 +75,12 @@ const DraftCourses = () => {
   const fetchDraftCourses = async () => {
     setLoading(true);
     
+    // Only show courses that are pending review (explicitly sent by instructors)
     const { data, error } = await supabase
       .from("courses")
       .select("*")
       .eq("published", false)
+      .eq("pending_review", true)
       .order("created_at", { ascending: false });
     
     if (error) {
@@ -96,7 +99,7 @@ const DraftCourses = () => {
   const publishCourse = async (course: Course) => {
     const { error } = await supabase
       .from("courses")
-      .update({ published: true })
+      .update({ published: true, pending_review: false })
       .eq("id", course.id);
     
     if (error) {
@@ -226,7 +229,7 @@ const DraftCourses = () => {
                     </Button>
                   </div>
                   <Badge className="absolute top-4 right-4 bg-orange-500 text-white border-0 z-10">
-                    Draft
+                    Pending Review
                   </Badge>
                   <img
                     src={course.image_url || "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80"}
