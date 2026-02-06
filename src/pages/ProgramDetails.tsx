@@ -29,11 +29,12 @@ interface Course {
 }
 
 const ProgramDetails = () => {
-  const { id } = useParams();
-  const [course, setCourse] = useState<Course | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [copied, setCopied] = useState(false);
-  const { toast } = useToast();
+   const { id } = useParams();
+   const [course, setCourse] = useState<Course | null>(null);
+   const [loading, setLoading] = useState(true);
+   const [copied, setCopied] = useState(false);
+   const [expandedOverview, setExpandedOverview] = useState(false);
+   const { toast } = useToast();
 
   const handleShare = async () => {
     const courseUrl = window.location.href;
@@ -131,9 +132,33 @@ const ProgramDetails = () => {
                 {course.title}
               </h1>
               {course.overview && (
-                <p className="text-xl text-muted-foreground mb-6">
-                  {course.overview}
-                </p>
+                <div className="mb-6">
+                  <p 
+                    className={`text-xl text-muted-foreground ${
+                      !expandedOverview ? "line-clamp-6" : ""
+                    }`}
+                  >
+                    {course.overview}
+                  </p>
+                  {course.overview.length > 300 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setExpandedOverview(!expandedOverview)}
+                      className="mt-2 p-0 h-auto text-primary hover:text-primary/80 font-medium"
+                    >
+                      {expandedOverview ? (
+                        <>
+                          Show Less <ChevronUp className="w-4 h-4 ml-1" />
+                        </>
+                      ) : (
+                        <>
+                          Show More <ChevronDown className="w-4 h-4 ml-1" />
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </div>
               )}
               
               <div className="flex flex-wrap items-center gap-6 mb-6">
