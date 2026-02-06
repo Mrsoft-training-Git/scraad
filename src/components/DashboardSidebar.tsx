@@ -12,6 +12,7 @@ import {
   Users,
   ChevronLeft,
   Briefcase,
+  FileClock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,7 @@ const allMenuItems = [
   { icon: BookOpen, label: "Course Allocation", path: "/dashboard/course-allocation", roles: ["admin"] },
   { icon: FileText, label: "Courses", path: "/dashboard/courses", roles: ["admin", "instructor"] },
   { icon: FileText, label: "Create Content", path: "/dashboard/create-content", roles: ["admin", "instructor"] },
+  { icon: FileClock, label: "Drafts", path: "/dashboard/drafts", roles: ["admin"] },
   { icon: GraduationCap, label: "Learning", path: "/dashboard/learning", roles: ["admin", "student", "instructor"] },
   { icon: Calendar, label: "Manage Classes", path: "/dashboard/classes", roles: ["admin", "instructor"] },
   { icon: CreditCard, label: "Payments", path: "/dashboard/payments", roles: ["admin"] },

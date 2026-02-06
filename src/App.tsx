@@ -16,6 +16,7 @@ import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import CourseAllocation from "./pages/CourseAllocation";
 import DashboardCourses from "./pages/DashboardCourses";
+import DraftCourses from "./pages/DraftCourses";
 import CreateContent from "./pages/CreateContent";
 import Learning from "./pages/Learning";
 import ManageClasses from "./pages/ManageClasses";
@@ -43,6 +44,7 @@ const App = () => (
           <Route path="/dashboard/course-allocation" element={<CourseAllocation />} />
           <Route path="/dashboard/courses" element={<DashboardCourses />} />
           <Route path="/dashboard/create-content" element={<CreateContent />} />
+          <Route path="/dashboard/drafts" element={<DraftCourses />} />
           <Route path="/dashboard/learning" element={<Learning />} />
           <Route path="/dashboard/learn/:courseId" element={<CourseViewer />} />
           <Route path="/dashboard/classes" element={<ManageClasses />} />
