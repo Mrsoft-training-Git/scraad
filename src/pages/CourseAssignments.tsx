@@ -902,7 +902,7 @@ const CourseAssignments = () => {
                 <p className="mt-1 whitespace-pre-wrap">{selectedAssignment.instructions}</p>
               </div>
             )}
-            <div className="space-y-4 py-4">
+            <div className="space-y-4 py-4 max-h-[50vh] overflow-y-auto pr-4">
               {selectedAssignment?.allowed_types.includes("text") && (
                 <div className="space-y-2">
                   <Label>Text Response</Label>
