@@ -13,7 +13,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { ClipboardList, Plus, Calendar, Clock, FileUp, Link as LinkIcon, Code, FileText, Loader2, Eye, Edit, CheckCircle, X, Upload } from "lucide-react";
+import { ClipboardList, Plus, Calendar, Clock, FileUp, Link as LinkIcon, Code, FileText, Loader2, Eye, Edit, CheckCircle, X, Upload, User as UserIcon } from "lucide-react";
+import { FilePreviewButton } from "@/components/FilePreview";
 import { format, isPast, formatDistanceToNow } from "date-fns";
 
 interface Course {
@@ -60,6 +61,8 @@ interface Submission {
   status: string;
   submitted_at: string | null;
   graded_at: string | null;
+  student_name?: string;
+  student_email?: string;
 }
 
 interface RubricScore {
@@ -429,7 +432,7 @@ const CourseAssignments = () => {
   };
 
   const openGradeDialog = async (assignment: Assignment) => {
-    // Fetch all submissions for this assignment
+    // Fetch all submissions for this assignment with student profile
     const { data: submissions } = await supabase
       .from("assignment_submissions")
       .select("*")
@@ -438,10 +441,20 @@ const CourseAssignments = () => {
 
     if (submissions && submissions.length > 0) {
       const sub = submissions[0];
+      
+      // Fetch student profile
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("full_name, email")
+        .eq("id", sub.student_id)
+        .maybeSingle();
+      
       setSelectedAssignment(assignment);
       setGradingSubmission({
         ...sub,
-        rubric_scores: (sub.rubric_scores as unknown as RubricScore[]) || []
+        rubric_scores: (sub.rubric_scores as unknown as RubricScore[]) || [],
+        student_name: profile?.full_name || "Unknown Student",
+        student_email: profile?.email || ""
       });
       setGradeData({
         score: sub.score || 0,
@@ -455,7 +468,26 @@ const CourseAssignments = () => {
   };
 
   const handleGradeSubmission = async () => {
-    if (!gradingSubmission || !user) return;
+    if (!gradingSubmission || !user || !selectedAssignment) return;
+
+    // Validate score doesn't exceed max score
+    if (gradeData.score > selectedAssignment.max_score) {
+      toast({ 
+        title: "Invalid Score", 
+        description: `Score cannot exceed max score of ${selectedAssignment.max_score}`, 
+        variant: "destructive" 
+      });
+      return;
+    }
+
+    if (gradeData.score < 0) {
+      toast({ 
+        title: "Invalid Score", 
+        description: "Score cannot be negative", 
+        variant: "destructive" 
+      });
+      return;
+    }
 
     setGrading(true);
     const updateData = {
@@ -1045,9 +1077,22 @@ const CourseAssignments = () => {
             </DialogHeader>
             {gradingSubmission && (
               <div className="space-y-4 py-4">
+                {/* Student Info */}
+                <div className="flex items-center gap-3 p-3 bg-primary/10 rounded-lg">
+                  <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                    <UserIcon className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-semibold">{gradingSubmission.student_name || "Unknown Student"}</p>
+                    {gradingSubmission.student_email && (
+                      <p className="text-sm text-muted-foreground">{gradingSubmission.student_email}</p>
+                    )}
+                  </div>
+                </div>
+
                 {/* Show submission content */}
                 <div className="p-4 bg-muted rounded-lg space-y-3">
-                  <h4 className="font-semibold">Student Submission</h4>
+                  <h4 className="font-semibold">Submission Content</h4>
                   {gradingSubmission.text_content && (
                     <div>
                       <span className="text-sm font-medium">Text Response:</span>
@@ -1057,12 +1102,9 @@ const CourseAssignments = () => {
                   {gradingSubmission.file_urls && gradingSubmission.file_urls.length > 0 && (
                     <div>
                       <span className="text-sm font-medium">Files:</span>
-                      <div className="space-y-1 mt-1">
+                      <div className="space-y-2 mt-1">
                         {gradingSubmission.file_urls.map((url, i) => (
-                          <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-primary hover:underline">
-                            <FileUp className="w-4 h-4" />
-                            {url.split('/').pop()}
-                          </a>
+                          <FilePreviewButton key={i} fileUrl={url} />
                         ))}
                       </div>
                     </div>
@@ -1083,7 +1125,7 @@ const CourseAssignments = () => {
                   {gradingSubmission.code_content && (
                     <div>
                       <span className="text-sm font-medium">Code ({gradingSubmission.code_language}):</span>
-                      <pre className="text-sm mt-1 p-2 bg-background rounded overflow-x-auto">
+                      <pre className="text-sm mt-1 p-2 bg-background rounded overflow-x-auto max-h-[200px]">
                         <code>{gradingSubmission.code_content}</code>
                       </pre>
                     </div>
