@@ -94,21 +94,23 @@ const getSignedUrl = async (bucketName: string, fileUrlOrPath: string): Promise<
 };
 
 export const FilePreview = ({ open, onOpenChange, fileUrl, fileName, bucketName = "assignment-submissions" }: FilePreviewProps) => {
-  const [signedUrl, setSignedUrl] = useState<string | null>(null);
+  // For public buckets, use the URL directly. For private buckets, generate signed URL.
+  const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const fileType = getFileType(fileUrl);
   const displayName = fileName || fileUrl.split('/').pop() || "File";
 
   useEffect(() => {
     if (open && fileUrl) {
-      // Check if this is already a full URL or a storage path
+      // If it's already a full HTTP URL, use it directly (public bucket)
       if (fileUrl.startsWith("http")) {
-        setSignedUrl(fileUrl);
+        setResolvedUrl(fileUrl);
+        setLoading(false);
       } else {
-        // It's a storage path, generate signed URL
+        // It's a storage path, generate signed URL for private access
         setLoading(true);
         getSignedUrl(bucketName, fileUrl).then((url) => {
-          setSignedUrl(url);
+          setResolvedUrl(url);
           setLoading(false);
         });
       }
@@ -124,7 +126,7 @@ export const FilePreview = ({ open, onOpenChange, fileUrl, fileName, bucketName 
       );
     }
 
-    if (!signedUrl) {
+    if (!resolvedUrl) {
       return (
         <div className="flex flex-col items-center justify-center py-12 space-y-4">
           <FileUp className="w-16 h-16 text-muted-foreground" />
@@ -140,7 +142,7 @@ export const FilePreview = ({ open, onOpenChange, fileUrl, fileName, bucketName 
         return (
           <div className="flex items-center justify-center w-full">
             <img 
-              src={signedUrl} 
+              src={resolvedUrl} 
               alt={displayName} 
               className="max-w-full max-h-[70vh] object-contain rounded-lg"
             />
@@ -151,7 +153,7 @@ export const FilePreview = ({ open, onOpenChange, fileUrl, fileName, bucketName 
         return (
           <div className="w-full aspect-video">
             <video 
-              src={signedUrl} 
+              src={resolvedUrl} 
               controls 
               className="w-full h-full rounded-lg bg-black"
             >
@@ -164,7 +166,7 @@ export const FilePreview = ({ open, onOpenChange, fileUrl, fileName, bucketName 
         return (
           <div className="w-full h-[70vh]">
             <iframe 
-              src={signedUrl} 
+              src={resolvedUrl} 
               title={displayName}
               className="w-full h-full rounded-lg border"
             />
@@ -175,7 +177,7 @@ export const FilePreview = ({ open, onOpenChange, fileUrl, fileName, bucketName 
         return (
           <div className="w-full h-[70vh]">
             <iframe 
-              src={signedUrl} 
+              src={resolvedUrl} 
               title={displayName}
               className="w-full h-full rounded-lg border bg-muted font-mono text-sm"
             />
@@ -191,13 +193,13 @@ export const FilePreview = ({ open, onOpenChange, fileUrl, fileName, bucketName 
             </p>
             <div className="flex gap-2">
               <Button asChild>
-                <a href={signedUrl} target="_blank" rel="noopener noreferrer">
+                <a href={resolvedUrl} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="w-4 h-4 mr-2" />
                   Open in New Tab
                 </a>
               </Button>
               <Button variant="outline" asChild>
-                <a href={signedUrl} download={displayName}>
+                <a href={resolvedUrl} download={displayName}>
                   <Download className="w-4 h-4 mr-2" />
                   Download
                 </a>
@@ -219,14 +221,14 @@ export const FilePreview = ({ open, onOpenChange, fileUrl, fileName, bucketName 
         </DialogHeader>
         {renderPreview()}
         <div className="flex justify-end gap-2 pt-2">
-          <Button variant="outline" asChild disabled={!signedUrl}>
-            <a href={signedUrl || "#"} download={displayName}>
+          <Button variant="outline" asChild disabled={!resolvedUrl}>
+            <a href={resolvedUrl || "#"} download={displayName}>
               <Download className="w-4 h-4 mr-2" />
               Download
             </a>
           </Button>
-          <Button variant="outline" asChild disabled={!signedUrl}>
-            <a href={signedUrl || "#"} target="_blank" rel="noopener noreferrer">
+          <Button variant="outline" asChild disabled={!resolvedUrl}>
+            <a href={resolvedUrl || "#"} target="_blank" rel="noopener noreferrer">
               <ExternalLink className="w-4 h-4 mr-2" />
               Open in New Tab
             </a>
