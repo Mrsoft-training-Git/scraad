@@ -80,9 +80,10 @@ const CourseAssignments = () => {
   const [selectedCourse, setSelectedCourse] = useState<string>(selectedCourseId || "all");
   const [activeTab, setActiveTab] = useState<string>("pending");
 
-  // Create assignment dialog
+  // Create/Edit assignment dialog
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null);
   const [newAssignment, setNewAssignment] = useState({
     course_id: "",
     title: "",
@@ -256,39 +257,106 @@ const CourseAssignments = () => {
     }
 
     setCreating(true);
-    const insertData = {
-      course_id: newAssignment.course_id,
-      instructor_id: user.id,
-      title: newAssignment.title.trim(),
-      description: newAssignment.description.trim() || null,
-      instructions: newAssignment.instructions.trim() || null,
-      due_date: new Date(newAssignment.due_date).toISOString(),
-      max_score: newAssignment.max_score,
-      allowed_types: newAssignment.allowed_types,
-      rubric: JSON.parse(JSON.stringify(newAssignment.rubric)),
-      is_published: newAssignment.is_published
-    };
-    const { error } = await supabase.from("course_assignments").insert(insertData);
+    
+    if (editingAssignment) {
+      // Update existing assignment
+      const updateData = {
+        course_id: newAssignment.course_id,
+        title: newAssignment.title.trim(),
+        description: newAssignment.description.trim() || null,
+        instructions: newAssignment.instructions.trim() || null,
+        due_date: new Date(newAssignment.due_date).toISOString(),
+        max_score: newAssignment.max_score,
+        allowed_types: newAssignment.allowed_types,
+        rubric: JSON.parse(JSON.stringify(newAssignment.rubric)),
+        is_published: newAssignment.is_published
+      };
+      const { error } = await supabase
+        .from("course_assignments")
+        .update(updateData)
+        .eq("id", editingAssignment.id);
+
+      if (error) {
+        toast({ title: "Error", description: "Failed to update assignment", variant: "destructive" });
+      } else {
+        toast({ title: "Success", description: "Assignment updated!" });
+        closeCreateDialog();
+        fetchAssignments();
+      }
+    } else {
+      // Create new assignment
+      const insertData = {
+        course_id: newAssignment.course_id,
+        instructor_id: user.id,
+        title: newAssignment.title.trim(),
+        description: newAssignment.description.trim() || null,
+        instructions: newAssignment.instructions.trim() || null,
+        due_date: new Date(newAssignment.due_date).toISOString(),
+        max_score: newAssignment.max_score,
+        allowed_types: newAssignment.allowed_types,
+        rubric: JSON.parse(JSON.stringify(newAssignment.rubric)),
+        is_published: newAssignment.is_published
+      };
+      const { error } = await supabase.from("course_assignments").insert(insertData);
+
+      if (error) {
+        toast({ title: "Error", description: "Failed to create assignment", variant: "destructive" });
+      } else {
+        toast({ title: "Success", description: "Assignment created!" });
+        closeCreateDialog();
+        fetchAssignments();
+      }
+    }
+    setCreating(false);
+  };
+
+  const openEditDialog = (assignment: Assignment) => {
+    setEditingAssignment(assignment);
+    setNewAssignment({
+      course_id: assignment.course_id,
+      title: assignment.title,
+      description: assignment.description || "",
+      instructions: assignment.instructions || "",
+      due_date: format(new Date(assignment.due_date), "yyyy-MM-dd'T'HH:mm"),
+      max_score: assignment.max_score,
+      allowed_types: assignment.allowed_types,
+      rubric: assignment.rubric,
+      is_published: assignment.is_published
+    });
+    setCreateDialogOpen(true);
+  };
+
+  const closeCreateDialog = () => {
+    setCreateDialogOpen(false);
+    setEditingAssignment(null);
+    setNewAssignment({
+      course_id: "",
+      title: "",
+      description: "",
+      instructions: "",
+      due_date: "",
+      max_score: 100,
+      allowed_types: ["text", "file"],
+      rubric: [],
+      is_published: false
+    });
+  };
+
+  const handleTogglePublish = async (assignment: Assignment) => {
+    const { error } = await supabase
+      .from("course_assignments")
+      .update({ is_published: !assignment.is_published })
+      .eq("id", assignment.id);
 
     if (error) {
-      toast({ title: "Error", description: "Failed to create assignment", variant: "destructive" });
+      toast({ title: "Error", description: "Failed to update assignment", variant: "destructive" });
     } else {
-      toast({ title: "Success", description: "Assignment created!" });
-      setCreateDialogOpen(false);
-      setNewAssignment({
-        course_id: "",
-        title: "",
-        description: "",
-        instructions: "",
-        due_date: "",
-        max_score: 100,
-        allowed_types: ["text", "file"],
-        rubric: [],
-        is_published: false
+      toast({ 
+        title: "Success", 
+        description: assignment.is_published ? "Assignment unpublished" : "Assignment published!" 
       });
       fetchAssignments();
     }
-    setCreating(false);
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -320,6 +388,17 @@ const CourseAssignments = () => {
 
   const handleSubmitAssignment = async () => {
     if (!user || !selectedAssignment) return;
+
+    // Check if past due date
+    if (isPast(new Date(selectedAssignment.due_date))) {
+      toast({ 
+        title: "Submission Closed", 
+        description: "The due date for this assignment has passed. Submissions are no longer accepted.", 
+        variant: "destructive" 
+      });
+      setSubmitDialogOpen(false);
+      return;
+    }
 
     setSubmitting(true);
     
@@ -486,7 +565,10 @@ const CourseAssignments = () => {
             </Select>
 
             {canCreateAssignment && (
-              <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+              <Dialog open={createDialogOpen} onOpenChange={(open) => {
+                if (!open) closeCreateDialog();
+                else setCreateDialogOpen(true);
+              }}>
                 <DialogTrigger asChild>
                   <Button>
                     <Plus className="w-4 h-4 mr-2" />
@@ -495,9 +577,9 @@ const CourseAssignments = () => {
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
-                    <DialogTitle>Create Assignment</DialogTitle>
+                    <DialogTitle>{editingAssignment ? "Edit Assignment" : "Create Assignment"}</DialogTitle>
                     <DialogDescription>
-                      Create a new assignment for students to complete
+                      {editingAssignment ? "Update assignment details" : "Create a new assignment for students to complete"}
                     </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4 py-4">
@@ -644,12 +726,12 @@ const CourseAssignments = () => {
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
+                    <Button variant="outline" onClick={closeCreateDialog}>
                       Cancel
                     </Button>
                     <Button onClick={handleCreateAssignment} disabled={creating}>
                       {creating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                      Create Assignment
+                      {editingAssignment ? "Save Changes" : "Create Assignment"}
                     </Button>
                   </DialogFooter>
                 </DialogContent>
@@ -728,24 +810,56 @@ const CourseAssignments = () => {
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      {userRole === "student" && !assignment.submission?.status?.includes("graded") && !isPast(new Date(assignment.due_date)) && (
-                        <Button 
-                          onClick={() => {
-                            setSelectedAssignment(assignment);
-                            setSubmitDialogOpen(true);
-                          }}
-                        >
-                          <Upload className="w-4 h-4 mr-2" />
-                          {assignment.submission ? "Edit Submission" : "Submit"}
-                        </Button>
+                      {userRole === "student" && (
+                        <>
+                          {isPast(new Date(assignment.due_date)) && !assignment.submission?.status?.includes("graded") && !assignment.submission?.status?.includes("submitted") ? (
+                            <Badge variant="destructive">Submission Closed</Badge>
+                          ) : (
+                            !assignment.submission?.status?.includes("graded") && !isPast(new Date(assignment.due_date)) && (
+                              <Button 
+                                onClick={() => {
+                                  setSelectedAssignment(assignment);
+                                  setSubmitDialogOpen(true);
+                                }}
+                              >
+                                <Upload className="w-4 h-4 mr-2" />
+                                {assignment.submission ? "Edit Submission" : "Submit"}
+                              </Button>
+                            )
+                          )}
+                        </>
                       )}
                       {canCreateAssignment && (
-                        <>
-                          <Button variant="outline" size="sm" onClick={() => openGradeDialog(assignment)}>
+                        <div className="flex items-center gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => openEditDialog(assignment)}
+                          >
                             <Edit className="w-4 h-4 mr-2" />
+                            Edit
+                          </Button>
+                          <Button 
+                            variant={assignment.is_published ? "secondary" : "default"} 
+                            size="sm" 
+                            onClick={() => handleTogglePublish(assignment)}
+                          >
+                            {assignment.is_published ? (
+                              <>
+                                <Eye className="w-4 h-4 mr-2" />
+                                Unpublish
+                              </>
+                            ) : (
+                              <>
+                                <CheckCircle className="w-4 h-4 mr-2" />
+                                Publish
+                              </>
+                            )}
+                          </Button>
+                          <Button variant="outline" size="sm" onClick={() => openGradeDialog(assignment)}>
                             Grade
                           </Button>
-                        </>
+                        </div>
                       )}
                     </div>
                   </div>
