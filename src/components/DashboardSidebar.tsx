@@ -45,9 +45,10 @@ const allMenuItems = [
 interface DashboardSidebarProps {
   userRole: string;
   unreadAnnouncementsCount?: number;
+  unreadAssignmentsCount?: number;
 }
 
-export const DashboardSidebar = ({ userRole, unreadAnnouncementsCount = 0 }: DashboardSidebarProps) => {
+export const DashboardSidebar = ({ userRole, unreadAnnouncementsCount = 0, unreadAssignmentsCount = 0 }: DashboardSidebarProps) => {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
 
@@ -111,11 +112,14 @@ export const DashboardSidebar = ({ userRole, unreadAnnouncementsCount = 0 }: Das
               <Icon className="w-5 h-5 flex-shrink-0" />
               {!collapsed && (
                 <div className="flex items-center justify-between flex-1">
-                  <span className="text-sm">{item.label}</span>
-                  {item.label === "Announcements" && unreadAnnouncementsCount > 0 && (
-                    <Badge className="text-xs bg-destructive">{unreadAnnouncementsCount}</Badge>
-                  )}
-                </div>
+                   <span className="text-sm">{item.label}</span>
+                   {item.label === "Announcements" && unreadAnnouncementsCount > 0 && (
+                     <Badge className="text-xs bg-destructive">{unreadAnnouncementsCount}</Badge>
+                   )}
+                   {item.label === "Assignments" && unreadAssignmentsCount > 0 && (
+                     <Badge className="text-xs bg-destructive">{unreadAssignmentsCount}</Badge>
+                   )}
+                 </div>
               )}
               {collapsed && <span className="text-sm lg:hidden">{item.label}</span>}
             </Link>
