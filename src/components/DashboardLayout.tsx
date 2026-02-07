@@ -1,4 +1,4 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { DashboardSidebar } from "./DashboardSidebar";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,6 +18,52 @@ interface DashboardLayoutProps {
 export const DashboardLayout = ({ children, user, userRole }: DashboardLayoutProps) => {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (userRole === "student" && user) {
+      const fetchUnreadCount = async () => {
+        // Get all announcements for enrolled courses
+        const { data: enrollments } = await supabase
+          .from("enrolled_courses")
+          .select("course_id")
+          .eq("user_id", user.id);
+
+        if (!enrollments || enrollments.length === 0) {
+          setUnreadCount(0);
+          return;
+        }
+
+        const courseIds = enrollments.map(e => e.course_id).filter(Boolean);
+        
+        // Get all announcements for those courses
+        const { data: announcements } = await supabase
+          .from("course_announcements")
+          .select("id")
+          .in("course_id", courseIds);
+
+        if (!announcements) {
+          setUnreadCount(0);
+          return;
+        }
+
+        const announcementIds = announcements.map(a => a.id);
+        
+        // Get read announcements
+        const { data: reads } = await supabase
+          .from("announcement_reads")
+          .select("announcement_id")
+          .eq("user_id", user.id)
+          .in("announcement_id", announcementIds);
+
+        const readSet = new Set(reads?.map(r => r.announcement_id) || []);
+        const unread = announcementIds.filter(id => !readSet.has(id)).length;
+        setUnreadCount(unread);
+      };
+
+      fetchUnreadCount();
+    }
+  }, [user, userRole]);
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -33,7 +79,7 @@ export const DashboardLayout = ({ children, user, userRole }: DashboardLayoutPro
     <div className="flex h-screen bg-muted/30 overflow-hidden">
       {/* Desktop Sidebar */}
       <div className="hidden lg:block">
-        <DashboardSidebar userRole={userRole} />
+        <DashboardSidebar userRole={userRole} unreadAnnouncementsCount={unreadCount} />
       </div>
       
       <main className="flex-1 flex flex-col w-full">
@@ -48,7 +94,7 @@ export const DashboardLayout = ({ children, user, userRole }: DashboardLayoutPro
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="p-0 w-64">
-                <DashboardSidebar userRole={userRole} />
+                <DashboardSidebar userRole={userRole} unreadAnnouncementsCount={unreadCount} />
               </SheetContent>
             </Sheet>
             

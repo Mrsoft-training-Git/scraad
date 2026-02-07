@@ -58,6 +58,7 @@ const CourseAnnouncements = () => {
   const [replies, setReplies] = useState<Map<string, Reply[]>>(new Map());
   const [replyText, setReplyText] = useState("");
   const [sendingReply, setSendingReply] = useState(false);
+  const [readAnnouncements, setReadAnnouncements] = useState<Set<string>>(new Set());
   
   // Create announcement dialog
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -87,6 +88,15 @@ const CourseAnnouncements = () => {
 
       const role = roleData?.role || "student";
       setUserRole(role);
+      
+      // Fetch read announcements for students
+      if (role === "student") {
+        const { data: reads } = await supabase
+          .from("announcement_reads")
+          .select("announcement_id")
+          .eq("user_id", session.user.id);
+        setReadAnnouncements(new Set(reads?.map(r => r.announcement_id) || []));
+      }
       
       await fetchCourses(session.user.id, role);
     };
@@ -214,6 +224,19 @@ const CourseAnnouncements = () => {
       setExpandedAnnouncement(null);
     } else {
       setExpandedAnnouncement(announcementId);
+      
+      // Mark as read if student
+      if (userRole === "student" && user && !readAnnouncements.has(announcementId)) {
+        const { error } = await supabase.from("announcement_reads").insert({
+          user_id: user.id,
+          announcement_id: announcementId
+        });
+        
+        if (!error) {
+          setReadAnnouncements(prev => new Set([...prev, announcementId]));
+        }
+      }
+      
       if (!replies.has(announcementId)) {
         await fetchReplies(announcementId);
       }
@@ -410,6 +433,11 @@ const CourseAnnouncements = () => {
                           <Badge variant="secondary" className="text-xs">
                             <Pin className="w-3 h-3 mr-1" />
                             Pinned
+                          </Badge>
+                        )}
+                        {userRole === "student" && !readAnnouncements.has(announcement.id) && (
+                          <Badge className="text-xs bg-destructive">
+                            New
                           </Badge>
                         )}
                         <Badge variant="outline">{announcement.course?.title}</Badge>

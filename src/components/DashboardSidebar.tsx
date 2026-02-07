@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import logo from "@/assets/uniport-logo.png";
 
@@ -43,9 +44,10 @@ const allMenuItems = [
 
 interface DashboardSidebarProps {
   userRole: string;
+  unreadAnnouncementsCount?: number;
 }
 
-export const DashboardSidebar = ({ userRole }: DashboardSidebarProps) => {
+export const DashboardSidebar = ({ userRole, unreadAnnouncementsCount = 0 }: DashboardSidebarProps) => {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
 
@@ -107,7 +109,14 @@ export const DashboardSidebar = ({ userRole }: DashboardSidebarProps) => {
               )}
             >
               <Icon className="w-5 h-5 flex-shrink-0" />
-              {!collapsed && <span className="text-sm">{item.label}</span>}
+              {!collapsed && (
+                <div className="flex items-center justify-between flex-1">
+                  <span className="text-sm">{item.label}</span>
+                  {item.label === "Announcements" && unreadAnnouncementsCount > 0 && (
+                    <Badge className="text-xs bg-destructive">{unreadAnnouncementsCount}</Badge>
+                  )}
+                </div>
+              )}
               {collapsed && <span className="text-sm lg:hidden">{item.label}</span>}
             </Link>
           );
