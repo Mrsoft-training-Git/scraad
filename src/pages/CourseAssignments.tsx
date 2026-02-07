@@ -346,6 +346,23 @@ const CourseAssignments = () => {
   };
 
   const handleTogglePublish = async (assignment: Assignment) => {
+    // If trying to unpublish, check for existing submissions
+    if (assignment.is_published) {
+      const { count } = await supabase
+        .from("assignment_submissions")
+        .select("*", { count: "exact", head: true })
+        .eq("assignment_id", assignment.id);
+
+      if (count && count > 0) {
+        toast({ 
+          title: "Cannot Unpublish", 
+          description: "This assignment has already received submissions and cannot be unpublished.", 
+          variant: "destructive" 
+        });
+        return;
+      }
+    }
+
     const { error } = await supabase
       .from("course_assignments")
       .update({ is_published: !assignment.is_published })
