@@ -53,14 +53,41 @@ const getFileIcon = (fileType: string) => {
   }
 };
 
+// Helper to extract relative path from full Supabase storage URL
+const extractStoragePath = (url: string, bucketName: string): string | null => {
+  // Check if it's a full Supabase storage URL
+  const publicPattern = `/storage/v1/object/public/${bucketName}/`;
+  const signedPattern = `/storage/v1/object/sign/${bucketName}/`;
+  
+  if (url.includes(publicPattern)) {
+    const pathStart = url.indexOf(publicPattern) + publicPattern.length;
+    return decodeURIComponent(url.substring(pathStart).split('?')[0]);
+  }
+  
+  if (url.includes(signedPattern)) {
+    const pathStart = url.indexOf(signedPattern) + signedPattern.length;
+    return decodeURIComponent(url.substring(pathStart).split('?')[0]);
+  }
+  
+  // If it's not a full URL, assume it's already a relative path
+  if (!url.startsWith("http")) {
+    return url;
+  }
+  
+  return null;
+};
+
 // Helper to get signed URL for private buckets
-const getSignedUrl = async (bucketName: string, filePath: string): Promise<string | null> => {
+const getSignedUrl = async (bucketName: string, fileUrlOrPath: string): Promise<string | null> => {
+  // Extract the relative path from the URL if it's a full URL
+  const filePath = extractStoragePath(fileUrlOrPath, bucketName) || fileUrlOrPath;
+  
   const { data, error } = await supabase.storage
     .from(bucketName)
     .createSignedUrl(filePath, 3600); // 1 hour expiry
   
   if (error) {
-    console.error("Error creating signed URL:", error);
+    console.error("Error creating signed URL:", error, "for path:", filePath);
     return null;
   }
   return data.signedUrl;
