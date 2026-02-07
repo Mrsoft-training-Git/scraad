@@ -1,17 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { FileText, Video, Image, Code, FileUp, ExternalLink, X, Download } from "lucide-react";
+import { FileText, Video, Image, Code, FileUp, ExternalLink, Download, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface FilePreviewProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   fileUrl: string;
   fileName?: string;
+  bucketName?: string;
 }
 
 const getFileType = (url: string): "image" | "video" | "pdf" | "code" | "other" => {
-  const extension = url.split('.').pop()?.toLowerCase() || "";
+  const extension = url.split('.').pop()?.toLowerCase().split('?')[0] || "";
   
   // Images
   if (["jpg", "jpeg", "png", "gif", "webp", "svg", "bmp"].includes(extension)) {
@@ -51,17 +53,67 @@ const getFileIcon = (fileType: string) => {
   }
 };
 
-export const FilePreview = ({ open, onOpenChange, fileUrl, fileName }: FilePreviewProps) => {
+// Helper to get signed URL for private buckets
+const getSignedUrl = async (bucketName: string, filePath: string): Promise<string | null> => {
+  const { data, error } = await supabase.storage
+    .from(bucketName)
+    .createSignedUrl(filePath, 3600); // 1 hour expiry
+  
+  if (error) {
+    console.error("Error creating signed URL:", error);
+    return null;
+  }
+  return data.signedUrl;
+};
+
+export const FilePreview = ({ open, onOpenChange, fileUrl, fileName, bucketName = "assignment-submissions" }: FilePreviewProps) => {
+  const [signedUrl, setSignedUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const fileType = getFileType(fileUrl);
   const displayName = fileName || fileUrl.split('/').pop() || "File";
 
+  useEffect(() => {
+    if (open && fileUrl) {
+      // Check if this is already a full URL or a storage path
+      if (fileUrl.startsWith("http")) {
+        setSignedUrl(fileUrl);
+      } else {
+        // It's a storage path, generate signed URL
+        setLoading(true);
+        getSignedUrl(bucketName, fileUrl).then((url) => {
+          setSignedUrl(url);
+          setLoading(false);
+        });
+      }
+    }
+  }, [open, fileUrl, bucketName]);
+
   const renderPreview = () => {
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      );
+    }
+
+    if (!signedUrl) {
+      return (
+        <div className="flex flex-col items-center justify-center py-12 space-y-4">
+          <FileUp className="w-16 h-16 text-muted-foreground" />
+          <p className="text-muted-foreground text-center">
+            Unable to load file preview.
+          </p>
+        </div>
+      );
+    }
+
     switch (fileType) {
       case "image":
         return (
           <div className="flex items-center justify-center w-full">
             <img 
-              src={fileUrl} 
+              src={signedUrl} 
               alt={displayName} 
               className="max-w-full max-h-[70vh] object-contain rounded-lg"
             />
@@ -72,7 +124,7 @@ export const FilePreview = ({ open, onOpenChange, fileUrl, fileName }: FilePrevi
         return (
           <div className="w-full aspect-video">
             <video 
-              src={fileUrl} 
+              src={signedUrl} 
               controls 
               className="w-full h-full rounded-lg bg-black"
             >
@@ -85,7 +137,7 @@ export const FilePreview = ({ open, onOpenChange, fileUrl, fileName }: FilePrevi
         return (
           <div className="w-full h-[70vh]">
             <iframe 
-              src={fileUrl} 
+              src={signedUrl} 
               title={displayName}
               className="w-full h-full rounded-lg border"
             />
@@ -96,7 +148,7 @@ export const FilePreview = ({ open, onOpenChange, fileUrl, fileName }: FilePrevi
         return (
           <div className="w-full h-[70vh]">
             <iframe 
-              src={fileUrl} 
+              src={signedUrl} 
               title={displayName}
               className="w-full h-full rounded-lg border bg-muted font-mono text-sm"
             />
@@ -112,13 +164,13 @@ export const FilePreview = ({ open, onOpenChange, fileUrl, fileName }: FilePrevi
             </p>
             <div className="flex gap-2">
               <Button asChild>
-                <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+                <a href={signedUrl} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="w-4 h-4 mr-2" />
                   Open in New Tab
                 </a>
               </Button>
               <Button variant="outline" asChild>
-                <a href={fileUrl} download={displayName}>
+                <a href={signedUrl} download={displayName}>
                   <Download className="w-4 h-4 mr-2" />
                   Download
                 </a>
@@ -140,14 +192,14 @@ export const FilePreview = ({ open, onOpenChange, fileUrl, fileName }: FilePrevi
         </DialogHeader>
         {renderPreview()}
         <div className="flex justify-end gap-2 pt-2">
-          <Button variant="outline" asChild>
-            <a href={fileUrl} download={displayName}>
+          <Button variant="outline" asChild disabled={!signedUrl}>
+            <a href={signedUrl || "#"} download={displayName}>
               <Download className="w-4 h-4 mr-2" />
               Download
             </a>
           </Button>
-          <Button variant="outline" asChild>
-            <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+          <Button variant="outline" asChild disabled={!signedUrl}>
+            <a href={signedUrl || "#"} target="_blank" rel="noopener noreferrer">
               <ExternalLink className="w-4 h-4 mr-2" />
               Open in New Tab
             </a>
@@ -162,12 +214,14 @@ export const FilePreview = ({ open, onOpenChange, fileUrl, fileName }: FilePrevi
 interface FilePreviewButtonProps {
   fileUrl: string;
   fileName?: string;
+  bucketName?: string;
 }
 
-export const FilePreviewButton = ({ fileUrl, fileName }: FilePreviewButtonProps) => {
+export const FilePreviewButton = ({ fileUrl, fileName, bucketName = "assignment-submissions" }: FilePreviewButtonProps) => {
   const [previewOpen, setPreviewOpen] = useState(false);
   const fileType = getFileType(fileUrl);
-  const displayName = fileName || fileUrl.split('/').pop() || "File";
+  // Extract just the filename from the path for display
+  const displayName = fileName || fileUrl.split('/').pop()?.split('?')[0] || "File";
 
   return (
     <>
@@ -183,6 +237,7 @@ export const FilePreviewButton = ({ fileUrl, fileName }: FilePreviewButtonProps)
         onOpenChange={setPreviewOpen} 
         fileUrl={fileUrl} 
         fileName={displayName}
+        bucketName={bucketName}
       />
     </>
   );
