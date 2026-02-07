@@ -166,7 +166,7 @@ export const FilePreview = ({ open, onOpenChange, fileUrl, fileName, bucketName 
         return (
           <div className="w-full h-[70vh]">
             <iframe 
-              src={resolvedUrl} 
+              src={`https://docs.google.com/viewer?url=${encodeURIComponent(resolvedUrl)}&embedded=true`}
               title={displayName}
               className="w-full h-full rounded-lg border"
             />
