@@ -14,6 +14,109 @@ export type Database = {
   }
   public: {
     Tables: {
+      announcement_replies: {
+        Row: {
+          announcement_id: string
+          content: string
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          announcement_id: string
+          content: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          announcement_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "announcement_replies_announcement_id_fkey"
+            columns: ["announcement_id"]
+            isOneToOne: false
+            referencedRelation: "course_announcements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assignment_submissions: {
+        Row: {
+          assignment_id: string
+          code_content: string | null
+          code_language: string | null
+          created_at: string
+          feedback: string | null
+          file_urls: string[] | null
+          graded_at: string | null
+          graded_by: string | null
+          id: string
+          link_urls: string[] | null
+          rubric_scores: Json | null
+          score: number | null
+          status: string | null
+          student_id: string
+          submitted_at: string | null
+          text_content: string | null
+          updated_at: string
+        }
+        Insert: {
+          assignment_id: string
+          code_content?: string | null
+          code_language?: string | null
+          created_at?: string
+          feedback?: string | null
+          file_urls?: string[] | null
+          graded_at?: string | null
+          graded_by?: string | null
+          id?: string
+          link_urls?: string[] | null
+          rubric_scores?: Json | null
+          score?: number | null
+          status?: string | null
+          student_id: string
+          submitted_at?: string | null
+          text_content?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assignment_id?: string
+          code_content?: string | null
+          code_language?: string | null
+          created_at?: string
+          feedback?: string | null
+          file_urls?: string[] | null
+          graded_at?: string | null
+          graded_by?: string | null
+          id?: string
+          link_urls?: string[] | null
+          rubric_scores?: Json | null
+          score?: number | null
+          status?: string | null
+          student_id?: string
+          submitted_at?: string | null
+          text_content?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignment_submissions_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "course_assignments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assignments: {
         Row: {
           created_at: string | null
@@ -72,6 +175,113 @@ export type Database = {
             columns: ["content_id"]
             isOneToOne: false
             referencedRelation: "course_content"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_announcements: {
+        Row: {
+          content: string
+          course_id: string
+          created_at: string
+          id: string
+          instructor_id: string
+          is_pinned: boolean | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          course_id: string
+          created_at?: string
+          id?: string
+          instructor_id: string
+          is_pinned?: boolean | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          course_id?: string
+          created_at?: string
+          id?: string
+          instructor_id?: string
+          is_pinned?: boolean | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_announcements_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_assignments: {
+        Row: {
+          allowed_types: string[] | null
+          course_id: string
+          created_at: string
+          description: string | null
+          due_date: string
+          id: string
+          instructions: string | null
+          instructor_id: string
+          is_published: boolean | null
+          max_score: number | null
+          module_id: string | null
+          rubric: Json | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          allowed_types?: string[] | null
+          course_id: string
+          created_at?: string
+          description?: string | null
+          due_date: string
+          id?: string
+          instructions?: string | null
+          instructor_id: string
+          is_published?: boolean | null
+          max_score?: number | null
+          module_id?: string | null
+          rubric?: Json | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          allowed_types?: string[] | null
+          course_id?: string
+          created_at?: string
+          description?: string | null
+          due_date?: string
+          id?: string
+          instructions?: string | null
+          instructor_id?: string
+          is_published?: boolean | null
+          max_score?: number | null
+          module_id?: string | null
+          rubric?: Json | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_assignments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_assignments_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "course_modules"
             referencedColumns: ["id"]
           },
         ]
@@ -248,6 +458,94 @@ export type Database = {
           what_you_learn?: string[] | null
         }
         Relationships: []
+      }
+      discussion_replies: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_answer: boolean | null
+          thread_id: string
+          updated_at: string
+          upvotes: number | null
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_answer?: boolean | null
+          thread_id: string
+          updated_at?: string
+          upvotes?: number | null
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_answer?: boolean | null
+          thread_id?: string
+          updated_at?: string
+          upvotes?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discussion_replies_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "discussion_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      discussion_threads: {
+        Row: {
+          content: string
+          course_id: string
+          created_at: string
+          id: string
+          is_pinned: boolean | null
+          is_resolved: boolean | null
+          title: string
+          updated_at: string
+          user_id: string
+          views_count: number | null
+        }
+        Insert: {
+          content: string
+          course_id: string
+          created_at?: string
+          id?: string
+          is_pinned?: boolean | null
+          is_resolved?: boolean | null
+          title: string
+          updated_at?: string
+          user_id: string
+          views_count?: number | null
+        }
+        Update: {
+          content?: string
+          course_id?: string
+          created_at?: string
+          id?: string
+          is_pinned?: boolean | null
+          is_resolved?: boolean | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          views_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discussion_threads_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       enrolled_courses: {
         Row: {
