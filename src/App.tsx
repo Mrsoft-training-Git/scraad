@@ -27,6 +27,9 @@ import RoleManagement from "./pages/RoleManagement";
 import UserManagement from "./pages/UserManagement";
 import ScrollToTop from "./components/ScrollToTop";
 import CourseViewer from "./pages/CourseViewer";
+import CourseAnnouncements from "./pages/CourseAnnouncements";
+import CourseDiscussions from "./pages/CourseDiscussions";
+import CourseAssignments from "./pages/CourseAssignments";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +51,9 @@ const App = () => (
           <Route path="/dashboard/learning" element={<Learning />} />
           <Route path="/dashboard/learn/:courseId" element={<CourseViewer />} />
           <Route path="/dashboard/classes" element={<ManageClasses />} />
+          <Route path="/dashboard/announcements" element={<CourseAnnouncements />} />
+          <Route path="/dashboard/discussions" element={<CourseDiscussions />} />
+          <Route path="/dashboard/assignments" element={<CourseAssignments />} />
           <Route path="/dashboard/payments" element={<Payments />} />
           <Route path="/dashboard/profile" element={<Profile />} />
           <Route path="/dashboard/references" element={<References />} />

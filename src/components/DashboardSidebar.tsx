@@ -13,6 +13,9 @@ import {
   ChevronLeft,
   Briefcase,
   FileClock,
+  Megaphone,
+  MessageSquare,
+  ClipboardList,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -28,6 +31,9 @@ const allMenuItems = [
   { icon: FileClock, label: "Drafts", path: "/dashboard/drafts", roles: ["admin"] },
   { icon: GraduationCap, label: "Learning", path: "/dashboard/learning", roles: ["admin", "student", "instructor"] },
   { icon: Calendar, label: "Manage Classes", path: "/dashboard/classes", roles: ["admin", "instructor"] },
+  { icon: Megaphone, label: "Announcements", path: "/dashboard/announcements", roles: ["admin", "student", "instructor"] },
+  { icon: MessageSquare, label: "Discussions", path: "/dashboard/discussions", roles: ["admin", "student", "instructor"] },
+  { icon: ClipboardList, label: "Assignments", path: "/dashboard/assignments", roles: ["admin", "student", "instructor"] },
   { icon: CreditCard, label: "Payments", path: "/dashboard/payments", roles: ["admin"] },
   { icon: User, label: "Profile Update", path: "/dashboard/profile", roles: ["admin", "student", "instructor"] },
   { icon: BookMarked, label: "References", path: "/dashboard/references", roles: ["admin"] },
