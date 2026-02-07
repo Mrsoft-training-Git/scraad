@@ -18,50 +18,72 @@ interface DashboardLayoutProps {
 export const DashboardLayout = ({ children, user, userRole }: DashboardLayoutProps) => {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadAnnouncementsCount, setUnreadAnnouncementsCount] = useState(0);
+  const [unreadAssignmentsCount, setUnreadAssignmentsCount] = useState(0);
 
   useEffect(() => {
     if (userRole === "student" && user) {
-      const fetchUnreadCount = async () => {
-        // Get all announcements for enrolled courses
+      const fetchUnreadCounts = async () => {
+        // Get all enrollments
         const { data: enrollments } = await supabase
           .from("enrolled_courses")
           .select("course_id")
           .eq("user_id", user.id);
 
         if (!enrollments || enrollments.length === 0) {
-          setUnreadCount(0);
+          setUnreadAnnouncementsCount(0);
+          setUnreadAssignmentsCount(0);
           return;
         }
 
         const courseIds = enrollments.map(e => e.course_id).filter(Boolean);
         
-        // Get all announcements for those courses
+        // Fetch unread announcements
         const { data: announcements } = await supabase
           .from("course_announcements")
           .select("id")
           .in("course_id", courseIds);
 
-        if (!announcements) {
-          setUnreadCount(0);
-          return;
+        if (announcements) {
+          const announcementIds = announcements.map(a => a.id);
+          const { data: reads } = await supabase
+            .from("announcement_reads")
+            .select("announcement_id")
+            .eq("user_id", user.id)
+            .in("announcement_id", announcementIds);
+
+          const readSet = new Set(reads?.map(r => r.announcement_id) || []);
+          const unread = announcementIds.filter(id => !readSet.has(id)).length;
+          setUnreadAnnouncementsCount(unread);
         }
 
-        const announcementIds = announcements.map(a => a.id);
-        
-        // Get read announcements
-        const { data: reads } = await supabase
-          .from("announcement_reads")
-          .select("announcement_id")
-          .eq("user_id", user.id)
-          .in("announcement_id", announcementIds);
+        // Fetch unread assignments (not submitted)
+        const { data: assignments } = await supabase
+          .from("course_assignments")
+          .select("id")
+          .eq("is_published", true)
+          .in("course_id", courseIds);
 
-        const readSet = new Set(reads?.map(r => r.announcement_id) || []);
-        const unread = announcementIds.filter(id => !readSet.has(id)).length;
-        setUnreadCount(unread);
+        if (assignments && assignments.length > 0) {
+          const assignmentIds = assignments.map(a => a.id);
+          
+          // Get student's submissions
+          const { data: submissions } = await supabase
+            .from("assignment_submissions")
+            .select("assignment_id, status")
+            .eq("student_id", user.id)
+            .in("assignment_id", assignmentIds);
+
+          const submittedSet = new Set(
+            submissions?.filter(s => s.status === "submitted" || s.status === "graded").map(s => s.assignment_id) || []
+          );
+          
+          const unsubmitted = assignmentIds.filter(id => !submittedSet.has(id)).length;
+          setUnreadAssignmentsCount(unsubmitted);
+        }
       };
 
-      fetchUnreadCount();
+      fetchUnreadCounts();
     }
   }, [user, userRole]);
 
@@ -79,7 +101,11 @@ export const DashboardLayout = ({ children, user, userRole }: DashboardLayoutPro
     <div className="flex h-screen bg-muted/30 overflow-hidden">
       {/* Desktop Sidebar */}
       <div className="hidden lg:block">
-        <DashboardSidebar userRole={userRole} unreadAnnouncementsCount={unreadCount} />
+        <DashboardSidebar 
+          userRole={userRole} 
+          unreadAnnouncementsCount={unreadAnnouncementsCount}
+          unreadAssignmentsCount={unreadAssignmentsCount}
+        />
       </div>
       
       <main className="flex-1 flex flex-col w-full">
@@ -94,7 +120,11 @@ export const DashboardLayout = ({ children, user, userRole }: DashboardLayoutPro
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="p-0 w-64">
-                <DashboardSidebar userRole={userRole} unreadAnnouncementsCount={unreadCount} />
+                <DashboardSidebar 
+                  userRole={userRole} 
+                  unreadAnnouncementsCount={unreadAnnouncementsCount}
+                  unreadAssignmentsCount={unreadAssignmentsCount}
+                />
               </SheetContent>
             </Sheet>
             
