@@ -367,7 +367,7 @@ const CourseAssignments = () => {
     
     setUploadingFile(true);
     const files = Array.from(e.target.files);
-    const newUrls: string[] = [];
+    const newPaths: string[] = [];
 
     for (const file of files) {
       const fileExt = file.name.split('.').pop();
@@ -378,14 +378,12 @@ const CourseAssignments = () => {
         .upload(fileName, file);
 
       if (!error && data) {
-        const { data: { publicUrl } } = supabase.storage
-          .from("assignment-submissions")
-          .getPublicUrl(data.path);
-        newUrls.push(publicUrl);
+        // Store just the file path, not the public URL (bucket is private)
+        newPaths.push(data.path);
       }
     }
 
-    setUploadedFiles(prev => [...prev, ...newUrls]);
+    setUploadedFiles(prev => [...prev, ...newPaths]);
     setUploadingFile(false);
   };
 
