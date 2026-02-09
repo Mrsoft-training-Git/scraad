@@ -165,7 +165,7 @@ const InstructorLiveClass = () => {
 
   return (
     <DashboardLayout user={user} userRole="instructor" hideTopBar={meetingActive}>
-      <div className="space-y-4">
+      <div className={meetingActive ? "h-full" : "space-y-4"}>
         {/* Header - hidden when meeting is active */}
         {!meetingActive && (
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -187,7 +187,7 @@ const InstructorLiveClass = () => {
         )}
 
         {/* Meeting Area + Floating Controls */}
-        <div className="relative">
+        <div className={meetingActive ? "relative h-full" : "relative"}>
           {/* Floating dropdown when meeting is active */}
           {meetingActive && (
             <div className="absolute top-3 right-3 z-20 flex items-center gap-2">
