@@ -53,6 +53,22 @@ export const LiveSessionsList = ({ isInstructor = false }: LiveSessionsListProps
 
       if (isInstructor) {
         query = query.eq("instructor_id", user.id);
+      } else {
+        // For students/admins, only show sessions for courses they're enrolled in
+        const { data: enrollments } = await supabase
+          .from("enrolled_courses")
+          .select("course_id")
+          .eq("user_id", user.id);
+
+        const enrolledCourseIds = enrollments?.map(e => e.course_id).filter(Boolean) as string[];
+        
+        if (!enrolledCourseIds || enrolledCourseIds.length === 0) {
+          setSessions([]);
+          setLoading(false);
+          return;
+        }
+
+        query = query.in("course_id", enrolledCourseIds);
       }
 
       const { data: sessionsData, error } = await query;
