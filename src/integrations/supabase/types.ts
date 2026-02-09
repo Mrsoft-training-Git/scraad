@@ -793,12 +793,14 @@ export type Database = {
           duration_minutes: number
           id: string
           instructor_id: string
+          recording_url: string | null
           scheduled_at: string
           status: string
           title: string
           updated_at: string
           zoom_join_url: string | null
           zoom_meeting_id: string | null
+          zoom_password: string | null
           zoom_start_url: string | null
         }
         Insert: {
@@ -807,12 +809,14 @@ export type Database = {
           duration_minutes?: number
           id?: string
           instructor_id: string
+          recording_url?: string | null
           scheduled_at: string
           status?: string
           title: string
           updated_at?: string
           zoom_join_url?: string | null
           zoom_meeting_id?: string | null
+          zoom_password?: string | null
           zoom_start_url?: string | null
         }
         Update: {
@@ -821,12 +825,14 @@ export type Database = {
           duration_minutes?: number
           id?: string
           instructor_id?: string
+          recording_url?: string | null
           scheduled_at?: string
           status?: string
           title?: string
           updated_at?: string
           zoom_join_url?: string | null
           zoom_meeting_id?: string | null
+          zoom_password?: string | null
           zoom_start_url?: string | null
         }
         Relationships: [
@@ -898,7 +904,10 @@ export type Database = {
           is_connected: boolean
           updated_at: string
           user_id: string
+          zoom_access_token: string | null
           zoom_email: string | null
+          zoom_expires_at: string | null
+          zoom_refresh_token: string | null
           zoom_user_id: string | null
         }
         Insert: {
@@ -908,7 +917,10 @@ export type Database = {
           is_connected?: boolean
           updated_at?: string
           user_id: string
+          zoom_access_token?: string | null
           zoom_email?: string | null
+          zoom_expires_at?: string | null
+          zoom_refresh_token?: string | null
           zoom_user_id?: string | null
         }
         Update: {
@@ -918,7 +930,10 @@ export type Database = {
           is_connected?: boolean
           updated_at?: string
           user_id?: string
+          zoom_access_token?: string | null
           zoom_email?: string | null
+          zoom_expires_at?: string | null
+          zoom_refresh_token?: string | null
           zoom_user_id?: string | null
         }
         Relationships: []
