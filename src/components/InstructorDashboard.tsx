@@ -3,6 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { BookOpen, Users, TrendingUp, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
+import { ZoomConnectionStatus } from "@/components/zoom/ZoomConnectionStatus";
+import { LiveSessionsList } from "@/components/zoom/LiveSessionsList";
 
 interface InstructorDashboardProps {
   userName: string;
@@ -174,6 +176,12 @@ export const InstructorDashboard = ({ userName, userId }: InstructorDashboardPro
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      {/* Zoom Integration & Live Sessions */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <ZoomConnectionStatus />
+        <LiveSessionsList isInstructor />
       </div>
 
       {/* Recent Enrollments */}

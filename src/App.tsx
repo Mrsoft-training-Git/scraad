@@ -30,6 +30,8 @@ import CourseViewer from "./pages/CourseViewer";
 import CourseAnnouncements from "./pages/CourseAnnouncements";
 import CourseDiscussions from "./pages/CourseDiscussions";
 import CourseAssignments from "./pages/CourseAssignments";
+import InstructorLiveClass from "./pages/InstructorLiveClass";
+import StudentLiveClass from "./pages/StudentLiveClass";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +56,8 @@ const App = () => (
           <Route path="/dashboard/announcements" element={<CourseAnnouncements />} />
           <Route path="/dashboard/discussions" element={<CourseDiscussions />} />
           <Route path="/dashboard/assignments" element={<CourseAssignments />} />
+          <Route path="/dashboard/live-class/:sessionId" element={<InstructorLiveClass />} />
+          <Route path="/dashboard/join-class/:sessionId" element={<StudentLiveClass />} />
           <Route path="/dashboard/payments" element={<Payments />} />
           <Route path="/dashboard/profile" element={<Profile />} />
           <Route path="/dashboard/references" element={<References />} />
