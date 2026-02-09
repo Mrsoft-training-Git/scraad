@@ -253,6 +253,10 @@ const InstructorLiveClass = () => {
                   userName={user.user_metadata?.full_name || user.email || "Instructor"}
                   userEmail={user.email}
                   zoomFallbackUrl={session?.zoom_start_url}
+                  onMeetingStart={() => {
+                    setMeetingActive(true);
+                    setSession(prev => prev ? { ...prev, status: "live" } : null);
+                  }}
                   onMeetingEnd={() => {
                     setMeetingActive(false);
                     setSession(prev => prev ? { ...prev, status: "ended" } : null);
