@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { ZoomMeetingContainer } from "@/components/zoom/ZoomMeetingContainer";
+import { ZoomMeetingEmbed } from "@/components/zoom/ZoomMeetingEmbed";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -90,10 +90,6 @@ const InstructorLiveClass = () => {
     if (result.success) {
       setMeetingActive(true);
       setSession(prev => prev ? { ...prev, status: "live" } : null);
-      // Open Zoom meeting in a new tab using the start URL
-      if (session?.zoom_start_url) {
-        window.open(session.zoom_start_url, "_blank");
-      }
     }
     
     setMeetingLoading(false);
@@ -187,11 +183,19 @@ const InstructorLiveClass = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Meeting Container */}
           <div className="lg:col-span-2">
-            <ZoomMeetingContainer 
-              isLoading={meetingLoading} 
-              meetingActive={meetingActive}
-              zoomUrl={session?.zoom_start_url}
-            />
+            {sessionId && user && (
+              <ZoomMeetingEmbed
+                sessionId={sessionId}
+                role={1}
+                userName={user.user_metadata?.full_name || user.email || "Instructor"}
+                userEmail={user.email}
+                zoomFallbackUrl={session?.zoom_start_url}
+                onMeetingEnd={() => {
+                  setMeetingActive(false);
+                  setSession(prev => prev ? { ...prev, status: "ended" } : null);
+                }}
+              />
+            )}
           </div>
 
           {/* Session Info Panel */}

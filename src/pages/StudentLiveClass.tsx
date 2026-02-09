@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { ZoomMeetingContainer } from "@/components/zoom/ZoomMeetingContainer";
+import { ZoomMeetingEmbed } from "@/components/zoom/ZoomMeetingEmbed";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -100,15 +100,7 @@ const StudentLiveClass = () => {
 
   const handleJoinClass = async () => {
     if (!sessionId) return;
-    setMeetingLoading(true);
-    
-    // Open the Zoom join URL in a new tab
-    if (session?.zoom_join_url) {
-      window.open(session.zoom_join_url, "_blank");
-      setMeetingActive(true);
-    }
-    
-    setMeetingLoading(false);
+    setMeetingActive(true);
   };
 
   const handleLeaveClass = () => {
@@ -188,11 +180,18 @@ const StudentLiveClass = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Meeting Container */}
           <div className="lg:col-span-2">
-            <ZoomMeetingContainer 
-              isLoading={meetingLoading} 
-              meetingActive={meetingActive}
-              zoomUrl={session?.zoom_join_url}
-            />
+            {sessionId && user && (
+              <ZoomMeetingEmbed
+                sessionId={sessionId}
+                role={0}
+                userName={user.user_metadata?.full_name || user.email || "Student"}
+                userEmail={user.email}
+                zoomFallbackUrl={session?.zoom_join_url}
+                onMeetingEnd={() => {
+                  setMeetingActive(false);
+                }}
+              />
+            )}
           </div>
 
           {/* Session Info Panel */}
