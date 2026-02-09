@@ -13,9 +13,10 @@ interface DashboardLayoutProps {
   children: ReactNode;
   user: User | null;
   userRole: string;
+  hideTopBar?: boolean;
 }
 
-export const DashboardLayout = ({ children, user, userRole }: DashboardLayoutProps) => {
+export const DashboardLayout = ({ children, user, userRole, hideTopBar = false }: DashboardLayoutProps) => {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [unreadAnnouncementsCount, setUnreadAnnouncementsCount] = useState(0);
@@ -110,6 +111,7 @@ export const DashboardLayout = ({ children, user, userRole }: DashboardLayoutPro
       
       <main className="flex-1 flex flex-col w-full">
         {/* Sticky top bar */}
+        {!hideTopBar && (
         <div className="sticky top-0 z-30 bg-card border-b border-border px-4 md:px-8 py-4 md:py-6 flex justify-between items-center">
           <div className="flex items-center gap-3">
             {/* Mobile menu trigger */}
@@ -169,9 +171,10 @@ export const DashboardLayout = ({ children, user, userRole }: DashboardLayoutPro
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+        )}
         
         {/* Scrollable content area */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-8">
+        <div className={hideTopBar ? "flex-1 overflow-y-auto p-0" : "flex-1 overflow-y-auto p-4 md:p-8"}>
           {children}
         </div>
       </main>
