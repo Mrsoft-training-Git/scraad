@@ -93,9 +93,10 @@ export const LiveSessionsList = ({ isInstructor = false }: LiveSessionsListProps
     }
   };
 
-  const getStatusBadge = (status: string, scheduledAt: string) => {
+  const getStatusBadge = (status: string, scheduledAt: string, durationMinutes: number) => {
     const now = new Date();
     const sessionTime = new Date(scheduledAt);
+    const sessionEndTime = new Date(sessionTime.getTime() + durationMinutes * 60 * 1000);
     
     if (status === "live") {
       return <Badge className="bg-red-600 hover:bg-red-700 animate-pulse text-[10px] px-1.5 py-0">Live</Badge>;
@@ -105,6 +106,10 @@ export const LiveSessionsList = ({ isInstructor = false }: LiveSessionsListProps
     }
     if (status === "cancelled") {
       return <Badge variant="destructive" className="text-[10px] px-1.5 py-0">Cancelled</Badge>;
+    }
+    // If session start time has passed but we're still within the duration window, show "In Progress" not "Missed"
+    if (sessionTime < now && now < sessionEndTime) {
+      return <Badge className="bg-orange-500 hover:bg-orange-600 text-[10px] px-1.5 py-0">In Progress</Badge>;
     }
     if (sessionTime < now) {
       return <Badge variant="outline" className="text-[10px] px-1.5 py-0">Missed</Badge>;
@@ -195,7 +200,7 @@ export const LiveSessionsList = ({ isInstructor = false }: LiveSessionsListProps
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
                             <h4 className="text-sm font-medium truncate">{session.title}</h4>
-                            {getStatusBadge(session.status, session.scheduled_at)}
+                            {getStatusBadge(session.status, session.scheduled_at, session.duration_minutes)}
                           </div>
                           <p className="text-[11px] text-muted-foreground mt-1 truncate">
                             {session.course?.title || "No course assigned"}
