@@ -109,9 +109,7 @@ const StudentLiveClass = () => {
   };
 
   const handleLeaveClass = () => {
-    // TODO: Leave Zoom Web SDK meeting
     setMeetingActive(false);
-    navigate("/dashboard");
   };
 
   const getStatusBadge = () => {
@@ -184,62 +182,8 @@ const StudentLiveClass = () => {
         )}
 
         <div className="relative">
-          {/* Floating dropdown when meeting is active */}
-          {meetingActive && (
-            <div className="absolute top-3 right-3 z-20 flex items-center gap-2">
-              {getStatusBadge()}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="secondary" size="sm" className="shadow-lg">
-                    <Settings className="h-4 w-4 mr-1" />
-                    Class Options
-                    <ChevronDown className="h-3 w-3 ml-1" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-72 p-3 space-y-3">
-                  <div className="space-y-2 text-sm">
-                    <p className="font-semibold">{session.title}</p>
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <UserIcon className="h-3.5 w-3.5" />
-                      <span>{session.instructor_name}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <Calendar className="h-3.5 w-3.5" />
-                      <span>{format(new Date(session.scheduled_at), "EEEE, MMMM d, yyyy")}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <Clock className="h-3.5 w-3.5" />
-                      <span>{format(new Date(session.scheduled_at), "h:mm a")} ({session.duration_minutes} min)</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <BookOpen className="h-3.5 w-3.5" />
-                      <span>{session.course_title || "No course"}</span>
-                    </div>
-                  </div>
-                  <div className="border-t border-border pt-3 space-y-2">
-                    <Button
-                      className="w-full"
-                      variant="outline"
-                      size="sm"
-                      onClick={handleLeaveClass}
-                    >
-                      <LogOut className="h-3.5 w-3.5 mr-2" />
-                      Leave Class
-                    </Button>
-                    <Button
-                      className="w-full"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => navigate("/dashboard")}
-                    >
-                      <ArrowLeft className="h-3.5 w-3.5 mr-2" />
-                      Back to Dashboard
-                    </Button>
-                  </div>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          )}
+
+
 
           {/* Meeting Container - full width when active */}
           <div className={meetingActive ? "" : "grid grid-cols-1 lg:grid-cols-3 gap-6"}>
