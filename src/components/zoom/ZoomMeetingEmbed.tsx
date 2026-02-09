@@ -10,6 +10,7 @@ interface ZoomMeetingEmbedProps {
   userName: string;
   userEmail?: string;
   onMeetingEnd?: () => void;
+  onMeetingStart?: () => void;
   zoomFallbackUrl?: string | null;
 }
 
@@ -21,6 +22,7 @@ export const ZoomMeetingEmbed = ({
   userName,
   userEmail = "",
   onMeetingEnd,
+  onMeetingStart,
   zoomFallbackUrl,
 }: ZoomMeetingEmbedProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -87,6 +89,7 @@ export const ZoomMeetingEmbed = ({
       });
 
       setStatus("active");
+      onMeetingStart?.();
 
       // Listen for meeting end
       client.on("connection-change", (payload: any) => {
