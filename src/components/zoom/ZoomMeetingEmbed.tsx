@@ -52,7 +52,7 @@ export const ZoomMeetingEmbed = ({
   }, [destroyClient]);
 
   const startMeeting = async () => {
-    if (!containerRef.current) return;
+    setStatus("loading");
     setStatus("loading");
     setErrorMsg("");
 
@@ -104,91 +104,81 @@ export const ZoomMeetingEmbed = ({
     }
   };
 
-  if (status === "idle") {
-    return (
-      <Card className="w-full h-full min-h-[400px] md:min-h-[500px] lg:min-h-[600px] bg-muted/50">
+  return (
+    <Card className="w-full h-full min-h-[400px] md:min-h-[500px] lg:min-h-[600px] bg-muted/50 overflow-hidden">
+      {/* Always-mounted container for the SDK to render into */}
+      <div
+        ref={containerRef}
+        className="w-full h-full"
+        style={{ display: status === "active" ? "block" : "none", minHeight: status === "active" ? "500px" : undefined }}
+      />
+
+      {status !== "active" && (
         <CardContent className="flex items-center justify-center h-full min-h-[400px] md:min-h-[500px] lg:min-h-[600px]">
-          <div className="text-center space-y-4 p-8">
-            <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center mx-auto">
-              <Video className="h-12 w-12 text-muted-foreground" />
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-lg font-semibold">Meeting Area</h3>
-              <p className="text-sm text-muted-foreground max-w-md">
-                Click the button below to join the meeting directly in your browser.
-              </p>
-            </div>
-            <Button onClick={startMeeting} size="lg">
-              <Video className="h-4 w-4 mr-2" />
-              {role === 1 ? "Start Meeting" : "Join Meeting"}
-            </Button>
-            {zoomFallbackUrl && (
-              <div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => window.open(zoomFallbackUrl, "_blank")}
-                >
-                  <ExternalLink className="h-3 w-3 mr-1" />
-                  Open in Zoom app instead
-                </Button>
+          {status === "idle" && (
+            <div className="text-center space-y-4 p-8">
+              <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center mx-auto">
+                <Video className="h-12 w-12 text-muted-foreground" />
               </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (status === "loading") {
-    return (
-      <Card className="w-full h-full min-h-[400px] md:min-h-[500px] lg:min-h-[600px] bg-muted/50">
-        <CardContent className="flex items-center justify-center h-full min-h-[400px] md:min-h-[500px] lg:min-h-[600px]">
-          <div className="text-center space-y-4">
-            <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
-            <p className="text-muted-foreground">Loading Zoom meeting...</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (status === "error") {
-    return (
-      <Card className="w-full h-full min-h-[400px] md:min-h-[500px] lg:min-h-[600px] bg-muted/50">
-        <CardContent className="flex items-center justify-center h-full min-h-[400px] md:min-h-[500px] lg:min-h-[600px]">
-          <div className="text-center space-y-4 p-8">
-            <div className="w-24 h-24 rounded-full bg-destructive/10 flex items-center justify-center mx-auto">
-              <AlertCircle className="h-12 w-12 text-destructive" />
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-lg font-semibold">Could not load meeting</h3>
-              <p className="text-sm text-muted-foreground max-w-md">{errorMsg}</p>
-            </div>
-            <div className="flex flex-col gap-2 items-center">
-              <Button onClick={startMeeting} variant="outline">
-                Try Again
+              <div className="space-y-2">
+                <h3 className="text-lg font-semibold">Meeting Area</h3>
+                <p className="text-sm text-muted-foreground max-w-md">
+                  Click the button below to join the meeting directly in your browser.
+                </p>
+              </div>
+              <Button onClick={startMeeting} size="lg">
+                <Video className="h-4 w-4 mr-2" />
+                {role === 1 ? "Start Meeting" : "Join Meeting"}
               </Button>
               {zoomFallbackUrl && (
-                <Button
-                  variant="default"
-                  onClick={() => window.open(zoomFallbackUrl, "_blank")}
-                >
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  Open in Zoom App
-                </Button>
+                <div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => window.open(zoomFallbackUrl, "_blank")}
+                  >
+                    <ExternalLink className="h-3 w-3 mr-1" />
+                    Open in Zoom app instead
+                  </Button>
+                </div>
               )}
             </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+          )}
 
-  // active — the SDK renders inside this div
-  return (
-    <Card className="w-full h-full min-h-[400px] md:min-h-[500px] lg:min-h-[600px] overflow-hidden">
-      <div ref={containerRef} className="w-full h-full min-h-[400px] md:min-h-[500px] lg:min-h-[600px]" />
+          {status === "loading" && (
+            <div className="text-center space-y-4">
+              <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
+              <p className="text-muted-foreground">Loading Zoom meeting...</p>
+            </div>
+          )}
+
+          {status === "error" && (
+            <div className="text-center space-y-4 p-8">
+              <div className="w-24 h-24 rounded-full bg-destructive/10 flex items-center justify-center mx-auto">
+                <AlertCircle className="h-12 w-12 text-destructive" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-lg font-semibold">Could not load meeting</h3>
+                <p className="text-sm text-muted-foreground max-w-md">{errorMsg}</p>
+              </div>
+              <div className="flex flex-col gap-2 items-center">
+                <Button onClick={startMeeting} variant="outline">
+                  Try Again
+                </Button>
+                {zoomFallbackUrl && (
+                  <Button
+                    variant="default"
+                    onClick={() => window.open(zoomFallbackUrl, "_blank")}
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Open in Zoom App
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      )}
     </Card>
   );
 };
