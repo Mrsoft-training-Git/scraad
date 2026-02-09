@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.zoom-oauth-callback]
 verify_jwt = false
+
+[functions.zoom-generate-signature]
+verify_jwt = false
