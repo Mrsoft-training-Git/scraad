@@ -32,6 +32,7 @@ import CourseDiscussions from "./pages/CourseDiscussions";
 import CourseAssignments from "./pages/CourseAssignments";
 import InstructorLiveClass from "./pages/InstructorLiveClass";
 import StudentLiveClass from "./pages/StudentLiveClass";
+import ZoomCallback from "./pages/ZoomCallback";
 
 const queryClient = new QueryClient();
 
@@ -70,6 +71,7 @@ const App = () => (
           <Route path="/programs/:id" element={<ProgramDetails />} />
           <Route path="/career" element={<Career />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/api/zoom/callback" element={<ZoomCallback />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
