@@ -79,7 +79,7 @@ const InstructorLiveClass = () => {
       }
 
       setSession({ ...data, course_title: courseTitle });
-      setMeetingActive(data.status === "live");
+      // Don't auto-set meetingActive from DB status — let the Zoom SDK's onMeetingStart control it
     } catch (error) {
       console.error("Error fetching session:", error);
     } finally {
