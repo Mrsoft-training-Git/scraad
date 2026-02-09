@@ -144,8 +144,8 @@ export const InstructorDashboard = ({ userName, userId }: InstructorDashboardPro
         ))}
       </div>
 
-      {/* Zoom & Live Sessions */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+      {/* Zoom & Live Sessions — compact collapsible row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
         <ZoomConnectionStatus />
         <LiveSessionsList isInstructor />
       </div>

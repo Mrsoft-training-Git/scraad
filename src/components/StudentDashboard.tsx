@@ -99,11 +99,11 @@ export const StudentDashboard = ({ userName }: { userName: string }) => {
         ))}
       </div>
 
-      {/* Upcoming Live Sessions */}
+      {/* Upcoming Live Sessions — collapsible */}
       <LiveSessionsList />
 
       {/* Content Grid */}
-      <div className="grid lg:grid-cols-5 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 md:gap-6">
         {/* Course Progress */}
         <Card className="lg:col-span-3 border border-border/60 shadow-none">
           <CardHeader className="pb-3 px-5 pt-5">
