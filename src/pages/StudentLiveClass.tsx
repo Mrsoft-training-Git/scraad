@@ -22,6 +22,7 @@ interface SessionDetails {
   status: string;
   course_title?: string;
   instructor_name?: string;
+  zoom_join_url?: string | null;
 }
 
 const StudentLiveClass = () => {
@@ -57,7 +58,7 @@ const StudentLiveClass = () => {
     try {
       const { data, error } = await supabase
         .from("live_sessions")
-        .select("id, title, course_id, instructor_id, scheduled_at, duration_minutes, status")
+        .select("id, title, course_id, instructor_id, scheduled_at, duration_minutes, status, zoom_join_url")
         .eq("id", sessionId)
         .single();
 
@@ -101,10 +102,10 @@ const StudentLiveClass = () => {
     if (!sessionId) return;
     setMeetingLoading(true);
     
-    const result = await joinLiveSession(sessionId);
-    if (result.success) {
+    // Open the Zoom join URL in a new tab
+    if (session?.zoom_join_url) {
+      window.open(session.zoom_join_url, "_blank");
       setMeetingActive(true);
-      // TODO: Initialize Zoom Web SDK here with result.joinUrl
     }
     
     setMeetingLoading(false);
@@ -189,7 +190,8 @@ const StudentLiveClass = () => {
           <div className="lg:col-span-2">
             <ZoomMeetingContainer 
               isLoading={meetingLoading} 
-              meetingActive={meetingActive} 
+              meetingActive={meetingActive}
+              zoomUrl={session?.zoom_join_url}
             />
           </div>
 

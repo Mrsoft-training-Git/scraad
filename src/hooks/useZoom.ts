@@ -220,6 +220,16 @@ export const useZoom = () => {
       const signatureData = await getZoomSignature(sessionId, 1);
       if (!signatureData) return { success: false };
 
+      // Update session status to "live" in the database
+      const { error: updateError } = await supabase
+        .from("live_sessions")
+        .update({ status: "live" })
+        .eq("id", sessionId);
+
+      if (updateError) {
+        console.error("Error updating session status:", updateError);
+      }
+
       toast({
         title: "Session Started",
         description: "Your live class has started.",
@@ -242,10 +252,11 @@ export const useZoom = () => {
    */
   const endLiveSession = async (sessionId: string): Promise<boolean> => {
     try {
-      const { error } = await supabase.functions.invoke("zoom-end-session", {
-        method: "POST",
-        body: { sessionId },
-      });
+      // Update session status to "ended" in the database
+      const { error } = await supabase
+        .from("live_sessions")
+        .update({ status: "ended" })
+        .eq("id", sessionId);
 
       if (error) throw error;
 
