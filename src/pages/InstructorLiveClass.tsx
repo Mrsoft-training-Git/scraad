@@ -6,7 +6,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Video, Play, Square, LogOut, Calendar, Clock, BookOpen, Users, ArrowLeft } from "lucide-react";
+import { Video, Play, Square, LogOut, Calendar, Clock, BookOpen, Users, ArrowLeft, Settings, ChevronDown } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
 import { useZoom } from "@/hooks/useZoom";
 import { format } from "date-fns";
@@ -160,111 +165,158 @@ const InstructorLiveClass = () => {
 
   return (
     <DashboardLayout user={user} userRole="instructor">
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}>
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-bold">{session.title}</h1>
-                {getStatusBadge()}
+      <div className="space-y-4">
+        {/* Header - hidden when meeting is active */}
+        {!meetingActive && (
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}>
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-2xl font-bold">{session.title}</h1>
+                  {getStatusBadge()}
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {session.course_title || "No course assigned"}
+                </p>
               </div>
-              <p className="text-sm text-muted-foreground">
-                {session.course_title || "No course assigned"}
-              </p>
             </div>
           </div>
-        </div>
+        )}
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Meeting Container */}
-          <div className="lg:col-span-2">
-            {sessionId && user && (
-              <ZoomMeetingEmbed
-                sessionId={sessionId}
-                role={1}
-                userName={user.user_metadata?.full_name || user.email || "Instructor"}
-                userEmail={user.email}
-                zoomFallbackUrl={session?.zoom_start_url}
-                onMeetingEnd={() => {
-                  setMeetingActive(false);
-                  setSession(prev => prev ? { ...prev, status: "ended" } : null);
-                }}
-              />
+        {/* Meeting Area + Floating Controls */}
+        <div className="relative">
+          {/* Floating dropdown when meeting is active */}
+          {meetingActive && (
+            <div className="absolute top-3 right-3 z-20 flex items-center gap-2">
+              {getStatusBadge()}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="secondary" size="sm" className="shadow-lg">
+                    <Settings className="h-4 w-4 mr-1" />
+                    Class Options
+                    <ChevronDown className="h-3 w-3 ml-1" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-72 p-3 space-y-3">
+                  {/* Info Section */}
+                  <div className="space-y-2 text-sm">
+                    <p className="font-semibold">{session.title}</p>
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Calendar className="h-3.5 w-3.5" />
+                      <span>{format(new Date(session.scheduled_at), "EEEE, MMMM d, yyyy")}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Clock className="h-3.5 w-3.5" />
+                      <span>{format(new Date(session.scheduled_at), "h:mm a")} ({session.duration_minutes} min)</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <BookOpen className="h-3.5 w-3.5" />
+                      <span>{session.course_title || "No course"}</span>
+                    </div>
+                  </div>
+                  <div className="border-t border-border pt-3 space-y-2">
+                    <Button
+                      className="w-full"
+                      variant="destructive"
+                      size="sm"
+                      onClick={handleEndClass}
+                      disabled={meetingLoading}
+                    >
+                      <Square className="h-3.5 w-3.5 mr-2" />
+                      End Class
+                    </Button>
+                    <Button
+                      className="w-full"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleLeaveClass}
+                    >
+                      <LogOut className="h-3.5 w-3.5 mr-2" />
+                      Leave Class
+                    </Button>
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          )}
+
+          {/* Meeting Container - full width when active */}
+          <div className={meetingActive ? "" : "grid grid-cols-1 lg:grid-cols-3 gap-6"}>
+            <div className={meetingActive ? "" : "lg:col-span-2"}>
+              {sessionId && user && (
+                <ZoomMeetingEmbed
+                  sessionId={sessionId}
+                  role={1}
+                  userName={user.user_metadata?.full_name || user.email || "Instructor"}
+                  userEmail={user.email}
+                  zoomFallbackUrl={session?.zoom_start_url}
+                  onMeetingEnd={() => {
+                    setMeetingActive(false);
+                    setSession(prev => prev ? { ...prev, status: "ended" } : null);
+                  }}
+                />
+              )}
+            </div>
+
+            {/* Side panel - only shown when NOT active */}
+            {!meetingActive && (
+              <div className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Video className="h-5 w-5" />
+                      Class Info
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 text-sm">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <span>{format(new Date(session.scheduled_at), "EEEE, MMMM d, yyyy")}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        <span>{format(new Date(session.scheduled_at), "h:mm a")} ({session.duration_minutes} min)</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <BookOpen className="h-4 w-4 text-muted-foreground" />
+                        <span>{session.course_title || "No course"}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Controls</CardTitle>
+                    <CardDescription>Manage your live class session</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {session.status !== "ended" && (
+                      <Button
+                        className="w-full"
+                        onClick={handleStartClass}
+                        disabled={meetingLoading}
+                      >
+                        <Play className="h-4 w-4 mr-2" />
+                        Start Class
+                      </Button>
+                    )}
+                    <Button
+                      className="w-full"
+                      variant="outline"
+                      onClick={handleLeaveClass}
+                    >
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Leave Class
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
             )}
-          </div>
-
-          {/* Session Info Panel */}
-          <div className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Video className="h-5 w-5" />
-                  Class Info
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span>{format(new Date(session.scheduled_at), "EEEE, MMMM d, yyyy")}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                    <span>{format(new Date(session.scheduled_at), "h:mm a")} ({session.duration_minutes} min)</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <BookOpen className="h-4 w-4 text-muted-foreground" />
-                    <span>{session.course_title || "No course"}</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Action Buttons */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Controls</CardTitle>
-                <CardDescription>Manage your live class session</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {!meetingActive && session.status !== "ended" && (
-                  <Button 
-                    className="w-full" 
-                    onClick={handleStartClass}
-                    disabled={meetingLoading}
-                  >
-                    <Play className="h-4 w-4 mr-2" />
-                    Start Class
-                  </Button>
-                )}
-                
-                {meetingActive && (
-                  <Button 
-                    className="w-full" 
-                    variant="destructive"
-                    onClick={handleEndClass}
-                    disabled={meetingLoading}
-                  >
-                    <Square className="h-4 w-4 mr-2" />
-                    End Class
-                  </Button>
-                )}
-
-                <Button 
-                  className="w-full" 
-                  variant="outline"
-                  onClick={handleLeaveClass}
-                >
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Leave Class
-                </Button>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </div>
