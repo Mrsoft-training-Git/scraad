@@ -786,6 +786,59 @@ export type Database = {
           },
         ]
       }
+      live_sessions: {
+        Row: {
+          course_id: string | null
+          created_at: string
+          duration_minutes: number
+          id: string
+          instructor_id: string
+          scheduled_at: string
+          status: string
+          title: string
+          updated_at: string
+          zoom_join_url: string | null
+          zoom_meeting_id: string | null
+          zoom_start_url: string | null
+        }
+        Insert: {
+          course_id?: string | null
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          instructor_id: string
+          scheduled_at: string
+          status?: string
+          title: string
+          updated_at?: string
+          zoom_join_url?: string | null
+          zoom_meeting_id?: string | null
+          zoom_start_url?: string | null
+        }
+        Update: {
+          course_id?: string | null
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          instructor_id?: string
+          scheduled_at?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          zoom_join_url?: string | null
+          zoom_meeting_id?: string | null
+          zoom_start_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_sessions_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -834,6 +887,39 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      zoom_connections: {
+        Row: {
+          connected_at: string | null
+          created_at: string
+          id: string
+          is_connected: boolean
+          updated_at: string
+          user_id: string
+          zoom_email: string | null
+          zoom_user_id: string | null
+        }
+        Insert: {
+          connected_at?: string | null
+          created_at?: string
+          id?: string
+          is_connected?: boolean
+          updated_at?: string
+          user_id: string
+          zoom_email?: string | null
+          zoom_user_id?: string | null
+        }
+        Update: {
+          connected_at?: string | null
+          created_at?: string
+          id?: string
+          is_connected?: boolean
+          updated_at?: string
+          user_id?: string
+          zoom_email?: string | null
+          zoom_user_id?: string | null
         }
         Relationships: []
       }

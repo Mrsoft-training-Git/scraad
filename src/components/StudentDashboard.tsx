@@ -5,6 +5,7 @@ import { BookOpen, Clock, CheckCircle, Trophy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { LiveSessionsList } from "@/components/zoom/LiveSessionsList";
 
 interface EnrolledCourse {
   id: string;
@@ -124,6 +125,9 @@ export const StudentDashboard = ({ userName }: { userName: string }) => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Upcoming Live Sessions */}
+      <LiveSessionsList />
 
       {/* Course Progress */}
       <Card className="border-none shadow-card">
