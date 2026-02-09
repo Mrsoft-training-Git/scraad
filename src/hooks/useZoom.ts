@@ -39,6 +39,13 @@ export interface CreateSessionData {
   duration_minutes: number;
 }
 
+export interface ZoomSignatureData {
+  signature: string;
+  sdkKey: string;
+  meetingNumber: string;
+  password: string;
+}
+
 export const useZoom = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [zoomConnection, setZoomConnection] = useState<ZoomConnection | null>(null);
@@ -57,9 +64,9 @@ export const useZoom = () => {
 
       const { data } = await supabase
         .from("zoom_connections")
-        .select("*")
+        .select("id, user_id, is_connected, zoom_user_id, zoom_email, connected_at")
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
 
       if (data) {
         setZoomConnection(data);
@@ -73,44 +80,25 @@ export const useZoom = () => {
   };
 
   /**
-   * Placeholder function - will be implemented when Zoom OAuth is set up
-   * Opens Zoom OAuth flow to connect account
+   * Calls zoom-connect-start edge function and redirects to Zoom OAuth
    */
   const connectZoom = async () => {
     setConnecting(true);
     try {
-      // TODO: Implement Zoom OAuth flow
-      // This will redirect to Zoom OAuth and handle the callback
-      toast({
-        title: "Zoom Integration",
-        description: "Zoom OAuth integration will be configured by the backend.",
+      const { data, error } = await supabase.functions.invoke("zoom-connect-start", {
+        method: "POST",
       });
-      
-      // Simulate connection for UI demonstration
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
-      const { data, error } = await supabase
-        .from("zoom_connections")
-        .upsert({
-          user_id: user.id,
-          is_connected: false, // Will be set to true after OAuth
-          updated_at: new Date().toISOString(),
-        })
-        .select()
-        .single();
 
       if (error) throw error;
-      
-      toast({
-        title: "Connect Zoom",
-        description: "Zoom OAuth will be triggered here. Backend integration pending.",
-      });
+      if (!data?.authorization_url) throw new Error("No authorization URL returned");
+
+      // Redirect to Zoom OAuth
+      window.location.href = data.authorization_url;
     } catch (error) {
       console.error("Error connecting Zoom:", error);
       toast({
         title: "Connection Failed",
-        description: "Failed to initiate Zoom connection.",
+        description: "Failed to initiate Zoom connection. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -119,35 +107,58 @@ export const useZoom = () => {
   };
 
   /**
-   * Placeholder function - creates a live session in the database
-   * Zoom meeting creation will be handled by backend
+   * Handles Zoom OAuth callback code exchange via edge function
+   */
+  const handleOAuthCallback = async (code: string): Promise<boolean> => {
+    try {
+      const { data, error } = await supabase.functions.invoke("zoom-oauth-callback", {
+        method: "POST",
+        body: { code },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Zoom Connected",
+        description: "Your Zoom account has been connected successfully.",
+      });
+
+      await checkZoomConnection();
+      return true;
+    } catch (error) {
+      console.error("Error in OAuth callback:", error);
+      toast({
+        title: "Connection Failed",
+        description: "Failed to complete Zoom connection.",
+        variant: "destructive",
+      });
+      return false;
+    }
+  };
+
+  /**
+   * Creates a live session via the zoom-create-session edge function
    */
   const createLiveSession = async (sessionData: CreateSessionData): Promise<LiveSession | null> => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
-      const { data, error } = await supabase
-        .from("live_sessions")
-        .insert({
+      const { data, error } = await supabase.functions.invoke("zoom-create-session", {
+        method: "POST",
+        body: {
+          courseId: sessionData.course_id,
           title: sessionData.title,
-          course_id: sessionData.course_id,
-          instructor_id: user.id,
-          scheduled_at: sessionData.scheduled_at,
-          duration_minutes: sessionData.duration_minutes,
-          status: "scheduled",
-        })
-        .select()
-        .single();
+          startTime: sessionData.scheduled_at,
+          duration: sessionData.duration_minutes,
+        },
+      });
 
       if (error) throw error;
 
       toast({
         title: "Session Created",
-        description: "Live session has been scheduled. Zoom meeting will be created when backend is connected.",
+        description: "Live session has been scheduled with Zoom.",
       });
 
-      return data as LiveSession;
+      return data?.session as LiveSession;
     } catch (error) {
       console.error("Error creating live session:", error);
       toast({
@@ -160,30 +171,36 @@ export const useZoom = () => {
   };
 
   /**
-   * Placeholder function - joins a live session
-   * Will use Zoom Web SDK when implemented
+   * Gets a Zoom Meeting SDK signature for joining/hosting a session
    */
-  const joinLiveSession = async (sessionId: string): Promise<{ success: boolean; joinUrl?: string }> => {
+  const getZoomSignature = async (sessionId: string, role: 0 | 1): Promise<ZoomSignatureData | null> => {
     try {
-      const { data: session, error } = await supabase
-        .from("live_sessions")
-        .select("*")
-        .eq("id", sessionId)
-        .single();
+      const { data, error } = await supabase.functions.invoke("zoom-generate-signature", {
+        method: "POST",
+        body: { sessionId, role },
+      });
 
       if (error) throw error;
+      return data as ZoomSignatureData;
+    } catch (error) {
+      console.error("Error getting Zoom signature:", error);
+      toast({
+        title: "Error",
+        description: "Failed to get meeting credentials.",
+        variant: "destructive",
+      });
+      return null;
+    }
+  };
 
-      if (session.status !== "live") {
-        toast({
-          title: "Session Not Live",
-          description: "This session is not currently live.",
-          variant: "destructive",
-        });
-        return { success: false };
-      }
-
-      // TODO: Initialize Zoom Web SDK and join meeting
-      return { success: true, joinUrl: session.zoom_join_url || undefined };
+  /**
+   * Joins a live session as a student (role=0) — fetches SDK signature
+   */
+  const joinLiveSession = async (sessionId: string): Promise<{ success: boolean; signatureData?: ZoomSignatureData }> => {
+    try {
+      const signatureData = await getZoomSignature(sessionId, 0);
+      if (!signatureData) return { success: false };
+      return { success: true, signatureData };
     } catch (error) {
       console.error("Error joining session:", error);
       toast({
@@ -196,34 +213,19 @@ export const useZoom = () => {
   };
 
   /**
-   * Placeholder function - starts a live session (instructor only)
-   * Will use Zoom Web SDK when implemented
+   * Starts a live session as an instructor (role=1) — fetches SDK signature
    */
-  const startLiveSession = async (sessionId: string): Promise<{ success: boolean; startUrl?: string }> => {
+  const startLiveSession = async (sessionId: string): Promise<{ success: boolean; signatureData?: ZoomSignatureData }> => {
     try {
-      const { data: session, error: fetchError } = await supabase
-        .from("live_sessions")
-        .select("*")
-        .eq("id", sessionId)
-        .single();
-
-      if (fetchError) throw fetchError;
-
-      // Update session status to live
-      const { error: updateError } = await supabase
-        .from("live_sessions")
-        .update({ status: "live", updated_at: new Date().toISOString() })
-        .eq("id", sessionId);
-
-      if (updateError) throw updateError;
+      const signatureData = await getZoomSignature(sessionId, 1);
+      if (!signatureData) return { success: false };
 
       toast({
         title: "Session Started",
         description: "Your live class has started.",
       });
 
-      // TODO: Initialize Zoom Web SDK and start meeting
-      return { success: true, startUrl: session.zoom_start_url || undefined };
+      return { success: true, signatureData };
     } catch (error) {
       console.error("Error starting session:", error);
       toast({
@@ -236,14 +238,14 @@ export const useZoom = () => {
   };
 
   /**
-   * Ends a live session
+   * Ends a live session via the zoom-end-session edge function
    */
   const endLiveSession = async (sessionId: string): Promise<boolean> => {
     try {
-      const { error } = await supabase
-        .from("live_sessions")
-        .update({ status: "ended", updated_at: new Date().toISOString() })
-        .eq("id", sessionId);
+      const { error } = await supabase.functions.invoke("zoom-end-session", {
+        method: "POST",
+        body: { sessionId },
+      });
 
       if (error) throw error;
 
@@ -264,16 +266,37 @@ export const useZoom = () => {
     }
   };
 
+  /**
+   * Fetches recording for a completed session
+   */
+  const fetchRecording = async (sessionId: string): Promise<string | null> => {
+    try {
+      const { data, error } = await supabase.functions.invoke("zoom-fetch-recording", {
+        method: "POST",
+        body: { sessionId },
+      });
+
+      if (error) throw error;
+      return data?.recording_url || null;
+    } catch (error) {
+      console.error("Error fetching recording:", error);
+      return null;
+    }
+  };
+
   return {
     isConnected,
     zoomConnection,
     loading,
     connecting,
     connectZoom,
+    handleOAuthCallback,
     createLiveSession,
     joinLiveSession,
     startLiveSession,
     endLiveSession,
+    fetchRecording,
+    getZoomSignature,
     refreshConnection: checkZoomConnection,
   };
 };
