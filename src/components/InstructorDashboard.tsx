@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookOpen, Users, TrendingUp, Clock } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BookOpen, Users, TrendingUp, Clock, ArrowUpRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 import { ZoomConnectionStatus } from "@/components/zoom/ZoomConnectionStatus";
 import { LiveSessionsList } from "@/components/zoom/LiveSessionsList";
 
@@ -24,6 +25,7 @@ interface RecentEnrollment {
   courseName: string;
   enrolledAt: string;
   progress: number;
+  initials: string;
 }
 
 export const InstructorDashboard = ({ userName, userId }: InstructorDashboardProps) => {
@@ -42,7 +44,6 @@ export const InstructorDashboard = ({ userName, userId }: InstructorDashboardPro
 
   const fetchDashboardData = async () => {
     try {
-      // Fetch instructor's courses
       const { data: courses } = await supabase
         .from("courses")
         .select("id, title, published, students_count")
@@ -53,7 +54,6 @@ export const InstructorDashboard = ({ userName, userId }: InstructorDashboardPro
       const publishedCourses = courses?.filter(c => c.published).length || 0;
       const totalStudents = courses?.reduce((sum, c) => sum + (c.students_count || 0), 0) || 0;
 
-      // Fetch enrollments for instructor's courses
       let avgProgress = 0;
       let enrollmentsData: RecentEnrollment[] = [];
 
@@ -68,7 +68,6 @@ export const InstructorDashboard = ({ userName, userId }: InstructorDashboardPro
         if (enrollments && enrollments.length > 0) {
           avgProgress = Math.round(enrollments.reduce((sum, e) => sum + (e.progress || 0), 0) / enrollments.length);
 
-          // Fetch student profiles
           const userIds = enrollments.map(e => e.user_id);
           const { data: profiles } = await supabase
             .from("profiles")
@@ -77,22 +76,21 @@ export const InstructorDashboard = ({ userName, userId }: InstructorDashboardPro
 
           const profilesMap = new Map(profiles?.map(p => [p.id, p.full_name]) || []);
 
-          enrollmentsData = enrollments.map(e => ({
-            id: e.id,
-            studentName: profilesMap.get(e.user_id) || "Unknown",
-            courseName: e.course_name,
-            enrolledAt: e.enrolled_at,
-            progress: e.progress || 0,
-          }));
+          enrollmentsData = enrollments.map(e => {
+            const name = profilesMap.get(e.user_id) || "Unknown";
+            return {
+              id: e.id,
+              studentName: name,
+              courseName: e.course_name,
+              enrolledAt: e.enrolled_at,
+              progress: e.progress || 0,
+              initials: name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2),
+            };
+          });
         }
       }
 
-      setStats({
-        totalCourses,
-        totalStudents,
-        publishedCourses,
-        avgProgress,
-      });
+      setStats({ totalCourses, totalStudents, publishedCourses, avgProgress });
       setRecentEnrollments(enrollmentsData);
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
@@ -102,123 +100,94 @@ export const InstructorDashboard = ({ userName, userId }: InstructorDashboardPro
   };
 
   const statsConfig = [
-    { 
-      title: "My Courses", 
-      value: stats.totalCourses, 
-      icon: BookOpen, 
-      description: `${stats.publishedCourses} published`,
-      color: "text-primary" 
-    },
-    { 
-      title: "Total Students", 
-      value: stats.totalStudents, 
-      icon: Users, 
-      description: "Enrolled in your courses",
-      color: "text-green-600" 
-    },
-    { 
-      title: "Avg. Progress", 
-      value: `${stats.avgProgress}%`, 
-      icon: TrendingUp, 
-      description: "Student completion rate",
-      color: "text-blue-600" 
-    },
-    { 
-      title: "Published", 
-      value: stats.publishedCourses, 
-      icon: Clock, 
-      description: "Active courses",
-      color: "text-amber-600" 
-    },
+    { title: "My Courses", value: stats.totalCourses, subtitle: `${stats.publishedCourses} published`, icon: BookOpen, accent: "bg-primary/10 text-primary" },
+    { title: "Total Students", value: stats.totalStudents, subtitle: "Enrolled overall", icon: Users, accent: "bg-secondary/10 text-secondary" },
+    { title: "Avg. Progress", value: `${stats.avgProgress}%`, subtitle: "Completion rate", icon: TrendingUp, accent: "bg-accent/10 text-accent" },
+    { title: "Published", value: stats.publishedCourses, subtitle: "Active courses", icon: Clock, accent: "bg-warning/10 text-warning-foreground" },
   ];
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
-  };
+  const formatDate = (dateString: string) =>
+    new Date(dateString).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-muted rounded w-1/3"></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[1, 2, 3, 4].map(i => (
-              <div key={i} className="h-32 bg-muted rounded"></div>
-            ))}
-          </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="h-24 bg-muted animate-pulse rounded-xl" />
+          ))}
         </div>
+        <div className="h-64 bg-muted animate-pulse rounded-xl" />
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-heading text-3xl font-bold">Welcome back, {userName}!</h1>
-        <p className="text-muted-foreground mt-1">Here's an overview of your courses and students.</p>
-      </div>
-
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         {statsConfig.map((stat) => (
-          <Card key={stat.title}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-              <stat.icon className={`h-4 w-4 ${stat.color}`} />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
-              <p className="text-xs text-muted-foreground">{stat.description}</p>
+          <Card key={stat.title} className="group relative overflow-hidden border border-border/60 shadow-none hover:border-primary/20 hover:shadow-md transition-all duration-300">
+            <CardContent className="p-4 md:p-5">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-[11px] md:text-xs font-medium text-muted-foreground uppercase tracking-wider">{stat.title}</p>
+                  <p className="text-2xl md:text-3xl font-heading font-bold mt-1 text-foreground">{stat.value}</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">{stat.subtitle}</p>
+                </div>
+                <div className={`w-9 h-9 md:w-10 md:h-10 rounded-lg ${stat.accent} flex items-center justify-center flex-shrink-0`}>
+                  <stat.icon className="w-4 h-4 md:w-5 md:h-5" />
+                </div>
+              </div>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {/* Zoom Integration & Live Sessions */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Zoom & Live Sessions */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         <ZoomConnectionStatus />
         <LiveSessionsList isInstructor />
       </div>
 
       {/* Recent Enrollments */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Enrollments</CardTitle>
-          <CardDescription>Students who recently enrolled in your courses</CardDescription>
+      <Card className="border border-border/60 shadow-none">
+        <CardHeader className="pb-3 px-5 pt-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-sm font-semibold text-foreground">Recent Enrollments</CardTitle>
+              <p className="text-xs text-muted-foreground mt-0.5">Students who recently joined your courses</p>
+            </div>
+          </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-5 pb-5 pt-0">
           {recentEnrollments.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p>No enrollments yet. Students will appear here once they enroll in your courses.</p>
+            <div className="text-center py-10">
+              <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mx-auto mb-3">
+                <Users className="w-6 h-6 text-muted-foreground" />
+              </div>
+              <p className="text-sm text-muted-foreground">No enrollments yet</p>
+              <p className="text-xs text-muted-foreground mt-1">Students will appear here once they enroll in your courses.</p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-1">
               {recentEnrollments.map((enrollment) => (
-                <div key={enrollment.id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <span className="text-sm font-semibold text-primary">
-                        {enrollment.studentName[0]?.toUpperCase() || "U"}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="font-medium">{enrollment.studentName}</p>
-                      <p className="text-sm text-muted-foreground">{enrollment.courseName}</p>
-                    </div>
+                <div key={enrollment.id} className="flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-muted/50 transition-colors -mx-3">
+                  <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <span className="text-xs font-semibold text-primary">{enrollment.initials}</span>
                   </div>
-                  <div className="text-right">
-                    <div className="flex items-center gap-3">
-                      <div className="w-24">
-                        <Progress value={enrollment.progress} className="h-2" />
-                      </div>
-                      <span className="text-sm font-medium w-12">{enrollment.progress}%</span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-sm font-medium truncate">{enrollment.studentName}</p>
+                      <span className="text-[11px] text-muted-foreground flex-shrink-0">{formatDate(enrollment.enrolledAt)}</span>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">{formatDate(enrollment.enrolledAt)}</p>
+                    <div className="flex items-center gap-2 mt-1.5">
+                      <p className="text-[11px] text-muted-foreground truncate flex-shrink-0">{enrollment.courseName}</p>
+                      <div className="flex items-center gap-1.5 ml-auto flex-shrink-0">
+                        <Progress value={enrollment.progress} className="h-1.5 w-16" />
+                        <span className="text-[11px] font-medium text-muted-foreground w-7 text-right">{enrollment.progress}%</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}

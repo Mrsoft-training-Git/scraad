@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { BookOpen, Clock, CheckCircle, Trophy } from "lucide-react";
+import { BookOpen, Clock, CheckCircle, Trophy, ArrowUpRight, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -65,151 +65,138 @@ export const StudentDashboard = ({ userName }: { userName: string }) => {
   const upcomingAssignments = assignments.filter(a => a.status === "pending");
   const completedAssignments = assignments.filter(a => a.status === "completed");
 
+  const statsConfig = [
+    { title: "Enrolled Courses", value: courses.length, icon: BookOpen, accent: "bg-primary/10 text-primary" },
+    { title: "Avg. Progress", value: `${averageProgress}%`, icon: Trophy, accent: "bg-secondary/10 text-secondary" },
+    { title: "Pending Tasks", value: upcomingAssignments.length, icon: Clock, accent: "bg-warning/10 text-warning-foreground" },
+    { title: "Completed", value: completedAssignments.length, icon: CheckCircle, accent: "bg-secondary/10 text-secondary" },
+  ];
+
   return (
-    <div className="space-y-6 md:space-y-8">
-      {/* Overview Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
-        <Card className="border-none shadow-card">
-          <CardContent className="p-3 md:p-6">
-            <div className="flex items-center justify-between mb-2 md:mb-4">
-              <div className="min-w-0 flex-1">
-                <p className="text-xs md:text-sm font-semibold text-muted-foreground mb-1 md:mb-2 truncate">ENROLLED</p>
-                <p className="text-2xl md:text-4xl font-bold text-primary">{courses.length}</p>
+    <div className="space-y-6">
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+        {statsConfig.map((stat, index) => (
+          <Card key={index} className="group relative overflow-hidden border border-border/60 shadow-none hover:border-primary/20 hover:shadow-md transition-all duration-300">
+            <CardContent className="p-4 md:p-5">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-[11px] md:text-xs font-medium text-muted-foreground uppercase tracking-wider">{stat.title}</p>
+                  <p className="text-2xl md:text-3xl font-heading font-bold mt-1 text-foreground">
+                    {loading ? (
+                      <span className="inline-block w-8 h-7 bg-muted animate-pulse rounded" />
+                    ) : (
+                      stat.value
+                    )}
+                  </p>
+                </div>
+                <div className={`w-9 h-9 md:w-10 md:h-10 rounded-lg ${stat.accent} flex items-center justify-center flex-shrink-0`}>
+                  <stat.icon className="w-4 h-4 md:w-5 md:h-5" />
+                </div>
               </div>
-              <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0 ml-2">
-                <BookOpen className="w-5 h-5 md:w-7 md:h-7" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-none shadow-card">
-          <CardContent className="p-3 md:p-6">
-            <div className="flex items-center justify-between mb-2 md:mb-4">
-              <div className="min-w-0 flex-1">
-                <p className="text-xs md:text-sm font-semibold text-muted-foreground mb-1 md:mb-2 truncate">PROGRESS</p>
-                <p className="text-2xl md:text-4xl font-bold text-primary">{averageProgress}%</p>
-              </div>
-              <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl bg-green-100 text-green-600 flex items-center justify-center flex-shrink-0 ml-2">
-                <Trophy className="w-5 h-5 md:w-7 md:h-7" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-none shadow-card">
-          <CardContent className="p-3 md:p-6">
-            <div className="flex items-center justify-between mb-2 md:mb-4">
-              <div className="min-w-0 flex-1">
-                <p className="text-xs md:text-sm font-semibold text-muted-foreground mb-1 md:mb-2 truncate">PENDING</p>
-                <p className="text-2xl md:text-4xl font-bold text-primary">{upcomingAssignments.length}</p>
-              </div>
-              <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center flex-shrink-0 ml-2">
-                <Clock className="w-5 h-5 md:w-7 md:h-7" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-none shadow-card">
-          <CardContent className="p-3 md:p-6">
-            <div className="flex items-center justify-between mb-2 md:mb-4">
-              <div className="min-w-0 flex-1">
-                <p className="text-xs md:text-sm font-semibold text-muted-foreground mb-1 md:mb-2 truncate">COMPLETED</p>
-                <p className="text-2xl md:text-4xl font-bold text-primary">{completedAssignments.length}</p>
-              </div>
-              <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center flex-shrink-0 ml-2">
-                <CheckCircle className="w-5 h-5 md:w-7 md:h-7" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       {/* Upcoming Live Sessions */}
       <LiveSessionsList />
 
-      {/* Course Progress */}
-      <Card className="border-none shadow-card">
-        <CardHeader className="bg-foreground text-background">
-          <CardTitle className="text-lg font-heading">My Courses</CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          {loading ? (
-            <p className="text-muted-foreground">Loading courses...</p>
-          ) : courses.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-muted-foreground mb-4">You haven't enrolled in any courses yet.</p>
-              <Button asChild>
-                <Link to="/courses">Browse Courses</Link>
+      {/* Content Grid */}
+      <div className="grid lg:grid-cols-5 gap-4 md:gap-6">
+        {/* Course Progress */}
+        <Card className="lg:col-span-3 border border-border/60 shadow-none">
+          <CardHeader className="pb-3 px-5 pt-5">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-semibold text-foreground">My Courses</CardTitle>
+              <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-foreground h-7 px-2" asChild>
+                <Link to="/courses">
+                  Browse <ArrowUpRight className="w-3 h-3 ml-1" />
+                </Link>
               </Button>
             </div>
-          ) : (
-            <div className="space-y-6">
-              {courses.map((course) => (
-                <div key={course.id} className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <h4 className="font-semibold">{course.course_name}</h4>
-                    <span className="text-sm text-muted-foreground">{course.progress}%</span>
-                  </div>
-                  <Progress value={course.progress} className="h-2" />
+          </CardHeader>
+          <CardContent className="px-5 pb-5 pt-0">
+            {loading ? (
+              <div className="space-y-4">
+                {[1, 2, 3].map(i => <div key={i} className="h-12 bg-muted animate-pulse rounded-lg" />)}
+              </div>
+            ) : courses.length === 0 ? (
+              <div className="text-center py-10">
+                <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mx-auto mb-3">
+                  <BookOpen className="w-6 h-6 text-muted-foreground" />
                 </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                <p className="text-sm text-muted-foreground mb-3">No courses yet</p>
+                <Button size="sm" asChild>
+                  <Link to="/courses">Browse Courses <ArrowRight className="w-3.5 h-3.5 ml-1.5" /></Link>
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-1">
+                {courses.map((course) => (
+                  <div key={course.id} className="flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-muted/50 transition-colors -mx-3">
+                    <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <BookOpen className="w-4 h-4 text-primary" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium truncate">{course.course_name}</p>
+                      <div className="flex items-center gap-2 mt-1.5">
+                        <Progress value={course.progress} className="h-1.5 flex-1" />
+                        <span className="text-[11px] font-medium text-muted-foreground w-8 text-right">{course.progress}%</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-      {/* Upcoming Assignments */}
-      <Card className="border-none shadow-card">
-        <CardHeader className="bg-foreground text-background">
-          <CardTitle className="text-lg font-heading">Upcoming Assignments</CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          {loading ? (
-            <p className="text-muted-foreground p-6">Loading assignments...</p>
-          ) : assignments.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-muted-foreground">No assignments yet.</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-muted">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-sm font-semibold">Assignment</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold">Due Date</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {assignments.map((assignment) => (
-                    <tr key={assignment.id} className="hover:bg-muted/50 transition-colors">
-                      <td className="px-6 py-4 font-medium">{assignment.title}</td>
-                      <td className="px-6 py-4 text-sm text-muted-foreground">
-                        {new Date(assignment.due_date).toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4">
-                        <span
-                          className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            assignment.status === "completed"
-                              ? "bg-green-100 text-green-700"
-                              : assignment.status === "submitted"
-                              ? "bg-blue-100 text-blue-700"
-                              : "bg-orange-100 text-orange-700"
-                          }`}
-                        >
-                          {assignment.status.charAt(0).toUpperCase() + assignment.status.slice(1)}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+        {/* Assignments */}
+        <Card className="lg:col-span-2 border border-border/60 shadow-none">
+          <CardHeader className="pb-3 px-5 pt-5">
+            <CardTitle className="text-sm font-semibold text-foreground">Upcoming Assignments</CardTitle>
+          </CardHeader>
+          <CardContent className="px-5 pb-5 pt-0">
+            {loading ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map(i => <div key={i} className="h-10 bg-muted animate-pulse rounded-lg" />)}
+              </div>
+            ) : assignments.length === 0 ? (
+              <div className="text-center py-10">
+                <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mx-auto mb-3">
+                  <CheckCircle className="w-6 h-6 text-muted-foreground" />
+                </div>
+                <p className="text-sm text-muted-foreground">No assignments yet</p>
+              </div>
+            ) : (
+              <div className="space-y-1">
+                {assignments.map((assignment) => (
+                  <div key={assignment.id} className="flex items-center justify-between py-2.5 px-2 rounded-lg hover:bg-muted/50 transition-colors -mx-2">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium truncate">{assignment.title}</p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">
+                        Due {new Date(assignment.due_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                      </p>
+                    </div>
+                    <span
+                      className={`ml-2 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide flex-shrink-0 ${
+                        assignment.status === "completed"
+                          ? "bg-secondary/10 text-secondary"
+                          : assignment.status === "submitted"
+                          ? "bg-accent/10 text-accent"
+                          : "bg-warning/10 text-warning-foreground"
+                      }`}
+                    >
+                      {assignment.status}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
