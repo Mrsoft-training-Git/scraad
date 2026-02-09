@@ -1,27 +1,37 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { useZoom } from "@/hooks/useZoom";
+import { supabase } from "@/integrations/supabase/client";
 import { Loader2, CheckCircle, XCircle } from "lucide-react";
 
 const ZoomCallback = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { handleOAuthCallback } = useZoom();
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
 
   useEffect(() => {
     const code = searchParams.get("code");
-    if (!code) {
+    const state = searchParams.get("state");
+
+    if (!code || !state) {
       setStatus("error");
       return;
     }
 
-    handleOAuthCallback(code).then((success) => {
-      setStatus(success ? "success" : "error");
-      if (success) {
-        setTimeout(() => navigate("/dashboard/classes"), 2000);
-      }
-    });
+    // Call the edge function with code and state (JWT token)
+    supabase.functions
+      .invoke("zoom-oauth-callback", {
+        method: "POST",
+        body: { code, state },
+      })
+      .then(({ error }) => {
+        if (error) {
+          console.error("OAuth callback error:", error);
+          setStatus("error");
+        } else {
+          setStatus("success");
+          setTimeout(() => navigate("/dashboard/classes"), 2000);
+        }
+      });
   }, []);
 
   return (

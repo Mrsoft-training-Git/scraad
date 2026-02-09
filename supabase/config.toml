@@ -1,1 +1,7 @@
 project_id = "isgfgclplfovvtlmitia"
+
+[functions.zoom-connect-start]
+verify_jwt = false
+
+[functions.zoom-oauth-callback]
+verify_jwt = false
