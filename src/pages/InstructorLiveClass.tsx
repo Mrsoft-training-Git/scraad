@@ -164,7 +164,7 @@ const InstructorLiveClass = () => {
   }
 
   return (
-    <DashboardLayout user={user} userRole="instructor" hideTopBar>
+    <DashboardLayout user={user} userRole="instructor">
       <div className="space-y-4">
         {/* Header - hidden when meeting is active */}
         {!meetingActive && (
