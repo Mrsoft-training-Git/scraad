@@ -120,72 +120,65 @@ export const ZoomMeetingEmbed = ({
       />
 
       {status !== "active" && (
-        <Card className="w-full h-full min-h-[400px] md:min-h-[500px] lg:min-h-[600px] bg-muted/50 overflow-hidden">
-          <CardContent className="flex items-center justify-center h-full min-h-[400px] md:min-h-[500px] lg:min-h-[600px]">
+        <div className="w-full rounded-xl border border-border bg-muted/30 backdrop-blur-sm overflow-hidden">
+          <div className="flex items-center justify-center py-10 px-6">
             {status === "idle" && (
-              <div className="text-center space-y-4 p-8">
-                <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center mx-auto">
-                  <Video className="h-12 w-12 text-muted-foreground" />
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Video className="h-7 w-7 text-primary" />
                 </div>
-                <div className="space-y-2">
-                  <h3 className="text-lg font-semibold">Meeting Area</h3>
-                  <p className="text-sm text-muted-foreground max-w-md">
-                    Click the button below to join the meeting directly in your browser.
-                  </p>
-                </div>
-                <Button onClick={startMeeting} size="lg">
-                  <Video className="h-4 w-4 mr-2" />
-                  {role === 1 ? "Start Meeting" : "Join Meeting"}
-                </Button>
-                {zoomFallbackUrl && (
-                  <div>
+                <p className="text-sm text-muted-foreground">Ready to connect</p>
+                <div className="flex items-center gap-2">
+                  <Button onClick={startMeeting} size="default">
+                    <Video className="h-4 w-4 mr-2" />
+                    {role === 1 ? "Start Meeting" : "Join Meeting"}
+                  </Button>
+                  {zoomFallbackUrl && (
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => window.open(zoomFallbackUrl, "_blank")}
                     >
-                      <ExternalLink className="h-3 w-3 mr-1" />
-                      Open in Zoom app instead
-                    </Button>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {status === "loading" && (
-              <div className="text-center space-y-4">
-                <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
-                <p className="text-muted-foreground">Loading Zoom meeting...</p>
-              </div>
-            )}
-
-            {status === "error" && (
-              <div className="text-center space-y-4 p-8">
-                <div className="w-24 h-24 rounded-full bg-destructive/10 flex items-center justify-center mx-auto">
-                  <AlertCircle className="h-12 w-12 text-destructive" />
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-lg font-semibold">Could not load meeting</h3>
-                  <p className="text-sm text-muted-foreground max-w-md">{errorMsg}</p>
-                </div>
-                <div className="flex flex-col gap-2 items-center">
-                  <Button onClick={startMeeting} variant="outline">
-                    Try Again
-                  </Button>
-                  {zoomFallbackUrl && (
-                    <Button
-                      variant="default"
-                      onClick={() => window.open(zoomFallbackUrl, "_blank")}
-                    >
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      Open in Zoom App
+                      <ExternalLink className="h-3.5 w-3.5 mr-1" />
+                      Zoom App
                     </Button>
                   )}
                 </div>
               </div>
             )}
-          </CardContent>
-        </Card>
+
+            {status === "loading" && (
+              <div className="flex items-center gap-3">
+                <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                <p className="text-sm text-muted-foreground">Connecting to meeting...</p>
+              </div>
+            )}
+
+            {status === "error" && (
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center">
+                  <AlertCircle className="h-6 w-6 text-destructive" />
+                </div>
+                <p className="text-sm text-muted-foreground max-w-sm text-center">{errorMsg}</p>
+                <div className="flex items-center gap-2">
+                  <Button onClick={startMeeting} variant="outline" size="sm">
+                    Try Again
+                  </Button>
+                  {zoomFallbackUrl && (
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={() => window.open(zoomFallbackUrl, "_blank")}
+                    >
+                      <ExternalLink className="h-3.5 w-3.5 mr-1" />
+                      Open in Zoom
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       )}
     </>
   );
