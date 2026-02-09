@@ -181,7 +181,7 @@ const DashboardCourses = () => {
     <DashboardLayout user={user} userRole={userRole}>
       <div className="space-y-4 md:space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <h2 className="font-heading text-2xl md:text-3xl font-bold">Course Catalog</h2>
+          <h2 className="text-lg font-semibold text-foreground">Course Catalog</h2>
           {(userRole === "admin" || userRole === "instructor") && (
             <Button onClick={() => handleOpenDialog()} className="w-full sm:w-auto">
               <Plus className="w-4 h-4 mr-2" />
@@ -209,7 +209,7 @@ const DashboardCourses = () => {
             {filteredCourses.map((course) => (
               <Card
                 key={course.id}
-                className="group overflow-hidden border-border/50 bg-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-2 flex flex-col"
+                className="group overflow-hidden border border-border/60 shadow-none bg-card hover:border-primary/20 hover:shadow-md transition-all duration-300 flex flex-col"
               >
                 <div className="aspect-video overflow-hidden relative">
                   {userRole === "admin" && (

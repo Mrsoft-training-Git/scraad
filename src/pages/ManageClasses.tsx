@@ -158,7 +158,7 @@ const ManageClasses = () => {
               </Button>
             </div>
 
-            <Card>
+            <Card className="border border-border/60 shadow-none">
               <CardHeader>
                 <div className="flex items-start gap-4">
                   <img
@@ -244,14 +244,14 @@ const ManageClasses = () => {
         ) : (
           <>
             <div>
-              <h2 className="font-heading text-3xl font-bold">Manage Classes</h2>
-              <p className="text-muted-foreground mt-1">View enrolled students and track their progress</p>
+              <h2 className="text-lg font-semibold text-foreground">Manage Classes</h2>
+              <p className="text-sm text-muted-foreground mt-0.5">View enrolled students and track their progress</p>
             </div>
 
             {loading ? (
               <div className="text-center py-12">Loading courses...</div>
             ) : courses.length === 0 ? (
-              <Card>
+              <Card className="border border-border/60 shadow-none">
                 <CardContent className="py-12 text-center">
                   <BookOpen className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
                   <h3 className="font-heading font-bold text-xl mb-2">No Courses Yet</h3>
@@ -263,7 +263,7 @@ const ManageClasses = () => {
                 {courses.map((course) => (
                   <Card
                     key={course.id}
-                    className="group cursor-pointer overflow-hidden border-border/50 bg-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-2"
+                    className="group cursor-pointer overflow-hidden border border-border/60 shadow-none bg-card hover:border-primary/20 hover:shadow-md transition-all duration-300"
                     onClick={() => handleCourseClick(course)}
                   >
                     <div className="aspect-video overflow-hidden relative">

@@ -329,11 +329,8 @@ const CourseDiscussions = () => {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h2 className="font-heading text-3xl font-bold flex items-center gap-2">
-              <MessageSquare className="w-8 h-8 text-primary" />
-              Discussions
-            </h2>
-            <p className="text-muted-foreground mt-1">
+            <h2 className="text-lg font-semibold text-foreground">Discussions</h2>
+            <p className="text-sm text-muted-foreground mt-0.5">
               Ask questions and engage with your course community
             </p>
           </div>
@@ -421,7 +418,7 @@ const CourseDiscussions = () => {
             <p className="text-muted-foreground mt-2">Loading discussions...</p>
           </div>
         ) : threads.length === 0 ? (
-          <Card>
+          <Card className="border border-border/60 shadow-none">
             <CardContent className="py-12 text-center">
               <MessageSquare className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
               <h3 className="font-heading font-bold text-xl mb-2">No Discussions Yet</h3>
@@ -431,7 +428,7 @@ const CourseDiscussions = () => {
         ) : (
           <div className="space-y-4">
             {threads.map((thread) => (
-              <Card key={thread.id} className={thread.is_pinned ? "border-primary/50 bg-primary/5" : ""}>
+              <Card key={thread.id} className={`border shadow-none ${thread.is_pinned ? "border-primary/40 bg-primary/5" : "border-border/60"}`}>
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
