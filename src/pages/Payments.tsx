@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DollarSign, CreditCard, TrendingUp, AlertCircle } from "lucide-react";
 
@@ -15,27 +15,19 @@ const Payments = () => {
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate("/auth");
-        return;
-      }
+      if (!session) { navigate("/auth"); return; }
       setUser(session.user);
-      
-      const { data: roleData } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", session.user.id)
-        .single();
-      
+      const { data: roleData } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id).single();
       setUserRole(roleData?.role || "student");
     };
     checkAuth();
   }, [navigate]);
-  const stats = [
-    { label: "Total Revenue", value: "₦2,450,000", icon: DollarSign, change: "+12.5%" },
-    { label: "Pending Payments", value: "₦340,000", icon: AlertCircle, change: "23 students" },
-    { label: "Successful Payments", value: "145", icon: CreditCard, change: "This month" },
-    { label: "Growth", value: "+18%", icon: TrendingUp, change: "vs last month" },
+
+  const statsConfig = [
+    { title: "Total Revenue", value: "₦2,450,000", subtitle: "+12.5%", icon: DollarSign, accent: "bg-primary/10 text-primary" },
+    { title: "Pending", value: "₦340,000", subtitle: "23 students", icon: AlertCircle, accent: "bg-warning/10 text-warning-foreground" },
+    { title: "Successful", value: "145", subtitle: "This month", icon: CreditCard, accent: "bg-secondary/10 text-secondary" },
+    { title: "Growth", value: "+18%", subtitle: "vs last month", icon: TrendingUp, accent: "bg-primary/10 text-primary" },
   ];
 
   const payments = [
@@ -48,54 +40,61 @@ const Payments = () => {
   return (
     <DashboardLayout user={user} userRole={userRole}>
       <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {stats.map((stat, index) => {
-              const Icon = stat.icon;
-              return (
-                <Card key={index}>
-                  <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">
-                      {stat.label}
-                    </CardTitle>
-                    <Icon className="w-4 h-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{stat.value}</div>
-                    <p className="text-xs text-muted-foreground mt-1">{stat.change}</p>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
+        <div>
+          <h2 className="text-lg font-semibold text-foreground">Payments</h2>
+          <p className="text-sm text-muted-foreground mt-0.5">Payment transactions overview</p>
+        </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Payments</CardTitle>
-              <CardDescription>View all payment transactions</CardDescription>
-            </CardHeader>
-            <CardContent>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+          {statsConfig.map((stat) => (
+            <Card key={stat.title} className="border border-border/60 shadow-none hover:border-primary/20 hover:shadow-md transition-all duration-300">
+              <CardContent className="p-4 md:p-5">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-[11px] md:text-xs font-medium text-muted-foreground uppercase tracking-wider">{stat.title}</p>
+                    <p className="text-2xl md:text-3xl font-heading font-bold mt-1 text-foreground">{stat.value}</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">{stat.subtitle}</p>
+                  </div>
+                  <div className={`w-9 h-9 md:w-10 md:h-10 rounded-lg ${stat.accent} flex items-center justify-center flex-shrink-0`}>
+                    <stat.icon className="w-4 h-4 md:w-5 md:h-5" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        <Card className="border border-border/60 shadow-none">
+          <CardHeader className="pb-3 px-5 pt-5">
+            <div>
+              <CardTitle className="text-sm font-semibold text-foreground">Recent Payments</CardTitle>
+              <p className="text-xs text-muted-foreground mt-0.5">All payment transactions</p>
+            </div>
+          </CardHeader>
+          <CardContent className="px-5 pb-5 pt-0">
+            <div className="overflow-x-auto -mx-5">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Student</TableHead>
+                    <TableHead className="pl-5">Student</TableHead>
                     <TableHead>Course</TableHead>
                     <TableHead>Amount</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead className="hidden sm:table-cell">Date</TableHead>
+                    <TableHead className="pr-5">Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {payments.map((payment) => (
-                    <TableRow key={payment.id}>
-                      <TableCell className="font-medium">{payment.student}</TableCell>
-                      <TableCell>{payment.course}</TableCell>
-                      <TableCell>{payment.amount}</TableCell>
-                      <TableCell>{payment.date}</TableCell>
-                      <TableCell>
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          payment.status === "Completed" 
-                            ? "bg-green-100 text-green-800" 
-                            : "bg-yellow-100 text-yellow-800"
+                    <TableRow key={payment.id} className="hover:bg-muted/30">
+                      <TableCell className="pl-5 font-medium text-sm">{payment.student}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{payment.course}</TableCell>
+                      <TableCell className="text-sm font-medium">{payment.amount}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground hidden sm:table-cell">{payment.date}</TableCell>
+                      <TableCell className="pr-5">
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide ${
+                          payment.status === "Completed"
+                            ? "bg-secondary/10 text-secondary"
+                            : "bg-warning/10 text-warning-foreground"
                         }`}>
                           {payment.status}
                         </span>
@@ -104,9 +103,10 @@ const Payments = () => {
                   ))}
                 </TableBody>
               </Table>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </DashboardLayout>
   );
 };

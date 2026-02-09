@@ -3,12 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Search, Users, Loader2 } from "lucide-react";
+import { Search, Users, ShieldCheck, GraduationCap, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 
 interface UserWithRole {
@@ -95,10 +94,10 @@ const UserManagement = () => {
   const adminCount = users.filter(u => u.role === "admin").length;
   const studentCount = users.filter(u => u.role === "student").length;
 
-  const stats = [
-    { label: "Total Users", value: totalUsers.toString(), change: "All registered users" },
-    { label: "Students", value: studentCount.toString(), change: `${totalUsers > 0 ? Math.round((studentCount / totalUsers) * 100) : 0}% of users` },
-    { label: "Admins", value: adminCount.toString(), change: "System access" },
+  const statsConfig = [
+    { title: "Total Users", value: totalUsers, icon: Users, accent: "bg-primary/10 text-primary" },
+    { title: "Students", value: studentCount, subtitle: `${totalUsers > 0 ? Math.round((studentCount / totalUsers) * 100) : 0}% of users`, icon: GraduationCap, accent: "bg-secondary/10 text-secondary" },
+    { title: "Admins", value: adminCount, subtitle: "System access", icon: ShieldCheck, accent: "bg-accent/10 text-accent" },
   ];
 
   // Filter users based on search
@@ -110,95 +109,102 @@ const UserManagement = () => {
   return (
     <DashboardLayout user={user} userRole={userRole}>
       <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {stats.map((stat, index) => (
-            <Card key={index}>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  {stat.label}
-                </CardTitle>
-                <Users className="w-4 h-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
-                <p className="text-xs text-muted-foreground mt-1">{stat.change}</p>
+        <div>
+          <h2 className="text-lg font-semibold text-foreground">User Management</h2>
+          <p className="text-sm text-muted-foreground mt-0.5">View and manage user accounts</p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
+          {statsConfig.map((stat) => (
+            <Card key={stat.title} className="border border-border/60 shadow-none hover:border-primary/20 hover:shadow-md transition-all duration-300">
+              <CardContent className="p-4 md:p-5">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-[11px] md:text-xs font-medium text-muted-foreground uppercase tracking-wider">{stat.title}</p>
+                    <p className="text-2xl md:text-3xl font-heading font-bold mt-1 text-foreground">
+                      {loading ? <span className="inline-block w-8 h-7 bg-muted animate-pulse rounded" /> : stat.value}
+                    </p>
+                  </div>
+                  <div className={`w-9 h-9 md:w-10 md:h-10 rounded-lg ${stat.accent} flex items-center justify-center flex-shrink-0`}>
+                    <stat.icon className="w-4 h-4 md:w-5 md:h-5" />
+                  </div>
+                </div>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        <Card>
-          <CardHeader>
-            <div className="flex justify-between items-center">
-              <div>
-                <CardTitle>All Users</CardTitle>
-                <CardDescription>View and manage user accounts</CardDescription>
-              </div>
-            </div>
-            <div className="relative mt-4">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+        <Card className="border border-border/60 shadow-none">
+          <CardHeader className="pb-3 px-5 pt-5">
+            <CardTitle className="text-sm font-semibold text-foreground">All Users</CardTitle>
+            <div className="relative mt-3">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-3.5 h-3.5" />
               <Input
                 placeholder="Search users..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-9 h-9 text-sm"
               />
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-5 pb-5 pt-0">
             {loading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+              <div className="flex items-center justify-center py-10">
+                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
               </div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>User</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Join Date</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredUsers.length === 0 ? (
+              <div className="overflow-x-auto -mx-5">
+                <Table>
+                  <TableHeader>
                     <TableRow>
-                      <TableCell colSpan={3} className="text-center text-muted-foreground py-8">
-                        No users found
-                      </TableCell>
+                      <TableHead className="pl-5">User</TableHead>
+                      <TableHead>Role</TableHead>
+                      <TableHead className="pr-5 hidden sm:table-cell">Join Date</TableHead>
                     </TableRow>
-                  ) : (
-                    filteredUsers.map((userData) => (
-                      <TableRow key={userData.id}>
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <Avatar className="w-8 h-8">
-                              <AvatarFallback>
-                                {userData.full_name?.split(' ').map(n => n[0]).join('') || '?'}
-                              </AvatarFallback>
-                            </Avatar>
-                            <span className="font-medium">{userData.full_name || 'Unknown User'}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <span className={`px-2 py-1 rounded-full text-xs capitalize ${
-                            userData.role === "admin" 
-                              ? "bg-yellow-100 text-yellow-800" 
-                              : "bg-muted"
-                          }`}>
-                            {userData.role}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          {userData.created_at 
-                            ? format(new Date(userData.created_at), 'MMM d, yyyy')
-                            : 'N/A'
-                          }
+                  </TableHeader>
+                  <TableBody>
+                    {filteredUsers.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={3} className="text-center text-muted-foreground py-10 text-sm">
+                          No users found
                         </TableCell>
                       </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
+                    ) : (
+                      filteredUsers.map((userData) => (
+                        <TableRow key={userData.id} className="hover:bg-muted/30">
+                          <TableCell className="pl-5">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                <span className="text-xs font-semibold text-primary">
+                                  {userData.full_name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'}
+                                </span>
+                              </div>
+                              <span className="text-sm font-medium">{userData.full_name || 'Unknown User'}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide ${
+                              userData.role === "admin" 
+                                ? "bg-warning/10 text-warning-foreground" 
+                                : userData.role === "instructor" 
+                                  ? "bg-secondary/10 text-secondary" 
+                                  : "bg-muted text-muted-foreground"
+                            }`}>
+                              {userData.role}
+                            </span>
+                          </TableCell>
+                          <TableCell className="pr-5 text-sm text-muted-foreground hidden sm:table-cell">
+                            {userData.created_at 
+                              ? format(new Date(userData.created_at), 'MMM d, yyyy')
+                              : 'N/A'
+                            }
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
             )}
           </CardContent>
         </Card>

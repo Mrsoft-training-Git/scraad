@@ -585,11 +585,8 @@ const CourseAssignments = () => {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h2 className="font-heading text-3xl font-bold flex items-center gap-2">
-              <ClipboardList className="w-8 h-8 text-primary" />
-              Assignments
-            </h2>
-            <p className="text-muted-foreground mt-1">
+            <h2 className="text-lg font-semibold text-foreground">Assignments</h2>
+            <p className="text-sm text-muted-foreground mt-0.5">
               {canCreateAssignment
                 ? "Create and grade student assignments"
                 : "Submit your assignments and track grades"}

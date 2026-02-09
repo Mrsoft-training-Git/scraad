@@ -87,14 +87,14 @@ const Learning = () => {
     <DashboardLayout user={user} userRole={userRole}>
       <div className="space-y-6">
         <div>
-          <h2 className="font-heading text-3xl font-bold">My Learning</h2>
-          <p className="text-muted-foreground mt-1">Track your progress across enrolled courses</p>
+          <h2 className="text-lg font-semibold text-foreground">My Learning</h2>
+          <p className="text-sm text-muted-foreground mt-0.5">Track your progress across enrolled courses</p>
         </div>
 
         {loading ? (
           <div className="text-center py-12">Loading your courses...</div>
         ) : enrolledCourses.length === 0 ? (
-          <Card>
+          <Card className="border border-border/60 shadow-none">
             <CardContent className="py-12 text-center">
               <BookOpen className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
               <h3 className="font-heading font-bold text-xl mb-2">No Courses Yet</h3>
@@ -114,7 +114,7 @@ const Learning = () => {
               return (
                 <Card
                   key={enrollment.id}
-                  className="group overflow-hidden border-border/50 bg-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-2 flex flex-col"
+                  className="group overflow-hidden border border-border/60 shadow-none bg-card hover:border-primary/20 hover:shadow-md transition-all duration-300 flex flex-col"
                 >
                   <div className="aspect-video overflow-hidden relative">
                     <Badge className="absolute top-4 right-4 bg-background/90 backdrop-blur-sm text-primary border-0 z-10">

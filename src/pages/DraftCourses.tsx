@@ -146,7 +146,7 @@ const DraftCourses = () => {
       <div className="space-y-4 md:space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h2 className="font-heading text-2xl md:text-3xl font-bold">Draft Courses</h2>
+            <h2 className="text-lg font-semibold text-foreground">Draft Courses</h2>
             <p className="text-muted-foreground mt-1">Review and publish courses pending approval</p>
           </div>
           <Badge variant="secondary" className="text-lg px-4 py-2">
@@ -176,7 +176,7 @@ const DraftCourses = () => {
             {filteredCourses.map((course) => (
               <Card
                 key={course.id}
-                className="group overflow-hidden border-border/50 bg-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-2 flex flex-col"
+                className="group overflow-hidden border border-border/60 shadow-none bg-card hover:border-primary/20 hover:shadow-md transition-all duration-300 flex flex-col"
               >
                 <div className="aspect-video overflow-hidden relative">
                   <div className="absolute top-4 right-4 z-10">

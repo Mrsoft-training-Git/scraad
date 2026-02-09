@@ -304,12 +304,9 @@ const CourseAnnouncements = () => {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h2 className="font-heading text-3xl font-bold flex items-center gap-2">
-              <Megaphone className="w-8 h-8 text-primary" />
-              Announcements
-            </h2>
-            <p className="text-muted-foreground mt-1">
-              {canCreateAnnouncement 
+            <h2 className="text-lg font-semibold text-foreground">Announcements</h2>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              {canCreateAnnouncement
                 ? "Broadcast important updates to your students"
                 : "Stay updated with course announcements"}
             </p>
@@ -410,7 +407,7 @@ const CourseAnnouncements = () => {
             <p className="text-muted-foreground mt-2">Loading announcements...</p>
           </div>
         ) : announcements.length === 0 ? (
-          <Card>
+          <Card className="border border-border/60 shadow-none">
             <CardContent className="py-12 text-center">
               <Megaphone className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
               <h3 className="font-heading font-bold text-xl mb-2">No Announcements</h3>
@@ -424,7 +421,7 @@ const CourseAnnouncements = () => {
         ) : (
           <div className="space-y-4">
             {announcements.map((announcement) => (
-              <Card key={announcement.id} className={announcement.is_pinned ? "border-primary/50 bg-primary/5" : ""}>
+              <Card key={announcement.id} className={`border shadow-none ${announcement.is_pinned ? "border-primary/40 bg-primary/5" : "border-border/60"}`}>
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
