@@ -174,7 +174,7 @@ export const AdminDashboard = () => {
       </div>
 
       {/* Content Grid */}
-      <div className="grid lg:grid-cols-5 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 md:gap-6">
         {/* Recent Students */}
         <Card className="lg:col-span-2 border border-border/60 shadow-none">
           <CardHeader className="pb-3 px-5 pt-5">
@@ -229,22 +229,22 @@ export const AdminDashboard = () => {
               </div>
             ) : (
               <>
-                <ChartContainer config={chartConfig} className="h-[280px] w-full">
-                  <BarChart
-                    data={displayedCourses}
-                    layout="vertical"
-                    margin={{ top: 0, right: 24, left: 8, bottom: 0 }}
-                  >
-                    <XAxis type="number" domain={[0, 100]} tickFormatter={(value) => `${value}%`} fontSize={11} tickLine={false} axisLine={false} />
-                    <YAxis
-                      type="category"
-                      dataKey="courseName"
-                      width={140}
-                      tickFormatter={(value) => value.length > 18 ? `${value.substring(0, 18)}...` : value}
-                      fontSize={11}
-                      tickLine={false}
-                      axisLine={false}
-                    />
+                 <ChartContainer config={chartConfig} className="h-[280px] w-full">
+                   <BarChart
+                     data={displayedCourses}
+                     layout="vertical"
+                     margin={{ top: 0, right: 16, left: 4, bottom: 0 }}
+                   >
+                     <XAxis type="number" domain={[0, 100]} tickFormatter={(value) => `${value}%`} fontSize={10} tickLine={false} axisLine={false} />
+                     <YAxis
+                       type="category"
+                       dataKey="courseName"
+                       width={100}
+                       tickFormatter={(value) => value.length > 14 ? `${value.substring(0, 14)}…` : value}
+                       fontSize={10}
+                       tickLine={false}
+                       axisLine={false}
+                     />
                     <ChartTooltip
                       content={({ active, payload }) => {
                         if (active && payload && payload.length) {
