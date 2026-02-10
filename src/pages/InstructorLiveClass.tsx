@@ -60,16 +60,23 @@ const InstructorLiveClass = () => {
   };
   const fetchSession = async () => {
     try {
+      console.log("Fetching session:", sessionId, "user:", user?.id);
       const {
         data,
         error
-      } = await supabase.from("live_sessions").select("id, title, course_id, scheduled_at, duration_minutes, status, zoom_start_url, zoom_join_url").eq("id", sessionId).single();
+      } = await supabase.from("live_sessions").select("id, title, course_id, scheduled_at, duration_minutes, status, zoom_start_url, zoom_join_url").eq("id", sessionId).maybeSingle();
       if (error) throw error;
+      if (!data) {
+        console.error("No session found for id:", sessionId);
+        setLoading(false);
+        return;
+      }
+      console.log("Session fetched, status:", data.status);
       let courseTitle = "";
       if (data.course_id) {
         const {
           data: courseData
-        } = await supabase.from("courses").select("title").eq("id", data.course_id).single();
+        } = await supabase.from("courses").select("title").eq("id", data.course_id).maybeSingle();
         courseTitle = courseData?.title || "";
       }
       setSession({
