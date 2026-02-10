@@ -228,16 +228,7 @@ const InstructorLiveClass = () => {
 
               <Card>
                 
-                <CardContent className="space-y-3">
-                  {session.status !== "ended" && <Button className="w-full" onClick={handleStartClass} disabled={meetingLoading}>
-                      <Play className="h-4 w-4 mr-2" />
-                      Start Class
-                    </Button>}
-                  <Button className="w-full" variant="outline" onClick={handleLeaveClass}>
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Leave Class
-                  </Button>
-                </CardContent>
+                
               </Card>
             </div>
           </div>
