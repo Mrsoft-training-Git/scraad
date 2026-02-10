@@ -71,3 +71,40 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+/* Zoom Meeting SDK – remove iPad frame, make fully responsive */
+[id^="zmmtg-root"],
+[id^="zmmtg-root"] > div {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  min-width: 0 !important;
+  position: relative !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+/* Remove the simulated device frame wrapper */
+[id^="zmmtg-root"] .zmwebsdk-makeStyles-root,
+[id^="zmmtg-root"] .zmwebsdk-MuiPaper-root {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Ensure the video/meeting canvas fills available space */
+[id^="zmmtg-root"] iframe,
+[id^="zmmtg-root"] video,
+[id^="zmmtg-root"] canvas {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  border: none !important;
+}
