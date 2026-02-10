@@ -112,13 +112,12 @@ export const DashboardLayout = ({ children, user, userRole, hideTopBar = false }
       <main className="flex-1 flex flex-col w-full">
         {/* Sticky top bar */}
         {!hideTopBar && (
-        <div className="sticky top-0 z-30 bg-card border-b border-border px-4 md:px-8 py-4 md:py-6 flex justify-between items-center">
+        <div className="sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-border/40 px-4 md:px-6 py-3 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            {/* Mobile menu trigger */}
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="lg:hidden">
-                  <Menu className="w-5 h-5" />
+                <Button variant="ghost" size="icon" className="lg:hidden h-8 w-8">
+                  <Menu className="w-4 h-4" />
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="p-0 w-64">
@@ -130,43 +129,42 @@ export const DashboardLayout = ({ children, user, userRole, hideTopBar = false }
               </SheetContent>
             </Sheet>
             
-            <div>
-              <div className="inline-block px-3 md:px-4 py-1 bg-primary text-primary-foreground rounded-lg text-xs md:text-sm font-semibold mb-1 md:mb-2">
-                Dashboard
-              </div>
-              <p className="text-muted-foreground text-sm hidden sm:block">Welcome back</p>
+            <div className="flex items-center gap-2.5">
+              <h1 className="font-heading text-base md:text-lg font-semibold text-foreground tracking-tight">Dashboard</h1>
+              <span className="hidden sm:inline-block text-muted-foreground/40">·</span>
+              <p className="text-muted-foreground text-xs hidden sm:block">Welcome back</p>
             </div>
           </div>
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-2 md:gap-3 px-2 md:px-4 py-2 md:py-2.5 hover:bg-accent/10 rounded-lg transition-all cursor-pointer border-2 border-border hover:border-primary bg-background shadow-sm">
-                <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <span className="text-xs md:text-sm font-bold text-primary">
+              <button className="flex items-center gap-2 px-2 py-1.5 hover:bg-muted rounded-full transition-all cursor-pointer group">
+                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center ring-2 ring-background shadow-sm">
+                  <span className="text-xs font-semibold text-primary-foreground">
                     {(user?.email?.split("@")[0]?.charAt(0).toUpperCase()) || "U"}
                   </span>
                 </div>
                 <div className="text-left hidden sm:block">
-                  <div className="font-semibold text-sm text-foreground">
+                  <div className="font-medium text-sm text-foreground leading-tight">
                     {user?.email?.split("@")[0] || "User"}
                   </div>
-                  <div className="text-xs text-muted-foreground capitalize">{userRole}</div>
+                  <div className="text-[11px] text-muted-foreground capitalize leading-tight">{userRole}</div>
                 </div>
-                <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                <ChevronDown className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground transition-colors" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 z-[100] bg-popover border-2 shadow-lg">
+            <DropdownMenuContent align="end" className="w-48 z-[100] bg-popover/95 backdrop-blur-lg border border-border/60 shadow-lg rounded-xl p-1">
               <DropdownMenuItem 
                 onClick={() => navigate("/dashboard/profile")} 
-                className="cursor-pointer hover:bg-accent focus:bg-accent px-4 py-3"
+                className="cursor-pointer hover:bg-muted focus:bg-muted px-3 py-2 rounded-lg text-sm"
               >
-                <span className="font-medium">Profile Settings</span>
+                Profile Settings
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={handleLogout} 
-                className="text-destructive cursor-pointer hover:bg-destructive/10 focus:bg-destructive/10 px-4 py-3"
+                className="text-destructive cursor-pointer hover:bg-destructive/10 focus:bg-destructive/10 px-3 py-2 rounded-lg text-sm"
               >
-                <span className="font-medium">Logout</span>
+                Logout
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
