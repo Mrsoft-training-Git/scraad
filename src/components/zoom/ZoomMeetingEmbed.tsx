@@ -111,16 +111,13 @@ export const ZoomMeetingEmbed = ({
 
   return (
     <>
-      {/* SDK container – fills entire parent; parent controls dimensions */}
+      {/* SDK container - always mounted, full viewport when active */}
       <div
         ref={containerRef}
+        className="w-full h-full"
         style={{
           display: status === "active" ? "block" : "none",
-          position: status === "active" ? "absolute" as const : undefined,
-          inset: status === "active" ? 0 : undefined,
-          width: "100%",
-          height: "100%",
-          overflow: "visible",
+          minHeight: status === "active" ? "calc(100vh - 64px)" : undefined,
         }}
       />
 

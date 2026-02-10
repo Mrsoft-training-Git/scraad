@@ -171,8 +171,8 @@ export const DashboardLayout = ({ children, user, userRole, hideTopBar = false }
         </div>
         )}
         
-        {/* Scrollable content area – no padding when top bar is hidden (e.g. active Zoom) */}
-        <div className={hideTopBar ? "flex-1 overflow-visible" : "flex-1 overflow-y-auto p-4 md:p-8"}>
+        {/* Scrollable content area */}
+        <div className={hideTopBar ? "flex-1 overflow-y-auto p-0" : "flex-1 overflow-y-auto p-4 md:p-8"}>
           {children}
         </div>
       </main>
