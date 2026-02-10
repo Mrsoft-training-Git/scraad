@@ -11,7 +11,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useZoom } from "@/hooks/useZoom";
 import { format } from "date-fns";
 import { User } from "@supabase/supabase-js";
-
 interface SessionDetails {
   id: string;
   title: string;
@@ -23,57 +22,60 @@ interface SessionDetails {
   zoom_start_url?: string | null;
   zoom_join_url?: string | null;
 }
-
 const InstructorLiveClass = () => {
-  const { sessionId } = useParams<{ sessionId: string }>();
+  const {
+    sessionId
+  } = useParams<{
+    sessionId: string;
+  }>();
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<SessionDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [meetingLoading, setMeetingLoading] = useState(false);
   const [meetingActive, setMeetingActive] = useState(false);
-  const { startLiveSession, endLiveSession } = useZoom();
-
+  const {
+    startLiveSession,
+    endLiveSession
+  } = useZoom();
   useEffect(() => {
     checkAuth();
   }, []);
-
   useEffect(() => {
     if (sessionId) {
       fetchSession();
     }
   }, [sessionId]);
-
   const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: {
+        session
+      }
+    } = await supabase.auth.getSession();
     if (!session) {
       navigate("/auth");
     } else {
       setUser(session.user);
     }
   };
-
   const fetchSession = async () => {
     try {
-      const { data, error } = await supabase
-        .from("live_sessions")
-        .select("id, title, course_id, scheduled_at, duration_minutes, status, zoom_start_url, zoom_join_url")
-        .eq("id", sessionId)
-        .single();
-
+      const {
+        data,
+        error
+      } = await supabase.from("live_sessions").select("id, title, course_id, scheduled_at, duration_minutes, status, zoom_start_url, zoom_join_url").eq("id", sessionId).single();
       if (error) throw error;
-
       let courseTitle = "";
       if (data.course_id) {
-        const { data: courseData } = await supabase
-          .from("courses")
-          .select("title")
-          .eq("id", data.course_id)
-          .single();
+        const {
+          data: courseData
+        } = await supabase.from("courses").select("title").eq("id", data.course_id).single();
         courseTitle = courseData?.title || "";
       }
-
-      setSession({ ...data, course_title: courseTitle });
+      setSession({
+        ...data,
+        course_title: courseTitle
+      });
       setMeetingActive(data.status === "live");
     } catch (error) {
       console.error("Error fetching session:", error);
@@ -81,37 +83,35 @@ const InstructorLiveClass = () => {
       setLoading(false);
     }
   };
-
   const handleStartClass = async () => {
     if (!sessionId) return;
     setMeetingLoading(true);
-    
     const result = await startLiveSession(sessionId);
     if (result.success) {
       setMeetingActive(true);
-      setSession(prev => prev ? { ...prev, status: "live" } : null);
+      setSession(prev => prev ? {
+        ...prev,
+        status: "live"
+      } : null);
     }
-    
     setMeetingLoading(false);
   };
-
   const handleEndClass = async () => {
     if (!sessionId) return;
     setMeetingLoading(true);
-    
     const success = await endLiveSession(sessionId);
     if (success) {
       setMeetingActive(false);
-      setSession(prev => prev ? { ...prev, status: "ended" } : null);
+      setSession(prev => prev ? {
+        ...prev,
+        status: "ended"
+      } : null);
     }
-    
     setMeetingLoading(false);
   };
-
   const handleLeaveClass = () => {
     navigate("/dashboard");
   };
-
   const getStatusBadge = () => {
     if (!session) return null;
     if (session.status === "live") {
@@ -122,10 +122,8 @@ const InstructorLiveClass = () => {
     }
     return <Badge variant="default">Scheduled</Badge>;
   };
-
   if (loading) {
-    return (
-      <DashboardLayout user={user} userRole="instructor">
+    return <DashboardLayout user={user} userRole="instructor">
         <div className="space-y-6">
           <Skeleton className="h-10 w-64" />
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -135,13 +133,10 @@ const InstructorLiveClass = () => {
             <Skeleton className="h-[300px]" />
           </div>
         </div>
-      </DashboardLayout>
-    );
+      </DashboardLayout>;
   }
-
   if (!session) {
-    return (
-      <DashboardLayout user={user} userRole="instructor">
+    return <DashboardLayout user={user} userRole="instructor">
         <div className="text-center py-12">
           <Video className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
           <h2 className="text-xl font-semibold mb-2">Session Not Found</h2>
@@ -151,35 +146,26 @@ const InstructorLiveClass = () => {
             Back to Dashboard
           </Button>
         </div>
-      </DashboardLayout>
-    );
+      </DashboardLayout>;
   }
-
-  return (
-    <DashboardLayout user={user} userRole="instructor" hideTopBar={meetingActive}>
-      {meetingActive ? (
-        <div className="relative w-full" style={{ height: '100vh' }}>
-          {sessionId && user && (
-            <ZoomMeetingEmbed
-              sessionId={sessionId}
-              role={1}
-              userName={user.user_metadata?.full_name || user.email || "Instructor"}
-              userEmail={user.email}
-              zoomFallbackUrl={session?.zoom_start_url}
-              sessionStatus={session?.status}
-              onMeetingStart={() => {
-                setMeetingActive(true);
-                setSession(prev => prev ? { ...prev, status: "live" } : null);
-              }}
-              onMeetingEnd={() => {
-                setMeetingActive(false);
-                setSession(prev => prev ? { ...prev, status: "ended" } : null);
-              }}
-            />
-          )}
-        </div>
-      ) : (
-        <div className="space-y-4">
+  return <DashboardLayout user={user} userRole="instructor" hideTopBar={meetingActive}>
+      {meetingActive ? <div className="relative w-full" style={{
+      height: '100vh'
+    }}>
+          {sessionId && user && <ZoomMeetingEmbed sessionId={sessionId} role={1} userName={user.user_metadata?.full_name || user.email || "Instructor"} userEmail={user.email} zoomFallbackUrl={session?.zoom_start_url} sessionStatus={session?.status} onMeetingStart={() => {
+        setMeetingActive(true);
+        setSession(prev => prev ? {
+          ...prev,
+          status: "live"
+        } : null);
+      }} onMeetingEnd={() => {
+        setMeetingActive(false);
+        setSession(prev => prev ? {
+          ...prev,
+          status: "ended"
+        } : null);
+      }} />}
+        </div> : <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}>
@@ -199,24 +185,19 @@ const InstructorLiveClass = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
-              {sessionId && user && (
-                <ZoomMeetingEmbed
-                  sessionId={sessionId}
-                  role={1}
-                  userName={user.user_metadata?.full_name || user.email || "Instructor"}
-                  userEmail={user.email}
-                  zoomFallbackUrl={session?.zoom_start_url}
-                  sessionStatus={session?.status}
-                  onMeetingStart={() => {
-                    setMeetingActive(true);
-                    setSession(prev => prev ? { ...prev, status: "live" } : null);
-                  }}
-                  onMeetingEnd={() => {
-                    setMeetingActive(false);
-                    setSession(prev => prev ? { ...prev, status: "ended" } : null);
-                  }}
-                />
-              )}
+              {sessionId && user && <ZoomMeetingEmbed sessionId={sessionId} role={1} userName={user.user_metadata?.full_name || user.email || "Instructor"} userEmail={user.email} zoomFallbackUrl={session?.zoom_start_url} sessionStatus={session?.status} onMeetingStart={() => {
+            setMeetingActive(true);
+            setSession(prev => prev ? {
+              ...prev,
+              status: "live"
+            } : null);
+          }} onMeetingEnd={() => {
+            setMeetingActive(false);
+            setSession(prev => prev ? {
+              ...prev,
+              status: "ended"
+            } : null);
+          }} />}
             </div>
 
             <div className="space-y-4">
@@ -246,17 +227,12 @@ const InstructorLiveClass = () => {
               </Card>
 
               <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Controls</CardTitle>
-                  <CardDescription>Manage your live class session</CardDescription>
-                </CardHeader>
+                
                 <CardContent className="space-y-3">
-                  {session.status !== "ended" && (
-                    <Button className="w-full" onClick={handleStartClass} disabled={meetingLoading}>
+                  {session.status !== "ended" && <Button className="w-full" onClick={handleStartClass} disabled={meetingLoading}>
                       <Play className="h-4 w-4 mr-2" />
                       Start Class
-                    </Button>
-                  )}
+                    </Button>}
                   <Button className="w-full" variant="outline" onClick={handleLeaveClass}>
                     <LogOut className="h-4 w-4 mr-2" />
                     Leave Class
@@ -265,10 +241,7 @@ const InstructorLiveClass = () => {
               </Card>
             </div>
           </div>
-        </div>
-      )}
-    </DashboardLayout>
-  );
+        </div>}
+    </DashboardLayout>;
 };
-
 export default InstructorLiveClass;
