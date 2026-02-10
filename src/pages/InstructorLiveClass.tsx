@@ -42,10 +42,10 @@ const InstructorLiveClass = () => {
     checkAuth();
   }, []);
   useEffect(() => {
-    if (sessionId) {
+    if (sessionId && user) {
       fetchSession();
     }
-  }, [sessionId]);
+  }, [sessionId, user]);
   const checkAuth = async () => {
     const {
       data: {
