@@ -195,6 +195,7 @@ const StudentLiveClass = () => {
                   userName={user.user_metadata?.full_name || user.email || "Student"}
                   userEmail={user.email}
                   zoomFallbackUrl={session?.zoom_join_url}
+                  sessionStatus={session?.status}
                   onMeetingStart={() => setMeetingActive(true)}
                   onMeetingEnd={() => setMeetingActive(false)}
                 />
