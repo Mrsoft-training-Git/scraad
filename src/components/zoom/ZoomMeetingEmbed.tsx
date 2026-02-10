@@ -12,6 +12,7 @@ interface ZoomMeetingEmbedProps {
   onMeetingEnd?: () => void;
   onMeetingStart?: () => void;
   zoomFallbackUrl?: string | null;
+  sessionStatus?: string;
 }
 
 type EmbedStatus = "idle" | "loading" | "active" | "error";
@@ -24,6 +25,7 @@ export const ZoomMeetingEmbed = ({
   onMeetingEnd,
   onMeetingStart,
   zoomFallbackUrl,
+  sessionStatus,
 }: ZoomMeetingEmbedProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const clientRef = useRef<any>(null);
@@ -122,7 +124,16 @@ export const ZoomMeetingEmbed = ({
       {status !== "active" && (
         <div className="w-full rounded-xl border border-border bg-muted/30 backdrop-blur-sm overflow-hidden">
           <div className="flex items-center justify-center py-10 px-6">
-            {status === "idle" && (
+            {status === "idle" && sessionStatus === "ended" && (
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-14 h-14 rounded-full bg-muted/50 flex items-center justify-center">
+                  <Video className="h-7 w-7 text-muted-foreground" />
+                </div>
+                <p className="text-sm text-muted-foreground">This session has ended</p>
+              </div>
+            )}
+
+            {status === "idle" && sessionStatus !== "ended" && (
               <div className="flex flex-col items-center gap-3">
                 <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
                   <Video className="h-7 w-7 text-primary" />
