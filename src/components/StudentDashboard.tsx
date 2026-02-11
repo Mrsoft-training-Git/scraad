@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { LiveSessionsList } from "@/components/zoom/LiveSessionsList";
+import { PaymentCountdown } from "@/components/PaymentCountdown";
 
 interface EnrolledCourse {
   id: string;
@@ -98,6 +99,9 @@ export const StudentDashboard = ({ userName }: { userName: string }) => {
           </Card>
         ))}
       </div>
+
+      {/* Payment Countdown Alerts */}
+      <PaymentCountdown />
 
       {/* Upcoming Live Sessions — collapsible */}
       <LiveSessionsList />

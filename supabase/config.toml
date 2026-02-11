@@ -8,3 +8,12 @@ verify_jwt = false
 
 [functions.zoom-generate-signature]
 verify_jwt = false
+
+[functions.initialize-payment]
+verify_jwt = false
+
+[functions.paystack-webhook]
+verify_jwt = false
+
+[functions.check-overdue-payments]
+verify_jwt = false
