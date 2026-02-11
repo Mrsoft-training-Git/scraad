@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Clock, Users, Award, CheckCircle, BookOpen, Video, ArrowLeft, Share2, Check, ChevronDown, ChevronUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { PaymentButtons } from "@/components/PaymentButtons";
 
 interface Course {
   id: string;
@@ -26,6 +27,9 @@ interface Course {
   what_you_learn: string[];
   requirements: string[];
   syllabus: any;
+  allows_part_payment: boolean;
+  first_tranche_amount: number | null;
+  second_tranche_amount: number | null;
 }
 
 const ProgramDetails = () => {
@@ -34,6 +38,7 @@ const ProgramDetails = () => {
    const [loading, setLoading] = useState(true);
    const [copied, setCopied] = useState(false);
    const [expandedOverview, setExpandedOverview] = useState(false);
+   const [enrollmentStatus, setEnrollmentStatus] = useState<string | null>(null);
    const { toast } = useToast();
 
   const handleShare = async () => {
@@ -58,8 +63,25 @@ const ProgramDetails = () => {
   useEffect(() => {
     if (id) {
       fetchCourseDetails();
+      checkEnrollmentStatus();
     }
   }, [id]);
+
+  const checkEnrollmentStatus = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user || !id) return;
+
+    const { data } = await supabase
+      .from("enrollments")
+      .select("payment_status")
+      .eq("user_id", user.id)
+      .eq("course_id", id)
+      .maybeSingle();
+
+    if (data) {
+      setEnrollmentStatus(data.payment_status);
+    }
+  };
 
   const fetchCourseDetails = async () => {
     setLoading(true);
@@ -330,9 +352,22 @@ const ProgramDetails = () => {
                     </div>
 
                     <div className="flex gap-2">
-                      <Button className="flex-1 bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground shadow-lg font-semibold py-6 text-lg" asChild>
-                        <Link to="/auth">Enroll Now</Link>
-                      </Button>
+                      {course.price === 0 ? (
+                        <Button className="flex-1 bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground shadow-lg font-semibold py-6 text-lg" asChild>
+                          <Link to="/auth">Enroll Free</Link>
+                        </Button>
+                      ) : (
+                        <div className="flex-1">
+                          <PaymentButtons
+                            courseId={course.id}
+                            price={course.price}
+                            allowsPartPayment={course.allows_part_payment}
+                            firstTrancheAmount={course.first_tranche_amount}
+                            secondTrancheAmount={course.second_tranche_amount}
+                            enrollmentStatus={enrollmentStatus}
+                          />
+                        </div>
+                      )}
                       <Button
                         variant="outline"
                         size="icon"

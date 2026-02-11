@@ -413,11 +413,13 @@ export type Database = {
       }
       courses: {
         Row: {
+          allows_part_payment: boolean
           category: string
           created_at: string | null
           description: string | null
           duration: string | null
           featured: boolean | null
+          first_tranche_amount: number | null
           id: string
           image_url: string | null
           instructor: string | null
@@ -428,6 +430,8 @@ export type Database = {
           price: number
           published: boolean | null
           requirements: string[] | null
+          second_payment_due_days: number | null
+          second_tranche_amount: number | null
           students_count: number | null
           syllabus: Json | null
           title: string
@@ -436,11 +440,13 @@ export type Database = {
           what_you_learn: string[] | null
         }
         Insert: {
+          allows_part_payment?: boolean
           category: string
           created_at?: string | null
           description?: string | null
           duration?: string | null
           featured?: boolean | null
+          first_tranche_amount?: number | null
           id?: string
           image_url?: string | null
           instructor?: string | null
@@ -451,6 +457,8 @@ export type Database = {
           price: number
           published?: boolean | null
           requirements?: string[] | null
+          second_payment_due_days?: number | null
+          second_tranche_amount?: number | null
           students_count?: number | null
           syllabus?: Json | null
           title: string
@@ -459,11 +467,13 @@ export type Database = {
           what_you_learn?: string[] | null
         }
         Update: {
+          allows_part_payment?: boolean
           category?: string
           created_at?: string | null
           description?: string | null
           duration?: string | null
           featured?: boolean | null
+          first_tranche_amount?: number | null
           id?: string
           image_url?: string | null
           instructor?: string | null
@@ -474,6 +484,8 @@ export type Database = {
           price?: number
           published?: boolean | null
           requirements?: string[] | null
+          second_payment_due_days?: number | null
+          second_tranche_amount?: number | null
           students_count?: number | null
           syllabus?: Json | null
           title?: string
@@ -599,6 +611,50 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "enrolled_courses_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      enrollments: {
+        Row: {
+          access_status: string
+          course_id: string
+          created_at: string
+          first_payment_date: string | null
+          id: string
+          payment_status: string
+          second_payment_date: string | null
+          second_payment_due_date: string | null
+          user_id: string
+        }
+        Insert: {
+          access_status?: string
+          course_id: string
+          created_at?: string
+          first_payment_date?: string | null
+          id?: string
+          payment_status?: string
+          second_payment_date?: string | null
+          second_payment_due_date?: string | null
+          user_id: string
+        }
+        Update: {
+          access_status?: string
+          course_id?: string
+          created_at?: string
+          first_payment_date?: string | null
+          id?: string
+          payment_status?: string
+          second_payment_date?: string | null
+          second_payment_due_date?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enrollments_course_id_fkey"
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "courses"

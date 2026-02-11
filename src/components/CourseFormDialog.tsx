@@ -41,6 +41,10 @@ interface CourseFormData {
   what_you_learn: string[];
   requirements: string[];
   syllabus: { title: string; description: string; topics: string[] }[];
+  allows_part_payment: boolean;
+  first_tranche_amount: string;
+  second_tranche_amount: string;
+  second_payment_due_days: string;
 }
 
 interface CourseFormDialogProps {
@@ -70,7 +74,11 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave, us
     level: "Beginner",
     what_you_learn: [""],
     requirements: [""],
-    syllabus: [{ title: "", description: "", topics: [] }]
+    syllabus: [{ title: "", description: "", topics: [] }],
+    allows_part_payment: false,
+    first_tranche_amount: "",
+    second_tranche_amount: "",
+    second_payment_due_days: "",
   });
 
   const [newSkill, setNewSkill] = useState("");
@@ -94,7 +102,11 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave, us
         requirements: editingCourse.requirements?.length ? editingCourse.requirements : [""],
         syllabus: editingCourse.syllabus?.length 
           ? editingCourse.syllabus.map((m: any) => ({ title: m.title || "", description: m.description || "", topics: m.topics || [] }))
-          : [{ title: "", description: "", topics: [] }]
+          : [{ title: "", description: "", topics: [] }],
+        allows_part_payment: editingCourse.allows_part_payment || false,
+        first_tranche_amount: editingCourse.first_tranche_amount?.toString() || "",
+        second_tranche_amount: editingCourse.second_tranche_amount?.toString() || "",
+        second_payment_due_days: editingCourse.second_payment_due_days?.toString() || "",
       });
       setImagePreview(editingCourse.image_url || "");
     } else if (open && !editingCourse) {
@@ -111,7 +123,11 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave, us
         level: "Beginner",
         what_you_learn: [""],
         requirements: [""],
-        syllabus: [{ title: "", description: "", topics: [] }]
+        syllabus: [{ title: "", description: "", topics: [] }],
+        allows_part_payment: false,
+        first_tranche_amount: "",
+        second_tranche_amount: "",
+        second_payment_due_days: "",
       });
       setImagePreview("");
     }
@@ -210,6 +226,23 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave, us
       return;
     }
 
+    // Validate part payment
+    if (!formData.is_free && formData.allows_part_payment) {
+      const first = parseFloat(formData.first_tranche_amount);
+      const second = parseFloat(formData.second_tranche_amount);
+      const total = parseFloat(formData.price);
+      const days = parseInt(formData.second_payment_due_days);
+
+      if (!first || !second || !days) {
+        toast({ title: "Error", description: "All part payment fields are required when part payment is enabled", variant: "destructive" });
+        return;
+      }
+      if (Math.abs(first + second - total) > 0.01) {
+        toast({ title: "Error", description: `First (₦${first}) + Second (₦${second}) tranche must equal the full price (₦${total})`, variant: "destructive" });
+        return;
+      }
+    }
+
     // Get current user for instructor_id
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -225,7 +258,11 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave, us
       level: formData.level,
       what_you_learn: formData.what_you_learn.filter(s => s.trim()),
       requirements: formData.requirements.filter(r => r.trim()),
-      syllabus: formData.syllabus.filter(m => m.title.trim())
+      syllabus: formData.syllabus.filter(m => m.title.trim()),
+      allows_part_payment: !formData.is_free && formData.allows_part_payment,
+      first_tranche_amount: formData.allows_part_payment ? parseInt(formData.first_tranche_amount) || null : null,
+      second_tranche_amount: formData.allows_part_payment ? parseInt(formData.second_tranche_amount) || null : null,
+      second_payment_due_days: formData.allows_part_payment ? parseInt(formData.second_payment_due_days) || null : null,
     };
 
     // If instructor is creating a course, auto-assign themselves
@@ -394,6 +431,76 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave, us
                   />
                 )}
               </div>
+
+              {/* Part Payment Section */}
+              {!formData.is_free && formData.price && (
+                <div className="col-span-2 border border-border/60 rounded-lg p-4 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={formData.allows_part_payment}
+                        onChange={(e) => setFormData({ ...formData, allows_part_payment: e.target.checked })}
+                        className="rounded border-input"
+                      />
+                      <span className="text-sm font-medium">Allow Part Payment (Installments)</span>
+                    </label>
+                  </div>
+                  
+                  {formData.allows_part_payment && (
+                    <div className="grid grid-cols-3 gap-3">
+                      <div>
+                        <Label htmlFor="first_tranche">First Tranche (₦)</Label>
+                        <Input
+                          id="first_tranche"
+                          type="number"
+                          value={formData.first_tranche_amount}
+                          onChange={(e) => setFormData({ ...formData, first_tranche_amount: e.target.value })}
+                          placeholder="e.g., 25000"
+                          className="mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="second_tranche">Second Tranche (₦)</Label>
+                        <Input
+                          id="second_tranche"
+                          type="number"
+                          value={formData.second_tranche_amount}
+                          onChange={(e) => setFormData({ ...formData, second_tranche_amount: e.target.value })}
+                          placeholder="e.g., 25000"
+                          className="mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="due_days">Due In (Days)</Label>
+                        <Input
+                          id="due_days"
+                          type="number"
+                          value={formData.second_payment_due_days}
+                          onChange={(e) => setFormData({ ...formData, second_payment_due_days: e.target.value })}
+                          placeholder="e.g., 30"
+                          className="mt-1"
+                        />
+                      </div>
+                      {formData.first_tranche_amount && formData.second_tranche_amount && (
+                        <div className="col-span-3">
+                          <p className={`text-xs ${
+                            Math.abs(parseFloat(formData.first_tranche_amount || "0") + parseFloat(formData.second_tranche_amount || "0") - parseFloat(formData.price || "0")) < 0.01
+                              ? "text-green-600"
+                              : "text-destructive"
+                          }`}>
+                            First (₦{parseFloat(formData.first_tranche_amount || "0").toLocaleString()}) + Second (₦{parseFloat(formData.second_tranche_amount || "0").toLocaleString()}) = ₦{(parseFloat(formData.first_tranche_amount || "0") + parseFloat(formData.second_tranche_amount || "0")).toLocaleString()}
+                            {Math.abs(parseFloat(formData.first_tranche_amount || "0") + parseFloat(formData.second_tranche_amount || "0") - parseFloat(formData.price || "0")) < 0.01
+                              ? " ✓ Matches full price"
+                              : ` ✗ Must equal full price (₦${parseFloat(formData.price || "0").toLocaleString()})`
+                            }
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div>
                 <Label htmlFor="category">Category *</Label>

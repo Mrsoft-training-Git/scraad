@@ -9,6 +9,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
 import { X, Video, FileText, Link as LinkIcon, CheckCircle2, ChevronDown, ChevronUp, ArrowRight, ArrowLeft, BookOpen, ExternalLink, Play, Pause, Volume2, VolumeX, Maximize, SkipBack, SkipForward, Download, Menu, ClipboardCheck } from "lucide-react";
 import { KnowledgeCheckPlayer } from "@/components/KnowledgeCheckPlayer";
+import { LockedCourseScreen } from "@/components/LockedCourseScreen";
 interface Course {
   id: string;
   title: string;
@@ -117,6 +118,9 @@ const CourseViewer = () => {
     total_questions: number;
   } | null>(null);
   const [passedQuizzes, setPassedQuizzes] = useState<Set<string>>(new Set());
+  const [accessLocked, setAccessLocked] = useState(false);
+  const [enrollmentPaymentStatus, setEnrollmentPaymentStatus] = useState<string | null>(null);
+  const [courseSecondTranche, setCourseSecondTranche] = useState<number | null>(null);
   const {
     toast
   } = useToast();
@@ -152,12 +156,33 @@ const CourseViewer = () => {
         // Check if user is instructor of this course or admin
         const { data: courseData } = await supabase
           .from("courses")
-          .select("instructor_id")
+          .select("instructor_id, second_tranche_amount")
           .eq("id", courseId)
           .maybeSingle();
         
+        setCourseSecondTranche(courseData?.second_tranche_amount || null);
+        
         const isOwnerOrAdmin = role === "admin" || (role === "instructor" && courseData?.instructor_id === session.user.id);
         setIsInstructorOrAdmin(isOwnerOrAdmin);
+        
+        // Check payment enrollment access (only for students)
+        if (!isOwnerOrAdmin) {
+          const { data: enrollment } = await supabase
+            .from("enrollments")
+            .select("*")
+            .eq("user_id", session.user.id)
+            .eq("course_id", courseId)
+            .maybeSingle();
+          
+          if (enrollment) {
+            setEnrollmentPaymentStatus(enrollment.payment_status);
+            if (enrollment.access_status !== "active") {
+              setAccessLocked(true);
+              setLoading(false);
+              return;
+            }
+          }
+        }
         
         const enrollId = await checkEnrollment(session.user.id, courseId);
         const courseContents = await fetchCourseData(courseId, isOwnerOrAdmin);
@@ -605,6 +630,16 @@ const CourseViewer = () => {
     return <div className="flex items-center justify-center h-screen bg-background">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>;
+  }
+  if (accessLocked && course) {
+    return (
+      <LockedCourseScreen
+        courseTitle={course.title}
+        courseId={course.id}
+        paymentStatus={enrollmentPaymentStatus || ""}
+        secondTranche={courseSecondTranche}
+      />
+    );
   }
   if (!course) {
     return <div className="flex items-center justify-center h-screen bg-background">
