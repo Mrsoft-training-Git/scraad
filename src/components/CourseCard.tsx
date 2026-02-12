@@ -84,12 +84,12 @@ export const CourseCard = ({ course, onEnroll, showEnrollButton = true }: Course
         </div>
         <div className="flex gap-2">
           {showEnrollButton && (
-            <Button 
-              className="flex-1 bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground shadow-lg shadow-primary/20 font-semibold"
-              onClick={() => onEnroll?.(course.id)}
-            >
-              Apply Now
-            </Button>
+          <Button 
+            className="flex-1 bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground shadow-lg shadow-primary/20 font-semibold"
+            asChild
+          >
+            <Link to={`/enroll/${course.id}`}>Apply Now</Link>
+          </Button>
           )}
           <Button
             variant="outline"
