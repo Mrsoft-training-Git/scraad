@@ -34,14 +34,13 @@ const Courses = () => {
   }, []);
 
   const checkEnrollmentStatus = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (user) {
-      const { data } = await supabase
-        .from("enrolled_courses")
-        .select("course_id")
-        .eq("user_id", user.id);
+      const { data } = await supabase.from("enrolled_courses").select("course_id").eq("user_id", user.id);
       if (data) {
-        setEnrolledCourseIds(data.map(e => e.course_id).filter(Boolean) as string[]);
+        setEnrolledCourseIds(data.map((e) => e.course_id).filter(Boolean) as string[]);
       }
     }
   };
@@ -54,7 +53,7 @@ const Courses = () => {
       .select("*")
       .eq("published", true)
       .order("created_at", { ascending: false });
-    
+
     if (!error && data) {
       setCourses(data);
     }
@@ -62,7 +61,7 @@ const Courses = () => {
   };
 
   // Get unique categories from courses
-  const categories = ["All", ...new Set(courses.map(c => c.category))];
+  const categories = ["All", ...new Set(courses.map((c) => c.category))];
 
   const filteredCourses = courses.filter((course) => {
     const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase());
@@ -86,7 +85,8 @@ const Courses = () => {
         <div className="container mx-auto px-4 relative">
           <div className="max-w-3xl mx-auto text-center space-y-6">
             <h1 className="font-heading font-bold text-4xl lg:text-5xl">
-              Explore Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-white/80">Courses</span>
+              Explore Our{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-white/80">Courses</span>
             </h1>
             <p className="text-lg text-white/90">
               Discover a wide range of professional courses designed to advance your career
@@ -138,7 +138,10 @@ const Courses = () => {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
               {filteredCourses.map((course) => (
-                <Card key={course.id} className="group overflow-hidden border-border/50 bg-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-2 cursor-pointer flex flex-col">
+                <Card
+                  key={course.id}
+                  className="group overflow-hidden border-border/50 bg-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-2 cursor-pointer flex flex-col"
+                >
                   <div className="aspect-video overflow-hidden relative">
                     <Badge className="absolute top-3 md:top-4 right-3 md:right-4 bg-background/90 backdrop-blur-sm text-primary border-0 z-10 text-xs">
                       {course.category}
@@ -150,7 +153,9 @@ const Courses = () => {
                       </Badge>
                     )}
                     <img
-                      src={course.image_url || "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80"}
+                      src={
+                        course.image_url || "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80"
+                      }
                       alt={course.title}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
@@ -170,7 +175,9 @@ const Courses = () => {
                           Free
                         </Badge>
                       ) : (
-                        <span className="text-lg md:text-2xl font-bold text-primary">₦{course.price.toLocaleString()}</span>
+                        <span className="text-lg md:text-2xl font-bold text-primary">
+                          ₦{course.price.toLocaleString()}
+                        </span>
                       )}
                       <div className="flex items-center gap-3 text-xs md:text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
@@ -180,18 +187,18 @@ const Courses = () => {
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       {isEnrolled(course.id) ? (
-                        <Button 
+                        <Button
                           className="bg-green-600 hover:bg-green-700 text-white font-semibold text-xs md:text-sm"
                           onClick={() => navigate("/dashboard/learning")}
                         >
                           Go to Course
                         </Button>
                       ) : (
-                        <Button 
+                        <Button
                           className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground shadow-lg shadow-primary/20 font-semibold text-xs md:text-sm"
                           onClick={() => handleEnroll(course)}
                         >
-                          Apply Now
+                          Enroll Now
                         </Button>
                       )}
                       <Button variant="outline" className="border-2 hover:bg-accent/10 text-xs md:text-sm" asChild>
