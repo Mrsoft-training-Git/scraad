@@ -33,6 +33,7 @@ import CourseAssignments from "./pages/CourseAssignments";
 import InstructorLiveClass from "./pages/InstructorLiveClass";
 import StudentLiveClass from "./pages/StudentLiveClass";
 import ZoomCallback from "./pages/ZoomCallback";
+import CourseEnrollment from "./pages/CourseEnrollment";
 
 const queryClient = new QueryClient();
 
@@ -69,6 +70,7 @@ const App = () => (
           <Route path="/signup/organization" element={<BusinessTeams />} />
           <Route path="/programs" element={<Programs />} />
           <Route path="/programs/:id" element={<ProgramDetails />} />
+          <Route path="/enroll/:courseId" element={<CourseEnrollment />} />
           <Route path="/career" element={<Career />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/api/zoom/callback" element={<ZoomCallback />} />

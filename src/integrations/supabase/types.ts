@@ -905,32 +905,53 @@ export type Database = {
         Row: {
           avatar_url: string | null
           bio: string | null
+          country: string | null
           created_at: string | null
+          date_of_birth: string | null
           department: string | null
+          device_type: string | null
+          education_level: string | null
           email: string | null
           full_name: string | null
+          gender: string | null
+          has_internet: boolean | null
           id: string
           phone: string | null
+          weekly_hours: string | null
         }
         Insert: {
           avatar_url?: string | null
           bio?: string | null
+          country?: string | null
           created_at?: string | null
+          date_of_birth?: string | null
           department?: string | null
+          device_type?: string | null
+          education_level?: string | null
           email?: string | null
           full_name?: string | null
+          gender?: string | null
+          has_internet?: boolean | null
           id: string
           phone?: string | null
+          weekly_hours?: string | null
         }
         Update: {
           avatar_url?: string | null
           bio?: string | null
+          country?: string | null
           created_at?: string | null
+          date_of_birth?: string | null
           department?: string | null
+          device_type?: string | null
+          education_level?: string | null
           email?: string | null
           full_name?: string | null
+          gender?: string | null
+          has_internet?: boolean | null
           id?: string
           phone?: string | null
+          weekly_hours?: string | null
         }
         Relationships: []
       }
