@@ -354,19 +354,12 @@ const ProgramDetails = () => {
                     <div className="flex gap-2">
                       {course.price === 0 ? (
                         <Button className="flex-1 bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground shadow-lg font-semibold py-6 text-lg" asChild>
-                          <Link to="/auth">Enroll Free</Link>
+                          <Link to={`/enroll/${course.id}`}>Enroll Free</Link>
                         </Button>
                       ) : (
-                        <div className="flex-1">
-                          <PaymentButtons
-                            courseId={course.id}
-                            price={course.price}
-                            allowsPartPayment={course.allows_part_payment}
-                            firstTrancheAmount={course.first_tranche_amount}
-                            secondTrancheAmount={course.second_tranche_amount}
-                            enrollmentStatus={enrollmentStatus}
-                          />
-                        </div>
+                        <Button className="flex-1 bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground shadow-lg font-semibold py-6 text-lg" asChild>
+                          <Link to={`/enroll/${course.id}`}>Enroll Now</Link>
+                        </Button>
                       )}
                       <Button
                         variant="outline"
