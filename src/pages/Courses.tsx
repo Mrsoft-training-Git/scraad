@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Search, Users, Filter, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useEnrollment } from "@/hooks/useEnrollment";
 
 interface Course {
   id: string;
@@ -27,7 +26,6 @@ const Courses = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [enrolledCourseIds, setEnrolledCourseIds] = useState<string[]>([]);
-  const { enrollInCourse, enrolling } = useEnrollment();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -72,11 +70,8 @@ const Courses = () => {
     return matchesSearch && matchesCategory;
   });
 
-  const handleEnroll = async (course: Course) => {
-    const success = await enrollInCourse(course.id, course.title);
-    if (success) {
-      setEnrolledCourseIds(prev => [...prev, course.id]);
-    }
+  const handleEnroll = (course: Course) => {
+    navigate(`/enroll/${course.id}`);
   };
 
   const isEnrolled = (courseId: string) => enrolledCourseIds.includes(courseId);
@@ -195,7 +190,6 @@ const Courses = () => {
                         <Button 
                           className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground shadow-lg shadow-primary/20 font-semibold text-xs md:text-sm"
                           onClick={() => handleEnroll(course)}
-                          disabled={enrolling}
                         >
                           Apply Now
                         </Button>

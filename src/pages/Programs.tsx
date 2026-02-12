@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Clock, Users, Award, BookOpen, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useEnrollment } from "@/hooks/useEnrollment";
+
 
 interface Course {
   id: string;
@@ -28,10 +28,6 @@ const Programs = () => {
   const [loading, setLoading] = useState(true);
   const [enrolledCourseIds, setEnrolledCourseIds] = useState<string[]>([]);
   const navigate = useNavigate();
-  const {
-    enrollInCourse,
-    enrolling
-  } = useEnrollment();
 
   useEffect(() => {
     fetchCourses();
@@ -66,11 +62,8 @@ const Programs = () => {
     setLoading(false);
   };
 
-  const handleEnroll = async (course: Course) => {
-    const success = await enrollInCourse(course.id, course.title);
-    if (success) {
-      setEnrolledCourseIds(prev => [...prev, course.id]);
-    }
+  const handleEnroll = (course: Course) => {
+    navigate(`/enroll/${course.id}`);
   };
   return <div className="min-h-screen bg-background">
       <Navbar />
@@ -153,8 +146,7 @@ const Programs = () => {
                       ) : (
                         <Button 
                           className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground shadow-lg shadow-primary/20 font-semibold" 
-                          onClick={() => handleEnroll(course)} 
-                          disabled={enrolling}
+                          onClick={() => handleEnroll(course)}
                         >
                           Apply Now
                         </Button>
