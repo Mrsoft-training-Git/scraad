@@ -34,6 +34,7 @@ import InstructorLiveClass from "./pages/InstructorLiveClass";
 import StudentLiveClass from "./pages/StudentLiveClass";
 import ZoomCallback from "./pages/ZoomCallback";
 import CourseEnrollment from "./pages/CourseEnrollment";
+import Bills from "./pages/Bills";
 
 const queryClient = new QueryClient();
 
@@ -61,6 +62,7 @@ const App = () => (
           <Route path="/dashboard/live-class/:sessionId" element={<InstructorLiveClass />} />
           <Route path="/dashboard/join-class/:sessionId" element={<StudentLiveClass />} />
           <Route path="/dashboard/payments" element={<Payments />} />
+          <Route path="/dashboard/bills" element={<Bills />} />
           <Route path="/dashboard/profile" element={<Profile />} />
           <Route path="/dashboard/references" element={<References />} />
           <Route path="/dashboard/roles" element={<RoleManagement />} />

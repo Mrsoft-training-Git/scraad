@@ -26,11 +26,19 @@ export const usePayment = (options?: UsePaymentOptions) => {
         return;
       }
 
+      // Fetch user's full name from profile
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", user.id)
+        .single();
+
       const { data, error } = await supabase.functions.invoke("initialize-payment", {
         body: {
           email: user.email,
           courseId,
           paymentType,
+          fullName: profile?.full_name || user.email,
         },
       });
 

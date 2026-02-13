@@ -8,6 +8,9 @@ interface LockedCourseScreenProps {
   courseId: string;
   paymentStatus: string;
   secondTranche?: number | null;
+  coursePrice?: number | null;
+  firstTranche?: number | null;
+  allowsPartPayment?: boolean;
 }
 
 export const LockedCourseScreen = ({
@@ -15,8 +18,14 @@ export const LockedCourseScreen = ({
   courseId,
   paymentStatus,
   secondTranche,
+  coursePrice,
+  firstTranche,
+  allowsPartPayment,
 }: LockedCourseScreenProps) => {
   const { initializePayment, loading } = usePayment();
+
+  const isPending = paymentStatus === "pending";
+  const isPartialOrDefaulted = paymentStatus === "partial" || paymentStatus === "defaulted";
 
   return (
     <div className="flex items-center justify-center min-h-[60vh] p-4">
@@ -26,27 +35,54 @@ export const LockedCourseScreen = ({
             <Lock className="w-8 h-8 text-destructive" />
           </div>
           <h2 className="text-xl font-heading font-bold text-foreground">
-            Access Locked
+            {isPending ? "Payment Required" : "Access Locked"}
           </h2>
           <p className="text-sm text-muted-foreground">
-            Your installment payment for <strong>{courseTitle}</strong> is
-            overdue. Please complete payment to regain access.
+            {isPending
+              ? <>You enrolled in <strong>{courseTitle}</strong> without payment. Please complete payment to access the full course content.</>
+              : <>Your installment payment for <strong>{courseTitle}</strong> is overdue. Please complete payment to regain access.</>
+            }
           </p>
-          {secondTranche && (
-            <p className="text-lg font-bold text-primary">
-              ₦{secondTranche.toLocaleString()} remaining
-            </p>
+
+          {isPending && coursePrice && (
+            <div className="space-y-2">
+              <Button
+                className="w-full"
+                onClick={() => initializePayment(courseId, "full")}
+                disabled={loading}
+              >
+                <CreditCard className="w-4 h-4 mr-2" />
+                {loading ? "Processing..." : `Pay Full Amount — ₦${coursePrice.toLocaleString()}`}
+              </Button>
+              {allowsPartPayment && firstTranche && (
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => initializePayment(courseId, "first")}
+                  disabled={loading}
+                >
+                  <CreditCard className="w-4 h-4 mr-2" />
+                  {loading ? "Processing..." : `Pay First Tranche — ₦${firstTranche.toLocaleString()}`}
+                </Button>
+              )}
+            </div>
           )}
-          {paymentStatus === "partial" || paymentStatus === "defaulted" ? (
-            <Button
-              className="w-full"
-              onClick={() => initializePayment(courseId, "second")}
-              disabled={loading}
-            >
-              <CreditCard className="w-4 h-4 mr-2" />
-              {loading ? "Processing..." : "Pay Second Tranche"}
-            </Button>
-          ) : null}
+
+          {isPartialOrDefaulted && secondTranche && (
+            <>
+              <p className="text-lg font-bold text-primary">
+                ₦{secondTranche.toLocaleString()} remaining
+              </p>
+              <Button
+                className="w-full"
+                onClick={() => initializePayment(courseId, "second")}
+                disabled={loading}
+              >
+                <CreditCard className="w-4 h-4 mr-2" />
+                {loading ? "Processing..." : "Pay Second Tranche"}
+              </Button>
+            </>
+          )}
         </CardContent>
       </Card>
     </div>

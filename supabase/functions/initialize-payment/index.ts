@@ -20,7 +20,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { email, courseId, paymentType } = await req.json();
+    const { email, courseId, paymentType, fullName } = await req.json();
 
     if (!email || !courseId || !paymentType) {
       return new Response(
@@ -78,22 +78,31 @@ Deno.serve(async (req) => {
     // Paystack expects amount in kobo (smallest unit)
     const amountInKobo = Math.round(amount * 100);
 
+    const paystackBody: any = {
+      email,
+      amount: amountInKobo,
+      metadata: {
+        courseId,
+        paymentType,
+        courseTitle: course.title,
+        custom_fields: [
+          {
+            display_name: "Student Name",
+            variable_name: "student_name",
+            value: fullName || email,
+          },
+        ],
+      },
+      callback_url: `${req.headers.get("origin") || ""}/dashboard/courses`,
+    };
+
     const paystackResponse = await fetch("https://api.paystack.co/transaction/initialize", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        email,
-        amount: amountInKobo,
-        metadata: {
-          courseId,
-          paymentType,
-          courseTitle: course.title,
-        },
-        callback_url: `${req.headers.get("origin") || ""}/dashboard/courses`,
-      }),
+      body: JSON.stringify(paystackBody),
     });
 
     const paystackData = await paystackResponse.json();
