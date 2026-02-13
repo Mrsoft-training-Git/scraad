@@ -36,6 +36,7 @@ const allMenuItems = [
   { icon: MessageSquare, label: "Discussions", path: "/dashboard/discussions", roles: ["admin", "student", "instructor"] },
   { icon: ClipboardList, label: "Assignments", path: "/dashboard/assignments", roles: ["admin", "student", "instructor"] },
   { icon: CreditCard, label: "Payments", path: "/dashboard/payments", roles: ["admin"] },
+  { icon: CreditCard, label: "Bills", path: "/dashboard/bills", roles: ["student", "instructor"] },
   { icon: User, label: "Profile Update", path: "/dashboard/profile", roles: ["admin", "student", "instructor"] },
   { icon: BookMarked, label: "References", path: "/dashboard/references", roles: ["admin"] },
   { icon: Shield, label: "Role Management", path: "/dashboard/roles", roles: ["admin"] },

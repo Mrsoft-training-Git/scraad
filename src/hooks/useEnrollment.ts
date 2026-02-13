@@ -49,6 +49,21 @@ export const useEnrollment = () => {
 
       if (error) throw error;
 
+      // Also create an enrollment record with locked access (pay later)
+      const { error: enrollError } = await supabase
+        .from("enrollments")
+        .insert({
+          user_id: user.id,
+          course_id: courseId,
+          payment_status: "pending",
+          access_status: "locked",
+        });
+
+      // Ignore unique constraint violations (already has enrollment)
+      if (enrollError && !enrollError.message.includes("duplicate")) {
+        console.error("Enrollment record error:", enrollError);
+      }
+
       // Atomically increment students count using database function
       await supabase.rpc('increment_students_count', { course_id_input: courseId });
 

@@ -121,6 +121,7 @@ const CourseViewer = () => {
   const [accessLocked, setAccessLocked] = useState(false);
   const [enrollmentPaymentStatus, setEnrollmentPaymentStatus] = useState<string | null>(null);
   const [courseSecondTranche, setCourseSecondTranche] = useState<number | null>(null);
+  const [courseFullData, setCourseFullData] = useState<any>(null);
   const {
     toast
   } = useToast();
@@ -156,11 +157,12 @@ const CourseViewer = () => {
         // Check if user is instructor of this course or admin
         const { data: courseData } = await supabase
           .from("courses")
-          .select("instructor_id, second_tranche_amount")
+          .select("instructor_id, second_tranche_amount, price, allows_part_payment, first_tranche_amount")
           .eq("id", courseId)
           .maybeSingle();
         
         setCourseSecondTranche(courseData?.second_tranche_amount || null);
+        setCourseFullData(courseData);
         
         const isOwnerOrAdmin = role === "admin" || (role === "instructor" && courseData?.instructor_id === session.user.id);
         setIsInstructorOrAdmin(isOwnerOrAdmin);
@@ -638,6 +640,9 @@ const CourseViewer = () => {
         courseId={course.id}
         paymentStatus={enrollmentPaymentStatus || ""}
         secondTranche={courseSecondTranche}
+        coursePrice={courseFullData?.price || null}
+        firstTranche={courseFullData?.first_tranche_amount || null}
+        allowsPartPayment={courseFullData?.allows_part_payment || false}
       />
     );
   }
