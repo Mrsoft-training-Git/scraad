@@ -21,6 +21,7 @@ export const DashboardLayout = ({ children, user, userRole, hideTopBar = false }
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [unreadAnnouncementsCount, setUnreadAnnouncementsCount] = useState(0);
   const [unreadAssignmentsCount, setUnreadAssignmentsCount] = useState(0);
+  const [unreadDiscussionsCount, setUnreadDiscussionsCount] = useState(0);
 
   useEffect(() => {
     if (userRole === "student" && user) {
@@ -34,6 +35,7 @@ export const DashboardLayout = ({ children, user, userRole, hideTopBar = false }
         if (!enrollments || enrollments.length === 0) {
           setUnreadAnnouncementsCount(0);
           setUnreadAssignmentsCount(0);
+          setUnreadDiscussionsCount(0);
           return;
         }
 
@@ -68,7 +70,6 @@ export const DashboardLayout = ({ children, user, userRole, hideTopBar = false }
         if (assignments && assignments.length > 0) {
           const assignmentIds = assignments.map(a => a.id);
           
-          // Get student's submissions
           const { data: submissions } = await supabase
             .from("assignment_submissions")
             .select("assignment_id, status")
@@ -81,6 +82,30 @@ export const DashboardLayout = ({ children, user, userRole, hideTopBar = false }
           
           const unsubmitted = assignmentIds.filter(id => !submittedSet.has(id)).length;
           setUnreadAssignmentsCount(unsubmitted);
+        }
+
+        // Fetch new discussions (threads created in last 7 days that student hasn't viewed)
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        
+        const { data: recentThreads } = await supabase
+          .from("discussion_threads")
+          .select("id")
+          .in("course_id", courseIds)
+          .gte("created_at", sevenDaysAgo.toISOString());
+
+        if (recentThreads) {
+          // Count threads not created by the current user as "new"
+          const { data: ownThreads } = await supabase
+            .from("discussion_threads")
+            .select("id")
+            .in("course_id", courseIds)
+            .gte("created_at", sevenDaysAgo.toISOString())
+            .eq("user_id", user.id);
+
+          const ownSet = new Set(ownThreads?.map(t => t.id) || []);
+          const newDiscussions = recentThreads.filter(t => !ownSet.has(t.id)).length;
+          setUnreadDiscussionsCount(newDiscussions);
         }
       };
 
@@ -106,6 +131,7 @@ export const DashboardLayout = ({ children, user, userRole, hideTopBar = false }
           userRole={userRole} 
           unreadAnnouncementsCount={unreadAnnouncementsCount}
           unreadAssignmentsCount={unreadAssignmentsCount}
+          unreadDiscussionsCount={unreadDiscussionsCount}
         />
       </div>
       
@@ -125,6 +151,7 @@ export const DashboardLayout = ({ children, user, userRole, hideTopBar = false }
                   userRole={userRole} 
                   unreadAnnouncementsCount={unreadAnnouncementsCount}
                   unreadAssignmentsCount={unreadAssignmentsCount}
+                  unreadDiscussionsCount={unreadDiscussionsCount}
                 />
               </SheetContent>
             </Sheet>

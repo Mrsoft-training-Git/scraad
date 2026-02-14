@@ -156,6 +156,18 @@ const CourseEnrollment = () => {
       toast({ title: "Missing fields", description: "Please fill in all required fields.", variant: "destructive" });
       return false;
     }
+    // Validate age: must be at least 10 years old
+    if (dateOfBirth) {
+      const dob = new Date(dateOfBirth);
+      const today = new Date();
+      const age = today.getFullYear() - dob.getFullYear();
+      const monthDiff = today.getMonth() - dob.getMonth();
+      const actualAge = monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate()) ? age - 1 : age;
+      if (actualAge < 10) {
+        toast({ title: "Age Restriction", description: "You must be at least 10 years old to enroll.", variant: "destructive" });
+        return false;
+      }
+    }
     return true;
   };
 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { BookOpen, Clock, CheckCircle, Trophy, ArrowUpRight, ArrowRight } from "lucide-react";
+import { BookOpen, Clock, CheckCircle, Trophy, ArrowUpRight, ArrowRight, ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -22,10 +22,13 @@ interface Assignment {
   status: string;
 }
 
+const INITIAL_COURSES_SHOWN = 4;
+
 export const StudentDashboard = ({ userName }: { userName: string }) => {
   const [courses, setCourses] = useState<EnrolledCourse[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showAllCourses, setShowAllCourses] = useState(false);
 
   useEffect(() => {
     fetchStudentData();
@@ -72,6 +75,8 @@ export const StudentDashboard = ({ userName }: { userName: string }) => {
     { title: "Pending Tasks", value: upcomingAssignments.length, icon: Clock, accent: "bg-warning/10 text-warning-foreground" },
     { title: "Completed", value: completedAssignments.length, icon: CheckCircle, accent: "bg-secondary/10 text-secondary" },
   ];
+
+  const visibleCourses = showAllCourses ? courses : courses.slice(0, INITIAL_COURSES_SHOWN);
 
   return (
     <div className="space-y-6">
@@ -137,7 +142,7 @@ export const StudentDashboard = ({ userName }: { userName: string }) => {
               </div>
             ) : (
               <div className="space-y-1">
-                {courses.map((course) => (
+                {visibleCourses.map((course) => (
                   <div key={course.id} className="flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-muted/50 transition-colors -mx-3">
                     <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                       <BookOpen className="w-4 h-4 text-primary" />
@@ -151,6 +156,17 @@ export const StudentDashboard = ({ userName }: { userName: string }) => {
                     </div>
                   </div>
                 ))}
+                {courses.length > INITIAL_COURSES_SHOWN && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full text-xs text-muted-foreground hover:text-foreground mt-2"
+                    onClick={() => setShowAllCourses(!showAllCourses)}
+                  >
+                    {showAllCourses ? "Show Less" : `Show ${courses.length - INITIAL_COURSES_SHOWN} More`}
+                    <ChevronDown className={`w-3 h-3 ml-1 transition-transform ${showAllCourses ? "rotate-180" : ""}`} />
+                  </Button>
+                )}
               </div>
             )}
           </CardContent>
