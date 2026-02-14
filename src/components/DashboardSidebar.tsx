@@ -16,6 +16,7 @@ import {
   Megaphone,
   MessageSquare,
   ClipboardList,
+  Video,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -32,6 +33,7 @@ const allMenuItems = [
   { icon: FileClock, label: "Drafts", path: "/dashboard/drafts", roles: ["admin"] },
   { icon: GraduationCap, label: "Learning", path: "/dashboard/learning", roles: ["admin", "student", "instructor"] },
   { icon: Calendar, label: "Manage Classes", path: "/dashboard/classes", roles: ["admin", "instructor"] },
+  { icon: Video, label: "Live Sessions", path: "/dashboard/live-sessions", roles: ["student", "instructor"] },
   { icon: Megaphone, label: "Announcements", path: "/dashboard/announcements", roles: ["admin", "student", "instructor"] },
   { icon: MessageSquare, label: "Discussions", path: "/dashboard/discussions", roles: ["admin", "student", "instructor"] },
   { icon: ClipboardList, label: "Assignments", path: "/dashboard/assignments", roles: ["admin", "student", "instructor"] },
@@ -47,9 +49,10 @@ interface DashboardSidebarProps {
   userRole: string;
   unreadAnnouncementsCount?: number;
   unreadAssignmentsCount?: number;
+  unreadDiscussionsCount?: number;
 }
 
-export const DashboardSidebar = ({ userRole, unreadAnnouncementsCount = 0, unreadAssignmentsCount = 0 }: DashboardSidebarProps) => {
+export const DashboardSidebar = ({ userRole, unreadAnnouncementsCount = 0, unreadAssignmentsCount = 0, unreadDiscussionsCount = 0 }: DashboardSidebarProps) => {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
 
@@ -119,6 +122,9 @@ export const DashboardSidebar = ({ userRole, unreadAnnouncementsCount = 0, unrea
                    )}
                    {item.label === "Assignments" && unreadAssignmentsCount > 0 && (
                      <Badge className="text-xs bg-destructive">{unreadAssignmentsCount}</Badge>
+                   )}
+                   {item.label === "Discussions" && unreadDiscussionsCount > 0 && (
+                     <Badge className="text-xs bg-destructive">{unreadDiscussionsCount}</Badge>
                    )}
                  </div>
               )}

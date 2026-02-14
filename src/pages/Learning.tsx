@@ -3,11 +3,12 @@ import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Users, CheckCircle2, PlayCircle, RotateCcw } from "lucide-react";
+import { BookOpen, Users, CheckCircle2, PlayCircle, RotateCcw, CreditCard } from "lucide-react";
+import { usePayment } from "@/hooks/usePayment";
 
 interface EnrolledCourse {
   id: string;
@@ -26,6 +27,10 @@ interface EnrolledCourse {
     students_count: number | null;
     price: number;
   };
+  enrollment?: {
+    payment_status: string;
+    access_status: string;
+  } | null;
 }
 
 const Learning = () => {
@@ -34,6 +39,7 @@ const Learning = () => {
   const [enrolledCourses, setEnrolledCourses] = useState<EnrolledCourse[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { initializePayment, loading: paymentLoading } = usePayment();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -72,15 +78,47 @@ const Learning = () => {
       .order("enrolled_at", { ascending: false });
 
     if (!error && data) {
-      setEnrolledCourses(data as EnrolledCourse[]);
+      // Fetch enrollment payment status for each course
+      const courseIds = data.map(d => d.course_id).filter(Boolean) as string[];
+      let enrollmentMap = new Map<string, { payment_status: string; access_status: string }>();
+      
+      if (courseIds.length > 0) {
+        const { data: enrollments } = await supabase
+          .from("enrollments")
+          .select("course_id, payment_status, access_status")
+          .eq("user_id", userId)
+          .in("course_id", courseIds);
+        
+        enrollments?.forEach(e => {
+          enrollmentMap.set(e.course_id, { payment_status: e.payment_status, access_status: e.access_status });
+        });
+      }
+
+      setEnrolledCourses((data as EnrolledCourse[]).map(d => ({
+        ...d,
+        enrollment: d.course_id ? enrollmentMap.get(d.course_id) || null : null,
+      })));
     }
     setLoading(false);
   };
 
-  const getButtonState = (progress: number) => {
-    if (progress === 100) return { label: "Review", icon: RotateCcw, variant: "outline" as const };
-    if (progress > 0) return { label: "Continue", icon: PlayCircle, variant: "default" as const };
-    return { label: "Start", icon: PlayCircle, variant: "default" as const };
+  const getButtonState = (progress: number, enrollment?: { payment_status: string; access_status: string } | null) => {
+    // If payment is pending or access is locked, show "Pay Now"
+    if (enrollment && (enrollment.payment_status === "pending" || enrollment.access_status === "locked")) {
+      return { label: "Pay Now", icon: CreditCard, variant: "destructive" as const, action: "pay" as const };
+    }
+    if (progress === 100) return { label: "Review", icon: RotateCcw, variant: "outline" as const, action: "view" as const };
+    if (progress > 0) return { label: "Continue", icon: PlayCircle, variant: "default" as const, action: "view" as const };
+    return { label: "Start", icon: PlayCircle, variant: "default" as const, action: "view" as const };
+  };
+
+  const handleButtonClick = (enrollment: EnrolledCourse, action: string) => {
+    if (action === "pay" && enrollment.course_id) {
+      // Navigate to enrollment page to pay
+      navigate(`/enroll/${enrollment.course_id}`);
+    } else {
+      navigate(`/dashboard/learn/${enrollment.course_id}`);
+    }
   };
 
   return (
@@ -100,7 +138,7 @@ const Learning = () => {
               <h3 className="font-heading font-bold text-xl mb-2">No Courses Yet</h3>
               <p className="text-muted-foreground mb-4">You haven't enrolled in any courses yet.</p>
               <Button asChild>
-                <Link to="/dashboard/courses">Browse Courses</Link>
+                <Link to="/courses">Browse Courses</Link>
               </Button>
             </CardContent>
           </Card>
@@ -108,7 +146,7 @@ const Learning = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {enrolledCourses.map((enrollment) => {
               const course = enrollment.course;
-              const buttonState = getButtonState(enrollment.progress);
+              const buttonState = getButtonState(enrollment.progress, enrollment.enrollment);
               const ButtonIcon = buttonState.icon;
 
               return (
@@ -124,6 +162,12 @@ const Learning = () => {
                       <Badge className="absolute top-4 left-4 bg-green-500 text-white border-0 z-10">
                         <CheckCircle2 className="w-3 h-3 mr-1" />
                         Completed
+                      </Badge>
+                    )}
+                    {buttonState.action === "pay" && (
+                      <Badge className="absolute top-4 left-4 bg-destructive text-destructive-foreground border-0 z-10">
+                        <CreditCard className="w-3 h-3 mr-1" />
+                        Payment Required
                       </Badge>
                     )}
                     <img
@@ -173,13 +217,12 @@ const Learning = () => {
                     <div className="grid grid-cols-2 gap-2">
                       <Button 
                         variant={buttonState.variant}
-                        className={buttonState.variant === "default" ? "bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground shadow-lg shadow-primary/20 font-semibold" : ""}
-                        asChild
+                        className={buttonState.variant === "default" ? "bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground shadow-lg shadow-primary/20 font-semibold" : buttonState.variant === "destructive" ? "font-semibold" : ""}
+                        onClick={() => handleButtonClick(enrollment, buttonState.action)}
+                        disabled={buttonState.action === "pay" && paymentLoading}
                       >
-                        <Link to={`/dashboard/learn/${enrollment.course_id}`}>
-                          <ButtonIcon className="w-4 h-4 mr-2" />
-                          {buttonState.label}
-                        </Link>
+                        <ButtonIcon className="w-4 h-4 mr-2" />
+                        {buttonState.label}
                       </Button>
                       <Button
                         variant="outline"

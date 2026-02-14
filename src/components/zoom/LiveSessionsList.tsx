@@ -82,7 +82,14 @@ export const LiveSessionsList = ({ isInstructor = false }: LiveSessionsListProps
           course: session.course_id ? coursesMap.get(session.course_id) : null,
         }));
 
-        setSessions(sessionsWithCourses);
+        // Only show upcoming sessions (not ended/past)
+        const now = new Date();
+        const upcomingSessions = sessionsWithCourses.filter(s => {
+          const endTime = new Date(new Date(s.scheduled_at).getTime() + s.duration_minutes * 60 * 1000);
+          return s.status === "live" || (s.status === "scheduled" && endTime >= now);
+        });
+
+        setSessions(upcomingSessions);
       } else {
         setSessions([]);
       }
@@ -101,18 +108,8 @@ export const LiveSessionsList = ({ isInstructor = false }: LiveSessionsListProps
     if (status === "live") {
       return <Badge className="bg-red-600 hover:bg-red-700 animate-pulse text-[10px] px-1.5 py-0">Live</Badge>;
     }
-    if (status === "ended") {
-      return <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Ended</Badge>;
-    }
-    if (status === "cancelled") {
-      return <Badge variant="destructive" className="text-[10px] px-1.5 py-0">Cancelled</Badge>;
-    }
-    // If session start time has passed but we're still within the duration window, show "In Progress" not "Missed"
     if (sessionTime < now && now < sessionEndTime) {
       return <Badge className="bg-orange-500 hover:bg-orange-600 text-[10px] px-1.5 py-0">In Progress</Badge>;
-    }
-    if (sessionTime < now) {
-      return <Badge variant="outline" className="text-[10px] px-1.5 py-0">Missed</Badge>;
     }
     return <Badge variant="default" className="text-[10px] px-1.5 py-0">Upcoming</Badge>;
   };
@@ -130,12 +127,12 @@ export const LiveSessionsList = ({ isInstructor = false }: LiveSessionsListProps
   };
 
   const liveCount = sessions.filter(s => s.status === "live").length;
-  const upcomingCount = sessions.filter(s => s.status === "scheduled").length;
+  const upcomingCount = sessions.length;
 
   const summaryText = loading
     ? "Loading..."
     : sessions.length === 0
-    ? "No sessions"
+    ? "No upcoming sessions"
     : liveCount > 0
     ? `${liveCount} live now`
     : `${upcomingCount} upcoming`;
@@ -151,7 +148,7 @@ export const LiveSessionsList = ({ isInstructor = false }: LiveSessionsListProps
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-foreground">
-                  {isInstructor ? "My Live Sessions" : "Live Sessions"}
+                  Upcoming Sessions
                 </p>
                 <p className="text-[11px] text-muted-foreground mt-0.5">{summaryText}</p>
               </div>
@@ -186,8 +183,8 @@ export const LiveSessionsList = ({ isInstructor = false }: LiveSessionsListProps
                     <Video className="w-10 h-10 mx-auto mb-2 text-muted-foreground/40" />
                     <p className="text-xs text-muted-foreground">
                       {isInstructor
-                        ? "No sessions scheduled yet."
-                        : "No live sessions for your courses."}
+                        ? "No upcoming sessions."
+                        : "No upcoming live sessions for your courses."}
                     </p>
                   </div>
                 ) : (
