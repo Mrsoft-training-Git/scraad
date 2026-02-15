@@ -36,6 +36,7 @@ import ZoomCallback from "./pages/ZoomCallback";
 import CourseEnrollment from "./pages/CourseEnrollment";
 import Bills from "./pages/Bills";
 import LiveSessions from "./pages/LiveSessions";
+import Enrollments from "./pages/Enrollments";
 
 const queryClient = new QueryClient();
 
@@ -65,6 +66,7 @@ const App = () => (
           <Route path="/dashboard/payments" element={<Payments />} />
           <Route path="/dashboard/bills" element={<Bills />} />
           <Route path="/dashboard/live-sessions" element={<LiveSessions />} />
+          <Route path="/dashboard/enrollments" element={<Enrollments />} />
           <Route path="/dashboard/profile" element={<Profile />} />
           <Route path="/dashboard/references" element={<References />} />
           <Route path="/dashboard/roles" element={<RoleManagement />} />
