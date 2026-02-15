@@ -6,7 +6,7 @@ export const useEnrollment = () => {
   const [enrolling, setEnrolling] = useState(false);
   const { toast } = useToast();
 
-  const enrollInCourse = async (courseId: string, courseName: string) => {
+  const enrollInCourse = async (courseId: string, courseName: string, isFree: boolean = false) => {
     setEnrolling(true);
     
     try {
@@ -49,14 +49,15 @@ export const useEnrollment = () => {
 
       if (error) throw error;
 
-      // Also create an enrollment record with locked access (pay later)
+      // Also create an enrollment record
       const { error: enrollError } = await supabase
         .from("enrollments")
         .insert({
           user_id: user.id,
           course_id: courseId,
-          payment_status: "pending",
-          access_status: "locked",
+          payment_status: isFree ? "paid" : "pending",
+          access_status: isFree ? "active" : "locked",
+          ...(isFree ? { first_payment_date: new Date().toISOString() } : {}),
         });
 
       // Ignore unique constraint violations (already has enrollment)

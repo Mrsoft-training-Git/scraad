@@ -45,10 +45,10 @@ interface LearningResources {
   weeklyHoursOther: string;
 }
 
-const STEPS = [
+const getSteps = (isFree: boolean) => [
   { id: 1, label: "Personal Information", icon: User },
   { id: 2, label: "Learning Resources", icon: BookOpen },
-  { id: 3, label: "Payment", icon: CreditCard },
+  { id: 3, label: isFree ? "Enrollment" : "Payment", icon: isFree ? BookOpen : CreditCard },
 ];
 
 const CourseEnrollment = () => {
@@ -251,6 +251,22 @@ const CourseEnrollment = () => {
     }
   };
 
+  const handleFreeEnroll = async () => {
+    if (!agreementCommitment || !agreementRules) {
+      toast({ title: "Agreement required", description: "Please agree to both statements before proceeding.", variant: "destructive" });
+      return;
+    }
+    if (!course) return;
+
+    const success = await enrollInCourse(course.id, course.title, true);
+    if (success) {
+      toast({ title: "Enrolled!", description: "You're now enrolled. Start learning!" });
+      navigate("/dashboard/learning");
+    }
+  };
+
+  const isFree = course?.price === 0;
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -285,10 +301,11 @@ const CourseEnrollment = () => {
 
           {/* Step Indicator */}
           <div className="flex items-center gap-2 mb-10">
-            {STEPS.map((s, i) => {
+            {getSteps(course.price === 0).map((s, i) => {
               const Icon = s.icon;
               const isActive = step === s.id;
               const isDone = step > s.id;
+              const steps = getSteps(course.price === 0);
               return (
                 <div key={s.id} className="flex items-center gap-2 flex-1">
                   <div className={`flex items-center justify-center w-9 h-9 rounded-full shrink-0 transition-colors ${
@@ -299,7 +316,7 @@ const CourseEnrollment = () => {
                   <span className={`text-xs font-medium hidden sm:block ${isActive || isDone ? "text-foreground" : "text-muted-foreground"}`}>
                     {s.label}
                   </span>
-                  {i < STEPS.length - 1 && (
+                  {i < steps.length - 1 && (
                     <div className={`flex-1 h-0.5 ${isDone ? "bg-primary" : "bg-border"}`} />
                   )}
                 </div>
@@ -465,66 +482,89 @@ const CourseEnrollment = () => {
           {step === 3 && (
             <Card className="border-border/50">
               <CardContent className="p-6 md:p-8 space-y-6">
-                <h2 className="font-heading text-xl font-bold">Payment</h2>
+                <h2 className="font-heading text-xl font-bold">{isFree ? "Enrollment" : "Payment"}</h2>
 
                 <div className="grid gap-4">
-                  {/* Pay Now */}
-                  <div className="border border-primary/20 rounded-xl p-5 bg-primary/5">
-                    <div className="flex items-start gap-3 mb-3">
-                      <Badge className="bg-primary/10 text-primary border-primary/20">Recommended</Badge>
-                    </div>
-                    <h3 className="font-heading font-bold text-lg mb-1">I want to Pay Now</h3>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Make payment immediately and get access to the entire course.
-                    </p>
-
-                    <div className="space-y-2">
+                  {isFree ? (
+                    /* Free Course — simple enroll */
+                    <div className="border border-green-500/20 rounded-xl p-5 bg-green-500/5">
+                      <div className="flex items-start gap-3 mb-3">
+                        <Badge className="bg-green-500/10 text-green-600 border-green-500/20">Free Course</Badge>
+                      </div>
+                      <h3 className="font-heading font-bold text-lg mb-1">This course is free!</h3>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        No payment is required. Click below to enroll and start learning immediately.
+                      </p>
                       <Button
                         className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground"
-                        onClick={() => handlePayNow("full")}
-                        disabled={paymentLoading}
+                        onClick={handleFreeEnroll}
+                        disabled={enrolling}
                       >
-                        {paymentLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CreditCard className="w-4 h-4 mr-2" />}
-                        Pay Full Amount — ₦{course.price.toLocaleString()}
+                        {enrolling ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <BookOpen className="w-4 h-4 mr-2" />}
+                        {enrolling ? "Enrolling..." : "Enroll"}
                       </Button>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Pay Now */}
+                      <div className="border border-primary/20 rounded-xl p-5 bg-primary/5">
+                        <div className="flex items-start gap-3 mb-3">
+                          <Badge className="bg-primary/10 text-primary border-primary/20">Recommended</Badge>
+                        </div>
+                        <h3 className="font-heading font-bold text-lg mb-1">I want to Pay Now</h3>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          Make payment immediately and get access to the entire course.
+                        </p>
 
-                      {course.allows_part_payment && course.first_tranche_amount && (
+                        <div className="space-y-2">
+                          <Button
+                            className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground"
+                            onClick={() => handlePayNow("full")}
+                            disabled={paymentLoading}
+                          >
+                            {paymentLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CreditCard className="w-4 h-4 mr-2" />}
+                            Pay Full Amount — ₦{course.price.toLocaleString()}
+                          </Button>
+
+                          {course.allows_part_payment && course.first_tranche_amount && (
+                            <Button
+                              variant="outline"
+                              className="w-full"
+                              onClick={() => handlePayNow("first")}
+                              disabled={paymentLoading}
+                            >
+                              <CreditCard className="w-4 h-4 mr-2" />
+                              Pay First Tranche — ₦{course.first_tranche_amount.toLocaleString()}
+                            </Button>
+                          )}
+                        </div>
+
+                        <div className="mt-4 p-3 rounded-lg bg-background border border-border/50">
+                          <p className="text-xs font-medium text-foreground mb-1">What happens after I pay:</p>
+                          <p className="text-xs text-muted-foreground">
+                            You will be sent your Student Login Credentials to your email. You can login into your portal and begin learning.
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Pay Later */}
+                      <div className="border border-border/50 rounded-xl p-5">
+                        <h3 className="font-heading font-bold text-lg mb-1">I will pay later</h3>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          Enroll now and pay later from your Portal. <span className="font-medium text-foreground">N/B: You will not have access to your course until you make full payment.</span>
+                        </p>
                         <Button
                           variant="outline"
                           className="w-full"
-                          onClick={() => handlePayNow("first")}
-                          disabled={paymentLoading}
+                          onClick={handlePayLater}
+                          disabled={enrolling}
                         >
-                          <CreditCard className="w-4 h-4 mr-2" />
-                          Pay First Tranche — ₦{course.first_tranche_amount.toLocaleString()}
+                          {enrolling ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                          {enrolling ? "Enrolling..." : "Enroll Without Payment"}
                         </Button>
-                      )}
-                    </div>
-
-                    <div className="mt-4 p-3 rounded-lg bg-background border border-border/50">
-                      <p className="text-xs font-medium text-foreground mb-1">What happens after I pay:</p>
-                      <p className="text-xs text-muted-foreground">
-                        You will be sent your Student Login Credentials to your email. You can login into your portal and begin learning.
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Pay Later */}
-                  <div className="border border-border/50 rounded-xl p-5">
-                    <h3 className="font-heading font-bold text-lg mb-1">I will pay later</h3>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Enroll now and pay later from your Portal. <span className="font-medium text-foreground">N/B: You will not have access to your course until you make full payment.</span>
-                    </p>
-                    <Button
-                      variant="outline"
-                      className="w-full"
-                      onClick={handlePayLater}
-                      disabled={enrolling}
-                    >
-                      {enrolling ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                      {enrolling ? "Enrolling..." : "Enroll Without Payment"}
-                    </Button>
-                  </div>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 {/* Agreement */}
