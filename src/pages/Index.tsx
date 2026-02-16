@@ -170,7 +170,7 @@ const Index = () => {
               </p>
 
               <div className="flex flex-wrap gap-3">
-                <Button size="sm" variant="outline" className="border-2 border-white/30 hover:bg-white/10 text-white font-semibold backdrop-blur-sm" asChild>
+                <Button size="sm" variant="outline" className="border-2 border-white/30 bg-transparent hover:bg-white/10 text-white font-semibold backdrop-blur-sm" asChild>
                   <Link to="/courses">View Programs</Link>
                 </Button>
               </div>
