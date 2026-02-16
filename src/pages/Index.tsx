@@ -155,7 +155,7 @@ const Index = () => {
             </div>
 
             {/* Right Hero */}
-             <div className="animate-fade-in space-y-4 flex flex-col justify-center bg-primary/90 backdrop-blur-sm rounded-2xl p-6 lg:p-8 border border-white/10">
+            <div className="animate-fade-in space-y-4 flex flex-col justify-center bg-white/5 backdrop-blur-sm rounded-2xl p-6 lg:p-8 border border-white/10">
               <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-medium w-fit">
                 <GraduationCap className="w-3 h-3" />
                 Career Advancement
