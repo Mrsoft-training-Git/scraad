@@ -295,9 +295,9 @@ const Index = () => {
           )}
 
           <div className="text-center">
-            <Link to="/programs">
-                <Button size="lg" className="bg-foreground text-background hover:bg-foreground/90 shadow-xl font-semibold px-6 md:px-8 text-sm md:text-base">
-                View All Programs <ArrowRight className="ml-2 w-4 h-4 md:w-5 md:h-5" />
+            <Link to="/courses">
+              <Button size="lg" className="bg-foreground text-background hover:bg-foreground/90 shadow-xl font-semibold px-6 md:px-8 text-sm md:text-base">
+                View All Courses <ArrowRight className="ml-2 w-4 h-4 md:w-5 md:h-5" />
               </Button>
             </Link>
           </div>
