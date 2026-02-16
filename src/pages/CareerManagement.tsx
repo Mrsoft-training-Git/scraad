@@ -543,15 +543,19 @@ const CareerManagement = () => {
                         <TableCell>{format(new Date(app.created_at), "MMM d, yyyy")}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
-                            <Button size="sm" variant="ghost" asChild>
-                              <a href={app.cv_url} target="_blank" rel="noopener noreferrer">
-                                <FileText className="w-4 h-4" />
-                              </a>
+                            <Button size="sm" variant="ghost" onClick={async () => {
+                              const { data } = await supabase.storage.from("cv-uploads").createSignedUrl(app.cv_url, 3600);
+                              if (data?.signedUrl) window.open(data.signedUrl, "_blank");
+                              else toast.error("Failed to generate download link");
+                            }}>
+                              <FileText className="w-4 h-4" />
                             </Button>
-                            <Button size="sm" variant="ghost" asChild>
-                              <a href={app.cv_url} download>
-                                <Download className="w-4 h-4" />
-                              </a>
+                            <Button size="sm" variant="ghost" onClick={async () => {
+                              const { data } = await supabase.storage.from("cv-uploads").createSignedUrl(app.cv_url, 3600, { download: true });
+                              if (data?.signedUrl) window.open(data.signedUrl, "_blank");
+                              else toast.error("Failed to generate download link");
+                            }}>
+                              <Download className="w-4 h-4" />
                             </Button>
                           </div>
                         </TableCell>

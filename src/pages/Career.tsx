@@ -75,16 +75,13 @@ const Career = () => {
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
-      const { data: urlData } = supabase.storage.from("cv-uploads").getPublicUrl(filePath);
-
-      // Submit application
+      // Store file path (bucket is private, admins use signed URLs to access)
       const { error: insertError } = await supabase.from("job_applications").insert({
         job_id: selectedJob.id,
         applicant_name: applicationData.name,
         applicant_email: applicationData.email,
         applicant_phone: applicationData.phone || null,
-        cv_url: urlData.publicUrl,
+        cv_url: filePath,
         cover_letter: applicationData.coverLetter || null,
       });
 
