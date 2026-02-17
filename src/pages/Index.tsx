@@ -10,7 +10,6 @@ import heroStudent from "@/assets/hero-student.jpg";
 import businessTraining from "@/assets/business-training.jpg";
 import { supabase } from "@/integrations/supabase/client";
 
-
 interface Course {
   id: string;
   title: string;
@@ -34,14 +33,13 @@ const Index = () => {
   }, []);
 
   const checkEnrollmentStatus = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (user) {
-      const { data } = await supabase
-        .from("enrolled_courses")
-        .select("course_id")
-        .eq("user_id", user.id);
+      const { data } = await supabase.from("enrolled_courses").select("course_id").eq("user_id", user.id);
       if (data) {
-        setEnrolledCourseIds(data.map(e => e.course_id).filter(Boolean) as string[]);
+        setEnrolledCourseIds(data.map((e) => e.course_id).filter(Boolean) as string[]);
       }
     }
   };
@@ -61,7 +59,7 @@ const Index = () => {
       .eq("featured", true)
       .order("created_at", { ascending: false })
       .limit(4);
-    
+
     if (!error && data) {
       setCourses(data);
     }
@@ -72,22 +70,26 @@ const Index = () => {
     {
       icon: Clock,
       title: "Self-Paced Learning",
-      description: "Learn at your own convenience with flexible access to course materials anytime, anywhere. No deadlines just your own pace!",
+      description:
+        "Learn at your own convenience with flexible access to course materials anytime, anywhere. No deadlines just your own pace!",
     },
     {
       icon: Award,
       title: "Certificate",
-      description: "Receive a professionally recognized certificate upon successful course completion to validate your skills and boost your career profile.",
+      description:
+        "Receive a professionally recognized certificate upon successful course completion to validate your skills and boost your career profile.",
     },
     {
       icon: TrendingUp,
       title: "Progress Report",
-      description: "Stay informed with real-time progress tracking. Monitor your performance and milestones as you move through each module",
+      description:
+        "Stay informed with real-time progress tracking. Monitor your performance and milestones as you move through each module",
     },
     {
       icon: BookOpen,
       title: "Hands on Training",
-      description: "Apply what you learn through interactive exercises and practical projects that simulate real-world scenarios.",
+      description:
+        "Apply what you learn through interactive exercises and practical projects that simulate real-world scenarios.",
     },
   ];
 
@@ -121,18 +123,18 @@ const Index = () => {
                 <span className="w-1.5 h-1.5 bg-success rounded-full animate-pulse"></span>
                 Trusted by 10,000+ learners
               </div>
-              
-              <h2 className="font-heading font-bold text-2xl lg:text-3xl leading-tight">
-                Master New Skills
-              </h2>
-              
+
+              <h2 className="font-heading font-bold text-2xl lg:text-3xl leading-tight">Master New Skills</h2>
+
               <p className="text-sm lg:text-base text-white/90 leading-relaxed">
                 Learn at your own pace with industry-recognized courses designed by experts.
               </p>
 
               <div className="flex flex-wrap gap-3">
                 <Button size="sm" className="bg-white text-primary hover:bg-white/90 font-semibold shadow-xl" asChild>
-                  <Link to="/auth">Get Started Free <ArrowRight className="ml-2 w-3 h-3" /></Link>
+                  <Link to="/auth">
+                    Get Started Free <ArrowRight className="ml-2 w-3 h-3" />
+                  </Link>
                 </Button>
               </div>
 
@@ -160,17 +162,20 @@ const Index = () => {
                 <GraduationCap className="w-3 h-3" />
                 Career Advancement
               </div>
-              
-              <h2 className="font-heading font-bold text-2xl lg:text-3xl leading-tight">
-                Transform Your Career
-              </h2>
-              
+
+              <h2 className="font-heading font-bold text-2xl lg:text-3xl leading-tight">Transform Your Career</h2>
+
               <p className="text-sm lg:text-base text-white/90 leading-relaxed">
                 Get certified and advance your career with practical, hands-on training.
               </p>
 
               <div className="flex flex-wrap gap-3">
-                <Button size="sm" variant="outline" className="border-2 border-white/30 bg-transparent hover:bg-white/10 text-white font-semibold backdrop-blur-sm" asChild>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-2 border-white/30 bg-transparent hover:bg-white/10 text-white font-semibold backdrop-blur-sm"
+                  asChild
+                >
                   <Link to="/courses">View Programs</Link>
                 </Button>
               </div>
@@ -193,7 +198,8 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-8 md:mb-12 max-w-2xl mx-auto">
             <h2 className="font-heading font-bold text-2xl md:text-3xl lg:text-4xl mb-3">
-              Why Choose <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">ODEL</span>
+              Why Choose{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">ODeL</span>
             </h2>
             <p className="text-sm md:text-base text-muted-foreground">
               Experience a learning platform designed for your success with features that adapt to your goals
@@ -202,14 +208,21 @@ const Index = () => {
 
           <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5">
             {features.map((feature, index) => (
-              <Card key={index} className="group border-border/50 bg-card-gradient hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 cursor-pointer overflow-hidden relative">
+              <Card
+                key={index}
+                className="group border-border/50 bg-card-gradient hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 cursor-pointer overflow-hidden relative"
+              >
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 <CardContent className="p-4 md:p-6 text-center relative">
                   <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-primary/10 to-accent/10 rounded-xl flex items-center justify-center mx-auto mb-3 md:mb-4 group-hover:scale-110 transition-transform">
                     <feature.icon className="w-5 h-5 md:w-6 md:h-6 text-primary" />
                   </div>
-                  <h3 className="font-heading font-bold text-sm md:text-lg mb-1 md:mb-2 text-foreground">{feature.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed text-xs md:text-sm hidden sm:block">{feature.description}</p>
+                  <h3 className="font-heading font-bold text-sm md:text-lg mb-1 md:mb-2 text-foreground">
+                    {feature.title}
+                  </h3>
+                  <p className="text-muted-foreground leading-relaxed text-xs md:text-sm hidden sm:block">
+                    {feature.description}
+                  </p>
                 </CardContent>
               </Card>
             ))}
@@ -222,10 +235,12 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="mb-8 md:mb-16 text-center">
             <h2 className="font-heading font-bold text-2xl md:text-4xl lg:text-5xl mb-3 md:mb-4">
-              Featured <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">Courses</span>
+              Featured{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">Courses</span>
             </h2>
             <p className="text-muted-foreground text-sm md:text-lg max-w-2xl mx-auto">
-              Discover courses from top instructors across various disciplines. Start learning today and transform your future.
+              Discover courses from top instructors across various disciplines. Start learning today and transform your
+              future.
             </p>
           </div>
 
@@ -236,13 +251,18 @@ const Index = () => {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 mb-8 md:mb-12">
               {courses.map((course) => (
-                <Card key={course.id} className="group overflow-hidden border-border/50 bg-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-2 cursor-pointer flex flex-col">
+                <Card
+                  key={course.id}
+                  className="group overflow-hidden border-border/50 bg-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-2 cursor-pointer flex flex-col"
+                >
                   <div className="aspect-video overflow-hidden relative">
                     <div className="absolute top-3 md:top-4 right-3 md:right-4 bg-background/90 backdrop-blur-sm px-2 md:px-3 py-1 rounded-full text-xs font-bold text-primary z-10">
                       Featured
                     </div>
                     <img
-                      src={course.image_url || "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80"}
+                      src={
+                        course.image_url || "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80"
+                      }
                       alt={course.title}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
@@ -253,14 +273,18 @@ const Index = () => {
                         {course.category}
                       </div>
                     </div>
-                    <h3 className="font-heading font-bold text-base md:text-lg mb-3 md:mb-4 line-clamp-2 group-hover:text-primary transition-colors min-h-[2.5rem] md:min-h-[3.5rem]">{course.title}</h3>
+                    <h3 className="font-heading font-bold text-base md:text-lg mb-3 md:mb-4 line-clamp-2 group-hover:text-primary transition-colors min-h-[2.5rem] md:min-h-[3.5rem]">
+                      {course.title}
+                    </h3>
                     <div className="flex items-center justify-between mb-4 md:mb-5 mt-auto">
                       {course.price === 0 ? (
                         <Badge className="bg-green-500/10 text-green-600 border-green-500/20 text-sm md:text-lg px-2 md:px-3 py-1">
                           Free
                         </Badge>
                       ) : (
-                        <span className="text-lg md:text-2xl font-bold text-primary">₦{course.price.toLocaleString()}</span>
+                        <span className="text-lg md:text-2xl font-bold text-primary">
+                          ₦{course.price.toLocaleString()}
+                        </span>
                       )}
                       <div className="flex items-center gap-3 text-xs md:text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
@@ -270,14 +294,14 @@ const Index = () => {
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       {isEnrolled(course.id) ? (
-                        <Button 
+                        <Button
                           className="bg-green-600 hover:bg-green-700 text-white font-semibold text-xs md:text-sm"
                           onClick={() => navigate("/dashboard/learning")}
                         >
                           Go to Course
                         </Button>
                       ) : (
-                        <Button 
+                        <Button
                           className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground shadow-lg shadow-primary/20 font-semibold text-xs md:text-sm"
                           onClick={() => handleEnroll(course)}
                         >
@@ -296,7 +320,10 @@ const Index = () => {
 
           <div className="text-center">
             <Link to="/courses">
-              <Button size="lg" className="bg-foreground text-background hover:bg-foreground/90 shadow-xl font-semibold px-6 md:px-8 text-sm md:text-base">
+              <Button
+                size="lg"
+                className="bg-foreground text-background hover:bg-foreground/90 shadow-xl font-semibold px-6 md:px-8 text-sm md:text-base"
+              >
                 View All Courses <ArrowRight className="ml-2 w-4 h-4 md:w-5 md:h-5" />
               </Button>
             </Link>
@@ -328,13 +355,21 @@ const Index = () => {
                 Empower Your Workforce with World-Class Training
               </h2>
               <p className="text-sm md:text-lg text-background/80 leading-relaxed">
-                Scale your team's skills with customized learning paths, progress tracking, and expert-led courses. Stay ahead in your industry with continuous upskilling programs.
+                Scale your team's skills with customized learning paths, progress tracking, and expert-led courses. Stay
+                ahead in your industry with continuous upskilling programs.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
-                <Button size="lg" className="bg-white text-foreground hover:bg-white/90 font-semibold shadow-xl h-12 md:h-14 px-6 md:px-8 text-sm md:text-base">
+                <Button
+                  size="lg"
+                  className="bg-white text-foreground hover:bg-white/90 font-semibold shadow-xl h-12 md:h-14 px-6 md:px-8 text-sm md:text-base"
+                >
                   Request Demo <ArrowRight className="ml-2 w-4 h-4 md:w-5 md:h-5" />
                 </Button>
-                <Button size="lg" variant="outline" className="border-2 border-white/30 hover:bg-white/10 text-white font-semibold h-12 md:h-14 px-6 md:px-8 backdrop-blur-sm text-sm md:text-base">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-2 border-white/30 hover:bg-white/10 text-white font-semibold h-12 md:h-14 px-6 md:px-8 backdrop-blur-sm text-sm md:text-base"
+                >
                   View Plans
                 </Button>
               </div>
@@ -348,7 +383,10 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-8 md:mb-16 max-w-3xl mx-auto">
             <h2 className="font-heading font-bold text-2xl md:text-4xl lg:text-5xl mb-4 md:mb-6">
-              Loved by <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">Learners Worldwide</span>
+              Loved by{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
+                Learners Worldwide
+              </span>
             </h2>
             <p className="text-sm md:text-lg text-muted-foreground">
               Join thousands of students and professionals transforming their careers
@@ -357,7 +395,10 @@ const Index = () => {
 
           <div className="grid md:grid-cols-2 gap-4 md:gap-8 max-w-5xl mx-auto">
             {testimonials.map((testimonial, index) => (
-              <Card key={index} className="border-border/50 bg-card-gradient hover:shadow-card-hover transition-all duration-300">
+              <Card
+                key={index}
+                className="border-border/50 bg-card-gradient hover:shadow-card-hover transition-all duration-300"
+              >
                 <CardContent className="p-4 md:p-8">
                   <div className="flex gap-1 mb-4 md:mb-6">
                     {[...Array(5)].map((_, i) => (
@@ -376,7 +417,9 @@ const Index = () => {
                       className="w-10 h-10 md:w-12 md:h-12 rounded-full ring-2 ring-primary/20"
                     />
                     <div>
-                      <div className="font-heading font-bold text-foreground text-sm md:text-base">{testimonial.name}</div>
+                      <div className="font-heading font-bold text-foreground text-sm md:text-base">
+                        {testimonial.name}
+                      </div>
                       <div className="text-xs md:text-sm text-muted-foreground">{testimonial.role}</div>
                     </div>
                   </div>
