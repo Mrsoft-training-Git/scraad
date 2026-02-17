@@ -32,13 +32,13 @@ export const Navbar = () => {
   return (
     <nav className="bg-background/80 backdrop-blur-xl border-b border-border sticky top-0 z-50 shadow-sm">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-20">
+        <div className="flex items-center justify-between h-14 md:h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 group">
-            <img src={logo} alt="UNIPORT Logo" className="w-12 h-12 object-contain group-hover:scale-105 transition-transform" />
+          <Link to="/" className="flex items-center gap-2 group">
+            <img src={logo} alt="UNIPORT Logo" className="w-8 h-8 md:w-10 md:h-10 object-contain group-hover:scale-105 transition-transform" />
             <div>
-              <div className="font-heading font-bold text-xl leading-tight text-foreground">University of Port Harcourt</div>
-              <div className="text-xs text-muted-foreground">Open Distance and e-Learning Center (ODeL)</div>
+              <div className="font-heading font-bold text-sm md:text-base leading-tight text-foreground">University of Port Harcourt</div>
+              <div className="text-[10px] md:text-xs text-muted-foreground leading-tight">Open Distance and e-Learning Center (ODeL)</div>
             </div>
           </Link>
 
