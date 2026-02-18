@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { X, Video, FileText, Link as LinkIcon, CheckCircle2, ChevronDown, ChevronUp, ArrowRight, ArrowLeft, BookOpen, ExternalLink, Play, Pause, Volume2, VolumeX, Maximize, SkipBack, SkipForward, Download, Menu, ClipboardCheck } from "lucide-react";
+import { X, Video, FileText, Link as LinkIcon, CheckCircle2, ChevronDown, ChevronUp, ArrowRight, ArrowLeft, BookOpen, ExternalLink, Play, Pause, Volume2, VolumeX, Maximize, SkipBack, SkipForward, Download, Menu, ClipboardCheck, StickyNote, FileDown, FileType } from "lucide-react";
 import { KnowledgeCheckPlayer } from "@/components/KnowledgeCheckPlayer";
 import { LockedCourseScreen } from "@/components/LockedCourseScreen";
 interface Course {
@@ -801,18 +802,89 @@ const CourseViewer = () => {
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex-1 flex flex-col p-3 sm:p-4 md:p-6 overflow-auto">
-            <div className="max-w-3xl mx-auto w-full">
-              {/* Content Title */}
-              {selectedContent && <h1 className="text-lg sm:text-xl md:text-2xl font-bold mb-3 sm:mb-4">{selectedContent.title}</h1>}
-              
-              {/* Video/Content Player - professional 16:9 aspect ratio */}
-              <div className="w-full">
-                {renderContentPlayer()}
+          <div className="flex-1 flex flex-col overflow-auto" id="course-scroll-container">
+            <div className="w-full">
+              {/* Video/Content Player - sticky on desktop when scrolling */}
+              <div className="w-full sticky top-0 z-10 bg-background">
+                <div className="max-w-3xl mx-auto w-full px-3 sm:px-4 md:px-6 pt-3 sm:pt-4 md:pt-6">
+                  <div className="w-full">
+                    {renderContentPlayer()}
+                  </div>
+                </div>
               </div>
-              
-              {/* Content Description */}
-              {selectedContent?.description && <p className="text-muted-foreground mt-3 sm:mt-4 text-sm sm:text-base">{selectedContent.description}</p>}
+
+              {/* Content Title + Tabs below player */}
+              <div className="max-w-3xl mx-auto w-full px-3 sm:px-4 md:px-6 pb-6">
+                {/* Title row - Coursera style */}
+                {selectedContent && (
+                  <div className="flex items-start justify-between gap-4 mt-4 mb-2">
+                    <h1 className="text-lg sm:text-xl md:text-2xl font-bold">{selectedContent.title}</h1>
+                    <Button variant="ghost" size="sm" className="text-primary shrink-0 gap-1.5">
+                      <StickyNote className="w-4 h-4" />
+                      <span className="hidden sm:inline">Save note</span>
+                    </Button>
+                  </div>
+                )}
+
+                {/* Coursera-style Tabs */}
+                {selectedContent && (
+                  <Tabs defaultValue="description" className="mt-2">
+                    <TabsList className="bg-transparent border-b rounded-none w-full justify-start h-auto p-0 gap-0">
+                      <TabsTrigger
+                        value="description"
+                        className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm font-medium"
+                      >
+                        Transcript
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="notes"
+                        className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm font-medium"
+                      >
+                        Notes
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="downloads"
+                        className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm font-medium"
+                      >
+                        Downloads
+                      </TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="description" className="mt-4">
+                      {selectedContent.description ? (
+                        <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">{selectedContent.description}</p>
+                      ) : (
+                        <p className="text-muted-foreground text-sm italic">No transcript available for this item.</p>
+                      )}
+                    </TabsContent>
+
+                    <TabsContent value="notes" className="mt-4">
+                      <div className="text-muted-foreground text-sm">
+                        <p className="italic">Notes feature coming soon. You'll be able to take and save notes while learning.</p>
+                      </div>
+                    </TabsContent>
+
+                    <TabsContent value="downloads" className="mt-4">
+                      {selectedContent.content_url && selectedContent.content_type === "document" ? (
+                        <div className="flex items-center gap-3 p-3 border rounded-lg">
+                          <FileDown className="w-5 h-5 text-primary" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{selectedContent.title}</p>
+                            <p className="text-xs text-muted-foreground">Document</p>
+                          </div>
+                          <Button variant="outline" size="sm" asChild>
+                            <a href={selectedContent.content_url} download target="_blank" rel="noopener noreferrer">
+                              <Download className="w-4 h-4 mr-1" /> Download
+                            </a>
+                          </Button>
+                        </div>
+                      ) : (
+                        <p className="text-muted-foreground text-sm italic">No downloadable resources for this item.</p>
+                      )}
+                    </TabsContent>
+                  </Tabs>
+                )}
+              </div>
             </div>
           </div>
 
