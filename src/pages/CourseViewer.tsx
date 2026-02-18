@@ -804,12 +804,10 @@ const CourseViewer = () => {
         <div className="flex-1 flex flex-col overflow-hidden">
           <div className="flex-1 flex flex-col overflow-auto" id="course-scroll-container">
             <div className="w-full">
-              {/* Video/Content Player - sticky on desktop when scrolling */}
-              <div className="w-full sticky top-0 z-10 bg-background">
-                <div className="max-w-3xl mx-auto w-full px-3 sm:px-4 md:px-6 pt-3 sm:pt-4 md:pt-6">
-                  <div className="w-full">
-                    {renderContentPlayer()}
-                  </div>
+              {/* Video/Content Player - flows naturally so user can scroll past */}
+              <div className="max-w-3xl mx-auto w-full px-3 sm:px-4 md:px-6 pt-3 sm:pt-4 md:pt-6">
+                <div className="w-full">
+                  {renderContentPlayer()}
                 </div>
               </div>
 
