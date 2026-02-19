@@ -153,7 +153,7 @@ const CourseViewer = () => {
     }
 
     const handleScroll = () => {
-      const threshold = playerInitialHeight.current * 0.4;
+      const threshold = playerInitialHeight.current * 0.6;
       setIsPlayerSticky(container.scrollTop > threshold);
     };
     container.addEventListener("scroll", handleScroll, { passive: true });
@@ -826,20 +826,19 @@ const CourseViewer = () => {
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col overflow-hidden">
           <div className="flex-1 flex flex-col overflow-y-auto" id="course-scroll-container" ref={scrollContainerRef}>
-            <div className="w-full min-h-[120vh]">
-              {/* Video/Content Player - shrinks when scrolled */}
+              {/* Video/Content Player - becomes sticky mini-player on scroll */}
               <div
                 ref={playerRef}
                 className={`w-full transition-all duration-300 ease-in-out ${
                   isPlayerSticky
-                    ? "sticky top-0 z-10 bg-background shadow-md"
+                    ? "sticky top-0 z-10 bg-black shadow-lg"
                     : ""
                 }`}
               >
                 <div
                   className={`mx-auto w-full transition-all duration-300 ease-in-out ${
                     isPlayerSticky
-                      ? "max-w-sm px-2 py-1"
+                      ? "max-w-xs sm:max-w-sm"
                       : "max-w-3xl px-3 sm:px-4 md:px-6 pt-3 sm:pt-4 md:pt-6"
                   }`}
                 >
@@ -918,8 +917,10 @@ const CourseViewer = () => {
                     </TabsContent>
                   </Tabs>
                 )}
+
+                {/* Extra space so user can scroll past content to trigger sticky */}
+                <div className="h-[50vh]" />
               </div>
-            </div>
           </div>
 
           {/* Bottom Navigation */}
