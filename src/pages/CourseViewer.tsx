@@ -138,24 +138,27 @@ const CourseViewer = () => {
   const [isPlayerSticky, setIsPlayerSticky] = useState(false);
   const playerRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const playerInitialHeight = useRef<number>(0);
   const lastSavedProgress = useRef<number>(0);
 
   // Sticky mini-player on scroll
   useEffect(() => {
     const container = scrollContainerRef.current;
-    if (!container) return;
+    const player = playerRef.current;
+    if (!container || !player) return;
+
+    // Capture the natural height once before any sticky changes
+    if (playerInitialHeight.current === 0) {
+      playerInitialHeight.current = player.offsetHeight;
+    }
+
     const handleScroll = () => {
-      const player = playerRef.current;
-      if (!player) return;
-      // Get the natural height of the player area
-      const playerRect = player.getBoundingClientRect();
-      const containerRect = container.getBoundingClientRect();
-      // If the user has scrolled past ~60% of the player height, shrink it
-      setIsPlayerSticky(container.scrollTop > (player.offsetHeight * 0.5));
+      const threshold = playerInitialHeight.current * 0.4;
+      setIsPlayerSticky(container.scrollTop > threshold);
     };
     container.addEventListener("scroll", handleScroll, { passive: true });
     return () => container.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [selectedContent]);
   useEffect(() => {
     const checkAuth = async () => {
       const {
@@ -822,8 +825,8 @@ const CourseViewer = () => {
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex-1 flex flex-col overflow-auto" id="course-scroll-container" ref={scrollContainerRef}>
-            <div className="w-full">
+          <div className="flex-1 flex flex-col overflow-y-auto" id="course-scroll-container" ref={scrollContainerRef}>
+            <div className="w-full min-h-[150vh]">
               {/* Video/Content Player - shrinks when scrolled */}
               <div
                 ref={playerRef}
@@ -836,7 +839,7 @@ const CourseViewer = () => {
                 <div
                   className={`mx-auto w-full transition-all duration-300 ease-in-out ${
                     isPlayerSticky
-                      ? "max-w-xl px-2 py-1"
+                      ? "max-w-sm px-2 py-1"
                       : "max-w-3xl px-3 sm:px-4 md:px-6 pt-3 sm:pt-4 md:pt-6"
                   }`}
                 >
