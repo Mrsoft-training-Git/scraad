@@ -826,7 +826,7 @@ const CourseViewer = () => {
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col overflow-hidden">
           <div className="flex-1 flex flex-col overflow-y-auto" id="course-scroll-container" ref={scrollContainerRef}>
-            <div className="w-full min-h-[150vh]">
+            <div className="w-full min-h-[120vh]">
               {/* Video/Content Player - shrinks when scrolled */}
               <div
                 ref={playerRef}
