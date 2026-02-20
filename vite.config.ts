@@ -21,8 +21,8 @@ export default defineConfig(({ mode }) => ({
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
       },
       manifest: {
-        name: "ODEL - Open Distance and e-Learning Centre",
-        short_name: "ODEL",
+        name: "ODeL - Open Distance and e-Learning Centre",
+        short_name: "ODeL",
         description: "World-class e-learning platform from University of Port Harcourt",
         theme_color: "#1a2744",
         background_color: "#ffffff",
