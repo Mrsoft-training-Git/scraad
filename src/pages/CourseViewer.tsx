@@ -123,6 +123,9 @@ const CourseViewer = () => {
   const [enrollmentPaymentStatus, setEnrollmentPaymentStatus] = useState<string | null>(null);
   const [courseSecondTranche, setCourseSecondTranche] = useState<number | null>(null);
   const [courseFullData, setCourseFullData] = useState<any>(null);
+  const [signedUrl, setSignedUrl] = useState<string | null>(null);
+  const [signedUrlLoading, setSignedUrlLoading] = useState(false);
+  const signedUrlCache = useRef<Map<string, { url: string; expires: number }>>(new Map());
   const {
     toast
   } = useToast();
@@ -139,6 +142,54 @@ const CourseViewer = () => {
   const playerRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastSavedProgress = useRef<number>(0);
+
+  // Helper to check if a URL is from course-content storage bucket
+  const isCourseContentUrl = (url: string): boolean => {
+    return url.includes('/storage/v1/object/public/course-content/') || 
+           url.includes('/storage/v1/object/sign/course-content/');
+  };
+
+  // Extract file path from storage URL
+  const extractFilePath = (url: string): string | null => {
+    const match = url.match(/\/storage\/v1\/object\/(?:public|sign)\/course-content\/(.+?)(?:\?|$)/);
+    return match ? decodeURIComponent(match[1]) : null;
+  };
+
+  // Get signed URL for protected content
+  const getSignedUrl = useCallback(async (contentUrl: string): Promise<string> => {
+    if (!isCourseContentUrl(contentUrl)) return contentUrl;
+    
+    const filePath = extractFilePath(contentUrl);
+    if (!filePath) return contentUrl;
+
+    // Check cache
+    const cached = signedUrlCache.current.get(filePath);
+    if (cached && cached.expires > Date.now()) {
+      return cached.url;
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke('get-signed-url', {
+        body: { filePath, bucket: 'course-content' },
+      });
+      
+      if (error || !data?.signedUrl) {
+        console.error('Failed to get signed URL:', error);
+        return contentUrl;
+      }
+
+      // Cache for 50 minutes (URL valid for 60)
+      signedUrlCache.current.set(filePath, {
+        url: data.signedUrl,
+        expires: Date.now() + 50 * 60 * 1000,
+      });
+
+      return data.signedUrl;
+    } catch (err) {
+      console.error('Signed URL error:', err);
+      return contentUrl;
+    }
+  }, []);
 
   // Sticky mini-player on scroll
   useEffect(() => {
@@ -287,6 +338,14 @@ const CourseViewer = () => {
       setContents(contentsData);
       if (contentsData.length > 0) {
         setSelectedContent(contentsData[0]);
+        // Fetch signed URL for first content item
+        if (contentsData[0].content_url && isCourseContentUrl(contentsData[0].content_url)) {
+          setSignedUrlLoading(true);
+          getSignedUrl(contentsData[0].content_url).then(url => {
+            setSignedUrl(url);
+            setSignedUrlLoading(false);
+          });
+        }
       }
     }
     setLoading(false);
@@ -385,7 +444,16 @@ const CourseViewer = () => {
     setSelectedContent(content);
     setIsPlaying(false);
     setVideoProgress(0);
+    setSignedUrl(null);
     lastSavedProgress.current = contentProgress.get(content.id) || 0;
+
+    // Fetch signed URL for protected content
+    if (content.content_url && isCourseContentUrl(content.content_url)) {
+      setSignedUrlLoading(true);
+      const url = await getSignedUrl(content.content_url);
+      setSignedUrl(url);
+      setSignedUrlLoading(false);
+    }
 
     // Load quiz questions if knowledge check
     if (content.content_type === "knowledge_check") {
@@ -531,7 +599,14 @@ const CourseViewer = () => {
           </div>
         </div>;
     }
-    const url = selectedContent.content_url;
+    const url = signedUrl || selectedContent.content_url;
+    const isProtectedContent = isCourseContentUrl(selectedContent.content_url);
+    
+    if (isProtectedContent && signedUrlLoading) {
+      return <div className="flex items-center justify-center aspect-video bg-muted rounded-lg">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>;
+    }
     // YouTube Video - tracks progress over time
     if (selectedContent.content_type === "video" && isYouTubeUrl(url)) {
       const videoId = getYouTubeVideoId(url);
@@ -542,8 +617,8 @@ const CourseViewer = () => {
 
     // Native Video with custom controls - auto-marks as completed when video ends
     if (selectedContent.content_type === "video") {
-      return <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-black group">
-          <video ref={videoRef} src={url} className="w-full h-full" onTimeUpdate={handleVideoProgress} onLoadedMetadata={() => {
+      return <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-black group" onContextMenu={(e) => e.preventDefault()}>
+          <video ref={videoRef} src={url} className="w-full h-full" controlsList="nodownload nofullscreen noremoteplayback" disablePictureInPicture onContextMenu={(e) => e.preventDefault()} onTimeUpdate={handleVideoProgress} onLoadedMetadata={() => {
           if (videoRef.current) {
             setVideoDuration(videoRef.current.duration);
             // Resume from saved progress
@@ -601,18 +676,22 @@ const CourseViewer = () => {
 
             {/* Actions */}
             <div className="flex items-center gap-1 sm:gap-2">
-              <Button variant="ghost" size="sm" asChild className="text-xs sm:text-sm px-2 sm:px-3">
-                <a href={url} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                  <span className="hidden xs:inline">Open</span>
-                </a>
-              </Button>
-              <Button variant="ghost" size="sm" asChild className="text-xs sm:text-sm px-2 sm:px-3">
-                <a href={url} download target="_blank" rel="noopener noreferrer">
-                  <Download className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                  <span className="hidden xs:inline">Download</span>
-                </a>
-              </Button>
+              {!isProtectedContent && (
+                <>
+                  <Button variant="ghost" size="sm" asChild className="text-xs sm:text-sm px-2 sm:px-3">
+                    <a href={url} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                      <span className="hidden xs:inline">Open</span>
+                    </a>
+                  </Button>
+                  <Button variant="ghost" size="sm" asChild className="text-xs sm:text-sm px-2 sm:px-3">
+                    <a href={url} download target="_blank" rel="noopener noreferrer">
+                      <Download className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                      <span className="hidden xs:inline">Download</span>
+                    </a>
+                  </Button>
+                </>
+              )}
             </div>
           </div>
 

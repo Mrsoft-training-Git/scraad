@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.check-overdue-payments]
 verify_jwt = false
+
+[functions.get-signed-url]
+verify_jwt = false
