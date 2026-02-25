@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Video, Link as LinkIcon, Trash2, Edit, Eye, EyeOff, Play, FolderPlus, ClipboardCheck } from "lucide-react";
+import { FileText, Video, Link as LinkIcon, Trash2, Edit, Eye, EyeOff, Play, FolderPlus, ClipboardCheck, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ContentPreview } from "@/components/ContentPreview";
@@ -21,6 +21,7 @@ import { KnowledgeCheckBuilder, QuizQuestion } from "@/components/KnowledgeCheck
 interface Course {
   id: string;
   title: string;
+  syllabus: any;
 }
 
 interface CourseModule {
@@ -115,7 +116,7 @@ const CreateContent = () => {
   }, [navigate]);
 
   const fetchCourses = async (userId: string, role: string) => {
-    let query = supabase.from("courses").select("id, title").order("title");
+    let query = supabase.from("courses").select("id, title, syllabus").order("title");
     
     // Instructors only see their assigned courses
     if (role === "instructor") {
@@ -496,6 +497,45 @@ const CreateContent = () => {
     setEditingModule(null);
     setNewModule({ course_id: "", title: "", description: "" });
     setModuleDialogOpen(true);
+  };
+
+  const handleImportSyllabusModules = async (courseId: string) => {
+    const course = courses.find(c => c.id === courseId);
+    if (!course?.syllabus || !Array.isArray(course.syllabus) || course.syllabus.length === 0) return;
+
+    setSaving(true);
+    const existingModules = modules.filter(m => m.course_id === courseId);
+    const startIndex = existingModules.length > 0 
+      ? Math.max(...existingModules.map(m => m.order_index || 0)) + 1 
+      : 0;
+
+    const modulesToInsert = course.syllabus.map((mod: any, index: number) => ({
+      course_id: courseId,
+      title: mod.title || mod.name || `Module ${startIndex + index + 1}`,
+      description: mod.description || null,
+      order_index: startIndex + index,
+    }));
+
+    const { error } = await supabase.from("course_modules").insert(modulesToInsert);
+    setSaving(false);
+
+    if (error) {
+      toast({ title: "Error", description: "Failed to import modules from syllabus", variant: "destructive" });
+    } else {
+      toast({ title: "Success", description: `${modulesToInsert.length} modules imported from course syllabus` });
+      setModuleDialogOpen(false);
+      refreshModules();
+    }
+  };
+
+  const getCourseSyllabusModuleCount = (courseId: string) => {
+    const course = courses.find(c => c.id === courseId);
+    if (!course?.syllabus || !Array.isArray(course.syllabus)) return 0;
+    return course.syllabus.length;
+  };
+
+  const courseHasNoModulesYet = (courseId: string) => {
+    return modules.filter(m => m.course_id === courseId).length === 0;
   };
 
   const handlePreview = (content: CourseContent) => {
@@ -912,7 +952,26 @@ const CreateContent = () => {
                       <SelectItem key={course.id} value={course.id}>{course.title}</SelectItem>
                     ))}
                   </SelectContent>
-                </Select>
+               </Select>
+
+               {/* Import from Syllabus button */}
+               {!editingModule && newModule.course_id && getCourseSyllabusModuleCount(newModule.course_id) > 0 && courseHasNoModulesYet(newModule.course_id) && (
+                 <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 space-y-2">
+                   <p className="text-sm text-muted-foreground">
+                     This course has <strong>{getCourseSyllabusModuleCount(newModule.course_id)} modules</strong> defined in its syllabus. Import them automatically?
+                   </p>
+                   <Button 
+                     variant="outline" 
+                     size="sm"
+                     onClick={() => handleImportSyllabusModules(newModule.course_id)}
+                     disabled={saving}
+                     className="w-full"
+                   >
+                     <Download className="w-4 h-4 mr-2" />
+                     {saving ? "Importing..." : "Import Modules from Syllabus"}
+                   </Button>
+                 </div>
+               )}
               </div>
 
               <div className="space-y-2">
