@@ -38,6 +38,7 @@ import CourseEnrollment from "./pages/CourseEnrollment";
 import Bills from "./pages/Bills";
 import LiveSessions from "./pages/LiveSessions";
 import Enrollments from "./pages/Enrollments";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
@@ -81,6 +82,7 @@ const App = () => (
           <Route path="/enroll/:courseId" element={<CourseEnrollment />} />
           <Route path="/career" element={<Career />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/api/zoom/callback" element={<ZoomCallback />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
