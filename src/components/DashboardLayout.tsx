@@ -14,9 +14,10 @@ interface DashboardLayoutProps {
   user: User | null;
   userRole: string;
   hideTopBar?: boolean;
+  profile?: { full_name?: string | null; avatar_url?: string | null } | null;
 }
 
-export const DashboardLayout = ({ children, user, userRole, hideTopBar = false }: DashboardLayoutProps) => {
+export const DashboardLayout = ({ children, user, userRole, hideTopBar = false, profile }: DashboardLayoutProps) => {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [unreadAnnouncementsCount, setUnreadAnnouncementsCount] = useState(0);
@@ -166,14 +167,18 @@ export const DashboardLayout = ({ children, user, userRole, hideTopBar = false }
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex items-center gap-2 px-2 py-1.5 hover:bg-muted rounded-full transition-all cursor-pointer group">
-                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center ring-2 ring-background shadow-sm">
-                  <span className="text-xs font-semibold text-primary-foreground">
-                    {(user?.email?.split("@")[0]?.charAt(0).toUpperCase()) || "U"}
-                  </span>
-                </div>
+                {profile?.avatar_url ? (
+                  <img src={profile.avatar_url} alt="Avatar" className="w-8 h-8 rounded-full object-cover ring-2 ring-background shadow-sm" />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center ring-2 ring-background shadow-sm">
+                    <span className="text-xs font-semibold text-primary-foreground">
+                      {(profile?.full_name?.charAt(0) || user?.email?.charAt(0) || "U").toUpperCase()}
+                    </span>
+                  </div>
+                )}
                 <div className="text-left hidden sm:block">
                   <div className="font-medium text-sm text-foreground leading-tight">
-                    {user?.email?.split("@")[0] || "User"}
+                    {profile?.full_name || user?.email?.split("@")[0] || "User"}
                   </div>
                   <div className="text-[11px] text-muted-foreground capitalize leading-tight">{userRole}</div>
                 </div>

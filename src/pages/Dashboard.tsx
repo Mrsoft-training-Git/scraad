@@ -91,7 +91,7 @@ const Dashboard = () => {
   };
 
   return (
-    <DashboardLayout user={user} userRole={userRole}>
+    <DashboardLayout user={user} userRole={userRole} profile={profile}>
       {renderDashboard()}
     </DashboardLayout>
   );
