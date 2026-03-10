@@ -76,6 +76,8 @@ const CreateContent = () => {
     place_after_content_id: "", // For positioning knowledge checks
   });
   const [file, setFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [isUploading, setIsUploading] = useState(false);
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
   
   const [newModule, setNewModule] = useState({
