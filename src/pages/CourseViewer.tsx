@@ -477,10 +477,10 @@ const CourseViewer = () => {
     setSignedUrl(null);
     lastSavedProgress.current = contentProgress.get(content.id) || 0;
 
-    // Fetch signed URL for protected content
-    if (content.content_url && isCourseContentUrl(content.content_url)) {
+    // Fetch signed URL for protected content (Supabase Storage or S3)
+    if (content.content_url && (isCourseContentUrl(content.content_url) || isS3Url(content.content_url))) {
       setSignedUrlLoading(true);
-      const url = await getSignedUrl(content.content_url);
+      const url = await getSignedUrl(content.content_url, content.course_id);
       setSignedUrl(url);
       setSignedUrlLoading(false);
     }

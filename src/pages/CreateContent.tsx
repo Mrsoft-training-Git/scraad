@@ -947,12 +947,32 @@ const CreateContent = () => {
                   <Label>{selectedContentType === "video" ? "Video File or URL" : "Document File"}</Label>
                   <Input 
                     type="file"
-                    accept={selectedContentType === "video" ? "video/*" : ".pdf,.doc,.docx,.txt,.ppt,.pptx"}
+                    accept={selectedContentType === "video" ? "video/mp4,video/quicktime,video/webm,video/x-msvideo,video/mpeg" : ".pdf,.doc,.docx,.txt,.ppt,.pptx"}
                     onChange={(e) => setFile(e.target.files?.[0] || null)}
+                    disabled={isUploading}
                   />
-                  {selectedContentType === "video" && (
+                  {selectedContentType === "video" && file && (
+                    <p className="text-xs text-muted-foreground">
+                      {file.name} ({(file.size / (1024 * 1024)).toFixed(1)} MB) — will upload to AWS S3
+                    </p>
+                  )}
+                  {isUploading && (
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>Uploading to S3…</span>
+                        <span>{uploadProgress}%</span>
+                      </div>
+                      <div className="w-full bg-muted rounded-full h-2">
+                        <div
+                          className="bg-primary h-2 rounded-full transition-all duration-300"
+                          style={{ width: `${uploadProgress}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                  {selectedContentType === "video" && !file && (
                     <>
-                      <p className="text-xs text-muted-foreground">Or enter a YouTube URL:</p>
+                      <p className="text-xs text-muted-foreground">Or enter a YouTube URL instead:</p>
                       <Input 
                         placeholder="https://youtube.com/watch?v=..."
                         value={formData.content_url}
