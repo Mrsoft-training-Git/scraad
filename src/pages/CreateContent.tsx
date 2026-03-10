@@ -992,10 +992,10 @@ const CreateContent = () => {
               </div>
 
               <div className="flex gap-3 pt-4">
-                <Button onClick={handleSubmit} disabled={saving} className="flex-1">
-                  {saving ? "Saving..." : editingContent ? "Update Content" : "Create Content"}
+                <Button onClick={handleSubmit} disabled={saving || isUploading} className="flex-1">
+                  {isUploading ? `Uploading… ${uploadProgress}%` : saving ? "Saving..." : editingContent ? "Update Content" : "Create Content"}
                 </Button>
-                <Button variant="outline" onClick={() => setDialogOpen(false)}>
+                <Button variant="outline" onClick={() => setDialogOpen(false)} disabled={isUploading}>
                   Cancel
                 </Button>
               </div>
