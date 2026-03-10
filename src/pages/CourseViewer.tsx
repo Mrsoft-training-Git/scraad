@@ -27,6 +27,7 @@ interface CourseModule {
 }
 interface CourseContent {
   id: string;
+  course_id: string;
   module_id: string | null;
   title: string;
   description: string | null;
