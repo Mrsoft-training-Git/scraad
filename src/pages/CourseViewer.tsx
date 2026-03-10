@@ -355,7 +355,7 @@ const CourseViewer = () => {
     // Instructors and admins can see all content (including unpublished), students only see published
     let contentQuery = supabase
       .from("course_content")
-      .select("id, module_id, title, description, content_type, content_url, order_index")
+      .select("id, course_id, module_id, title, description, content_type, content_url, order_index")
       .eq("course_id", courseId)
       .order("order_index");
     
@@ -369,10 +369,10 @@ const CourseViewer = () => {
       setContents(contentsData);
       if (contentsData.length > 0) {
         setSelectedContent(contentsData[0]);
-        // Fetch signed URL for first content item
-        if (contentsData[0].content_url && isCourseContentUrl(contentsData[0].content_url)) {
+        // Fetch signed URL for first content item (S3 or Supabase Storage)
+        if (contentsData[0].content_url && (isCourseContentUrl(contentsData[0].content_url) || isS3Url(contentsData[0].content_url))) {
           setSignedUrlLoading(true);
-          getSignedUrl(contentsData[0].content_url).then(url => {
+          getSignedUrl(contentsData[0].content_url, contentsData[0].course_id).then(url => {
             setSignedUrl(url);
             setSignedUrlLoading(false);
           });
