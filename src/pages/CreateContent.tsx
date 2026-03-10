@@ -76,6 +76,8 @@ const CreateContent = () => {
     place_after_content_id: "", // For positioning knowledge checks
   });
   const [file, setFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [isUploading, setIsUploading] = useState(false);
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
   
   const [newModule, setNewModule] = useState({
@@ -308,6 +310,7 @@ const CreateContent = () => {
     }
   };
 
+
   const handleSubmit = async () => {
     if (!formData.course_id || !formData.title) {
       toast({ title: "Error", description: "Please fill in required fields", variant: "destructive" });
@@ -325,22 +328,84 @@ const CreateContent = () => {
     let fileUrl: string | null = formData.content_url || null;
     
     if (file) {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-      filePath = `${formData.course_id}/${fileName}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from("course-content")
-        .upload(filePath, file);
-      
-      if (uploadError) {
-        toast({ title: "Error", description: "Failed to upload file", variant: "destructive" });
-        setSaving(false);
-        return;
+      // Video files → upload to AWS S3 via pre-signed URL
+      if (formData.content_type === "video") {
+        const allowedTypes = ["video/mp4", "video/quicktime", "video/webm", "video/x-msvideo", "video/mpeg"];
+        if (!allowedTypes.includes(file.type)) {
+          toast({ title: "Invalid file", description: "Only mp4, mov, webm, avi, mpeg videos are allowed", variant: "destructive" });
+          setSaving(false);
+          return;
+        }
+        if (file.size > 2 * 1024 * 1024 * 1024) {
+          toast({ title: "File too large", description: "Video must be under 2 GB", variant: "destructive" });
+          setSaving(false);
+          return;
+        }
+
+        try {
+          setIsUploading(true);
+          setUploadProgress(0);
+
+          const { data: session } = await supabase.auth.getSession();
+          const { data: uploadData, error: fnError } = await supabase.functions.invoke("s3-get-upload-url", {
+            body: {
+              courseId: formData.course_id,
+              fileName: file.name,
+              contentType: file.type,
+              fileSize: file.size,
+            },
+          });
+
+          if (fnError || !uploadData?.uploadUrl) {
+            throw new Error(fnError?.message || "Failed to get upload URL");
+          }
+
+          // Upload directly to S3 with progress tracking using XMLHttpRequest
+          await new Promise<void>((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.upload.addEventListener("progress", (e) => {
+              if (e.lengthComputable) {
+                setUploadProgress(Math.round((e.loaded / e.total) * 100));
+              }
+            });
+            xhr.addEventListener("load", () => {
+              if (xhr.status >= 200 && xhr.status < 300) resolve();
+              else reject(new Error(`S3 upload failed: ${xhr.status} ${xhr.statusText}`));
+            });
+            xhr.addEventListener("error", () => reject(new Error("Network error during upload")));
+            xhr.open("PUT", uploadData.uploadUrl);
+            xhr.setRequestHeader("Content-Type", file.type);
+            xhr.send(file);
+          });
+
+          filePath = uploadData.s3Key;   // store S3 key in file_path
+          fileUrl = uploadData.s3Url;    // store s3://bucket/key in content_url
+          setIsUploading(false);
+        } catch (err: any) {
+          toast({ title: "Upload failed", description: err.message, variant: "destructive" });
+          setSaving(false);
+          setIsUploading(false);
+          return;
+        }
+      } else {
+        // Non-video files → continue using Supabase Storage
+        const fileExt = file.name.split(".").pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        filePath = `${formData.course_id}/${fileName}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from("course-content")
+          .upload(filePath, file);
+        
+        if (uploadError) {
+          toast({ title: "Error", description: "Failed to upload file", variant: "destructive" });
+          setSaving(false);
+          return;
+        }
+        
+        const { data: urlData } = supabase.storage.from("course-content").getPublicUrl(filePath);
+        fileUrl = urlData.publicUrl;
       }
-      
-      const { data: urlData } = supabase.storage.from("course-content").getPublicUrl(filePath);
-      fileUrl = urlData.publicUrl;
     }
     
     // Calculate order_index for knowledge checks based on placement
@@ -882,12 +947,32 @@ const CreateContent = () => {
                   <Label>{selectedContentType === "video" ? "Video File or URL" : "Document File"}</Label>
                   <Input 
                     type="file"
-                    accept={selectedContentType === "video" ? "video/*" : ".pdf,.doc,.docx,.txt,.ppt,.pptx"}
+                    accept={selectedContentType === "video" ? "video/mp4,video/quicktime,video/webm,video/x-msvideo,video/mpeg" : ".pdf,.doc,.docx,.txt,.ppt,.pptx"}
                     onChange={(e) => setFile(e.target.files?.[0] || null)}
+                    disabled={isUploading}
                   />
-                  {selectedContentType === "video" && (
+                  {selectedContentType === "video" && file && (
+                    <p className="text-xs text-muted-foreground">
+                      {file.name} ({(file.size / (1024 * 1024)).toFixed(1)} MB) — will upload to AWS S3
+                    </p>
+                  )}
+                  {isUploading && (
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>Uploading to S3…</span>
+                        <span>{uploadProgress}%</span>
+                      </div>
+                      <div className="w-full bg-muted rounded-full h-2">
+                        <div
+                          className="bg-primary h-2 rounded-full transition-all duration-300"
+                          style={{ width: `${uploadProgress}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                  {selectedContentType === "video" && !file && (
                     <>
-                      <p className="text-xs text-muted-foreground">Or enter a YouTube URL:</p>
+                      <p className="text-xs text-muted-foreground">Or enter a YouTube URL instead:</p>
                       <Input 
                         placeholder="https://youtube.com/watch?v=..."
                         value={formData.content_url}
@@ -907,10 +992,10 @@ const CreateContent = () => {
               </div>
 
               <div className="flex gap-3 pt-4">
-                <Button onClick={handleSubmit} disabled={saving} className="flex-1">
-                  {saving ? "Saving..." : editingContent ? "Update Content" : "Create Content"}
+                <Button onClick={handleSubmit} disabled={saving || isUploading} className="flex-1">
+                  {isUploading ? `Uploading… ${uploadProgress}%` : saving ? "Saving..." : editingContent ? "Update Content" : "Create Content"}
                 </Button>
-                <Button variant="outline" onClick={() => setDialogOpen(false)}>
+                <Button variant="outline" onClick={() => setDialogOpen(false)} disabled={isUploading}>
                   Cancel
                 </Button>
               </div>

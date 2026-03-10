@@ -27,6 +27,7 @@ interface CourseModule {
 }
 interface CourseContent {
   id: string;
+  course_id: string;
   module_id: string | null;
   title: string;
   description: string | null;
@@ -143,53 +144,83 @@ const CourseViewer = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastSavedProgress = useRef<number>(0);
 
-  // Helper to check if a URL is from course-content storage bucket
+
+  // Helper: check if a URL is a Supabase course-content bucket URL
   const isCourseContentUrl = (url: string): boolean => {
     return url.includes('/storage/v1/object/public/course-content/') || 
            url.includes('/storage/v1/object/sign/course-content/');
   };
 
-  // Extract file path from storage URL
+  // Helper: check if a URL is an S3 URL (s3://bucket/key or https://bucket.s3...)
+  const isS3Url = (url: string): boolean => {
+    return url.startsWith('s3://') || url.includes('.amazonaws.com/');
+  };
+
+  // Extract file path from Supabase storage URL
   const extractFilePath = (url: string): string | null => {
     const match = url.match(/\/storage\/v1\/object\/(?:public|sign)\/course-content\/(.+?)(?:\?|$)/);
     return match ? decodeURIComponent(match[1]) : null;
   };
 
-  // Get signed URL for protected content
-  const getSignedUrl = useCallback(async (contentUrl: string): Promise<string> => {
-    if (!isCourseContentUrl(contentUrl)) return contentUrl;
-    
-    const filePath = extractFilePath(contentUrl);
-    if (!filePath) return contentUrl;
-
-    // Check cache
-    const cached = signedUrlCache.current.get(filePath);
+  // Get signed URL for protected content (handles both Supabase Storage and AWS S3)
+  const getSignedUrl = useCallback(async (contentUrl: string, contentCourseId?: string): Promise<string> => {
+    const cacheKey = contentUrl;
+    const cached = signedUrlCache.current.get(cacheKey);
     if (cached && cached.expires > Date.now()) {
       return cached.url;
     }
 
-    try {
-      const { data, error } = await supabase.functions.invoke('get-signed-url', {
-        body: { filePath, bucket: 'course-content' },
-      });
-      
-      if (error || !data?.signedUrl) {
-        console.error('Failed to get signed URL:', error);
+    // AWS S3 video
+    if (isS3Url(contentUrl)) {
+      const resolvedCourseId = contentCourseId || courseId;
+      if (!resolvedCourseId) return contentUrl;
+      try {
+        const { data, error } = await supabase.functions.invoke('s3-get-signed-url', {
+          body: { s3Url: contentUrl, courseId: resolvedCourseId },
+        });
+        if (error || !data?.signedUrl) {
+          console.error('Failed to get S3 signed URL:', error);
+          return contentUrl;
+        }
+        // Cache for 12 minutes (URL valid for 15)
+        signedUrlCache.current.set(cacheKey, {
+          url: data.signedUrl,
+          expires: Date.now() + 12 * 60 * 1000,
+        });
+        return data.signedUrl;
+      } catch (err) {
+        console.error('S3 signed URL error:', err);
         return contentUrl;
       }
-
-      // Cache for 50 minutes (URL valid for 60)
-      signedUrlCache.current.set(filePath, {
-        url: data.signedUrl,
-        expires: Date.now() + 50 * 60 * 1000,
-      });
-
-      return data.signedUrl;
-    } catch (err) {
-      console.error('Signed URL error:', err);
-      return contentUrl;
     }
-  }, []);
+
+    // Supabase Storage video
+    if (isCourseContentUrl(contentUrl)) {
+      const filePath = extractFilePath(contentUrl);
+      if (!filePath) return contentUrl;
+      try {
+        const { data, error } = await supabase.functions.invoke('get-signed-url', {
+          body: { filePath, bucket: 'course-content' },
+        });
+        if (error || !data?.signedUrl) {
+          console.error('Failed to get Supabase signed URL:', error);
+          return contentUrl;
+        }
+        // Cache for 50 minutes (URL valid for 60)
+        signedUrlCache.current.set(cacheKey, {
+          url: data.signedUrl,
+          expires: Date.now() + 50 * 60 * 1000,
+        });
+        return data.signedUrl;
+      } catch (err) {
+        console.error('Signed URL error:', err);
+        return contentUrl;
+      }
+    }
+
+    return contentUrl;
+  }, [courseId]);
+
 
   // Sticky mini-player on scroll
   useEffect(() => {
@@ -324,7 +355,7 @@ const CourseViewer = () => {
     // Instructors and admins can see all content (including unpublished), students only see published
     let contentQuery = supabase
       .from("course_content")
-      .select("id, module_id, title, description, content_type, content_url, order_index")
+      .select("id, course_id, module_id, title, description, content_type, content_url, order_index")
       .eq("course_id", courseId)
       .order("order_index");
     
@@ -338,10 +369,10 @@ const CourseViewer = () => {
       setContents(contentsData);
       if (contentsData.length > 0) {
         setSelectedContent(contentsData[0]);
-        // Fetch signed URL for first content item
-        if (contentsData[0].content_url && isCourseContentUrl(contentsData[0].content_url)) {
+        // Fetch signed URL for first content item (S3 or Supabase Storage)
+        if (contentsData[0].content_url && (isCourseContentUrl(contentsData[0].content_url) || isS3Url(contentsData[0].content_url))) {
           setSignedUrlLoading(true);
-          getSignedUrl(contentsData[0].content_url).then(url => {
+          getSignedUrl(contentsData[0].content_url, contentsData[0].course_id).then(url => {
             setSignedUrl(url);
             setSignedUrlLoading(false);
           });
@@ -447,10 +478,10 @@ const CourseViewer = () => {
     setSignedUrl(null);
     lastSavedProgress.current = contentProgress.get(content.id) || 0;
 
-    // Fetch signed URL for protected content
-    if (content.content_url && isCourseContentUrl(content.content_url)) {
+    // Fetch signed URL for protected content (Supabase Storage or S3)
+    if (content.content_url && (isCourseContentUrl(content.content_url) || isS3Url(content.content_url))) {
       setSignedUrlLoading(true);
-      const url = await getSignedUrl(content.content_url);
+      const url = await getSignedUrl(content.content_url, content.course_id);
       setSignedUrl(url);
       setSignedUrlLoading(false);
     }
