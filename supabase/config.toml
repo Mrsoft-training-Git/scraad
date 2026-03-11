@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.s3-get-signed-url]
 verify_jwt = false
+
+[functions.s3-manage-object]
+verify_jwt = false
