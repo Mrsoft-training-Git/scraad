@@ -383,11 +383,19 @@ const CreateContent = () => {
               }
             });
             xhr.addEventListener("load", () => {
-              if (xhr.status >= 200 && xhr.status < 300) resolve();
-              else reject(new Error(`S3 upload failed: ${xhr.status} ${xhr.statusText}`));
+              if (xhr.status >= 200 && xhr.status < 300) {
+                resolve();
+              } else {
+                console.error("S3 upload failed:", xhr.status, xhr.responseText);
+                reject(new Error(`S3 upload failed (${xhr.status}): ${xhr.responseText || xhr.statusText}`));
+              }
             });
-            xhr.addEventListener("error", () => reject(new Error("Network error during upload")));
+            xhr.addEventListener("error", () => {
+              console.error("S3 XHR network error — check S3 bucket CORS policy allows PUT from this origin");
+              reject(new Error("Upload failed: check S3 bucket CORS configuration allows PUT requests from this domain"));
+            });
             xhr.open("PUT", uploadData.uploadUrl);
+            // Content-Type MUST match exactly what was signed in the pre-signed URL
             xhr.setRequestHeader("Content-Type", file.type);
             xhr.send(file);
           });
