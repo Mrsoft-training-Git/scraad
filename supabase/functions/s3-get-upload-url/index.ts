@@ -48,12 +48,13 @@ async function generatePresignedPutUrl(
   const credentialScope = `${dateStamp}/${region}/s3/aws4_request`;
   const credential = `${accessKeyId}/${credentialScope}`;
 
+  // Include content-type in signed headers so the browser PUT header matches the signature
   const params = new URLSearchParams({
     "X-Amz-Algorithm": "AWS4-HMAC-SHA256",
     "X-Amz-Credential": credential,
     "X-Amz-Date": amzDate,
     "X-Amz-Expires": expiresIn.toString(),
-    "X-Amz-SignedHeaders": "host",
+    "X-Amz-SignedHeaders": "content-type;host",
   });
 
   // Sort params for canonical query string
@@ -62,8 +63,9 @@ async function generatePresignedPutUrl(
     .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
     .join("&");
 
-  const canonicalHeaders = `host:${host}\n`;
-  const signedHeaders = "host";
+  // Headers must be sorted lexicographically for canonical request
+  const canonicalHeaders = `content-type:${contentType}\nhost:${host}\n`;
+  const signedHeaders = "content-type;host";
   const payloadHash = "UNSIGNED-PAYLOAD";
 
   const encodedKey = key.split("/").map(segment => encodeURIComponent(segment)).join("/");
