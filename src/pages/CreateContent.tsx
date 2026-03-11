@@ -280,10 +280,24 @@ const CreateContent = () => {
     setDialogOpen(true);
   };
 
-  const handleDelete = async (id: string, filePath: string | null) => {
+  const deleteS3Object = async (s3Url: string, courseId: string, action: "delete" | "replace" = "delete") => {
+    try {
+      await supabase.functions.invoke("s3-manage-object", {
+        body: { action, s3Url, courseId },
+      });
+    } catch (err) {
+      console.warn("S3 object cleanup warning:", err);
+      // Best-effort — don't block DB operation
+    }
+  };
+
+  const handleDelete = async (id: string, filePath: string | null, contentUrl: string | null, courseId: string) => {
     if (!confirm("Are you sure you want to delete this content?")) return;
     
-    if (filePath) {
+    // Delete from storage: S3 for videos, Supabase Storage for other files
+    if (contentUrl && (contentUrl.startsWith("s3://") || contentUrl.includes(".amazonaws.com/"))) {
+      await deleteS3Object(contentUrl, courseId, "delete");
+    } else if (filePath) {
       await supabase.storage.from("course-content").remove([filePath]);
     }
     
@@ -377,6 +391,12 @@ const CreateContent = () => {
             xhr.setRequestHeader("Content-Type", file.type);
             xhr.send(file);
           });
+
+          // If updating an existing video, clean up the old S3 object
+          if (editingContent?.content_url && 
+              (editingContent.content_url.startsWith("s3://") || editingContent.content_url.includes(".amazonaws.com/"))) {
+            await deleteS3Object(editingContent.content_url, formData.course_id, "replace");
+          }
 
           filePath = uploadData.s3Key;   // store S3 key in file_path
           fileUrl = uploadData.s3Url;    // store s3://bucket/key in content_url
@@ -803,7 +823,7 @@ const CreateContent = () => {
                             variant="ghost" 
                             size="icon" 
                             className="text-destructive"
-                            onClick={() => handleDelete(content.id, content.file_path)}
+                            onClick={() => handleDelete(content.id, content.file_path, content.content_url, content.course_id)}
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
