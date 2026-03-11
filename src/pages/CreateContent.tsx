@@ -392,6 +392,12 @@ const CreateContent = () => {
             xhr.send(file);
           });
 
+          // If updating an existing video, clean up the old S3 object
+          if (editingContent?.content_url && 
+              (editingContent.content_url.startsWith("s3://") || editingContent.content_url.includes(".amazonaws.com/"))) {
+            await deleteS3Object(editingContent.content_url, formData.course_id, "replace");
+          }
+
           filePath = uploadData.s3Key;   // store S3 key in file_path
           fileUrl = uploadData.s3Url;    // store s3://bucket/key in content_url
           setIsUploading(false);
