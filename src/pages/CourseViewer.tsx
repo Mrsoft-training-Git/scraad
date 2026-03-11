@@ -66,7 +66,7 @@ const YouTubeProgressTracker = ({
   onProgressUpdate: (contentId: string, progress: number) => Promise<void>;
 }) => {
   const [estimatedProgress, setEstimatedProgress] = useState(savedProgress);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   useEffect(() => {
     // Assume average video is ~5 minutes (300 seconds), update every 15 seconds = ~5% progress
     if (!isCompleted && estimatedProgress < 100) {
