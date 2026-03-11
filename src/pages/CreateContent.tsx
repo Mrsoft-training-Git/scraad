@@ -817,7 +817,7 @@ const CreateContent = () => {
                             variant="ghost" 
                             size="icon" 
                             className="text-destructive"
-                            onClick={() => handleDelete(content.id, content.file_path)}
+                            onClick={() => handleDelete(content.id, content.file_path, content.content_url, content.course_id)}
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
