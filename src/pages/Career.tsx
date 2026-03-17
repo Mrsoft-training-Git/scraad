@@ -149,8 +149,8 @@ const Career = () => {
               </span>
             </h1>
             <p className="text-xl text-muted-foreground mb-8">
-              Join the University of Port Harcourt's distance learning team and help shape the
-              future of online education in Nigeria.
+              Join the Cradua team at M-R International and help shape the
+              future of online education.
             </p>
           </div>
         </div>

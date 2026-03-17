@@ -39,7 +39,7 @@ const PWAInstallPrompt = () => {
       <div className="flex items-center gap-3 rounded-xl border bg-card p-4 shadow-lg">
         <Download className="h-8 w-8 shrink-0 text-primary" />
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-sm text-foreground">Install ODeL</p>
+          <p className="font-semibold text-sm text-foreground">Install Cradua</p>
           <p className="text-xs text-muted-foreground">Add to home screen for quick access</p>
         </div>
         <Button size="sm" onClick={handleInstall}>

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import logo from "@/assets/uniport-logo.png";
+import logo from "@/assets/mr-logo.jpeg";
 import { cn } from "@/lib/utils";
 
 export const Navbar = () => {
@@ -35,10 +35,10 @@ export const Navbar = () => {
         <div className="flex items-center justify-between h-14 md:h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group">
-            <img src={logo} alt="UNIPORT Logo" className="w-8 h-8 md:w-10 md:h-10 object-contain group-hover:scale-105 transition-transform" />
+            <img src={logo} alt="Cradua Logo" className="w-8 h-8 md:w-10 md:h-10 object-contain rounded group-hover:scale-105 transition-transform" />
             <div>
-              <div className="font-heading font-bold text-sm md:text-base leading-tight text-foreground">University of Port Harcourt</div>
-              <div className="text-[10px] md:text-xs text-muted-foreground leading-tight">Open Distance and e-Learning Center (ODeL)</div>
+              <div className="font-heading font-bold text-sm md:text-base leading-tight text-foreground">Cradua</div>
+              <div className="text-[10px] md:text-xs text-muted-foreground leading-tight">by M-R International</div>
             </div>
           </Link>
 
