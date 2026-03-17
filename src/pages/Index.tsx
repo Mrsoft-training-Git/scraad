@@ -236,7 +236,7 @@ const Index = () => {
           <div className="mb-8 md:mb-16 text-center">
             <h2 className="font-heading font-bold text-2xl md:text-4xl lg:text-5xl mb-3 md:mb-4">
               Featured{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">Courses</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Courses</span>
             </h2>
             <p className="text-muted-foreground text-sm md:text-lg max-w-2xl mx-auto">
               Discover courses from top instructors across various disciplines. Start learning today and transform your
