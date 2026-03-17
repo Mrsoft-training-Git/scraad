@@ -199,7 +199,7 @@ const Index = () => {
           <div className="text-center mb-8 md:mb-12 max-w-2xl mx-auto">
             <h2 className="font-heading font-bold text-2xl md:text-3xl lg:text-4xl mb-3">
               Why Choose{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">ODeL</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Cradua</span>
             </h2>
             <p className="text-sm md:text-base text-muted-foreground">
               Experience a learning platform designed for your success with features that adapt to your goals
