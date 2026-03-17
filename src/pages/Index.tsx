@@ -199,7 +199,7 @@ const Index = () => {
           <div className="text-center mb-8 md:mb-12 max-w-2xl mx-auto">
             <h2 className="font-heading font-bold text-2xl md:text-3xl lg:text-4xl mb-3">
               Why Choose{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">ODeL</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Cradua</span>
             </h2>
             <p className="text-sm md:text-base text-muted-foreground">
               Experience a learning platform designed for your success with features that adapt to your goals
@@ -236,7 +236,7 @@ const Index = () => {
           <div className="mb-8 md:mb-16 text-center">
             <h2 className="font-heading font-bold text-2xl md:text-4xl lg:text-5xl mb-3 md:mb-4">
               Featured{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">Courses</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Courses</span>
             </h2>
             <p className="text-muted-foreground text-sm md:text-lg max-w-2xl mx-auto">
               Discover courses from top instructors across various disciplines. Start learning today and transform your
@@ -384,9 +384,9 @@ const Index = () => {
           <div className="text-center mb-8 md:mb-16 max-w-3xl mx-auto">
             <h2 className="font-heading font-bold text-2xl md:text-4xl lg:text-5xl mb-4 md:mb-6">
               Loved by{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
+               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
                 Learners Worldwide
-              </span>
+               </span>
             </h2>
             <p className="text-sm md:text-lg text-muted-foreground">
               Join thousands of students and professionals transforming their careers

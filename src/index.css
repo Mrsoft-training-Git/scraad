@@ -2,62 +2,60 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Cradua Design System — MR Soft Red/Green palette */
 
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 222 47% 20%;
+    --foreground: 210 20% 16%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 20%;
+    --card-foreground: 210 20% 16%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 20%;
+    --popover-foreground: 210 20% 16%;
 
-    --primary: 222 47% 25%;
+    --primary: 0 72% 44%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 156 65% 35%;
+    --secondary: 152 60% 32%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 220 14% 96%;
-    --muted-foreground: 222 20% 46%;
+    --muted: 210 14% 96%;
+    --muted-foreground: 210 12% 46%;
 
-    --accent: 195 82% 50%;
+    --accent: 152 60% 32%;
     --accent-foreground: 0 0% 100%;
 
-    --success: 156 65% 35%;
+    --success: 152 60% 38%;
     --success-foreground: 0 0% 100%;
 
     --warning: 45 100% 50%;
-    --warning-foreground: 222 47% 20%;
+    --warning-foreground: 210 20% 16%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 14% 90%;
-    --input: 220 14% 90%;
-    --ring: 222 47% 25%;
+    --border: 210 14% 90%;
+    --input: 210 14% 90%;
+    --ring: 0 72% 44%;
 
     --radius: 0.75rem;
 
-    --sidebar-background: 222 47% 25%;
+    --sidebar-background: 210 20% 16%;
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 195 82% 50%;
+    --sidebar-primary: 0 72% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 222 47% 30%;
+    --sidebar-accent: 210 20% 22%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 222 35% 35%;
-    --sidebar-ring: 195 82% 50%;
+    --sidebar-border: 210 14% 28%;
+    --sidebar-ring: 0 72% 50%;
 
-    --hero-gradient: linear-gradient(135deg, hsl(222 47% 25%) 0%, hsl(195 82% 50%) 50%, hsl(156 65% 35%) 100%);
-    --card-gradient: linear-gradient(to bottom right, hsl(0 0% 100%), hsl(220 20% 98%));
-    --card-shadow: 0 2px 20px -2px hsl(222 47% 25% / 0.08);
-    --card-shadow-hover: 0 8px 40px -4px hsl(222 47% 25% / 0.2);
-    --glow: 0 0 40px hsl(195 82% 50% / 0.3);
+    --hero-gradient: linear-gradient(135deg, hsl(0 72% 44%) 0%, hsl(0 72% 38%) 40%, hsl(152 60% 32%) 100%);
+    --card-gradient: linear-gradient(to bottom right, hsl(0 0% 100%), hsl(0 0% 98%));
+    --card-shadow: 0 2px 20px -2px hsl(0 0% 0% / 0.06);
+    --card-shadow-hover: 0 8px 40px -4px hsl(0 72% 44% / 0.15);
+    --glow: 0 0 40px hsl(0 72% 44% / 0.2);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
@@ -87,7 +85,6 @@ All colors MUST be HSL.
   background: transparent !important;
 }
 
-/* Remove the simulated device frame wrapper */
 [id^="zmmtg-root"] .zmwebsdk-makeStyles-root,
 [id^="zmmtg-root"] .zmwebsdk-MuiPaper-root {
   width: 100% !important;
@@ -99,7 +96,6 @@ All colors MUST be HSL.
   box-shadow: none !important;
 }
 
-/* Ensure the video/meeting canvas fills available space */
 [id^="zmmtg-root"] iframe,
 [id^="zmmtg-root"] video,
 [id^="zmmtg-root"] canvas {
