@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import logo from "@/assets/uniport-logo.png";
+import logo from "@/assets/mr-logo.jpeg";
 import { cn } from "@/lib/utils";
 
 export const Navbar = () => {
@@ -34,11 +34,11 @@ export const Navbar = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-14 md:h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group">
-            <img src={logo} alt="UNIPORT Logo" className="w-8 h-8 md:w-10 md:h-10 object-contain group-hover:scale-105 transition-transform" />
+          <Link to="/" className="flex items-center gap-3 group">
+            <img src={logo} alt="MR Soft Logo" className="h-8 md:h-10 object-contain group-hover:scale-105 transition-transform" />
             <div>
-              <div className="font-heading font-bold text-sm md:text-base leading-tight text-foreground">University of Port Harcourt</div>
-              <div className="text-[10px] md:text-xs text-muted-foreground leading-tight">Open Distance and e-Learning Center (ODeL)</div>
+              <div className="font-heading font-bold text-base md:text-lg leading-tight text-foreground">Cradua</div>
+              <div className="text-[10px] md:text-xs text-muted-foreground leading-tight">by M-R International</div>
             </div>
           </Link>
 
@@ -60,7 +60,7 @@ export const Navbar = () => {
             ))}
 
             {isAuthenticated ? (
-              <Button className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white shadow-lg shadow-primary/30 font-semibold" asChild>
+              <Button className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-white shadow-lg shadow-primary/30 font-semibold" asChild>
                 <Link to="/dashboard">Dashboard</Link>
               </Button>
             ) : (
@@ -68,7 +68,7 @@ export const Navbar = () => {
                 <Button variant="ghost" className="text-foreground hover:text-primary hover:bg-muted/50" asChild>
                   <Link to="/auth">Login</Link>
                 </Button>
-                <Button className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white shadow-lg shadow-primary/30 font-semibold" asChild>
+                <Button className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-white shadow-lg shadow-primary/30 font-semibold" asChild>
                   <Link to="/auth">Sign Up Free</Link>
                 </Button>
               </>
@@ -90,7 +90,7 @@ export const Navbar = () => {
                 to={link.to}
                 className={cn(
                   "block py-2 transition-colors",
-                  isActive(link.to) ? "text-primary font-semibold" : "hover:text-accent"
+                  isActive(link.to) ? "text-primary font-semibold" : "hover:text-secondary"
                 )}
               >
                 {link.label}
@@ -98,15 +98,15 @@ export const Navbar = () => {
             ))}
             <div className="pt-2 space-y-2">
               {isAuthenticated ? (
-                <Button variant="default" className="w-full bg-accent hover:bg-accent/90" asChild>
+                <Button variant="default" className="w-full" asChild>
                   <Link to="/dashboard">Dashboard</Link>
                 </Button>
               ) : (
                 <>
-                  <Button variant="outline" className="w-full border-primary-foreground/20" asChild>
+                  <Button variant="outline" className="w-full" asChild>
                     <Link to="/auth">Login</Link>
                   </Button>
-                  <Button variant="default" className="w-full bg-accent hover:bg-accent/90" asChild>
+                  <Button variant="default" className="w-full" asChild>
                     <Link to="/auth">Sign Up</Link>
                   </Button>
                 </>
@@ -125,8 +125,8 @@ export const Navbar = () => {
             <span className="sm:hidden">Individual</span>
           </Link>
           <span className="text-muted-foreground">•</span>
-          <Link to="/signup/organization" className="hover:text-primary transition-colors font-medium flex items-center gap-2">
-            <span className="w-2 h-2 bg-accent rounded-full"></span>
+          <Link to="/signup/organization" className="hover:text-secondary transition-colors font-medium flex items-center gap-2">
+            <span className="w-2 h-2 bg-secondary rounded-full"></span>
             <span className="hidden sm:inline">Business & Teams</span>
             <span className="sm:hidden">Business</span>
           </Link>

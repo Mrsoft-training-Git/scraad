@@ -384,9 +384,9 @@ const Index = () => {
           <div className="text-center mb-8 md:mb-16 max-w-3xl mx-auto">
             <h2 className="font-heading font-bold text-2xl md:text-4xl lg:text-5xl mb-4 md:mb-6">
               Loved by{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
+               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
                 Learners Worldwide
-              </span>
+               </span>
             </h2>
             <p className="text-sm md:text-lg text-muted-foreground">
               Join thousands of students and professionals transforming their careers

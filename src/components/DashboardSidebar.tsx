@@ -1,29 +1,14 @@
 import { Link, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard,
-  BookOpen,
-  FileText,
-  GraduationCap,
-  Calendar,
-  CreditCard,
-  User,
-  BookMarked,
-  Shield,
-  Users,
-  ChevronLeft,
-  Briefcase,
-  FileClock,
-  Megaphone,
-  MessageSquare,
-  ClipboardList,
-  Video,
-  UserPlus,
+  LayoutDashboard, BookOpen, FileText, GraduationCap, Calendar, CreditCard, User,
+  BookMarked, Shield, Users, ChevronLeft, Briefcase, FileClock, Megaphone,
+  MessageSquare, ClipboardList, Video, UserPlus,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
-import logo from "@/assets/uniport-logo.png";
+import logo from "@/assets/mr-logo.jpeg";
 
 const allMenuItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard", roles: ["admin", "student", "instructor"] },
@@ -72,15 +57,15 @@ export const DashboardSidebar = ({ userRole, unreadAnnouncementsCount = 0, unrea
       <div className="px-4 lg:px-6 py-4 md:py-6 border-b border-sidebar-border flex items-center justify-between">
         {!collapsed ? (
           <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <img src={logo} alt="UNIPORT Logo" className="w-8 h-8 lg:w-10 lg:h-10 object-contain" />
+            <img src={logo} alt="Cradua Logo" className="h-8 lg:h-10 object-contain" />
             <div className="text-sm">
-              <div className="font-bold">University of</div>
-              <div className="text-xs opacity-80">Port Harcourt</div>
+              <div className="font-bold">Cradua</div>
+              <div className="text-xs opacity-80">M-R International</div>
             </div>
           </Link>
         ) : (
           <Link to="/" className="hover:opacity-80 transition-opacity">
-            <img src={logo} alt="UNIPORT Logo" className="w-8 h-8 object-contain" />
+            <img src={logo} alt="Cradua Logo" className="h-8 object-contain" />
           </Link>
         )}
         <Button
@@ -135,7 +120,6 @@ export const DashboardSidebar = ({ userRole, unreadAnnouncementsCount = 0, unrea
           );
         })}
       </nav>
-
     </aside>
   );
 };
