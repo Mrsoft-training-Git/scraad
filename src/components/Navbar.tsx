@@ -117,8 +117,7 @@ export const Navbar = () => {
       </div>
 
       {/* Sign Up Options Bar */}
-      <div className="bg-muted/30 text-foreground py-2 md:py-3 text-center text-xs md:text-sm border-t border-border/50">
-        
+      
 
 
 
@@ -130,8 +129,9 @@ export const Navbar = () => {
 
 
 
-        
-      </div>
+
+
+      
     </nav>);
 
 };
