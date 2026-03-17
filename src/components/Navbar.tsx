@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import logo from "@/assets/uniport-logo.png";
+import logo from "@/assets/mr-logo.jpeg";
 import { cn } from "@/lib/utils";
 
 export const Navbar = () => {
