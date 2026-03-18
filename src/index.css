@@ -4,7 +4,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Cradua Design System — Corporate Blue / Gold palette */
+/* ScraAd Design System — Deep Blue / Gold palette */
 
 @layer base {
   :root {
@@ -115,4 +115,21 @@
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Smooth animations */
+@layer utilities {
+  .animate-in {
+    animation-duration: 0.2s;
+    animation-fill-mode: both;
+  }
+  
+  @keyframes slide-in-from-top-2 {
+    from { transform: translateY(-0.5rem); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  
+  .slide-in-from-top-2 {
+    animation-name: slide-in-from-top-2;
+  }
 }
