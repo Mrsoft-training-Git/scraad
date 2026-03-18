@@ -8,19 +8,25 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useDashboardAuth } from "@/hooks/useDashboardAuth";
 import { format } from "date-fns";
-import { Check, X, Clock, Mail, Phone, FileText, Loader2, Plus, ImagePlus } from "lucide-react";
+import { Check, X, Clock, Mail, Phone, FileText, Loader2, Plus, ImagePlus, Pencil, MapPin, Calendar, Users } from "lucide-react";
 
-interface Program { id: string; title: string; status: string; start_date: string | null; mode: string; }
+interface FullProgram {
+  id: string; title: string; status: string; start_date: string | null; mode: string;
+  short_description: string | null; description: string | null; duration: string | null;
+  location: string | null; banner_image_url: string | null; created_at: string;
+  max_participants: number | null; learning_outcomes: string[] | null; requirements: string[] | null;
+}
 interface Application { id: string; program_id: string; user_id: string; full_name: string; email: string; phone: string | null; experience_level: string | null; motivation: string | null; cv_url: string | null; status: string; created_at: string; }
 
 const ProgramManagement = () => {
   const { toast } = useToast();
   const { user, profile, userRole, loading: authLoading } = useDashboardAuth();
-  const [programs, setPrograms] = useState<Program[]>([]);
+  const [programs, setPrograms] = useState<FullProgram[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
   const [selectedProgram, setSelectedProgram] = useState("all");
   const [statusFilter, setStatusFilter] = useState("pending");
@@ -28,12 +34,13 @@ const ProgramManagement = () => {
   const [processing, setProcessing] = useState<string | null>(null);
   const [selectedApp, setSelectedApp] = useState<Application | null>(null);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [editingProgram, setEditingProgram] = useState<FullProgram | null>(null);
 
   useEffect(() => { if (!authLoading) { fetchPrograms(); fetchApplications(); } }, [authLoading, selectedProgram, statusFilter]);
 
   const fetchPrograms = async () => {
-    const { data } = await supabase.from("programs").select("id, title, status, start_date, mode").order("created_at", { ascending: false });
-    if (data) setPrograms(data);
+    const { data } = await supabase.from("programs").select("*").order("created_at", { ascending: false });
+    if (data) setPrograms(data as FullProgram[]);
   };
 
   const fetchApplications = async () => {
@@ -67,6 +74,10 @@ const ProgramManagement = () => {
     const s: Record<string, string> = { pending: "bg-secondary/10 text-secondary border-secondary/20", approved: "bg-green-500/10 text-green-600 border-green-500/20", rejected: "bg-destructive/10 text-destructive border-destructive/20" };
     return <Badge className={`capitalize ${s[status] || ""}`}>{status}</Badge>;
   };
+  const programStatusBadge = (status: string) => {
+    const s: Record<string, string> = { open: "bg-green-500/10 text-green-600 border-green-500/20", ongoing: "bg-secondary/10 text-secondary border-secondary/20", closed: "bg-muted text-muted-foreground border-border" };
+    return <Badge className={`capitalize ${s[status] || ""}`}>{status}</Badge>;
+  };
 
   if (authLoading) return null;
 
@@ -76,88 +87,152 @@ const ProgramManagement = () => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="font-heading text-2xl font-bold">Program Management</h1>
-            <p className="text-sm text-muted-foreground">Review applications and manage training programs</p>
+            <p className="text-sm text-muted-foreground">Manage training programs and review applications</p>
           </div>
           <Button onClick={() => setShowCreateDialog(true)}><Plus className="w-4 h-4 mr-2" /> Create Program</Button>
         </div>
 
-        <div className="flex flex-wrap gap-3">
-          <Select value={selectedProgram} onValueChange={setSelectedProgram}>
-            <SelectTrigger className="w-[200px]"><SelectValue placeholder="Filter by program" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Programs</SelectItem>
-              {programs.map(p => <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>)}
-            </SelectContent>
-          </Select>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="approved">Approved</SelectItem>
-              <SelectItem value="rejected">Rejected</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <Tabs defaultValue="programs" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="programs">Programs ({programs.length})</TabsTrigger>
+            <TabsTrigger value="applications">Applications</TabsTrigger>
+          </TabsList>
 
-        <div className="grid grid-cols-3 gap-4">
-          {[
-            { label: "Pending", count: applications.filter(a => a.status === "pending").length, color: "text-secondary" },
-            { label: "Approved", count: applications.filter(a => a.status === "approved").length, color: "text-green-600" },
-            { label: "Rejected", count: applications.filter(a => a.status === "rejected").length, color: "text-destructive" },
-          ].map(s => (
-            <Card key={s.label} className="border-border/60">
-              <CardContent className="p-4 text-center">
-                <p className={`text-2xl font-bold ${s.color}`}>{s.count}</p>
-                <p className="text-xs text-muted-foreground">{s.label}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+          <TabsContent value="programs" className="space-y-4">
+            {programs.length === 0 ? (
+              <Card className="border-border/60"><CardContent className="py-12 text-center text-muted-foreground">No programs created yet.</CardContent></Card>
+            ) : (
+              <div className="grid gap-4">
+                {programs.map(program => (
+                  <Card key={program.id} className="border-border/60 overflow-hidden hover:border-primary/20 transition-colors">
+                    <CardContent className="p-0">
+                      <div className="flex flex-col sm:flex-row">
+                        {program.banner_image_url && (
+                          <div className="sm:w-48 h-32 sm:h-auto flex-shrink-0">
+                            <img src={program.banner_image_url} alt={program.title} className="w-full h-full object-cover" />
+                          </div>
+                        )}
+                        <div className="flex-1 p-4">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <h3 className="font-semibold text-lg truncate">{program.title}</h3>
+                                {programStatusBadge(program.status)}
+                              </div>
+                              {program.short_description && (
+                                <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{program.short_description}</p>
+                              )}
+                              <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                                {program.mode && (
+                                  <span className="capitalize flex items-center gap-1">
+                                    <Users className="w-3 h-3" />{program.mode}
+                                  </span>
+                                )}
+                                {program.location && (
+                                  <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{program.location}</span>
+                                )}
+                                {program.duration && (
+                                  <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{program.duration}</span>
+                                )}
+                                {program.start_date && (
+                                  <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{format(new Date(program.start_date), "MMM d, yyyy")}</span>
+                                )}
+                              </div>
+                            </div>
+                            <Button size="sm" variant="outline" onClick={() => setEditingProgram(program)}>
+                              <Pencil className="w-3.5 h-3.5 mr-1" /> Edit
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
 
-        {loading ? (
-          <div className="text-center py-12 text-muted-foreground">Loading applications...</div>
-        ) : applications.length === 0 ? (
-          <Card className="border-border/60"><CardContent className="py-12 text-center text-muted-foreground">No applications found.</CardContent></Card>
-        ) : (
-          <div className="space-y-3">
-            {applications.map(app => (
-              <Card key={app.id} className="border-border/60 hover:border-primary/20 transition-colors">
-                <CardContent className="p-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold truncate">{app.full_name}</h3>
-                        {statusBadge(app.status)}
+          <TabsContent value="applications" className="space-y-4">
+            <div className="flex flex-wrap gap-3">
+              <Select value={selectedProgram} onValueChange={setSelectedProgram}>
+                <SelectTrigger className="w-[200px]"><SelectValue placeholder="Filter by program" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Programs</SelectItem>
+                  {programs.map(p => <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="approved">Approved</SelectItem>
+                  <SelectItem value="rejected">Rejected</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              {[
+                { label: "Pending", count: applications.filter(a => a.status === "pending").length, color: "text-secondary" },
+                { label: "Approved", count: applications.filter(a => a.status === "approved").length, color: "text-green-600" },
+                { label: "Rejected", count: applications.filter(a => a.status === "rejected").length, color: "text-destructive" },
+              ].map(s => (
+                <Card key={s.label} className="border-border/60">
+                  <CardContent className="p-4 text-center">
+                    <p className={`text-2xl font-bold ${s.color}`}>{s.count}</p>
+                    <p className="text-xs text-muted-foreground">{s.label}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {loading ? (
+              <div className="text-center py-12 text-muted-foreground">Loading applications...</div>
+            ) : applications.length === 0 ? (
+              <Card className="border-border/60"><CardContent className="py-12 text-center text-muted-foreground">No applications found.</CardContent></Card>
+            ) : (
+              <div className="space-y-3">
+                {applications.map(app => (
+                  <Card key={app.id} className="border-border/60 hover:border-primary/20 transition-colors">
+                    <CardContent className="p-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-semibold truncate">{app.full_name}</h3>
+                            {statusBadge(app.status)}
+                          </div>
+                          <p className="text-sm text-muted-foreground truncate">{getProgramTitle(app.program_id)}</p>
+                          <div className="flex flex-wrap gap-3 mt-1 text-xs text-muted-foreground">
+                            <span className="flex items-center gap-1"><Mail className="w-3 h-3" />{app.email}</span>
+                            {app.phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{app.phone}</span>}
+                            <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{format(new Date(app.created_at), "MMM d, yyyy")}</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <Button size="sm" variant="outline" onClick={() => setSelectedApp(app)}><FileText className="w-3.5 h-3.5 mr-1" /> View</Button>
+                          {app.status === "pending" && (
+                            <>
+                              <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" disabled={processing === app.id} onClick={() => handleAction(app.id, app.user_id, app.program_id, "approved")}>
+                                {processing === app.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5 mr-1" />}Approve
+                              </Button>
+                              <Button size="sm" variant="destructive" disabled={processing === app.id} onClick={() => handleAction(app.id, app.user_id, app.program_id, "rejected")}>
+                                <X className="w-3.5 h-3.5 mr-1" /> Reject
+                              </Button>
+                            </>
+                          )}
+                        </div>
                       </div>
-                      <p className="text-sm text-muted-foreground truncate">{getProgramTitle(app.program_id)}</p>
-                      <div className="flex flex-wrap gap-3 mt-1 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1"><Mail className="w-3 h-3" />{app.email}</span>
-                        {app.phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{app.phone}</span>}
-                        <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{format(new Date(app.created_at), "MMM d, yyyy")}</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <Button size="sm" variant="outline" onClick={() => setSelectedApp(app)}><FileText className="w-3.5 h-3.5 mr-1" /> View</Button>
-                      {app.status === "pending" && (
-                        <>
-                          <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" disabled={processing === app.id} onClick={() => handleAction(app.id, app.user_id, app.program_id, "approved")}>
-                            {processing === app.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5 mr-1" />}Approve
-                          </Button>
-                          <Button size="sm" variant="destructive" disabled={processing === app.id} onClick={() => handleAction(app.id, app.user_id, app.program_id, "rejected")}>
-                            <X className="w-3.5 h-3.5 mr-1" /> Reject
-                          </Button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
 
+      {/* Application Details Dialog */}
       <Dialog open={!!selectedApp} onOpenChange={() => setSelectedApp(null)}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
@@ -194,16 +269,79 @@ const ProgramManagement = () => {
       </Dialog>
 
       <CreateProgramDialog open={showCreateDialog} onOpenChange={setShowCreateDialog} onCreated={fetchPrograms} />
+      <EditProgramDialog program={editingProgram} onOpenChange={() => setEditingProgram(null)} onUpdated={fetchPrograms} />
     </DashboardLayout>
   );
 };
 
+/* ─── Image Upload Field ─── */
+const ImageUploadField = ({ imagePreview, onImageChange, onClear }: { imagePreview: string | null; onImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void; onClear: () => void }) => (
+  <div>
+    <Label>Banner Image</Label>
+    <div className="mt-1.5">
+      {imagePreview ? (
+        <div className="relative group">
+          <img src={imagePreview} alt="Preview" className="w-full h-40 object-cover rounded-lg border border-border" />
+          <button type="button" onClick={onClear} className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      ) : (
+        <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-primary/40 transition-colors bg-muted/30">
+          <ImagePlus className="w-8 h-8 text-muted-foreground mb-2" />
+          <span className="text-sm text-muted-foreground">Click to upload banner image</span>
+          <input type="file" accept="image/*" className="hidden" onChange={onImageChange} />
+        </label>
+      )}
+    </div>
+  </div>
+);
+
+/* ─── Program Form Fields ─── */
+const ProgramFormFields = ({ form, setForm }: { form: any; setForm: (f: any) => void }) => (
+  <>
+    <div><Label>Title *</Label><Input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} required /></div>
+    <div><Label>Short Description</Label><Input value={form.short_description} onChange={e => setForm({ ...form, short_description: e.target.value })} /></div>
+    <div><Label>Full Description</Label><Textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={3} /></div>
+    <div className="grid grid-cols-2 gap-4">
+      <div><Label>Duration</Label><Input placeholder="e.g. 4 weeks" value={form.duration} onChange={e => setForm({ ...form, duration: e.target.value })} /></div>
+      <div><Label>Mode</Label>
+        <Select value={form.mode} onValueChange={v => setForm({ ...form, mode: v })}>
+          <SelectTrigger><SelectValue /></SelectTrigger>
+          <SelectContent><SelectItem value="physical">Physical</SelectItem><SelectItem value="hybrid">Hybrid</SelectItem><SelectItem value="online">Online</SelectItem></SelectContent>
+        </Select>
+      </div>
+    </div>
+    <div className="grid grid-cols-2 gap-4">
+      <div><Label>Location</Label><Input value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} /></div>
+      <div><Label>Start Date</Label><Input type="date" value={form.start_date} onChange={e => setForm({ ...form, start_date: e.target.value })} /></div>
+    </div>
+    <div><Label>Status</Label>
+      <Select value={form.status} onValueChange={v => setForm({ ...form, status: v })}>
+        <SelectTrigger><SelectValue /></SelectTrigger>
+        <SelectContent><SelectItem value="open">Open</SelectItem><SelectItem value="ongoing">Ongoing</SelectItem><SelectItem value="closed">Closed</SelectItem></SelectContent>
+      </Select>
+    </div>
+  </>
+);
+
+/* ─── Upload Helper ─── */
+const uploadBannerImage = async (imageFile: File) => {
+  const fileExt = imageFile.name.split(".").pop();
+  const filePath = `${crypto.randomUUID()}.${fileExt}`;
+  const { error: uploadError } = await supabase.storage.from("program-images").upload(filePath, imageFile);
+  if (uploadError) throw uploadError;
+  const { data: urlData } = supabase.storage.from("program-images").getPublicUrl(filePath);
+  return urlData.publicUrl;
+};
+
+/* ─── Create Program Dialog ─── */
 const CreateProgramDialog = ({ open, onOpenChange, onCreated }: { open: boolean; onOpenChange: (v: boolean) => void; onCreated: () => void }) => {
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [form, setForm] = useState({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "" });
+  const [form, setForm] = useState({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", status: "open" });
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -219,27 +357,17 @@ const CreateProgramDialog = ({ open, onOpenChange, onCreated }: { open: boolean;
     if (!form.title.trim()) return;
     setSubmitting(true);
     try {
-      let bannerUrl: string | null = null;
-
-      if (imageFile) {
-        const fileExt = imageFile.name.split(".").pop();
-        const filePath = `${crypto.randomUUID()}.${fileExt}`;
-        const { error: uploadError } = await supabase.storage.from("program-images").upload(filePath, imageFile);
-        if (uploadError) throw uploadError;
-        const { data: urlData } = supabase.storage.from("program-images").getPublicUrl(filePath);
-        bannerUrl = urlData.publicUrl;
-      }
-
+      const bannerUrl = imageFile ? await uploadBannerImage(imageFile) : null;
       const { error } = await supabase.from("programs").insert({
         title: form.title.trim(), short_description: form.short_description.trim() || null, description: form.description.trim() || null,
-        duration: form.duration.trim() || null, mode: form.mode, location: form.location.trim() || null, start_date: form.start_date || null, status: "open",
+        duration: form.duration.trim() || null, mode: form.mode, location: form.location.trim() || null, start_date: form.start_date || null, status: form.status,
         banner_image_url: bannerUrl,
       });
       if (error) throw error;
       toast({ title: "Program created!" });
       onCreated();
       onOpenChange(false);
-      setForm({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "" });
+      setForm({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", status: "open" });
       setImageFile(null);
       setImagePreview(null);
     } catch (err: any) {
@@ -252,42 +380,81 @@ const CreateProgramDialog = ({ open, onOpenChange, onCreated }: { open: boolean;
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle>Create Training Program</DialogTitle><DialogDescription>Set up a new training program.</DialogDescription></DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label>Banner Image</Label>
-            <div className="mt-1.5">
-              {imagePreview ? (
-                <div className="relative group">
-                  <img src={imagePreview} alt="Preview" className="w-full h-40 object-cover rounded-lg border border-border" />
-                  <button type="button" onClick={() => { setImageFile(null); setImagePreview(null); }} className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              ) : (
-                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-primary/40 transition-colors bg-muted/30">
-                  <ImagePlus className="w-8 h-8 text-muted-foreground mb-2" />
-                  <span className="text-sm text-muted-foreground">Click to upload banner image</span>
-                  <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
-                </label>
-              )}
-            </div>
-          </div>
-          <div><Label>Title *</Label><Input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} required /></div>
-          <div><Label>Short Description</Label><Input value={form.short_description} onChange={e => setForm({ ...form, short_description: e.target.value })} /></div>
-          <div><Label>Full Description</Label><Textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={3} /></div>
-          <div className="grid grid-cols-2 gap-4">
-            <div><Label>Duration</Label><Input placeholder="e.g. 4 weeks" value={form.duration} onChange={e => setForm({ ...form, duration: e.target.value })} /></div>
-            <div><Label>Mode</Label>
-              <Select value={form.mode} onValueChange={v => setForm({ ...form, mode: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent><SelectItem value="physical">Physical</SelectItem><SelectItem value="hybrid">Hybrid</SelectItem><SelectItem value="online">Online</SelectItem></SelectContent>
-              </Select>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div><Label>Location</Label><Input value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} /></div>
-            <div><Label>Start Date</Label><Input type="date" value={form.start_date} onChange={e => setForm({ ...form, start_date: e.target.value })} /></div>
-          </div>
+          <ImageUploadField imagePreview={imagePreview} onImageChange={handleImageChange} onClear={() => { setImageFile(null); setImagePreview(null); }} />
+          <ProgramFormFields form={form} setForm={setForm} />
           <Button type="submit" className="w-full" disabled={submitting}>{submitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />} Create Program</Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+/* ─── Edit Program Dialog ─── */
+const EditProgramDialog = ({ program, onOpenChange, onUpdated }: { program: FullProgram | null; onOpenChange: () => void; onUpdated: () => void }) => {
+  const { toast } = useToast();
+  const [submitting, setSubmitting] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [form, setForm] = useState({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", status: "open" });
+
+  useEffect(() => {
+    if (program) {
+      setForm({
+        title: program.title || "",
+        short_description: program.short_description || "",
+        description: program.description || "",
+        duration: program.duration || "",
+        mode: program.mode || "physical",
+        location: program.location || "",
+        start_date: program.start_date || "",
+        status: program.status || "open",
+      });
+      setImagePreview(program.banner_image_url || null);
+      setImageFile(null);
+    }
+  }, [program]);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageFile(file);
+    const reader = new FileReader();
+    reader.onloadend = () => setImagePreview(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!program || !form.title.trim()) return;
+    setSubmitting(true);
+    try {
+      let bannerUrl = program.banner_image_url;
+      if (imageFile) {
+        bannerUrl = await uploadBannerImage(imageFile);
+      }
+
+      const { error } = await supabase.from("programs").update({
+        title: form.title.trim(), short_description: form.short_description.trim() || null, description: form.description.trim() || null,
+        duration: form.duration.trim() || null, mode: form.mode, location: form.location.trim() || null, start_date: form.start_date || null, status: form.status,
+        banner_image_url: bannerUrl,
+      }).eq("id", program.id);
+      if (error) throw error;
+      toast({ title: "Program updated!" });
+      onUpdated();
+      onOpenChange();
+    } catch (err: any) {
+      toast({ title: "Failed", description: err.message, variant: "destructive" });
+    } finally { setSubmitting(false); }
+  };
+
+  return (
+    <Dialog open={!!program} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogHeader><DialogTitle>Edit Program</DialogTitle><DialogDescription>Update program details.</DialogDescription></DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <ImageUploadField imagePreview={imagePreview} onImageChange={handleImageChange} onClear={() => { setImageFile(null); setImagePreview(null); }} />
+          <ProgramFormFields form={form} setForm={setForm} />
+          <Button type="submit" className="w-full" disabled={submitting}>{submitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />} Save Changes</Button>
         </form>
       </DialogContent>
     </Dialog>
