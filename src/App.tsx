@@ -39,6 +39,8 @@ import Bills from "./pages/Bills";
 import LiveSessions from "./pages/LiveSessions";
 import Enrollments from "./pages/Enrollments";
 import ResetPassword from "./pages/ResetPassword";
+import ProgramManagement from "./pages/ProgramManagement";
+import ProgramDashboard from "./pages/ProgramDashboard";
 
 const queryClient = new QueryClient();
 
