@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import logo from "@/assets/mr-logo.jpeg";
+import { BookOpen, ArrowUpRight } from "lucide-react";
 
 export const Footer = () => {
   return (
@@ -9,14 +9,16 @@ export const Footer = () => {
           {/* Brand */}
           <div className="md:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-3">
-              <img src={logo} alt="Cradua" className="w-8 h-8 rounded-lg object-contain" />
+              <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
+                <BookOpen className="w-4 h-4 text-secondary-foreground" />
+              </div>
               <div>
-                <div className="font-heading font-bold text-primary-foreground text-sm">Cradua</div>
-                <div className="text-[10px] text-primary-foreground/50">by M-R International</div>
+                <div className="font-heading font-bold text-primary-foreground text-sm">ScraAd</div>
+                <div className="text-[10px] text-primary-foreground/50">Scratch to Advance</div>
               </div>
             </Link>
             <p className="text-xs text-primary-foreground/50 leading-relaxed max-w-xs">
-              World-class e-learning platform empowering professionals and organizations with industry-relevant skills.
+              Modern e-learning platform empowering professionals and organizations with industry-relevant skills. Go from scratch to advance.
             </p>
           </div>
 
@@ -62,8 +64,8 @@ export const Footer = () => {
         </div>
 
         <div className="border-t border-primary-foreground/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-xs text-primary-foreground/40">&copy; {new Date().getFullYear()} Cradua by M-R International. All rights reserved.</p>
-          <p className="text-xs text-primary-foreground/30">Powered by M-R International</p>
+          <p className="text-xs text-primary-foreground/40">&copy; {new Date().getFullYear()} ScraAd. All rights reserved.</p>
+          <p className="text-xs text-primary-foreground/30">Scratch to Advance</p>
         </div>
       </div>
     </footer>
