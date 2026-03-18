@@ -49,71 +49,68 @@ export const DashboardSidebar = ({ userRole, unreadAnnouncementsCount = 0, unrea
     <aside
       className={cn(
         "bg-sidebar text-sidebar-foreground h-screen lg:sticky top-0 flex flex-col transition-all duration-300",
-        collapsed ? "lg:w-20" : "lg:w-64",
+        collapsed ? "lg:w-[72px]" : "lg:w-60",
         "w-full"
       )}
     >
       {/* Header */}
-      <div className="px-4 lg:px-6 py-4 md:py-6 border-b border-sidebar-border flex items-center justify-between">
+      <div className="px-4 py-5 border-b border-sidebar-border flex items-center justify-between">
         {!collapsed ? (
-          <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <img src={logo} alt="Cradua Logo" className="h-8 lg:h-10 object-contain" />
+          <Link to="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
+            <img src={logo} alt="Cradua Logo" className="h-8 w-8 object-contain rounded-lg" />
             <div className="text-sm">
-              <div className="font-bold">Cradua</div>
-              <div className="text-xs opacity-80">M-R International</div>
+              <div className="font-heading font-bold text-sidebar-foreground">Cradua</div>
+              <div className="text-[10px] text-sidebar-foreground/50">M-R International</div>
             </div>
           </Link>
         ) : (
-          <Link to="/" className="hover:opacity-80 transition-opacity">
-            <img src={logo} alt="Cradua Logo" className="h-8 object-contain" />
+          <Link to="/" className="hover:opacity-80 transition-opacity mx-auto">
+            <img src={logo} alt="Cradua Logo" className="h-8 w-8 object-contain rounded-lg" />
           </Link>
         )}
         <Button
           variant="ghost"
           size="icon"
           onClick={() => setCollapsed(!collapsed)}
-          className="hover:bg-sidebar-accent hidden lg:flex"
+          className="hover:bg-sidebar-accent text-sidebar-foreground/60 hover:text-sidebar-foreground hidden lg:flex h-7 w-7"
         >
-          <ChevronLeft
-            className={cn(
-              "w-5 h-5 transition-transform",
-              collapsed && "rotate-180"
-            )}
-          />
+          <ChevronLeft className={cn("w-4 h-4 transition-transform", collapsed && "rotate-180")} />
         </Button>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 py-4 lg:py-6 px-2 lg:px-3 space-y-1 overflow-y-auto">
+      <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto">
         {menuItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
+          const badge = item.label === "Announcements" ? unreadAnnouncementsCount
+            : item.label === "Assignments" ? unreadAssignmentsCount
+            : item.label === "Discussions" ? unreadDiscussionsCount
+            : 0;
 
           return (
             <Link
               key={item.path}
               to={item.path}
               className={cn(
-                "flex items-center gap-3 px-3 lg:px-4 py-3 rounded-lg transition-all duration-200",
-                "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                isActive && "bg-sidebar-primary text-sidebar-primary-foreground font-semibold shadow-lg",
-                collapsed && "lg:justify-center"
+                "flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-all duration-200 text-sm",
+                "hover:bg-sidebar-accent",
+                isActive
+                  ? "bg-sidebar-primary text-sidebar-primary-foreground font-semibold shadow-sm"
+                  : "text-sidebar-foreground/70 hover:text-sidebar-foreground",
+                collapsed && "lg:justify-center lg:px-2"
               )}
             >
-              <Icon className="w-5 h-5 flex-shrink-0" />
+              <Icon className="w-[18px] h-[18px] flex-shrink-0" />
               {!collapsed && (
-                <div className="flex items-center justify-between flex-1">
-                   <span className="text-sm">{item.label}</span>
-                   {item.label === "Announcements" && unreadAnnouncementsCount > 0 && (
-                     <Badge className="text-xs bg-destructive">{unreadAnnouncementsCount}</Badge>
-                   )}
-                   {item.label === "Assignments" && unreadAssignmentsCount > 0 && (
-                     <Badge className="text-xs bg-destructive">{unreadAssignmentsCount}</Badge>
-                   )}
-                   {item.label === "Discussions" && unreadDiscussionsCount > 0 && (
-                     <Badge className="text-xs bg-destructive">{unreadDiscussionsCount}</Badge>
-                   )}
-                 </div>
+                <div className="flex items-center justify-between flex-1 min-w-0">
+                  <span className="truncate">{item.label}</span>
+                  {badge > 0 && (
+                    <Badge className="text-[10px] bg-destructive text-destructive-foreground border-0 h-5 min-w-5 flex items-center justify-center px-1.5">
+                      {badge}
+                    </Badge>
+                  )}
+                </div>
               )}
               {collapsed && <span className="text-sm lg:hidden">{item.label}</span>}
             </Link>

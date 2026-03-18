@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
+import { Menu, X, Search, Bell } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/mr-logo.jpeg";
@@ -22,116 +22,106 @@ export const Navbar = () => {
   }, []);
 
   const navLinks = [
-  { to: "/", label: "Home" },
-  { to: "/programs", label: "Top Rated" },
-  { to: "/career", label: "Career" }];
-
+    { to: "/", label: "Home" },
+    { to: "/courses", label: "Courses" },
+    { to: "/programs", label: "Programs" },
+    { to: "/career", label: "Career" },
+  ];
 
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className="bg-background/80 backdrop-blur-xl border-b border-border sticky top-0 z-50 shadow-sm">
+    <nav className="bg-card/95 backdrop-blur-xl border-b border-border sticky top-0 z-50">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-14 md:h-16">
+        <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group">
-            <img src={logo} alt="Cradua Logo" className="w-8 h-8 md:w-10 md:h-10 object-contain rounded group-hover:scale-105 transition-transform" />
+          <Link to="/" className="flex items-center gap-2.5 group flex-shrink-0">
+            <img src={logo} alt="Cradua Logo" className="w-9 h-9 object-contain rounded-lg shadow-sm" />
             <div>
-              <div className="font-heading font-bold text-sm md:text-base leading-tight text-foreground">Cradua</div>
-              <div className="text-[10px] md:text-xs text-muted-foreground leading-tight">by M-R International</div>
+              <div className="font-heading font-bold text-base leading-tight text-foreground">Cradua</div>
+              <div className="text-[10px] text-muted-foreground leading-tight">by M-R International</div>
             </div>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-6">
-            {navLinks.map((link) =>
-            <Link
-              key={link.to}
-              to={link.to}
-              className={cn(
-                "text-sm font-medium transition-colors py-1 border-b-2",
-                isActive(link.to) ?
-                "text-primary border-primary" :
-                "text-foreground hover:text-primary border-transparent"
-              )}>
-              
+          <div className="hidden lg:flex items-center gap-1">
+            {navLinks.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className={cn(
+                  "px-3.5 py-2 text-sm font-medium rounded-lg transition-colors",
+                  isActive(link.to)
+                    ? "text-primary bg-primary/8"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                )}
+              >
                 {link.label}
               </Link>
-            )}
+            ))}
+          </div>
 
-            {isAuthenticated ?
-            <Button className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white shadow-lg shadow-primary/30 font-semibold" asChild>
+          {/* Right side */}
+          <div className="hidden lg:flex items-center gap-2">
+            {isAuthenticated ? (
+              <Button className="bg-primary hover:bg-accent text-primary-foreground font-semibold shadow-sm" asChild>
                 <Link to="/dashboard">Dashboard</Link>
-              </Button> :
-
-            <>
-                <Button variant="ghost" className="text-foreground hover:text-primary hover:bg-muted/50" asChild>
-                  <Link to="/auth">Login</Link>
+              </Button>
+            ) : (
+              <>
+                <Button variant="ghost" className="text-foreground hover:text-primary font-medium" asChild>
+                  <Link to="/auth">Log in</Link>
                 </Button>
-                <Button className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white shadow-lg shadow-primary/30 font-semibold" asChild>
+                <Button className="bg-primary hover:bg-accent text-primary-foreground font-semibold shadow-sm" asChild>
                   <Link to="/auth">Sign Up Free</Link>
                 </Button>
               </>
-            }
+            )}
           </div>
 
           {/* Mobile Menu Button */}
-          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="lg:hidden">
-            <Menu className="w-6 h-6" />
+          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="lg:hidden p-2 rounded-lg hover:bg-muted transition-colors">
+            {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
 
         {/* Mobile Menu */}
-        {isMenuOpen &&
-        <div className="lg:hidden pb-4 space-y-3">
-            {navLinks.map((link) =>
-          <Link
-            key={link.to}
-            to={link.to}
-            className={cn(
-              "block py-2 transition-colors",
-              isActive(link.to) ? "text-primary font-semibold" : "hover:text-accent"
-            )}>
-            
+        {isMenuOpen && (
+          <div className="lg:hidden pb-4 space-y-1 border-t border-border pt-3">
+            {navLinks.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                onClick={() => setIsMenuOpen(false)}
+                className={cn(
+                  "block px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                  isActive(link.to)
+                    ? "text-primary bg-primary/8"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                )}
+              >
                 {link.label}
               </Link>
-          )}
-            <div className="pt-2 space-y-2">
-              {isAuthenticated ?
-            <Button variant="default" className="w-full bg-accent hover:bg-accent/90" asChild>
+            ))}
+            <div className="pt-3 space-y-2 border-t border-border mt-2">
+              {isAuthenticated ? (
+                <Button className="w-full bg-primary hover:bg-accent text-primary-foreground font-semibold" asChild>
                   <Link to="/dashboard">Dashboard</Link>
-                </Button> :
-
-            <>
-                  <Button variant="outline" className="w-full border-primary-foreground/20" asChild>
-                    <Link to="/auth">Login</Link>
+                </Button>
+              ) : (
+                <>
+                  <Button variant="outline" className="w-full font-medium" asChild>
+                    <Link to="/auth">Log in</Link>
                   </Button>
-                  <Button variant="default" className="w-full bg-accent hover:bg-accent/90" asChild>
-                    <Link to="/auth">Sign Up</Link>
+                  <Button className="w-full bg-primary hover:bg-accent text-primary-foreground font-semibold" asChild>
+                    <Link to="/auth">Sign Up Free</Link>
                   </Button>
                 </>
-            }
+              )}
             </div>
           </div>
-        }
+        )}
       </div>
-
-      {/* Sign Up Options Bar */}
-      
-
-
-
-
-
-
-
-
-
-
-
-
-
-      
-    </nav>);
-
+    </nav>
+  );
 };
