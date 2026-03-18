@@ -11,7 +11,8 @@ import {
   Monitor, Zap, Target, BarChart3,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import businessTraining from "@/assets/business-training.jpg";
+import heroTraining from "@/assets/hero-training.jpg";
+import teamTraining from "@/assets/team-training.jpg";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Course {
@@ -167,7 +168,7 @@ const Index = () => {
             <div className="hidden lg:block relative">
               <div className="bg-card rounded-2xl shadow-2xl overflow-hidden border border-border/50">
                 <img
-                  src={businessTraining}
+                  src={heroTraining}
                   alt="Professionals learning on Cradua"
                   className="w-full h-72 object-cover"
                 />
@@ -392,7 +393,7 @@ const Index = () => {
                 </div>
               </div>
               <div className="hidden lg:block">
-                <img src={businessTraining} alt="Business teams training on Cradua" className="w-full h-full object-cover" />
+                <img src={teamTraining} alt="Business teams training on Cradua" className="w-full h-full object-cover" />
               </div>
             </div>
           </div>
