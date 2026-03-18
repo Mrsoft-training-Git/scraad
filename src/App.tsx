@@ -39,6 +39,8 @@ import Bills from "./pages/Bills";
 import LiveSessions from "./pages/LiveSessions";
 import Enrollments from "./pages/Enrollments";
 import ResetPassword from "./pages/ResetPassword";
+import ProgramManagement from "./pages/ProgramManagement";
+import ProgramDashboard from "./pages/ProgramDashboard";
 
 const queryClient = new QueryClient();
 
@@ -73,6 +75,8 @@ const App = () => (
           <Route path="/dashboard/profile" element={<Profile />} />
           <Route path="/dashboard/references" element={<References />} />
           <Route path="/dashboard/roles" element={<RoleManagement />} />
+          <Route path="/dashboard/programs" element={<ProgramManagement />} />
+          <Route path="/dashboard/programs/:programId" element={<ProgramDashboard />} />
           <Route path="/dashboard/users" element={<UserManagement />} />
           <Route path="/courses" element={<Courses />} />
           <Route path="/signup/individual" element={<IndividualLearner />} />
