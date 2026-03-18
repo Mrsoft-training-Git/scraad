@@ -1,407 +1,311 @@
 import { useState, useEffect } from "react";
-import { AboutCourseSection } from "@/components/AboutCourseSection";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Clock, Users, Award, CheckCircle, BookOpen, Video, ArrowLeft, Share2, Check, ChevronDown, ChevronUp } from "lucide-react";
+import { Clock, MapPin, Calendar, ArrowLeft, Users, CheckCircle, Laptop, Building, Globe, Share2, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { PaymentButtons } from "@/components/PaymentButtons";
+import { ProgramApplicationForm } from "@/components/programs/ProgramApplicationForm";
+import { format } from "date-fns";
 
-interface Course {
+interface Program {
   id: string;
   title: string;
   description: string | null;
-  overview: string | null;
-  price: number;
-  image_url: string | null;
-  category: string;
-  instructor: string | null;
+  short_description: string | null;
+  banner_image_url: string | null;
   duration: string | null;
-  students_count: number;
-  level: string | null;
-  what_you_learn: string[];
+  mode: string;
+  location: string | null;
+  start_date: string | null;
+  end_date: string | null;
+  status: string;
+  max_participants: number | null;
   requirements: string[];
-  syllabus: any;
-  allows_part_payment: boolean;
-  first_tranche_amount: number | null;
-  second_tranche_amount: number | null;
+  learning_outcomes: string[];
+  schedule: any;
+  instructor_name: string | null;
 }
 
-const ProgramDetails = () => {
-   const { id } = useParams();
-   const [course, setCourse] = useState<Course | null>(null);
-   const [loading, setLoading] = useState(true);
-   const [copied, setCopied] = useState(false);
-   const [expandedOverview, setExpandedOverview] = useState(false);
-   const [enrollmentStatus, setEnrollmentStatus] = useState<string | null>(null);
-   const { toast } = useToast();
+const modeLabels: Record<string, { label: string; icon: React.ReactNode }> = {
+  physical: { label: "Physical", icon: <Building className="w-4 h-4" /> },
+  hybrid: { label: "Hybrid", icon: <Globe className="w-4 h-4" /> },
+  online: { label: "Online", icon: <Laptop className="w-4 h-4" /> },
+};
 
-  const handleShare = async () => {
-    const courseUrl = window.location.href;
-    try {
-      await navigator.clipboard.writeText(courseUrl);
-      setCopied(true);
-      toast({
-        title: "Link copied!",
-        description: "Course link has been copied to clipboard.",
-      });
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      toast({
-        title: "Failed to copy",
-        description: "Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
+const ProgramDetails = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [program, setProgram] = useState<Program | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
+  const [applicationStatus, setApplicationStatus] = useState<string | null>(null);
+  const [showApplicationForm, setShowApplicationForm] = useState(false);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
     if (id) {
-      fetchCourseDetails();
-      checkEnrollmentStatus();
+      fetchProgram();
+      checkAuth();
     }
   }, [id]);
 
-  const checkEnrollmentStatus = async () => {
+  const checkAuth = async () => {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user || !id) return;
-
-    const { data } = await supabase
-      .from("enrollments")
-      .select("payment_status")
-      .eq("user_id", user.id)
-      .eq("course_id", id)
-      .maybeSingle();
-
-    if (data) {
-      setEnrollmentStatus(data.payment_status);
+    setUser(user);
+    if (user && id) {
+      const { data } = await supabase
+        .from("program_applications")
+        .select("status")
+        .eq("program_id", id)
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (data) setApplicationStatus(data.status);
     }
   };
 
-  const fetchCourseDetails = async () => {
+  const fetchProgram = async () => {
     setLoading(true);
     const { data, error } = await supabase
-      .from("courses")
+      .from("programs")
       .select("*")
       .eq("id", id)
-      .eq("published", true)
       .single();
-    
-    if (!error && data) {
-      setCourse(data);
-    }
+    if (!error && data) setProgram(data as Program);
     setLoading(false);
+  };
+
+  const handleShare = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      toast({ title: "Link copied!" });
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast({ title: "Failed to copy", variant: "destructive" });
+    }
+  };
+
+  const handleApplyClick = () => {
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
+    setShowApplicationForm(true);
   };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <div className="container mx-auto px-4 py-20 text-center">
-          <p>Loading course details...</p>
-        </div>
+        <div className="container mx-auto px-4 py-20 text-center text-muted-foreground">Loading...</div>
         <Footer />
       </div>
     );
   }
 
-  if (!course) {
+  if (!program) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="container mx-auto px-4 py-20 text-center">
-          <h2 className="text-3xl font-bold mb-4">Course Not Found</h2>
-          <p className="text-muted-foreground mb-8">The course you're looking for doesn't exist.</p>
-          <Button asChild>
-            <Link to="/programs">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Programs
-            </Link>
-          </Button>
+          <h2 className="text-2xl font-bold mb-4">Program Not Found</h2>
+          <Button asChild><Link to="/programs"><ArrowLeft className="w-4 h-4 mr-2" />Back to Programs</Link></Button>
         </div>
         <Footer />
       </div>
     );
   }
 
+  const modeInfo = modeLabels[program.mode] || modeLabels.physical;
+  const schedule = Array.isArray(program.schedule) ? program.schedule : [];
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
-      {/* Hero Section */}
-      <section className="py-12 bg-gradient-to-br from-primary/5 via-accent/5 to-background">
-        <div className="container mx-auto px-4">
-          <div className="mb-6">
-            <Button variant="ghost" asChild>
-              <Link to="/programs">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Programs
-              </Link>
+
+      {/* Hero */}
+      <section className="relative">
+        <div className="aspect-[3/1] md:aspect-[4/1] overflow-hidden">
+          <img
+            src={program.banner_image_url || "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1600&q=80"}
+            alt={program.title}
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+        </div>
+        <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12 text-white">
+          <div className="container mx-auto">
+            <Button variant="ghost" className="text-white/80 hover:text-white mb-4 -ml-3" asChild>
+              <Link to="/programs"><ArrowLeft className="w-4 h-4 mr-2" />All Programs</Link>
             </Button>
-          </div>
-          
-          <div className="grid lg:grid-cols-2 gap-8 items-start">
-            <div>
-              <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">
-                {course.category}
+            <div className="flex flex-wrap gap-2 mb-3">
+              <Badge className="bg-white/20 backdrop-blur-sm border-white/20 text-white capitalize">
+                {modeInfo.icon} <span className="ml-1">{modeInfo.label}</span>
               </Badge>
-              <h1 className="font-heading text-4xl md:text-5xl font-bold mb-4">
-                {course.title}
-              </h1>
-              {course.overview && (
-                <div className="mb-6">
-                  <p 
-                    className={`text-xl text-muted-foreground ${
-                      !expandedOverview ? "line-clamp-6" : ""
-                    }`}
-                  >
-                    {course.overview}
-                  </p>
-                  {course.overview.length > 300 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setExpandedOverview(!expandedOverview)}
-                      className="mt-2 p-0 h-auto text-primary hover:text-primary/80 font-medium"
-                    >
-                      {expandedOverview ? (
-                        <>
-                          Show Less <ChevronUp className="w-4 h-4 ml-1" />
-                        </>
-                      ) : (
-                        <>
-                          Show More <ChevronDown className="w-4 h-4 ml-1" />
-                        </>
-                      )}
-                    </Button>
-                  )}
-                </div>
-              )}
-              
-              <div className="flex flex-wrap items-center gap-6 mb-6">
-                {course.duration && (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Clock className="w-5 h-5" />
-                    <span>{course.duration}</span>
-                  </div>
-                )}
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Users className="w-5 h-5" />
-                  <span>{course.students_count}+ enrolled</span>
-                </div>
-                {course.level && (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Award className="w-5 h-5" />
-                    <span>{course.level}</span>
-                  </div>
-                )}
-              </div>
-
-              {course.instructor && (
-                <div className="mb-6">
-                  <p className="text-sm text-muted-foreground">Instructor:</p>
-                  <p className="font-semibold">{course.instructor}</p>
-                </div>
-              )}
-              
-              <div className="flex items-baseline gap-4">
-                {course.price === 0 ? (
-                  <Badge className="bg-green-500/10 text-green-600 border-green-500/20 text-2xl px-4 py-2">
-                    Free
-                  </Badge>
-                ) : (
-                  <span className="text-4xl font-bold text-primary">₦{course.price.toLocaleString()}</span>
-                )}
-              </div>
+              <Badge className={`capitalize ${program.status === "open" ? "bg-green-500/80 text-white border-0" : program.status === "ongoing" ? "bg-secondary/80 text-white border-0" : "bg-white/20 text-white border-white/20"}`}>
+                {program.status}
+              </Badge>
             </div>
-
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl">
-              <img
-                src={course.image_url || "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&q=80"}
-                alt={course.title}
-                className="w-full h-auto"
-              />
-            </div>
+            <h1 className="font-heading text-3xl md:text-5xl font-bold mb-2">{program.title}</h1>
+            {program.instructor_name && <p className="text-white/80">Instructor: {program.instructor_name}</p>}
           </div>
         </div>
       </section>
 
-      {/* Course Details */}
-      <section className="py-16">
+      {/* Key info bar */}
+      <section className="bg-card border-b">
+        <div className="container mx-auto px-4 py-4 flex flex-wrap gap-6 text-sm text-muted-foreground">
+          {program.duration && <span className="flex items-center gap-1.5"><Clock className="w-4 h-4 text-primary" />{program.duration}</span>}
+          {program.location && <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4 text-primary" />{program.location}</span>}
+          {program.start_date && <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4 text-primary" />Starts {format(new Date(program.start_date), "MMM d, yyyy")}</span>}
+          {program.max_participants && <span className="flex items-center gap-1.5"><Users className="w-4 h-4 text-primary" />Max {program.max_participants} participants</span>}
+        </div>
+      </section>
+
+      {/* Content */}
+      <section className="py-12">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-3 gap-8">
-            {/* Main Content */}
+            {/* Main */}
             <div className="lg:col-span-2">
-              <Tabs defaultValue="overview" className="w-full">
+              <Tabs defaultValue="about">
                 <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="overview">Overview</TabsTrigger>
-                  <TabsTrigger value="curriculum">Curriculum</TabsTrigger>
+                  <TabsTrigger value="about">About</TabsTrigger>
+                  <TabsTrigger value="schedule">Schedule</TabsTrigger>
                   <TabsTrigger value="requirements">Requirements</TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="overview" className="space-y-8 mt-8">
-                  {course.what_you_learn && course.what_you_learn.length > 0 && (
+                <TabsContent value="about" className="mt-6 space-y-8">
+                  {program.description && (
                     <div>
-                      <h2 className="font-heading text-2xl font-bold mb-4">What You'll Learn</h2>
-                      <div className="grid md:grid-cols-2 gap-4">
-                        {course.what_you_learn.map((item, index) => (
-                          <div key={index} className="flex items-start gap-3">
-                            <CheckCircle className="w-5 h-5 text-success mt-1 flex-shrink-0" />
-                            <span className="text-muted-foreground">{item}</span>
+                      <h2 className="font-heading text-2xl font-bold mb-3">About This Program</h2>
+                      <p className="text-muted-foreground whitespace-pre-line">{program.description}</p>
+                    </div>
+                  )}
+                  {program.learning_outcomes && program.learning_outcomes.length > 0 && (
+                    <div>
+                      <h2 className="font-heading text-2xl font-bold mb-3">Learning Outcomes</h2>
+                      <div className="grid md:grid-cols-2 gap-3">
+                        {program.learning_outcomes.map((item, i) => (
+                          <div key={i} className="flex items-start gap-2">
+                            <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                            <span className="text-muted-foreground text-sm">{item}</span>
                           </div>
                         ))}
                       </div>
                     </div>
                   )}
-
-                  <AboutCourseSection description={course.description} />
                 </TabsContent>
 
-                <TabsContent value="curriculum" className="mt-8">
-                  <h2 className="font-heading text-2xl font-bold mb-6">Course Curriculum</h2>
-                  {course.syllabus && Array.isArray(course.syllabus) && course.syllabus.length > 0 ? (
-                    <div className="space-y-6">
-                      {course.syllabus.map((module: any, index: number) => (
-                        <div key={index} className="border-l-4 border-primary/30 pl-4">
-                          <h3 className="font-heading font-bold text-lg mb-2">
-                            Module {index + 1}: {module.title || module.name || `Module ${index + 1}`}
-                          </h3>
-                          {module.description && (
-                            <div 
-                              className="text-muted-foreground text-sm mb-3 prose prose-sm max-w-none"
-                              dangerouslySetInnerHTML={{ 
-                                __html: module.description
-                                  .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                                  .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                                  .replace(/^- (.*)$/gm, '<li>$1</li>')
-                                  .replace(/(<li>.*<\/li>)/s, '<ul class="list-disc list-inside">$1</ul>')
-                                  .replace(/\n/g, '<br/>')
-                              }}
-                            />
-                          )}
-                          {module.topics && Array.isArray(module.topics) && module.topics.length > 0 && (
-                            <div className="ml-2">
-                              <p className="text-sm font-medium text-muted-foreground mb-2">Topics:</p>
-                              <ol className="list-decimal list-inside space-y-1 ml-4">
-                                {module.topics.map((topic: string, topicIndex: number) => (
-                                  <li key={topicIndex} className="text-muted-foreground text-sm">
-                                    {topic}
-                                  </li>
-                                ))}
-                              </ol>
-                            </div>
-                          )}
-                        </div>
+                <TabsContent value="schedule" className="mt-6">
+                  <h2 className="font-heading text-2xl font-bold mb-4">Weekly Schedule</h2>
+                  {schedule.length > 0 ? (
+                    <div className="space-y-4">
+                      {schedule.map((week: any, i: number) => (
+                        <Card key={i} className="border-l-4 border-l-primary">
+                          <CardContent className="p-4">
+                            <h3 className="font-bold mb-1">{week.title || `Week ${i + 1}`}</h3>
+                            {week.description && <p className="text-muted-foreground text-sm">{week.description}</p>}
+                          </CardContent>
+                        </Card>
                       ))}
                     </div>
                   ) : (
-                    <Card className="border-border/50">
-                      <CardContent className="p-8 text-center">
-                        <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                        <p className="text-muted-foreground">
-                          Detailed curriculum information will be available soon. Contact us for more details about the course structure.
-                        </p>
-                      </CardContent>
-                    </Card>
+                    <p className="text-muted-foreground">Schedule details will be shared upon admission.</p>
                   )}
                 </TabsContent>
 
-                <TabsContent value="requirements" className="mt-8">
-                  <h2 className="font-heading text-2xl font-bold mb-6">Requirements</h2>
-                  {course.requirements && course.requirements.length > 0 ? (
+                <TabsContent value="requirements" className="mt-6">
+                  <h2 className="font-heading text-2xl font-bold mb-4">Who Can Apply</h2>
+                  {program.requirements && program.requirements.length > 0 ? (
                     <ul className="space-y-3">
-                      {course.requirements.map((req, index) => (
-                        <li key={index} className="flex items-start gap-3">
-                          <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
+                      {program.requirements.map((req, i) => (
+                        <li key={i} className="flex items-start gap-2">
+                          <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0" />
                           <span className="text-muted-foreground">{req}</span>
                         </li>
                       ))}
                     </ul>
                   ) : (
-                    <Card className="border-border/50">
-                      <CardContent className="p-8">
-                        <p className="text-muted-foreground">
-                          No specific prerequisites required. This course is designed to be accessible to learners at various skill levels.
-                        </p>
-                      </CardContent>
-                    </Card>
+                    <p className="text-muted-foreground">No specific prerequisites. Open to all skill levels.</p>
                   )}
                 </TabsContent>
               </Tabs>
             </div>
 
-            {/* Sidebar - Enrollment Card */}
+            {/* Sidebar */}
             <div>
-              <Card className="sticky top-6 border-border/50 shadow-lg">
-                <CardContent className="p-6">
-                  <div className="space-y-6">
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-2">Price</p>
-                      {course.price === 0 ? (
-                        <Badge className="bg-green-500/10 text-green-600 border-green-500/20 text-2xl px-4 py-2">
-                          Free
-                        </Badge>
-                      ) : (
-                        <p className="text-4xl font-bold text-primary">₦{course.price.toLocaleString()}</p>
-                      )}
-                    </div>
-
-                    <div className="flex gap-2">
-                      {course.price === 0 ? (
-                        <Button className="flex-1 bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground shadow-lg font-semibold py-6 text-lg" asChild>
-                          <Link to={`/enroll/${course.id}`}>Enroll Free</Link>
-                        </Button>
-                      ) : (
-                        <Button className="flex-1 bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground shadow-lg font-semibold py-6 text-lg" asChild>
-                          <Link to={`/enroll/${course.id}`}>Enroll Now</Link>
-                        </Button>
-                      )}
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={handleShare}
-                        className="h-auto py-6 px-4"
-                        title="Share course"
-                      >
-                        {copied ? <Check className="w-5 h-5 text-green-500" /> : <Share2 className="w-5 h-5" />}
+              <Card className="sticky top-6 shadow-lg">
+                <CardContent className="p-6 space-y-4">
+                  {applicationStatus === "approved" ? (
+                    <div className="text-center">
+                      <Badge className="bg-green-500/10 text-green-600 border-green-500/20 text-base px-4 py-2 mb-3">
+                        ✅ Admitted
+                      </Badge>
+                      <p className="text-sm text-muted-foreground mb-3">You have been accepted into this program.</p>
+                      <Button className="w-full" asChild>
+                        <Link to={`/dashboard/programs/${program.id}`}>Go to Program Dashboard</Link>
                       </Button>
                     </div>
-
-                    <div className="space-y-3 pt-4 border-t">
-                      <h3 className="font-heading font-bold">This program includes:</h3>
-                      <ul className="space-y-3">
-                        {course.duration && (
-                          <li className="flex items-center gap-3 text-sm text-muted-foreground">
-                            <Clock className="w-5 h-5 text-primary" />
-                            <span>{course.duration} of learning</span>
-                          </li>
-                        )}
-                        <li className="flex items-center gap-3 text-sm text-muted-foreground">
-                          <Award className="w-5 h-5 text-primary" />
-                          <span>Certificate upon completion</span>
-                        </li>
-                        <li className="flex items-center gap-3 text-sm text-muted-foreground">
-                          <BookOpen className="w-5 h-5 text-primary" />
-                          <span>Lifetime access to materials</span>
-                        </li>
-                        <li className="flex items-center gap-3 text-sm text-muted-foreground">
-                          <Users className="w-5 h-5 text-primary" />
-                          <span>Join {course.students_count}+ learners</span>
-                        </li>
-                      </ul>
+                  ) : applicationStatus === "pending" ? (
+                    <div className="text-center">
+                      <Badge className="bg-secondary/10 text-secondary border-secondary/20 text-base px-4 py-2 mb-3">
+                        ⏳ Application Pending
+                      </Badge>
+                      <p className="text-sm text-muted-foreground">Your application is under review. We'll notify you once a decision is made.</p>
                     </div>
-                  </div>
+                  ) : applicationStatus === "rejected" ? (
+                    <div className="text-center">
+                      <Badge className="bg-destructive/10 text-destructive border-destructive/20 text-base px-4 py-2 mb-3">
+                        Application Not Accepted
+                      </Badge>
+                      <p className="text-sm text-muted-foreground">Unfortunately, your application was not accepted for this cohort.</p>
+                    </div>
+                  ) : program.status === "open" ? (
+                    <>
+                      <Button onClick={handleApplyClick} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6 text-lg">
+                        Apply for Program
+                      </Button>
+                      <p className="text-xs text-muted-foreground text-center">Free to apply. Admission required.</p>
+                    </>
+                  ) : (
+                    <Button disabled className="w-full py-6 text-lg">
+                      {program.status === "ongoing" ? "Program In Progress" : "Applications Closed"}
+                    </Button>
+                  )}
+
+                  <Button variant="outline" onClick={handleShare} className="w-full">
+                    {copied ? <Check className="w-4 h-4 mr-2" /> : <Share2 className="w-4 h-4 mr-2" />}
+                    {copied ? "Copied!" : "Share Program"}
+                  </Button>
                 </CardContent>
               </Card>
             </div>
           </div>
         </div>
       </section>
+
+      {/* Application Form Dialog */}
+      {showApplicationForm && user && (
+        <ProgramApplicationForm
+          programId={program.id}
+          programTitle={program.title}
+          userId={user.id}
+          userEmail={user.email || ""}
+          open={showApplicationForm}
+          onOpenChange={setShowApplicationForm}
+          onSuccess={() => {
+            setApplicationStatus("pending");
+            setShowApplicationForm(false);
+          }}
+        />
+      )}
 
       <Footer />
     </div>

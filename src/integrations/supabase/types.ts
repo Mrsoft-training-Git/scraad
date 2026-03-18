@@ -955,6 +955,134 @@ export type Database = {
         }
         Relationships: []
       }
+      program_applications: {
+        Row: {
+          created_at: string
+          cv_url: string | null
+          email: string
+          experience_level: string | null
+          full_name: string
+          id: string
+          motivation: string | null
+          phone: string | null
+          program_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          cv_url?: string | null
+          email: string
+          experience_level?: string | null
+          full_name: string
+          id?: string
+          motivation?: string | null
+          phone?: string | null
+          program_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          cv_url?: string | null
+          email?: string
+          experience_level?: string | null
+          full_name?: string
+          id?: string
+          motivation?: string | null
+          phone?: string | null
+          program_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_applications_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      programs: {
+        Row: {
+          banner_image_url: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          duration: string | null
+          end_date: string | null
+          id: string
+          instructor_id: string | null
+          instructor_name: string | null
+          learning_outcomes: string[] | null
+          location: string | null
+          max_participants: number | null
+          mode: string
+          requirements: string[] | null
+          schedule: Json | null
+          short_description: string | null
+          start_date: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          banner_image_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          duration?: string | null
+          end_date?: string | null
+          id?: string
+          instructor_id?: string | null
+          instructor_name?: string | null
+          learning_outcomes?: string[] | null
+          location?: string | null
+          max_participants?: number | null
+          mode?: string
+          requirements?: string[] | null
+          schedule?: Json | null
+          short_description?: string | null
+          start_date?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          banner_image_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          duration?: string | null
+          end_date?: string | null
+          id?: string
+          instructor_id?: string | null
+          instructor_name?: string | null
+          learning_outcomes?: string[] | null
+          location?: string | null
+          max_participants?: number | null
+          mode?: string
+          requirements?: string[] | null
+          schedule?: Json | null
+          short_description?: string | null
+          start_date?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
