@@ -201,22 +201,47 @@ const ProgramManagement = () => {
 const CreateProgramDialog = ({ open, onOpenChange, onCreated }: { open: boolean; onOpenChange: (v: boolean) => void; onCreated: () => void }) => {
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [form, setForm] = useState({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "" });
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageFile(file);
+    const reader = new FileReader();
+    reader.onloadend = () => setImagePreview(reader.result as string);
+    reader.readAsDataURL(file);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.title.trim()) return;
     setSubmitting(true);
     try {
+      let bannerUrl: string | null = null;
+
+      if (imageFile) {
+        const fileExt = imageFile.name.split(".").pop();
+        const filePath = `${crypto.randomUUID()}.${fileExt}`;
+        const { error: uploadError } = await supabase.storage.from("program-images").upload(filePath, imageFile);
+        if (uploadError) throw uploadError;
+        const { data: urlData } = supabase.storage.from("program-images").getPublicUrl(filePath);
+        bannerUrl = urlData.publicUrl;
+      }
+
       const { error } = await supabase.from("programs").insert({
         title: form.title.trim(), short_description: form.short_description.trim() || null, description: form.description.trim() || null,
         duration: form.duration.trim() || null, mode: form.mode, location: form.location.trim() || null, start_date: form.start_date || null, status: "open",
+        banner_image_url: bannerUrl,
       });
       if (error) throw error;
       toast({ title: "Program created!" });
       onCreated();
       onOpenChange(false);
       setForm({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "" });
+      setImageFile(null);
+      setImagePreview(null);
     } catch (err: any) {
       toast({ title: "Failed", description: err.message, variant: "destructive" });
     } finally { setSubmitting(false); }
@@ -227,6 +252,25 @@ const CreateProgramDialog = ({ open, onOpenChange, onCreated }: { open: boolean;
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle>Create Training Program</DialogTitle><DialogDescription>Set up a new training program.</DialogDescription></DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label>Banner Image</Label>
+            <div className="mt-1.5">
+              {imagePreview ? (
+                <div className="relative group">
+                  <img src={imagePreview} alt="Preview" className="w-full h-40 object-cover rounded-lg border border-border" />
+                  <button type="button" onClick={() => { setImageFile(null); setImagePreview(null); }} className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-primary/40 transition-colors bg-muted/30">
+                  <ImagePlus className="w-8 h-8 text-muted-foreground mb-2" />
+                  <span className="text-sm text-muted-foreground">Click to upload banner image</span>
+                  <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
+                </label>
+              )}
+            </div>
+          </div>
           <div><Label>Title *</Label><Input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} required /></div>
           <div><Label>Short Description</Label><Input value={form.short_description} onChange={e => setForm({ ...form, short_description: e.target.value })} /></div>
           <div><Label>Full Description</Label><Textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={3} /></div>
