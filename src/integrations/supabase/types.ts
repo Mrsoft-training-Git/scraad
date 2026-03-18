@@ -1014,6 +1014,319 @@ export type Database = {
           },
         ]
       }
+      program_assignments: {
+        Row: {
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          is_published: boolean | null
+          max_score: number | null
+          module_id: string | null
+          program_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          is_published?: boolean | null
+          max_score?: number | null
+          module_id?: string | null
+          program_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          is_published?: boolean | null
+          max_score?: number | null
+          module_id?: string | null
+          program_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_assignments_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "program_modules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_assignments_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      program_enrollments: {
+        Row: {
+          completed_at: string | null
+          enrolled_at: string
+          id: string
+          program_id: string
+          progress: number | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          enrolled_at?: string
+          id?: string
+          program_id: string
+          progress?: number | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          enrolled_at?: string
+          id?: string
+          program_id?: string
+          progress?: number | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_enrollments_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      program_exam_results: {
+        Row: {
+          answers: Json
+          completed_at: string
+          exam_id: string
+          id: string
+          score: number | null
+          total_questions: number | null
+          user_id: string
+        }
+        Insert: {
+          answers?: Json
+          completed_at?: string
+          exam_id: string
+          id?: string
+          score?: number | null
+          total_questions?: number | null
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          completed_at?: string
+          exam_id?: string
+          id?: string
+          score?: number | null
+          total_questions?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_exam_results_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "program_exams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      program_exams: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_published: boolean | null
+          program_id: string
+          questions: Json
+          time_limit_minutes: number | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean | null
+          program_id: string
+          questions?: Json
+          time_limit_minutes?: number | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean | null
+          program_id?: string
+          questions?: Json
+          time_limit_minutes?: number | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_exams_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      program_materials: {
+        Row: {
+          content_url: string | null
+          created_at: string
+          description: string | null
+          file_path: string | null
+          id: string
+          material_type: string
+          module_id: string
+          order_index: number | null
+          program_id: string
+          title: string
+        }
+        Insert: {
+          content_url?: string | null
+          created_at?: string
+          description?: string | null
+          file_path?: string | null
+          id?: string
+          material_type?: string
+          module_id: string
+          order_index?: number | null
+          program_id: string
+          title: string
+        }
+        Update: {
+          content_url?: string | null
+          created_at?: string
+          description?: string | null
+          file_path?: string | null
+          id?: string
+          material_type?: string
+          module_id?: string
+          order_index?: number | null
+          program_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_materials_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "program_modules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_materials_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      program_modules: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          order_index: number | null
+          program_id: string
+          title: string
+          updated_at: string
+          week_number: number | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_index?: number | null
+          program_id: string
+          title: string
+          updated_at?: string
+          week_number?: number | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_index?: number | null
+          program_id?: string
+          title?: string
+          updated_at?: string
+          week_number?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_modules_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      program_submissions: {
+        Row: {
+          assignment_id: string
+          feedback: string | null
+          file_urls: string[] | null
+          graded_at: string | null
+          id: string
+          score: number | null
+          status: string
+          submitted_at: string
+          text_content: string | null
+          user_id: string
+        }
+        Insert: {
+          assignment_id: string
+          feedback?: string | null
+          file_urls?: string[] | null
+          graded_at?: string | null
+          id?: string
+          score?: number | null
+          status?: string
+          submitted_at?: string
+          text_content?: string | null
+          user_id: string
+        }
+        Update: {
+          assignment_id?: string
+          feedback?: string | null
+          file_urls?: string[] | null
+          graded_at?: string | null
+          id?: string
+          score?: number | null
+          status?: string
+          submitted_at?: string
+          text_content?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_submissions_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "program_assignments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       programs: {
         Row: {
           banner_image_url: string | null
