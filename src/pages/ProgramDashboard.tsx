@@ -7,15 +7,16 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useDashboardAuth } from "@/hooks/useDashboardAuth";
 import { format } from "date-fns";
 import {
   BookOpen, Calendar, FileText, ClipboardList, BarChart3,
   CheckCircle, Clock, Upload, Loader2, Play, ArrowLeft,
   Video, File, ExternalLink,
 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ProgramInfo {
   id: string;
@@ -33,6 +34,7 @@ interface ProgramInfo {
 const ProgramDashboard = () => {
   const { programId } = useParams();
   const { toast } = useToast();
+  const { user, profile, userRole, loading: authLoading } = useDashboardAuth();
   const [program, setProgram] = useState<ProgramInfo | null>(null);
   const [enrollment, setEnrollment] = useState<any>(null);
   const [modules, setModules] = useState<any[]>([]);
@@ -45,13 +47,12 @@ const ProgramDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
 
   useEffect(() => {
-    if (programId) fetchAll();
-  }, [programId]);
+    if (programId && user) fetchAll();
+  }, [programId, user]);
 
   const fetchAll = async () => {
-    setLoading(true);
-    const { data: { user } } = await supabase.auth.getUser();
     if (!user || !programId) return;
+    setLoading(true);
 
     const [programRes, enrollRes, modulesRes, materialsRes, assignmentsRes, subsRes, examsRes, resultsRes] = await Promise.all([
       supabase.from("programs").select("*").eq("id", programId).single(),
@@ -75,9 +76,9 @@ const ProgramDashboard = () => {
     setLoading(false);
   };
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
-      <DashboardLayout>
+      <DashboardLayout user={user} userRole={userRole} profile={profile}>
         <div className="flex items-center justify-center py-20 text-muted-foreground">
           <Loader2 className="w-6 h-6 animate-spin mr-2" /> Loading program...
         </div>
@@ -87,7 +88,7 @@ const ProgramDashboard = () => {
 
   if (!program || !enrollment) {
     return (
-      <DashboardLayout>
+      <DashboardLayout user={user} userRole={userRole} profile={profile}>
         <div className="text-center py-20">
           <h2 className="text-xl font-bold mb-2">Access Denied</h2>
           <p className="text-muted-foreground mb-4">You don't have access to this program.</p>
@@ -108,7 +109,7 @@ const ProgramDashboard = () => {
   const progressPercent = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
 
   return (
-    <DashboardLayout>
+    <DashboardLayout user={user} userRole={userRole} profile={profile}>
       <div className="space-y-6">
         {/* Header */}
         <div>
@@ -145,7 +146,6 @@ const ProgramDashboard = () => {
             <TabsTrigger value="exams"><FileText className="w-4 h-4 mr-1 hidden sm:inline" />Exams</TabsTrigger>
           </TabsList>
 
-          {/* Overview Tab */}
           <TabsContent value="overview" className="mt-6 space-y-6">
             <div className="grid sm:grid-cols-3 gap-4">
               {[
@@ -174,7 +174,6 @@ const ProgramDashboard = () => {
             )}
           </TabsContent>
 
-          {/* Schedule Tab */}
           <TabsContent value="schedule" className="mt-6">
             {modules.length > 0 ? (
               <div className="space-y-3">
@@ -199,7 +198,6 @@ const ProgramDashboard = () => {
             )}
           </TabsContent>
 
-          {/* Materials Tab */}
           <TabsContent value="materials" className="mt-6">
             {materials.length > 0 ? (
               <div className="space-y-3">
@@ -235,12 +233,10 @@ const ProgramDashboard = () => {
             )}
           </TabsContent>
 
-          {/* Assignments Tab */}
           <TabsContent value="assignments" className="mt-6">
             <AssignmentsList assignments={assignments} submissions={submissions} onSubmit={fetchAll} />
           </TabsContent>
 
-          {/* Exams Tab */}
           <TabsContent value="exams" className="mt-6">
             <ExamsList exams={exams} results={examResults} onComplete={fetchAll} />
           </TabsContent>
@@ -250,7 +246,6 @@ const ProgramDashboard = () => {
   );
 };
 
-// Assignments sub-component
 const AssignmentsList = ({ assignments, submissions, onSubmit }: { assignments: any[]; submissions: any[]; onSubmit: () => void }) => {
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState<string | null>(null);
@@ -276,14 +271,12 @@ const AssignmentsList = ({ assignments, submissions, onSubmit }: { assignments: 
     }
   };
 
-  if (assignments.length === 0) {
-    return <p className="text-center text-muted-foreground py-8">No assignments yet.</p>;
-  }
+  if (assignments.length === 0) return <p className="text-center text-muted-foreground py-8">No assignments yet.</p>;
 
   return (
     <div className="space-y-4">
       {assignments.map(a => {
-        const sub = submissions.find(s => s.assignment_id === a.id);
+        const sub = submissions.find((s: any) => s.assignment_id === a.id);
         return (
           <Card key={a.id} className="border-border/60">
             <CardContent className="p-4">
@@ -311,7 +304,7 @@ const AssignmentsList = ({ assignments, submissions, onSubmit }: { assignments: 
                   <Textarea
                     placeholder="Type your answer..."
                     value={textInput[a.id] || ""}
-                    onChange={e => setTextInput({ ...textInput, [a.id]: e.target.value })}
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setTextInput({ ...textInput, [a.id]: e.target.value })}
                     rows={3}
                   />
                   <Button
@@ -332,17 +325,11 @@ const AssignmentsList = ({ assignments, submissions, onSubmit }: { assignments: 
   );
 };
 
-// Exams sub-component
 const ExamsList = ({ exams, results, onComplete }: { exams: any[]; results: any[]; onComplete: () => void }) => {
   const { toast } = useToast();
   const [activeExam, setActiveExam] = useState<any>(null);
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [submitting, setSubmitting] = useState(false);
-
-  const handleStartExam = (exam: any) => {
-    setActiveExam(exam);
-    setAnswers({});
-  };
 
   const handleSubmitExam = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -393,8 +380,8 @@ const ExamsList = ({ exams, results, onComplete }: { exams: any[]; results: any[
                     onClick={() => setAnswers({ ...answers, [qi]: oi })}
                     className={`w-full text-left px-4 py-2.5 rounded-lg border transition-colors text-sm ${
                       answers[qi] === oi
-                        ? "border-primary bg-primary/5 text-primary font-medium"
-                        : "border-border hover:border-primary/30 text-foreground"
+                        ? "border-primary bg-primary/5 font-medium"
+                        : "border-border hover:border-primary/30"
                     }`}
                   >
                     {opt}
@@ -412,14 +399,12 @@ const ExamsList = ({ exams, results, onComplete }: { exams: any[]; results: any[
     );
   }
 
-  if (exams.length === 0) {
-    return <p className="text-center text-muted-foreground py-8">No exams available yet.</p>;
-  }
+  if (exams.length === 0) return <p className="text-center text-muted-foreground py-8">No exams available yet.</p>;
 
   return (
     <div className="space-y-3">
-      {exams.map(exam => {
-        const result = results.find(r => r.exam_id === exam.id);
+      {exams.map((exam: any) => {
+        const result = results.find((r: any) => r.exam_id === exam.id);
         const questions = Array.isArray(exam.questions) ? exam.questions : [];
         return (
           <Card key={exam.id} className="border-border/60">
@@ -433,7 +418,7 @@ const ExamsList = ({ exams, results, onComplete }: { exams: any[]; results: any[
                   Score: {result.score}/{result.total_questions}
                 </Badge>
               ) : (
-                <Button size="sm" onClick={() => handleStartExam(exam)}>
+                <Button size="sm" onClick={() => { setActiveExam(exam); setAnswers({}); }}>
                   <Play className="w-3.5 h-3.5 mr-1" /> Start Exam
                 </Button>
               )}
