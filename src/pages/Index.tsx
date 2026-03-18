@@ -11,7 +11,8 @@ import {
   Monitor, Zap, Target, BarChart3,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import businessTraining from "@/assets/business-training.jpg";
+import heroTraining from "@/assets/hero-training.jpg";
+import teamTraining from "@/assets/team-training.jpg";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Course {
