@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useDashboardAuth } from "@/hooks/useDashboardAuth";
 import { format } from "date-fns";
-import { Check, X, Clock, Mail, Phone, FileText, Loader2, Plus } from "lucide-react";
+import { Check, X, Clock, Mail, Phone, FileText, Loader2, Plus, ImagePlus } from "lucide-react";
 
 interface Program { id: string; title: string; status: string; start_date: string | null; mode: string; }
 interface Application { id: string; program_id: string; user_id: string; full_name: string; email: string; phone: string | null; experience_level: string | null; motivation: string | null; cv_url: string | null; status: string; created_at: string; }
