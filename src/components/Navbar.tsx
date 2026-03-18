@@ -1,9 +1,9 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Search, Bell } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import logo from "@/assets/mr-logo.jpeg";
+import logo from "@/assets/scraad-logo.png";
 import { cn } from "@/lib/utils";
 
 export const Navbar = () => {
@@ -36,10 +36,10 @@ export const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5 group flex-shrink-0">
-            <img src={logo} alt="Cradua Logo" className="w-9 h-9 object-contain rounded-lg shadow-sm" />
+            <img src={logo} alt="ScraAd Logo" className="w-9 h-9 object-contain" />
             <div>
-              <div className="font-heading font-bold text-base leading-tight text-foreground">Cradua</div>
-              <div className="text-[10px] text-muted-foreground leading-tight">by M-R International</div>
+              <div className="font-heading font-bold text-base leading-tight text-foreground">ScraAd</div>
+              <div className="text-[10px] text-muted-foreground leading-tight">Scratch to Advance</div>
             </div>
           </Link>
 

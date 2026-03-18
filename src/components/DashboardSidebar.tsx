@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
-import logo from "@/assets/mr-logo.jpeg";
+import logo from "@/assets/scraad-logo.png";
 
 const allMenuItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard", roles: ["admin", "student", "instructor"] },
@@ -57,15 +57,15 @@ export const DashboardSidebar = ({ userRole, unreadAnnouncementsCount = 0, unrea
       <div className="px-4 py-5 border-b border-sidebar-border flex items-center justify-between">
         {!collapsed ? (
           <Link to="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
-            <img src={logo} alt="Cradua Logo" className="h-8 w-8 object-contain rounded-lg" />
+            <img src={logo} alt="ScraAd Logo" className="h-8 w-8 object-contain" />
             <div className="text-sm">
-              <div className="font-heading font-bold text-sidebar-foreground">Cradua</div>
-              <div className="text-[10px] text-sidebar-foreground/50">M-R International</div>
+              <div className="font-heading font-bold text-sidebar-foreground">ScraAd</div>
+              <div className="text-[10px] text-sidebar-foreground/50">Scratch to Advance</div>
             </div>
           </Link>
         ) : (
           <Link to="/" className="hover:opacity-80 transition-opacity mx-auto">
-            <img src={logo} alt="Cradua Logo" className="h-8 w-8 object-contain rounded-lg" />
+            <img src={logo} alt="ScraAd Logo" className="h-8 w-8 object-contain" />
           </Link>
         )}
         <Button

@@ -131,11 +131,11 @@ const Index = () => {
                 <span className="text-sm font-medium text-primary-foreground/90">Trusted by 10,000+ professionals</span>
               </div>
               <h1 className="font-heading font-bold text-3xl md:text-4xl lg:text-[3.25rem] text-primary-foreground leading-[1.12] tracking-tight">
-                Unlock your potential with{" "}
-                <span className="text-secondary">world-class training</span>
+                Go from <span className="text-secondary">Scratch</span> to{" "}
+                <span className="text-secondary">Advance</span>
               </h1>
               <p className="text-primary-foreground/75 text-base md:text-lg max-w-lg leading-relaxed">
-                Build in-demand skills with courses, certifications, and hands-on training from industry experts at M-R International.
+                Build in-demand skills with courses, certifications, and hands-on training from industry experts. Your transformation starts here.
               </p>
 
               {/* Search bar */}
@@ -169,7 +169,7 @@ const Index = () => {
               <div className="bg-card rounded-2xl shadow-2xl overflow-hidden border border-border/50">
                 <img
                   src={heroTraining}
-                  alt="Professionals learning on Cradua"
+                  alt="Professionals learning on ScraAd"
                   className="w-full h-72 object-cover"
                 />
                 <div className="p-5 space-y-3">
@@ -337,12 +337,12 @@ const Index = () => {
         </div>
       </section>
 
-      {/* ─── Why Cradua ─── */}
+      {/* ─── Why ScraAd ─── */}
       <section className="py-12 lg:py-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-10">
             <h2 className="font-heading font-bold text-2xl md:text-3xl text-foreground">
-              Why learners choose <span className="text-primary">Cradua</span>
+              Why learners choose <span className="text-primary">ScraAd</span>
             </h2>
             <p className="text-muted-foreground mt-2 max-w-md mx-auto">Everything you need to build skills and advance your career</p>
           </div>
@@ -375,7 +375,7 @@ const Index = () => {
               <div className="p-8 lg:p-12 space-y-5">
                 <div className="inline-flex items-center gap-2 bg-primary-foreground/10 px-3 py-1.5 rounded-full text-xs font-medium text-primary-foreground">
                   <Users className="w-3.5 h-3.5" />
-                  Cradua for Business
+                  ScraAd for Business
                 </div>
                 <h2 className="font-heading font-bold text-2xl md:text-3xl lg:text-4xl leading-tight text-primary-foreground">
                   Upskill your entire team
@@ -393,7 +393,7 @@ const Index = () => {
                 </div>
               </div>
               <div className="hidden lg:block">
-                <img src={teamTraining} alt="Business teams training on Cradua" className="w-full h-full object-cover" />
+                <img src={teamTraining} alt="Business teams training on ScraAd" className="w-full h-full object-cover" />
               </div>
             </div>
           </div>
@@ -405,7 +405,7 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-8">
             <h2 className="font-heading font-bold text-2xl md:text-3xl text-foreground">What our learners say</h2>
-            <p className="text-muted-foreground text-sm md:text-base mt-2">Join thousands achieving their goals on Cradua</p>
+            <p className="text-muted-foreground text-sm md:text-base mt-2">Join thousands achieving their goals on ScraAd</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-4 md:gap-6 max-w-5xl mx-auto">
@@ -439,7 +439,7 @@ const Index = () => {
             Start learning today
           </h2>
           <p className="text-primary-foreground/75 text-sm md:text-base max-w-lg mx-auto">
-            Join Cradua and gain the skills to advance your career, earn certificates, and learn from the best.
+            Join ScraAd and gain the skills to advance your career, earn certificates, and learn from the best.
           </p>
           <div className="flex justify-center gap-3">
             <Button size="lg" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold h-12 px-8 shadow-lg" asChild>
