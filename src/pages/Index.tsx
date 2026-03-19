@@ -408,9 +408,9 @@ const Index = () => {
             <p className="text-muted-foreground text-sm md:text-base mt-2">Join thousands achieving their goals on ScraAd</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-4 md:gap-6 max-w-5xl mx-auto">
+          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide md:grid md:grid-cols-3 md:overflow-visible md:pb-0 max-w-5xl mx-auto">
             {testimonials.map((t, i) => (
-              <Card key={i} className="border border-border bg-card hover:shadow-card-hover transition-all duration-300">
+              <Card key={i} className="border border-border bg-card hover:shadow-card-hover transition-all duration-300 min-w-[280px] shrink-0 md:min-w-0">
                 <CardContent className="p-6">
                   <div className="flex gap-0.5 mb-4">
                     {[...Array(5)].map((_, j) => (
