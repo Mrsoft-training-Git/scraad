@@ -353,7 +353,7 @@ const Index = () => {
               { icon: TrendingUp, title: "Progress Tracking", desc: "Monitor your learning journey with detailed analytics" },
               { icon: BookOpen, title: "Hands-on Training", desc: "Real-world projects and practical exercises" },
             ].map((f, i) => (
-              <Card key={i} className="border border-border bg-card hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300">
+              <Card key={i} className="border border-border bg-card hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300 min-w-[75vw] shrink-0 sm:min-w-0">
                 <CardContent className="p-6 flex flex-col items-center text-center">
                   <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
                     <f.icon className="w-7 h-7 text-primary" />
