@@ -392,7 +392,7 @@ const Index = () => {
                   </Button>
                 </div>
               </div>
-              <div className="hidden lg:block">
+              <div className="h-48 lg:h-full">
                 <img src={teamTraining} alt="Business teams training on ScraAd" className="w-full h-full object-cover" />
               </div>
             </div>
