@@ -222,19 +222,19 @@ const Index = () => {
             <h2 className="font-heading font-bold text-2xl md:text-3xl text-foreground">Top Categories</h2>
             <p className="text-muted-foreground text-sm md:text-base mt-2">Browse courses by field of study</p>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
+          <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide lg:grid lg:grid-cols-6 lg:overflow-visible lg:pb-0">
             {categories.map((cat) => {
               const Icon = cat.icon;
               return (
                 <Link
                   key={cat.name}
                   to={`/courses?category=${encodeURIComponent(cat.name)}`}
-                  className="group flex flex-col items-center gap-3 p-5 rounded-xl bg-card border border-border hover:border-primary/30 hover:shadow-card-hover transition-all duration-300"
+                  className="group flex flex-col items-center gap-3 p-5 rounded-xl bg-card border border-border hover:border-primary/30 hover:shadow-card-hover transition-all duration-300 min-w-[130px] shrink-0 lg:min-w-0"
                 >
                   <div className={`w-12 h-12 rounded-xl ${cat.color} flex items-center justify-center group-hover:scale-110 transition-transform`}>
                     <Icon className="w-6 h-6" />
                   </div>
-                  <span className="text-sm font-medium text-foreground text-center">{cat.name}</span>
+                  <span className="text-sm font-medium text-foreground text-center whitespace-nowrap">{cat.name}</span>
                 </Link>
               );
             })}
