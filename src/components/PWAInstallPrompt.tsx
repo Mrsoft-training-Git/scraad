@@ -38,7 +38,7 @@ const PWAInstallPrompt = () => {
   return (
     <div className="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-md animate-in slide-in-from-bottom-4">
       <div className="flex items-center gap-3 rounded-xl border bg-card p-4 shadow-lg">
-        <Download className="h-8 w-8 shrink-0 text-primary" />
+        <img src={scraadLogo} alt="ScraAd" className="h-10 w-10 shrink-0 rounded-lg" />
         <div className="flex-1 min-w-0">
           <p className="font-semibold text-sm text-foreground">Install ScraAd</p>
           <p className="text-xs text-muted-foreground">Add to home screen for quick access</p>
