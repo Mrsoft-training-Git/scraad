@@ -267,11 +267,11 @@ const Index = () => {
               <p>No featured courses yet. Check back soon!</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+            <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:overflow-visible sm:pb-0">
               {courses.map((course) => (
                 <Card
                   key={course.id}
-                  className="group overflow-hidden bg-card border border-border hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300 flex flex-col"
+                  className="group overflow-hidden bg-card border border-border hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300 flex flex-col min-w-[260px] shrink-0 sm:min-w-0"
                 >
                   <Link to={`/programs/${course.id}`} className="block aspect-video overflow-hidden relative">
                     <img
