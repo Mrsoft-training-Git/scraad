@@ -346,7 +346,7 @@ const Index = () => {
             </h2>
             <p className="text-muted-foreground mt-2 max-w-md mx-auto">Everything you need to build skills and advance your career</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:overflow-visible sm:pb-0">
             {[
               { icon: Clock, title: "Self-Paced Learning", desc: "Learn on your own schedule, anywhere in the world" },
               { icon: Award, title: "Recognized Certificates", desc: "Earn credentials valued by employers" },
