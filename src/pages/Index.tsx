@@ -346,14 +346,14 @@ const Index = () => {
             </h2>
             <p className="text-muted-foreground mt-2 max-w-md mx-auto">Everything you need to build skills and advance your career</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:overflow-visible sm:pb-0">
             {[
               { icon: Clock, title: "Self-Paced Learning", desc: "Learn on your own schedule, anywhere in the world" },
               { icon: Award, title: "Recognized Certificates", desc: "Earn credentials valued by employers" },
               { icon: TrendingUp, title: "Progress Tracking", desc: "Monitor your learning journey with detailed analytics" },
               { icon: BookOpen, title: "Hands-on Training", desc: "Real-world projects and practical exercises" },
             ].map((f, i) => (
-              <Card key={i} className="border border-border bg-card hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300">
+              <Card key={i} className="border border-border bg-card hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300 min-w-[75vw] shrink-0 sm:min-w-0">
                 <CardContent className="p-6 flex flex-col items-center text-center">
                   <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
                     <f.icon className="w-7 h-7 text-primary" />
@@ -410,7 +410,7 @@ const Index = () => {
 
           <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide md:grid md:grid-cols-3 md:overflow-visible md:pb-0 max-w-5xl mx-auto">
             {testimonials.map((t, i) => (
-              <Card key={i} className="border border-border bg-card hover:shadow-card-hover transition-all duration-300 min-w-[280px] shrink-0 md:min-w-0">
+              <Card key={i} className="border border-border bg-card hover:shadow-card-hover transition-all duration-300 min-w-[80vw] shrink-0 md:min-w-0">
                 <CardContent className="p-6">
                   <div className="flex gap-0.5 mb-4">
                     {[...Array(5)].map((_, j) => (
