@@ -545,6 +545,21 @@ const ProgramPaymentCard = ({ program, paymentStatus, onPaymentComplete }: { pro
   );
 };
 
+/* ─── Second Tranche Button ─── */
+const SecondTrancheButton = ({ program, onPaymentComplete }: { program: ProgramInfo; onPaymentComplete: () => void }) => {
+  const { initializePayment, loading } = usePayment({ onSuccess: onPaymentComplete });
+  return (
+    <Button
+      size="sm"
+      onClick={() => initializePayment(program.id, "second", "program")}
+      disabled={loading}
+    >
+      <CreditCard className="w-4 h-4 mr-2" />
+      {loading ? "Processing..." : `Pay ₦${(program.second_tranche_amount || 0).toLocaleString()}`}
+    </Button>
+  );
+};
+
 /* ─── Admission Letter Card ─── */
 const AdmissionLetterCard = ({ program, profile, enrollment }: { program: ProgramInfo; profile: any; enrollment: any }) => {
   const handleDownload = () => {
