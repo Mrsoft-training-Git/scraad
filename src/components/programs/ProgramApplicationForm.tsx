@@ -48,8 +48,8 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
       return;
     }
 
-    if (age !== null && age < 10) {
-      toast({ title: "Applicants must be at least 10 years old", variant: "destructive" });
+    if (age !== null && age < 1) {
+      toast({ title: "Please enter a valid age", variant: "destructive" });
       return;
     }
 
