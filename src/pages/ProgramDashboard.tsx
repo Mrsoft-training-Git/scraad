@@ -54,27 +54,26 @@ const ProgramDashboard = () => {
   useEffect(() => {
     if (programId && user) {
       fetchAll();
-      // If returning from payment gateway, poll for webhook to update enrollment
+      // If returning from payment gateway, verify payment directly
       const params = new URLSearchParams(window.location.search);
-      if (params.has("trxref") || params.has("reference")) {
-        let attempts = 0;
-        const poll = setInterval(async () => {
-          attempts++;
-          const { data } = await supabase
-            .from("program_enrollments")
-            .select("payment_status")
-            .eq("program_id", programId)
-            .eq("user_id", user.id)
-            .maybeSingle();
-          if (data && (data.payment_status === "paid" || data.payment_status === "partial")) {
-            clearInterval(poll);
-            fetchAll();
-            // Clean URL
+      const reference = params.get("trxref") || params.get("reference");
+      if (reference) {
+        const verifyPayment = async () => {
+          try {
+            const { data } = await supabase.functions.invoke("verify-payment", {
+              body: { reference },
+            });
+            if (data?.verified) {
+              toast({ title: "Payment Confirmed", description: "Your payment has been verified successfully." });
+              fetchAll();
+            }
+          } catch (err) {
+            console.error("Payment verification error:", err);
+          } finally {
             window.history.replaceState({}, "", window.location.pathname);
           }
-          if (attempts >= 15) clearInterval(poll);
-        }, 2000);
-        return () => clearInterval(poll);
+        };
+        verifyPayment();
       }
     }
   }, [programId, user]);
