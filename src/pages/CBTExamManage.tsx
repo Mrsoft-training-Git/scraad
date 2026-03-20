@@ -53,10 +53,11 @@ const CBTExamManage = () => {
   const [programs, setPrograms] = useState<any[]>([]);
   const [examForm, setExamForm] = useState({
     title: "", description: "", exam_type: "course" as "course" | "program",
-    course_id: "", program_id: "", start_time: "", end_time: "",
+    course_id: "", program_id: "", track: "", start_time: "", end_time: "",
     duration_minutes: 60, shuffle_questions: false, allow_retake: false,
     max_attempts: 1, auto_submit: true,
   });
+  const [tracks, setTracks] = useState<string[]>([]);
 
   useEffect(() => {
     if (exam) {
@@ -66,6 +67,7 @@ const CBTExamManage = () => {
         exam_type: exam.exam_type,
         course_id: exam.course_id || "",
         program_id: exam.program_id || "",
+        track: exam.track || "",
         start_time: exam.start_time ? new Date(exam.start_time).toISOString().slice(0, 16) : "",
         end_time: exam.end_time ? new Date(exam.end_time).toISOString().slice(0, 16) : "",
         duration_minutes: exam.duration_minutes,
@@ -81,10 +83,14 @@ const CBTExamManage = () => {
     const fetchData = async () => {
       const [c, p] = await Promise.all([
         supabase.from("courses").select("id, title").order("title"),
-        supabase.from("programs").select("id, title").order("title"),
+        supabase.from("programs").select("id, title, track").order("title"),
       ]);
       if (c.data) setCourses(c.data);
-      if (p.data) setPrograms(p.data);
+      if (p.data) {
+        setPrograms(p.data);
+        const uniqueTracks = [...new Set(p.data.map((pr: any) => pr.track).filter(Boolean))] as string[];
+        setTracks(uniqueTracks);
+      }
     };
     fetchData();
   }, []);
@@ -101,6 +107,7 @@ const CBTExamManage = () => {
       exam_type: examForm.exam_type,
       course_id: examForm.exam_type === "course" ? examForm.course_id : null,
       program_id: examForm.exam_type === "program" ? examForm.program_id : null,
+      track: examForm.exam_type === "program" && examForm.track ? examForm.track : null,
       start_time: examForm.start_time,
       end_time: examForm.end_time,
       duration_minutes: examForm.duration_minutes,
@@ -248,7 +255,7 @@ const CBTExamManage = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>Exam Type</Label>
-                  <Select value={examForm.exam_type} onValueChange={(v: "course" | "program") => setExamForm({ ...examForm, exam_type: v, course_id: "", program_id: "" })}>
+                  <Select value={examForm.exam_type} onValueChange={(v: "course" | "program") => setExamForm({ ...examForm, exam_type: v, course_id: "", program_id: "", track: "" })}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="course">Course Exam</SelectItem>
@@ -274,6 +281,18 @@ const CBTExamManage = () => {
                   </div>
                 )}
               </div>
+              {examForm.exam_type === "program" && tracks.length > 0 && (
+                <div>
+                  <Label>Track (optional — leave empty for all tracks)</Label>
+                  <Select value={examForm.track} onValueChange={v => setExamForm({ ...examForm, track: v })}>
+                    <SelectTrigger><SelectValue placeholder="All tracks" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">All Tracks</SelectItem>
+                      {tracks.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-4">
                 <div><Label>Start Time *</Label><Input type="datetime-local" value={examForm.start_time} onChange={e => {
                   const start = e.target.value;

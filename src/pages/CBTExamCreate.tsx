@@ -21,6 +21,7 @@ const CBTExamCreate = () => {
   const [saving, setSaving] = useState(false);
   const [courses, setCourses] = useState<any[]>([]);
   const [programs, setPrograms] = useState<any[]>([]);
+  const [tracks, setTracks] = useState<string[]>([]);
 
   const [form, setForm] = useState({
     title: "",
@@ -28,6 +29,7 @@ const CBTExamCreate = () => {
     exam_type: "course" as "course" | "program",
     course_id: "",
     program_id: "",
+    track: "",
     start_time: "",
     end_time: "",
     duration_minutes: 60,
@@ -41,10 +43,14 @@ const CBTExamCreate = () => {
     const fetchData = async () => {
       const [c, p] = await Promise.all([
         supabase.from("courses").select("id, title").order("title"),
-        supabase.from("programs").select("id, title").order("title"),
+        supabase.from("programs").select("id, title, track").order("title"),
       ]);
       if (c.data) setCourses(c.data);
-      if (p.data) setPrograms(p.data);
+      if (p.data) {
+        setPrograms(p.data);
+        const uniqueTracks = [...new Set(p.data.map((pr: any) => pr.track).filter(Boolean))] as string[];
+        setTracks(uniqueTracks);
+      }
     };
     fetchData();
   }, []);
@@ -72,6 +78,7 @@ const CBTExamCreate = () => {
       exam_type: form.exam_type,
       course_id: form.exam_type === "course" ? form.course_id : null,
       program_id: form.exam_type === "program" ? form.program_id : null,
+      track: form.exam_type === "program" && form.track ? form.track : null,
       start_time: form.start_time,
       end_time: form.end_time,
       duration_minutes: form.duration_minutes,
@@ -121,7 +128,7 @@ const CBTExamCreate = () => {
               </div>
               <div>
                 <Label>Exam Type *</Label>
-                <Select value={form.exam_type} onValueChange={(v: "course" | "program") => setForm({ ...form, exam_type: v, course_id: "", program_id: "" })}>
+                <Select value={form.exam_type} onValueChange={(v: "course" | "program") => setForm({ ...form, exam_type: v, course_id: "", program_id: "", track: "" })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="course">Course Exam</SelectItem>
@@ -138,13 +145,27 @@ const CBTExamCreate = () => {
                   </Select>
                 </div>
               ) : (
-                <div>
-                  <Label>Select Program *</Label>
-                  <Select value={form.program_id} onValueChange={v => setForm({ ...form, program_id: v })}>
-                    <SelectTrigger><SelectValue placeholder="Choose program..." /></SelectTrigger>
-                    <SelectContent>{programs.map(p => <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
+                <>
+                  <div>
+                    <Label>Select Program *</Label>
+                    <Select value={form.program_id} onValueChange={v => setForm({ ...form, program_id: v })}>
+                      <SelectTrigger><SelectValue placeholder="Choose program..." /></SelectTrigger>
+                      <SelectContent>{programs.map(p => <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
+                  {tracks.length > 0 && (
+                    <div>
+                      <Label>Track (optional — leave empty for all tracks)</Label>
+                      <Select value={form.track} onValueChange={v => setForm({ ...form, track: v })}>
+                        <SelectTrigger><SelectValue placeholder="All tracks" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">All Tracks</SelectItem>
+                          {tracks.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </>
               )}
             </CardContent>
           </Card>

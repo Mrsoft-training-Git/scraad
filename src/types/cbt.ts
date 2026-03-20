@@ -5,6 +5,7 @@ export interface CBTExam {
   exam_type: 'course' | 'program';
   course_id: string | null;
   program_id: string | null;
+  track: string | null;
   start_time: string;
   end_time: string;
   duration_minutes: number;
