@@ -458,7 +458,8 @@ const EditProgramDialog = ({ program, onOpenChange, onUpdated }: { program: Full
   const [submitting, setSubmitting] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [form, setForm] = useState({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", status: "open", price: "0", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "" });
+  const [instructors, setInstructors] = useState<InstructorOption[]>([]);
+  const [form, setForm] = useState({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", status: "open", price: "0", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "", theme: "", track: "", instructor_id: "", instructor_name: "" });
 
   useEffect(() => {
     if (program) {
@@ -476,11 +477,24 @@ const EditProgramDialog = ({ program, onOpenChange, onUpdated }: { program: Full
         first_tranche_amount: String((program as any).first_tranche_amount || ""),
         second_tranche_amount: String((program as any).second_tranche_amount || ""),
         second_payment_due_days: String((program as any).second_payment_due_days || ""),
+        theme: program.theme || "",
+        track: program.track || "",
+        instructor_id: program.instructor_id || "",
+        instructor_name: program.instructor_name || "",
       });
       setImagePreview(program.banner_image_url || null);
       setImageFile(null);
+      fetchInstructors();
     }
   }, [program]);
+
+  const fetchInstructors = async () => {
+    const { data: roles } = await supabase.from("user_roles").select("user_id").eq("role", "instructor");
+    if (!roles || roles.length === 0) return;
+    const ids = roles.map(r => r.user_id);
+    const { data: profiles } = await supabase.from("profiles").select("id, full_name, email").in("id", ids);
+    if (profiles) setInstructors(profiles as InstructorOption[]);
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -508,6 +522,8 @@ const EditProgramDialog = ({ program, onOpenChange, onUpdated }: { program: Full
         first_tranche_amount: form.allows_part_payment && form.first_tranche_amount ? parseInt(form.first_tranche_amount) : null,
         second_tranche_amount: form.allows_part_payment && form.second_tranche_amount ? parseInt(form.second_tranche_amount) : null,
         second_payment_due_days: form.allows_part_payment && form.second_payment_due_days ? parseInt(form.second_payment_due_days) : null,
+        theme: form.theme.trim() || null, track: form.track.trim() || null,
+        instructor_id: form.instructor_id || null, instructor_name: form.instructor_name.trim() || null,
       }).eq("id", program.id);
       if (error) throw error;
       toast({ title: "Program updated!" });
@@ -524,7 +540,7 @@ const EditProgramDialog = ({ program, onOpenChange, onUpdated }: { program: Full
         <DialogHeader><DialogTitle>Edit Program</DialogTitle><DialogDescription>Update program details.</DialogDescription></DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <ImageUploadField imagePreview={imagePreview} onImageChange={handleImageChange} onClear={() => { setImageFile(null); setImagePreview(null); }} />
-          <ProgramFormFields form={form} setForm={setForm} />
+          <ProgramFormFields form={form} setForm={setForm} instructors={instructors} />
           <Button type="submit" className="w-full" disabled={submitting}>{submitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />} Save Changes</Button>
         </form>
       </DialogContent>
