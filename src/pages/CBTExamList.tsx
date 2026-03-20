@@ -32,7 +32,7 @@ const CBTExamList = () => {
         .order("created_at", { ascending: false });
       setExams((data as unknown as CBTExam[]) || []);
     } else {
-      // Students: fetch exams for their enrolled courses AND programs
+      // Students: fetch exams for their enrolled courses AND programs (filtered by track via RLS)
       const [courseEnr, progEnr] = await Promise.all([
         supabase.from("enrollments").select("course_id").eq("user_id", user.id).in("payment_status", ["paid", "partial"]),
         supabase.from("program_enrollments").select("program_id").eq("user_id", user.id),
@@ -47,6 +47,7 @@ const CBTExamList = () => {
         if (data) allExams.push(...(data as unknown as CBTExam[]));
       }
       if (programIds.length > 0) {
+        // RLS already filters by track — just fetch published program exams for enrolled programs
         const { data } = await supabase.from("cbt_exams").select("*").eq("is_published", true).eq("exam_type", "program").in("program_id", programIds);
         if (data) allExams.push(...(data as unknown as CBTExam[]));
       }
