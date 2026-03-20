@@ -157,8 +157,8 @@ const ProgramDashboard = () => {
           </div>
         </div>
 
-        {/* Payment Section */}
-        {!hasPaid && (
+        {/* Payment Section - only for unpaid */}
+        {paymentStatus === "unpaid" && (
           <ProgramPaymentCard
             program={program}
             paymentStatus={paymentStatus}
@@ -166,8 +166,21 @@ const ProgramDashboard = () => {
           />
         )}
 
-        {/* Admission Letter */}
-        {hasPaid && (
+        {/* Second tranche reminder for partial/defaulted */}
+        {(isPartial || paymentStatus === "defaulted") && program.second_tranche_amount && (
+          <Card className="border-warning/30 bg-warning/5">
+            <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div>
+                <h3 className="font-semibold text-sm">Second Payment Due</h3>
+                <p className="text-xs text-muted-foreground">Complete your second installment of ₦{program.second_tranche_amount.toLocaleString()}</p>
+              </div>
+              <SecondTrancheButton program={program} onPaymentComplete={fetchAll} />
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Admission Letter - show when paid or partial (has active access) */}
+        {(hasPaid || isPartial) && (
           <AdmissionLetterCard program={program} profile={profile} enrollment={enrollment} />
         )}
 
