@@ -79,7 +79,32 @@ const ProgramDetails = () => {
       .select("*")
       .eq("id", id)
       .single();
-    if (!error && data) setProgram(data as Program);
+    if (!error && data) {
+      const prog = data as Program;
+      // If closed, check if user is admin, assigned instructor, or enrolled student
+      if (prog.status === "closed") {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          setProgram(null);
+          setLoading(false);
+          return;
+        }
+        const userId = session.user.id;
+        const [roleRes, enrollRes] = await Promise.all([
+          supabase.from("user_roles").select("role").eq("user_id", userId).single(),
+          supabase.from("program_enrollments").select("id").eq("program_id", id).eq("user_id", userId).maybeSingle(),
+        ]);
+        const role = roleRes.data?.role;
+        const isEnrolled = !!enrollRes.data;
+        const isAssignedInstructor = prog.instructor_id === userId;
+        if (role !== "admin" && !isAssignedInstructor && !isEnrolled) {
+          setProgram(null);
+          setLoading(false);
+          return;
+        }
+      }
+      setProgram(prog);
+    }
     setLoading(false);
   };
 

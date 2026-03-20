@@ -52,6 +52,7 @@ const Programs = () => {
     const { data, error } = await supabase
       .from("programs")
       .select("id, title, short_description, banner_image_url, duration, mode, location, start_date, status, max_participants")
+      .neq("status", "closed")
       .order("created_at", { ascending: false });
     if (!error && data) {
       setPrograms(data);
