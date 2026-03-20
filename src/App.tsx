@@ -41,6 +41,12 @@ import Enrollments from "./pages/Enrollments";
 import ResetPassword from "./pages/ResetPassword";
 import ProgramManagement from "./pages/ProgramManagement";
 import ProgramDashboard from "./pages/ProgramDashboard";
+import CBTExamList from "./pages/CBTExamList";
+import CBTExamCreate from "./pages/CBTExamCreate";
+import CBTExamManage from "./pages/CBTExamManage";
+import CBTExamView from "./pages/CBTExamView";
+import CBTExamTake from "./pages/CBTExamTake";
+import CBTSubmissions from "./pages/CBTSubmissions";
 
 const queryClient = new QueryClient();
 
