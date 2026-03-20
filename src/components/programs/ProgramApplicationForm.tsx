@@ -103,6 +103,14 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
             <Input id="phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
           </div>
           <div>
+            <Label htmlFor="age">Age *</Label>
+            <Input id="age" type="number" min="1" max="150" value={form.age} onChange={(e) => setForm({ ...form, age: e.target.value })} required />
+          </div>
+          <div>
+            <Label htmlFor="address">Address *</Label>
+            <Input id="address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} required />
+          </div>
+          <div>
             <Label>Experience Level</Label>
             <Select value={form.experience_level} onValueChange={(v) => setForm({ ...form, experience_level: v })}>
               <SelectTrigger><SelectValue placeholder="Select level" /></SelectTrigger>
