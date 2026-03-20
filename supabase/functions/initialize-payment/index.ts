@@ -105,6 +105,13 @@ Deno.serve(async (req) => {
       amount = second_tranche_amount;
     }
 
+    if (amount <= 0) {
+      return new Response(
+        JSON.stringify({ error: "This item is free and does not require payment" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const amountInKobo = Math.round(amount * 100);
 
     const callbackPath = entityType === "course" ? "/dashboard/courses" : "/dashboard/programs";
