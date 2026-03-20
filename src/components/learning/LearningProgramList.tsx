@@ -38,12 +38,14 @@ function computeStatus(opts: {
   payment_status: string | null;
   start_date: string | null;
   end_date: string | null;
+  program_status: string | null;
 }): ProgramStatus {
   const now = new Date();
   const started = opts.start_date ? new Date(opts.start_date) <= now : false;
   const ended = opts.end_date ? new Date(opts.end_date) < now : false;
+  const closed = opts.program_status === "closed";
 
-  if (ended && (opts.enrolled || opts.application_status === "approved")) return "ended";
+  if ((ended || closed)) return "ended";
   if (opts.enrolled && started) return "in-progress";
   if (opts.application_status === "approved" || opts.enrolled) return "admitted";
   return "applied";
