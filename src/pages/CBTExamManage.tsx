@@ -67,6 +67,7 @@ const CBTExamManage = () => {
         exam_type: exam.exam_type,
         course_id: exam.course_id || "",
         program_id: exam.program_id || "",
+        track: exam.track || "",
         start_time: exam.start_time ? new Date(exam.start_time).toISOString().slice(0, 16) : "",
         end_time: exam.end_time ? new Date(exam.end_time).toISOString().slice(0, 16) : "",
         duration_minutes: exam.duration_minutes,
