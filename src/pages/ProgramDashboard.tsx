@@ -52,7 +52,31 @@ const ProgramDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
 
   useEffect(() => {
-    if (programId && user) fetchAll();
+    if (programId && user) {
+      fetchAll();
+      // If returning from payment gateway, poll for webhook to update enrollment
+      const params = new URLSearchParams(window.location.search);
+      if (params.has("trxref") || params.has("reference")) {
+        let attempts = 0;
+        const poll = setInterval(async () => {
+          attempts++;
+          const { data } = await supabase
+            .from("program_enrollments")
+            .select("payment_status")
+            .eq("program_id", programId)
+            .eq("user_id", user.id)
+            .maybeSingle();
+          if (data && (data.payment_status === "paid" || data.payment_status === "partial")) {
+            clearInterval(poll);
+            fetchAll();
+            // Clean URL
+            window.history.replaceState({}, "", window.location.pathname);
+          }
+          if (attempts >= 15) clearInterval(poll);
+        }, 2000);
+        return () => clearInterval(poll);
+      }
+    }
   }, [programId, user]);
 
   const fetchAll = async () => {
