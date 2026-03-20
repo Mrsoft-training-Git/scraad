@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { DashboardLayout } from "@/components/DashboardLayout";
@@ -8,6 +8,7 @@ import { BookOpen, GraduationCap } from "lucide-react";
 import { usePayment } from "@/hooks/usePayment";
 import { LearningCourseList } from "@/components/learning/LearningCourseList";
 import { LearningProgramList } from "@/components/learning/LearningProgramList";
+import { useToast } from "@/hooks/use-toast";
 
 interface EnrolledCourse {
   id: string;
@@ -38,7 +39,10 @@ const Learning = () => {
   const [profile, setProfile] = useState<any>(null);
   const [enrolledCourses, setEnrolledCourses] = useState<EnrolledCourse[]>([]);
   const [loading, setLoading] = useState(true);
+  const [verifying, setVerifying] = useState(false);
+  const [defaultTab, setDefaultTab] = useState("courses");
   const navigate = useNavigate();
+  const { toast } = useToast();
   const { loading: paymentLoading } = usePayment();
 
   useEffect(() => {
@@ -54,6 +58,31 @@ const Learning = () => {
 
       setUserRole(roleData.data?.role || "student");
       if (profileData.data) setProfile(profileData.data);
+
+      // Verify payment if returning from Paystack
+      const params = new URLSearchParams(window.location.search);
+      const reference = params.get("trxref") || params.get("reference");
+      if (reference) {
+        setVerifying(true);
+        try {
+          const { data, error } = await supabase.functions.invoke("verify-payment", {
+            body: { reference },
+          });
+          if (data?.verified) {
+            toast({ title: "Payment Confirmed", description: "Your payment has been verified successfully." });
+            if (data.entityType === "program") {
+              setDefaultTab("programs");
+            }
+          }
+        } catch (err) {
+          console.error("Payment verification error:", err);
+        } finally {
+          setVerifying(false);
+          // Clean URL
+          window.history.replaceState({}, "", window.location.pathname);
+        }
+      }
+
       fetchEnrolledCourses(session.user.id);
     };
     checkAuth();
@@ -94,7 +123,7 @@ const Learning = () => {
           <p className="text-sm text-muted-foreground mt-0.5">Manage your enrolled courses and programs</p>
         </div>
 
-        <Tabs defaultValue="courses" className="w-full">
+        <Tabs defaultValue={defaultTab} className="w-full">
           <TabsList className="w-full sm:w-auto">
             <TabsTrigger value="courses" className="flex items-center gap-2">
               <BookOpen className="w-4 h-4" />
