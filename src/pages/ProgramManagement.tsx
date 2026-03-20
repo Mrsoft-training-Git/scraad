@@ -393,6 +393,22 @@ const ProgramFormFields = ({ form, setForm, instructors }: { form: any; setForm:
         Auto-computed Status: <Badge variant="secondary">{computeProgramStatus(form.start_date, form.end_date)}</Badge>
       </div>
     )}
+    {instructors && (
+      <div><Label>Assign Instructor</Label>
+        <Select value={form.instructor_id || "none"} onValueChange={v => {
+          const inst = instructors.find(i => i.id === v);
+          setForm({ ...form, instructor_id: v === "none" ? "" : v, instructor_name: inst ? (inst.full_name || inst.email || "") : "" });
+        }}>
+          <SelectTrigger><SelectValue placeholder="Select instructor" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">No instructor</SelectItem>
+            {instructors.map(inst => (
+              <SelectItem key={inst.id} value={inst.id}>{inst.full_name || inst.email || inst.id}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    )}
     <div><Label>Price (₦) *</Label><Input type="number" min="0" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="0" /></div>
     <div className="flex items-center gap-2">
       <input type="checkbox" id="allows_part_payment" checked={form.allows_part_payment} onChange={e => setForm({ ...form, allows_part_payment: e.target.checked })} className="rounded border-border" />
@@ -407,12 +423,6 @@ const ProgramFormFields = ({ form, setForm, instructors }: { form: any; setForm:
     {form.allows_part_payment && (
       <div><Label>Second Payment Due (days after first)</Label><Input type="number" min="1" value={form.second_payment_due_days} onChange={e => setForm({ ...form, second_payment_due_days: e.target.value })} placeholder="30" /></div>
     )}
-    <div><Label>Status</Label>
-      <Select value={form.status} onValueChange={v => setForm({ ...form, status: v })}>
-        <SelectTrigger><SelectValue /></SelectTrigger>
-        <SelectContent><SelectItem value="open">Open</SelectItem><SelectItem value="ongoing">Ongoing</SelectItem><SelectItem value="closed">Closed</SelectItem></SelectContent>
-      </Select>
-    </div>
   </>
 );
 
