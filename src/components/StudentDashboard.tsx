@@ -237,7 +237,7 @@ export const StudentDashboard = ({ userName }: { userName: string }) => {
           {recommended.slice(0, 4).map((course) => (
             <Link
               key={course.id}
-              to={`/programs/${course.id}`}
+              to={`/courses/${course.id}`}
               className="min-w-[260px] md:min-w-0 snap-start flex-shrink-0 md:flex-shrink group"
             >
               <Card className="overflow-hidden border border-border bg-card hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300 h-full">
