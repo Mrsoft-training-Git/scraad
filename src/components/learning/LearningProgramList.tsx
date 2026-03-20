@@ -20,6 +20,7 @@ interface LearningProgram {
   mode: string;
   start_date: string | null;
   end_date: string | null;
+  program_status: string | null;
   progress: number | null;
   payment_status: string | null;
   access_status: string | null;
