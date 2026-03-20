@@ -386,21 +386,11 @@ const ProgramFormFields = ({ form, setForm, instructors }: { form: any; setForm:
     <div className="grid grid-cols-2 gap-4">
       <div><Label>Location</Label><Input value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} /></div>
       <div><Label>Start Date</Label><Input type="date" value={form.start_date} onChange={e => setForm({ ...form, start_date: e.target.value })} /></div>
+      <div><Label>End Date</Label><Input type="date" value={form.end_date} onChange={e => setForm({ ...form, end_date: e.target.value })} /></div>
     </div>
-    {instructors && (
-      <div><Label>Assign Instructor</Label>
-        <Select value={form.instructor_id || "none"} onValueChange={v => {
-          const inst = instructors.find(i => i.id === v);
-          setForm({ ...form, instructor_id: v === "none" ? "" : v, instructor_name: inst ? (inst.full_name || inst.email || "") : "" });
-        }}>
-          <SelectTrigger><SelectValue placeholder="Select instructor" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="none">No instructor</SelectItem>
-            {instructors.map(inst => (
-              <SelectItem key={inst.id} value={inst.id}>{inst.full_name || inst.email || inst.id}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+    {form.start_date && form.end_date && (
+      <div className="text-sm text-muted-foreground">
+        Auto-computed Status: <Badge variant="secondary">{computeProgramStatus(form.start_date, form.end_date)}</Badge>
       </div>
     )}
     <div><Label>Price (₦) *</Label><Input type="number" min="0" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="0" /></div>
