@@ -116,7 +116,7 @@ const ProgramManagement = () => {
                             </div>
                             {program.short_description && <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{program.short_description}</p>}
                             <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-                              
+                              {program.track && <Badge variant="secondary" className="text-xs">{program.track}</Badge>}
                               {program.duration && <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{program.duration}</span>}
                             </div>
                           </div>
