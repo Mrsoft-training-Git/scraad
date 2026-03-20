@@ -82,7 +82,7 @@ export const LearningProgramList = ({ userId }: Props) => {
         .eq("user_id", userId),
       supabase
         .from("program_enrollments")
-        .select("id, program_id, status, progress, payment_status, access_status, program:programs(id, title, short_description, banner_image_url, duration, mode, start_date, end_date)")
+        .select("id, program_id, status, progress, payment_status, access_status, program:programs(id, title, short_description, banner_image_url, duration, mode, start_date, end_date, status)")
         .eq("user_id", userId),
     ]);
 
