@@ -291,6 +291,7 @@ export type Database = {
           shuffle_questions: boolean
           start_time: string
           title: string
+          track: string | null
           updated_at: string
         }
         Insert: {
@@ -310,6 +311,7 @@ export type Database = {
           shuffle_questions?: boolean
           start_time: string
           title: string
+          track?: string | null
           updated_at?: string
         }
         Update: {
@@ -329,6 +331,7 @@ export type Database = {
           shuffle_questions?: boolean
           start_time?: string
           title?: string
+          track?: string | null
           updated_at?: string
         }
         Relationships: [
