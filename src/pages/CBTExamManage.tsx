@@ -53,10 +53,11 @@ const CBTExamManage = () => {
   const [programs, setPrograms] = useState<any[]>([]);
   const [examForm, setExamForm] = useState({
     title: "", description: "", exam_type: "course" as "course" | "program",
-    course_id: "", program_id: "", start_time: "", end_time: "",
+    course_id: "", program_id: "", track: "", start_time: "", end_time: "",
     duration_minutes: 60, shuffle_questions: false, allow_retake: false,
     max_attempts: 1, auto_submit: true,
   });
+  const [tracks, setTracks] = useState<string[]>([]);
 
   useEffect(() => {
     if (exam) {
