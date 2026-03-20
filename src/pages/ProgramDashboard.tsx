@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,11 +10,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useDashboardAuth } from "@/hooks/useDashboardAuth";
+import { usePayment } from "@/hooks/usePayment";
 import { format } from "date-fns";
 import {
   BookOpen, Calendar, FileText, ClipboardList, BarChart3,
   CheckCircle, Clock, Upload, Loader2, Play, ArrowLeft,
-  Video, File, ExternalLink,
+  Video, File, ExternalLink, CreditCard, Wallet, Download,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -29,6 +30,10 @@ interface ProgramInfo {
   end_date: string | null;
   schedule: any;
   instructor_name: string | null;
+  price: number;
+  allows_part_payment: boolean;
+  first_tranche_amount: number | null;
+  second_tranche_amount: number | null;
 }
 
 const ProgramDashboard = () => {
