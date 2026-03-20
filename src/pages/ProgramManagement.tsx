@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,8 +21,10 @@ interface FullProgram {
   short_description: string | null; description: string | null; duration: string | null;
   location: string | null; banner_image_url: string | null; created_at: string;
   max_participants: number | null; learning_outcomes: string[] | null; requirements: string[] | null;
+  theme: string | null; track: string | null; instructor_id: string | null; instructor_name: string | null;
 }
 interface Application { id: string; program_id: string; user_id: string; full_name: string; email: string; phone: string | null; experience_level: string | null; motivation: string | null; cv_url: string | null; status: string; created_at: string; }
+interface InstructorOption { id: string; full_name: string | null; email: string | null; }
 
 const ProgramManagement = () => {
   const { toast } = useToast();
@@ -40,7 +43,7 @@ const ProgramManagement = () => {
 
   const fetchPrograms = async () => {
     const { data } = await supabase.from("programs").select("*").order("created_at", { ascending: false });
-    if (data) setPrograms(data as FullProgram[]);
+    if (data) setPrograms(data.map((d: any) => ({ ...d, theme: d.theme || null, track: d.track || null })) as FullProgram[]);
   };
 
   const fetchApplications = async () => {
@@ -80,6 +83,59 @@ const ProgramManagement = () => {
   };
 
   if (authLoading) return null;
+
+  // Instructor view: show only assigned programs with manage link
+  if (userRole === "instructor") {
+    const assignedPrograms = programs.filter(p => p.instructor_id === user?.id);
+    return (
+      <DashboardLayout user={user} userRole={userRole} profile={profile}>
+        <div className="space-y-6">
+          <div>
+            <h1 className="font-heading text-2xl font-bold">My Programs</h1>
+            <p className="text-sm text-muted-foreground">Programs assigned to you</p>
+          </div>
+          {assignedPrograms.length === 0 ? (
+            <Card className="border-border/60"><CardContent className="py-12 text-center text-muted-foreground">No programs assigned to you yet.</CardContent></Card>
+          ) : (
+            <div className="grid gap-4">
+              {assignedPrograms.map(program => (
+                <Card key={program.id} className="border-border/60 overflow-hidden hover:border-primary/20 transition-colors">
+                  <CardContent className="p-0">
+                    <div className="flex flex-col sm:flex-row">
+                      {program.banner_image_url && (
+                        <div className="sm:w-48 h-32 sm:h-auto flex-shrink-0">
+                          <img src={program.banner_image_url} alt={program.title} className="w-full h-full object-cover" />
+                        </div>
+                      )}
+                      <div className="flex-1 p-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className="font-semibold text-lg truncate">{program.title}</h3>
+                              {programStatusBadge(program.status)}
+                            </div>
+                            {program.short_description && <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{program.short_description}</p>}
+                            <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+                              {program.theme && <Badge variant="outline" className="text-xs">{program.theme}</Badge>}
+                              {program.track && <Badge variant="secondary" className="text-xs">{program.track}</Badge>}
+                              {program.duration && <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{program.duration}</span>}
+                            </div>
+                          </div>
+                          <Button size="sm" asChild>
+                            <Link to={`/dashboard/programs/${program.id}/manage`}>Manage</Link>
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout user={user} userRole={userRole} profile={profile}>
@@ -123,6 +179,15 @@ const ProgramManagement = () => {
                                 <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{program.short_description}</p>
                               )}
                               <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                                {program.theme && (
+                                  <Badge variant="outline" className="text-xs">{program.theme}</Badge>
+                                )}
+                                {program.track && (
+                                  <Badge variant="secondary" className="text-xs">{program.track}</Badge>
+                                )}
+                                {program.instructor_name && (
+                                  <span className="flex items-center gap-1"><Users className="w-3 h-3" />Instructor: {program.instructor_name}</span>
+                                )}
                                 {program.mode && (
                                   <span className="capitalize flex items-center gap-1">
                                     <Users className="w-3 h-3" />{program.mode}
@@ -298,9 +363,13 @@ const ImageUploadField = ({ imagePreview, onImageChange, onClear }: { imagePrevi
 );
 
 /* ─── Program Form Fields ─── */
-const ProgramFormFields = ({ form, setForm }: { form: any; setForm: (f: any) => void }) => (
+const ProgramFormFields = ({ form, setForm, instructors }: { form: any; setForm: (f: any) => void; instructors?: InstructorOption[] }) => (
   <>
     <div><Label>Title *</Label><Input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} required /></div>
+    <div className="grid grid-cols-2 gap-4">
+      <div><Label>Theme</Label><Input placeholder="e.g. Kids And Teens Bootcamp" value={form.theme} onChange={e => setForm({ ...form, theme: e.target.value })} /></div>
+      <div><Label>Track</Label><Input placeholder="e.g. Python Programming" value={form.track} onChange={e => setForm({ ...form, track: e.target.value })} /></div>
+    </div>
     <div><Label>Short Description</Label><Input value={form.short_description} onChange={e => setForm({ ...form, short_description: e.target.value })} /></div>
     <div><Label>Full Description</Label><Textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={3} /></div>
     <div className="grid grid-cols-2 gap-4">
@@ -316,6 +385,22 @@ const ProgramFormFields = ({ form, setForm }: { form: any; setForm: (f: any) => 
       <div><Label>Location</Label><Input value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} /></div>
       <div><Label>Start Date</Label><Input type="date" value={form.start_date} onChange={e => setForm({ ...form, start_date: e.target.value })} /></div>
     </div>
+    {instructors && (
+      <div><Label>Assign Instructor</Label>
+        <Select value={form.instructor_id || "none"} onValueChange={v => {
+          const inst = instructors.find(i => i.id === v);
+          setForm({ ...form, instructor_id: v === "none" ? "" : v, instructor_name: inst ? (inst.full_name || inst.email || "") : "" });
+        }}>
+          <SelectTrigger><SelectValue placeholder="Select instructor" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">No instructor</SelectItem>
+            {instructors.map(inst => (
+              <SelectItem key={inst.id} value={inst.id}>{inst.full_name || inst.email || inst.id}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    )}
     <div><Label>Price (₦) *</Label><Input type="number" min="0" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="0" /></div>
     <div className="flex items-center gap-2">
       <input type="checkbox" id="allows_part_payment" checked={form.allows_part_payment} onChange={e => setForm({ ...form, allows_part_payment: e.target.checked })} className="rounded border-border" />
@@ -355,7 +440,20 @@ const CreateProgramDialog = ({ open, onOpenChange, onCreated }: { open: boolean;
   const [submitting, setSubmitting] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [form, setForm] = useState({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", status: "open", price: "0", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "" });
+  const [instructors, setInstructors] = useState<InstructorOption[]>([]);
+  const [form, setForm] = useState({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", status: "open", price: "0", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "", theme: "", track: "", instructor_id: "", instructor_name: "" });
+
+  useEffect(() => {
+    if (open) fetchInstructors();
+  }, [open]);
+
+  const fetchInstructors = async () => {
+    const { data: roles } = await supabase.from("user_roles").select("user_id").eq("role", "instructor");
+    if (!roles || roles.length === 0) return;
+    const ids = roles.map(r => r.user_id);
+    const { data: profiles } = await supabase.from("profiles").select("id, full_name, email").in("id", ids);
+    if (profiles) setInstructors(profiles as InstructorOption[]);
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -379,12 +477,14 @@ const CreateProgramDialog = ({ open, onOpenChange, onCreated }: { open: boolean;
         first_tranche_amount: form.allows_part_payment && form.first_tranche_amount ? parseInt(form.first_tranche_amount) : null,
         second_tranche_amount: form.allows_part_payment && form.second_tranche_amount ? parseInt(form.second_tranche_amount) : null,
         second_payment_due_days: form.allows_part_payment && form.second_payment_due_days ? parseInt(form.second_payment_due_days) : null,
+        theme: form.theme.trim() || null, track: form.track.trim() || null,
+        instructor_id: form.instructor_id || null, instructor_name: form.instructor_name.trim() || null,
       });
       if (error) throw error;
       toast({ title: "Program created!" });
       onCreated();
       onOpenChange(false);
-      setForm({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", status: "open", price: "0", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "" });
+      setForm({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", status: "open", price: "0", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "", theme: "", track: "", instructor_id: "", instructor_name: "" });
       setImageFile(null);
       setImagePreview(null);
     } catch (err: any) {
@@ -398,7 +498,7 @@ const CreateProgramDialog = ({ open, onOpenChange, onCreated }: { open: boolean;
         <DialogHeader><DialogTitle>Create Training Program</DialogTitle><DialogDescription>Set up a new training program.</DialogDescription></DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <ImageUploadField imagePreview={imagePreview} onImageChange={handleImageChange} onClear={() => { setImageFile(null); setImagePreview(null); }} />
-          <ProgramFormFields form={form} setForm={setForm} />
+          <ProgramFormFields form={form} setForm={setForm} instructors={instructors} />
           <Button type="submit" className="w-full" disabled={submitting}>{submitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />} Create Program</Button>
         </form>
       </DialogContent>
@@ -412,7 +512,8 @@ const EditProgramDialog = ({ program, onOpenChange, onUpdated }: { program: Full
   const [submitting, setSubmitting] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [form, setForm] = useState({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", status: "open", price: "0", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "" });
+  const [instructors, setInstructors] = useState<InstructorOption[]>([]);
+  const [form, setForm] = useState({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", status: "open", price: "0", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "", theme: "", track: "", instructor_id: "", instructor_name: "" });
 
   useEffect(() => {
     if (program) {
@@ -430,11 +531,24 @@ const EditProgramDialog = ({ program, onOpenChange, onUpdated }: { program: Full
         first_tranche_amount: String((program as any).first_tranche_amount || ""),
         second_tranche_amount: String((program as any).second_tranche_amount || ""),
         second_payment_due_days: String((program as any).second_payment_due_days || ""),
+        theme: program.theme || "",
+        track: program.track || "",
+        instructor_id: program.instructor_id || "",
+        instructor_name: program.instructor_name || "",
       });
       setImagePreview(program.banner_image_url || null);
       setImageFile(null);
+      fetchInstructors();
     }
   }, [program]);
+
+  const fetchInstructors = async () => {
+    const { data: roles } = await supabase.from("user_roles").select("user_id").eq("role", "instructor");
+    if (!roles || roles.length === 0) return;
+    const ids = roles.map(r => r.user_id);
+    const { data: profiles } = await supabase.from("profiles").select("id, full_name, email").in("id", ids);
+    if (profiles) setInstructors(profiles as InstructorOption[]);
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -462,6 +576,8 @@ const EditProgramDialog = ({ program, onOpenChange, onUpdated }: { program: Full
         first_tranche_amount: form.allows_part_payment && form.first_tranche_amount ? parseInt(form.first_tranche_amount) : null,
         second_tranche_amount: form.allows_part_payment && form.second_tranche_amount ? parseInt(form.second_tranche_amount) : null,
         second_payment_due_days: form.allows_part_payment && form.second_payment_due_days ? parseInt(form.second_payment_due_days) : null,
+        theme: form.theme.trim() || null, track: form.track.trim() || null,
+        instructor_id: form.instructor_id || null, instructor_name: form.instructor_name.trim() || null,
       }).eq("id", program.id);
       if (error) throw error;
       toast({ title: "Program updated!" });
@@ -478,7 +594,7 @@ const EditProgramDialog = ({ program, onOpenChange, onUpdated }: { program: Full
         <DialogHeader><DialogTitle>Edit Program</DialogTitle><DialogDescription>Update program details.</DialogDescription></DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <ImageUploadField imagePreview={imagePreview} onImageChange={handleImageChange} onClear={() => { setImageFile(null); setImagePreview(null); }} />
-          <ProgramFormFields form={form} setForm={setForm} />
+          <ProgramFormFields form={form} setForm={setForm} instructors={instructors} />
           <Button type="submit" className="w-full" disabled={submitting}>{submitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />} Save Changes</Button>
         </form>
       </DialogContent>

@@ -41,6 +41,7 @@ import Enrollments from "./pages/Enrollments";
 import ResetPassword from "./pages/ResetPassword";
 import ProgramManagement from "./pages/ProgramManagement";
 import ProgramDashboard from "./pages/ProgramDashboard";
+import InstructorProgramManage from "./pages/InstructorProgramManage";
 import CBTExamList from "./pages/CBTExamList";
 import CBTExamCreate from "./pages/CBTExamCreate";
 import CBTExamManage from "./pages/CBTExamManage";
@@ -83,6 +84,7 @@ const App = () => (
           <Route path="/dashboard/roles" element={<RoleManagement />} />
           <Route path="/dashboard/programs" element={<ProgramManagement />} />
           <Route path="/dashboard/programs/:programId" element={<ProgramDashboard />} />
+          <Route path="/dashboard/programs/:programId/manage" element={<InstructorProgramManage />} />
           <Route path="/dashboard/users" element={<UserManagement />} />
           <Route path="/dashboard/cbt" element={<CBTExamList />} />
           <Route path="/dashboard/cbt/create" element={<CBTExamCreate />} />
