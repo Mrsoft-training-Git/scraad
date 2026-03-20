@@ -114,7 +114,7 @@ Deno.serve(async (req) => {
 
     const amountInKobo = Math.round(amount * 100);
 
-    const callbackPath = entityType === "course" ? "/dashboard/courses" : "/dashboard/programs";
+    const callbackPath = entityType === "course" ? "/dashboard/learning" : "/dashboard/learning";
 
     const paystackBody: any = {
       email,
