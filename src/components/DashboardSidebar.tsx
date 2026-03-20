@@ -2,7 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, BookOpen, FileText, GraduationCap, Calendar, CreditCard, User,
   BookMarked, Shield, Users, ChevronLeft, Briefcase, FileClock, Megaphone,
-  MessageSquare, ClipboardList, Video, UserPlus,
+  MessageSquare, ClipboardList, Video, UserPlus, Monitor,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
