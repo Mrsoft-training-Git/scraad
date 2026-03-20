@@ -127,7 +127,7 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
           </div>
           <div>
             <Label htmlFor="age">Age *</Label>
-            <Input id="age" type="number" min="10" max="150" value={form.age} onChange={(e) => setForm({ ...form, age: e.target.value })} required />
+            <Input id="age" type="number" min="1" max="150" value={form.age} onChange={(e) => setForm({ ...form, age: e.target.value })} required />
           </div>
           <div>
             <Label htmlFor="address">Address *</Label>
