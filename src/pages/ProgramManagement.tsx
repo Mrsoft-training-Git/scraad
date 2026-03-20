@@ -42,7 +42,7 @@ const ProgramManagement = () => {
 
   const fetchPrograms = async () => {
     const { data } = await supabase.from("programs").select("*").order("created_at", { ascending: false });
-    if (data) setPrograms(data as FullProgram[]);
+    if (data) setPrograms(data.map((d: any) => ({ ...d, theme: d.theme || null, track: d.track || null })) as FullProgram[]);
   };
 
   const fetchApplications = async () => {
