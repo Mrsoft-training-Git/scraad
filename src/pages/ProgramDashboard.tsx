@@ -103,6 +103,10 @@ const ProgramDashboard = () => {
     );
   }
 
+  const paymentStatus = enrollment.payment_status || "unpaid";
+  const hasPaid = paymentStatus === "paid";
+  const isPartial = paymentStatus === "partial";
+
   const completedAssignments = assignments.filter(a =>
     submissions.some(s => s.assignment_id === a.id && s.status === "graded")
   ).length;
