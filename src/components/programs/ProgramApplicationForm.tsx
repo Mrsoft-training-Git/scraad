@@ -60,6 +60,8 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
         full_name: form.full_name.trim(),
         email: form.email.trim(),
         phone: form.phone.trim() || null,
+        age: form.age ? parseInt(form.age) : null,
+        address: form.address.trim() || null,
         experience_level: form.experience_level || null,
         motivation: form.motivation.trim() || null,
         cv_url,
