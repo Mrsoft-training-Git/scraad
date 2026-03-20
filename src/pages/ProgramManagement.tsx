@@ -572,7 +572,7 @@ const EditProgramDialog = ({ program, onOpenChange, onUpdated }: { program: Full
 
       const { error } = await supabase.from("programs").update({
         title: form.title.trim(), short_description: form.short_description.trim() || null, description: form.description.trim() || null,
-        duration: form.duration.trim() || null, mode: form.mode, location: form.location.trim() || null, start_date: form.start_date || null, status: form.status,
+        duration: form.duration.trim() || null, mode: form.mode, location: form.location.trim() || null, start_date: form.start_date || null, end_date: form.end_date || null, status: computeProgramStatus(form.start_date, form.end_date),
         banner_image_url: bannerUrl, price: parseFloat(form.price) || 0, allows_part_payment: form.allows_part_payment,
         first_tranche_amount: form.allows_part_payment && form.first_tranche_amount ? parseInt(form.first_tranche_amount) : null,
         second_tranche_amount: form.allows_part_payment && form.second_tranche_amount ? parseInt(form.second_tranche_amount) : null,
