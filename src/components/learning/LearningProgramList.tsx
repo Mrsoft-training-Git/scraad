@@ -20,6 +20,7 @@ interface LearningProgram {
   mode: string;
   start_date: string | null;
   end_date: string | null;
+  program_status: string | null;
   progress: number | null;
   payment_status: string | null;
   access_status: string | null;
@@ -38,12 +39,14 @@ function computeStatus(opts: {
   payment_status: string | null;
   start_date: string | null;
   end_date: string | null;
+  program_status: string | null;
 }): ProgramStatus {
   const now = new Date();
   const started = opts.start_date ? new Date(opts.start_date) <= now : false;
   const ended = opts.end_date ? new Date(opts.end_date) < now : false;
+  const closed = opts.program_status === "closed";
 
-  if (ended && (opts.enrolled || opts.application_status === "approved")) return "ended";
+  if ((ended || closed)) return "ended";
   if (opts.enrolled && started) return "in-progress";
   if (opts.application_status === "approved" || opts.enrolled) return "admitted";
   return "applied";
@@ -75,11 +78,11 @@ export const LearningProgramList = ({ userId }: Props) => {
     const [appRes, enrollRes] = await Promise.all([
       supabase
         .from("program_applications")
-        .select("id, program_id, status, program:programs(id, title, short_description, banner_image_url, duration, mode, start_date, end_date)")
+        .select("id, program_id, status, program:programs(id, title, short_description, banner_image_url, duration, mode, start_date, end_date, status)")
         .eq("user_id", userId),
       supabase
         .from("program_enrollments")
-        .select("id, program_id, status, progress, payment_status, access_status, program:programs(id, title, short_description, banner_image_url, duration, mode, start_date, end_date)")
+        .select("id, program_id, status, progress, payment_status, access_status, program:programs(id, title, short_description, banner_image_url, duration, mode, start_date, end_date, status)")
         .eq("user_id", userId),
     ]);
 
@@ -100,6 +103,7 @@ export const LearningProgramList = ({ userId }: Props) => {
           mode: prog.mode,
           start_date: prog.start_date,
           end_date: prog.end_date,
+          program_status: prog.status,
           progress: null,
           payment_status: null,
           access_status: null,
@@ -126,6 +130,7 @@ export const LearningProgramList = ({ userId }: Props) => {
           mode: prog.mode,
           start_date: prog.start_date,
           end_date: prog.end_date,
+          program_status: prog.status,
           progress: enr.progress,
           payment_status: enr.payment_status,
           access_status: enr.access_status,
@@ -145,6 +150,7 @@ export const LearningProgramList = ({ userId }: Props) => {
         payment_status: p.payment_status,
         start_date: p.start_date,
         end_date: p.end_date,
+        program_status: p.program_status,
       }),
     }));
 
