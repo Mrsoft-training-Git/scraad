@@ -26,6 +26,8 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
     full_name: "",
     email: userEmail,
     phone: "",
+    age: "",
+    address: "",
     experience_level: "",
     motivation: "",
   });
@@ -58,6 +60,8 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
         full_name: form.full_name.trim(),
         email: form.email.trim(),
         phone: form.phone.trim() || null,
+        age: form.age ? parseInt(form.age) : null,
+        address: form.address.trim() || null,
         experience_level: form.experience_level || null,
         motivation: form.motivation.trim() || null,
         cv_url,
@@ -99,6 +103,14 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
           <div>
             <Label htmlFor="phone">Phone Number</Label>
             <Input id="phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+          </div>
+          <div>
+            <Label htmlFor="age">Age *</Label>
+            <Input id="age" type="number" min="1" max="150" value={form.age} onChange={(e) => setForm({ ...form, age: e.target.value })} required />
+          </div>
+          <div>
+            <Label htmlFor="address">Address *</Label>
+            <Input id="address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} required />
           </div>
           <div>
             <Label>Experience Level</Label>

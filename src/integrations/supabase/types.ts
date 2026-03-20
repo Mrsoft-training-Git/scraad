@@ -1285,6 +1285,8 @@ export type Database = {
       }
       program_applications: {
         Row: {
+          address: string | null
+          age: number | null
           created_at: string
           cv_url: string | null
           email: string
@@ -1301,6 +1303,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          address?: string | null
+          age?: number | null
           created_at?: string
           cv_url?: string | null
           email: string
@@ -1317,6 +1321,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          address?: string | null
+          age?: number | null
           created_at?: string
           cv_url?: string | null
           email?: string
