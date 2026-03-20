@@ -275,13 +275,22 @@ const CBTExamManage = () => {
                 )}
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div><Label>Start Time *</Label><Input type="datetime-local" value={examForm.start_time} onChange={e => setExamForm({ ...examForm, start_time: e.target.value })} /></div>
-                <div><Label>End Time *</Label><Input type="datetime-local" value={examForm.end_time} onChange={e => setExamForm({ ...examForm, end_time: e.target.value })} /></div>
+                <div><Label>Start Time *</Label><Input type="datetime-local" value={examForm.start_time} onChange={e => {
+                  const start = e.target.value;
+                  const updated = { ...examForm, start_time: start };
+                  if (start && examForm.end_time) updated.duration_minutes = Math.max(1, Math.round((new Date(examForm.end_time).getTime() - new Date(start).getTime()) / 60000));
+                  setExamForm(updated);
+                }} /></div>
+                <div><Label>End Time *</Label><Input type="datetime-local" value={examForm.end_time} onChange={e => {
+                  const end = e.target.value;
+                  const updated = { ...examForm, end_time: end };
+                  if (examForm.start_time && end) updated.duration_minutes = Math.max(1, Math.round((new Date(end).getTime() - new Date(examForm.start_time).getTime()) / 60000));
+                  setExamForm(updated);
+                }} /></div>
               </div>
-              <div>
-                <Label>Duration (minutes)</Label>
-                <Input type="number" min={1} value={examForm.duration_minutes} onChange={e => setExamForm({ ...examForm, duration_minutes: parseInt(e.target.value) || 60 })} />
-              </div>
+              {examForm.start_time && examForm.end_time && (
+                <p className="text-sm text-muted-foreground">Duration: <strong>{examForm.duration_minutes} minutes</strong> (auto-calculated)</p>
+              )}
               <div className="space-y-3">
                 <div className="flex items-center justify-between"><Label>Shuffle Questions</Label><Switch checked={examForm.shuffle_questions} onCheckedChange={v => setExamForm({ ...examForm, shuffle_questions: v })} /></div>
                 <div className="flex items-center justify-between"><Label>Allow Retake</Label><Switch checked={examForm.allow_retake} onCheckedChange={v => setExamForm({ ...examForm, allow_retake: v })} /></div>
