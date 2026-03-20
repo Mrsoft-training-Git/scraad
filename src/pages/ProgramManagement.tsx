@@ -300,9 +300,13 @@ const ImageUploadField = ({ imagePreview, onImageChange, onClear }: { imagePrevi
 );
 
 /* ─── Program Form Fields ─── */
-const ProgramFormFields = ({ form, setForm }: { form: any; setForm: (f: any) => void }) => (
+const ProgramFormFields = ({ form, setForm, instructors }: { form: any; setForm: (f: any) => void; instructors?: InstructorOption[] }) => (
   <>
     <div><Label>Title *</Label><Input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} required /></div>
+    <div className="grid grid-cols-2 gap-4">
+      <div><Label>Theme</Label><Input placeholder="e.g. Kids And Teens Bootcamp" value={form.theme} onChange={e => setForm({ ...form, theme: e.target.value })} /></div>
+      <div><Label>Track</Label><Input placeholder="e.g. Python Programming" value={form.track} onChange={e => setForm({ ...form, track: e.target.value })} /></div>
+    </div>
     <div><Label>Short Description</Label><Input value={form.short_description} onChange={e => setForm({ ...form, short_description: e.target.value })} /></div>
     <div><Label>Full Description</Label><Textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={3} /></div>
     <div className="grid grid-cols-2 gap-4">
@@ -318,6 +322,22 @@ const ProgramFormFields = ({ form, setForm }: { form: any; setForm: (f: any) => 
       <div><Label>Location</Label><Input value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} /></div>
       <div><Label>Start Date</Label><Input type="date" value={form.start_date} onChange={e => setForm({ ...form, start_date: e.target.value })} /></div>
     </div>
+    {instructors && (
+      <div><Label>Assign Instructor</Label>
+        <Select value={form.instructor_id || "none"} onValueChange={v => {
+          const inst = instructors.find(i => i.id === v);
+          setForm({ ...form, instructor_id: v === "none" ? "" : v, instructor_name: inst ? (inst.full_name || inst.email || "") : "" });
+        }}>
+          <SelectTrigger><SelectValue placeholder="Select instructor" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">No instructor</SelectItem>
+            {instructors.map(inst => (
+              <SelectItem key={inst.id} value={inst.id}>{inst.full_name || inst.email || inst.id}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    )}
     <div><Label>Price (₦) *</Label><Input type="number" min="0" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="0" /></div>
     <div className="flex items-center gap-2">
       <input type="checkbox" id="allows_part_payment" checked={form.allows_part_payment} onChange={e => setForm({ ...form, allows_part_payment: e.target.checked })} className="rounded border-border" />
