@@ -11,8 +11,9 @@ export const usePayment = (options?: UsePaymentOptions) => {
   const { toast } = useToast();
 
   const initializePayment = async (
-    courseId: string,
-    paymentType: "full" | "first" | "second"
+    entityId: string,
+    paymentType: "full" | "first" | "second",
+    entityType: "course" | "program" = "course"
   ) => {
     setLoading(true);
     try {
@@ -26,20 +27,26 @@ export const usePayment = (options?: UsePaymentOptions) => {
         return;
       }
 
-      // Fetch user's full name from profile
       const { data: profile } = await supabase
         .from("profiles")
         .select("full_name")
         .eq("id", user.id)
         .single();
 
+      const body: any = {
+        email: user.email,
+        paymentType,
+        fullName: profile?.full_name || user.email,
+      };
+
+      if (entityType === "course") {
+        body.courseId = entityId;
+      } else {
+        body.programId = entityId;
+      }
+
       const { data, error } = await supabase.functions.invoke("initialize-payment", {
-        body: {
-          email: user.email,
-          courseId,
-          paymentType,
-          fullName: profile?.full_name || user.email,
-        },
+        body,
       });
 
       if (error) throw error;
