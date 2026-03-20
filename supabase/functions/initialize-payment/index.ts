@@ -146,7 +146,6 @@ Deno.serve(async (req) => {
     });
 
     const paystackData = await paystackResponse.json();
-    console.log("Paystack response status:", paystackResponse.status, "data:", JSON.stringify(paystackData));
 
     if (!paystackData.status) {
       return new Response(
