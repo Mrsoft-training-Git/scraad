@@ -29,6 +29,9 @@ interface Program {
   learning_outcomes: string[];
   schedule: any;
   instructor_name: string | null;
+  price: number;
+  allows_part_payment: boolean;
+  first_tranche_amount: number | null;
 }
 
 const modeLabels: Record<string, { label: string; icon: React.ReactNode }> = {
@@ -269,6 +272,16 @@ const ProgramDetails = () => {
                     </div>
                   ) : program.status === "open" ? (
                     <>
+                      {program.price > 0 && (
+                        <div className="text-center mb-3">
+                          <p className="text-3xl font-bold text-primary">₦{program.price.toLocaleString()}</p>
+                          {program.allows_part_payment && program.first_tranche_amount && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Or pay in installments from ₦{program.first_tranche_amount.toLocaleString()}
+                            </p>
+                          )}
+                        </div>
+                      )}
                       <Button onClick={handleApplyClick} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6 text-lg">
                         Apply for Program
                       </Button>

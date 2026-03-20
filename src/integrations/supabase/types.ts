@@ -1398,29 +1398,44 @@ export type Database = {
       }
       program_enrollments: {
         Row: {
+          access_status: string
           completed_at: string | null
           enrolled_at: string
+          first_payment_date: string | null
           id: string
+          payment_status: string
           program_id: string
           progress: number | null
+          second_payment_date: string | null
+          second_payment_due_date: string | null
           status: string
           user_id: string
         }
         Insert: {
+          access_status?: string
           completed_at?: string | null
           enrolled_at?: string
+          first_payment_date?: string | null
           id?: string
+          payment_status?: string
           program_id: string
           progress?: number | null
+          second_payment_date?: string | null
+          second_payment_due_date?: string | null
           status?: string
           user_id: string
         }
         Update: {
+          access_status?: string
           completed_at?: string | null
           enrolled_at?: string
+          first_payment_date?: string | null
           id?: string
+          payment_status?: string
           program_id?: string
           progress?: number | null
+          second_payment_date?: string | null
+          second_payment_due_date?: string | null
           status?: string
           user_id?: string
         }
@@ -1657,12 +1672,14 @@ export type Database = {
       }
       programs: {
         Row: {
+          allows_part_payment: boolean
           banner_image_url: string | null
           created_at: string
           created_by: string | null
           description: string | null
           duration: string | null
           end_date: string | null
+          first_tranche_amount: number | null
           id: string
           instructor_id: string | null
           instructor_name: string | null
@@ -1670,8 +1687,11 @@ export type Database = {
           location: string | null
           max_participants: number | null
           mode: string
+          price: number
           requirements: string[] | null
           schedule: Json | null
+          second_payment_due_days: number | null
+          second_tranche_amount: number | null
           short_description: string | null
           start_date: string | null
           status: string
@@ -1679,12 +1699,14 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          allows_part_payment?: boolean
           banner_image_url?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
           duration?: string | null
           end_date?: string | null
+          first_tranche_amount?: number | null
           id?: string
           instructor_id?: string | null
           instructor_name?: string | null
@@ -1692,8 +1714,11 @@ export type Database = {
           location?: string | null
           max_participants?: number | null
           mode?: string
+          price?: number
           requirements?: string[] | null
           schedule?: Json | null
+          second_payment_due_days?: number | null
+          second_tranche_amount?: number | null
           short_description?: string | null
           start_date?: string | null
           status?: string
@@ -1701,12 +1726,14 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          allows_part_payment?: boolean
           banner_image_url?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
           duration?: string | null
           end_date?: string | null
+          first_tranche_amount?: number | null
           id?: string
           instructor_id?: string | null
           instructor_name?: string | null
@@ -1714,8 +1741,11 @@ export type Database = {
           location?: string | null
           max_participants?: number | null
           mode?: string
+          price?: number
           requirements?: string[] | null
           schedule?: Json | null
+          second_payment_due_days?: number | null
+          second_tranche_amount?: number | null
           short_description?: string | null
           start_date?: string | null
           status?: string

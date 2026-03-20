@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,11 +10,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useDashboardAuth } from "@/hooks/useDashboardAuth";
+import { usePayment } from "@/hooks/usePayment";
 import { format } from "date-fns";
 import {
   BookOpen, Calendar, FileText, ClipboardList, BarChart3,
   CheckCircle, Clock, Upload, Loader2, Play, ArrowLeft,
-  Video, File, ExternalLink,
+  Video, File, ExternalLink, CreditCard, Wallet, Download,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -29,6 +30,10 @@ interface ProgramInfo {
   end_date: string | null;
   schedule: any;
   instructor_name: string | null;
+  price: number;
+  allows_part_payment: boolean;
+  first_tranche_amount: number | null;
+  second_tranche_amount: number | null;
 }
 
 const ProgramDashboard = () => {
@@ -98,6 +103,10 @@ const ProgramDashboard = () => {
     );
   }
 
+  const paymentStatus = enrollment.payment_status || "unpaid";
+  const hasPaid = paymentStatus === "paid";
+  const isPartial = paymentStatus === "partial";
+
   const completedAssignments = assignments.filter(a =>
     submissions.some(s => s.assignment_id === a.id && s.status === "graded")
   ).length;
@@ -123,6 +132,20 @@ const ProgramDashboard = () => {
             <Badge className="capitalize">{program.mode}</Badge>
           </div>
         </div>
+
+        {/* Payment Section */}
+        {!hasPaid && (
+          <ProgramPaymentCard
+            program={program}
+            paymentStatus={paymentStatus}
+            onPaymentComplete={fetchAll}
+          />
+        )}
+
+        {/* Admission Letter */}
+        {hasPaid && (
+          <AdmissionLetterCard program={program} profile={profile} enrollment={enrollment} />
+        )}
 
         {/* Progress Bar */}
         <Card className="border-border/60">
@@ -427,6 +450,141 @@ const ExamsList = ({ exams, results, onComplete }: { exams: any[]; results: any[
         );
       })}
     </div>
+  );
+};
+
+/* ─── Program Payment Card ─── */
+const ProgramPaymentCard = ({ program, paymentStatus, onPaymentComplete }: { program: ProgramInfo; paymentStatus: string; onPaymentComplete: () => void }) => {
+  const { initializePayment, loading } = usePayment({ onSuccess: onPaymentComplete });
+
+  return (
+    <Card className="border-primary/30 bg-primary/5">
+      <CardContent className="p-6">
+        <h3 className="font-heading text-lg font-bold mb-2">
+          {paymentStatus === "unpaid" ? "Complete Your Payment" : "Complete Second Payment"}
+        </h3>
+        <p className="text-sm text-muted-foreground mb-4">
+          {paymentStatus === "unpaid"
+            ? "You've been admitted! Please complete payment to access program content."
+            : "Your first payment has been received. Please complete the second installment."}
+        </p>
+        <div className="space-y-2">
+          {paymentStatus === "unpaid" && (
+            <>
+              <Button
+                className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground"
+                onClick={() => initializePayment(program.id, "full", "program")}
+                disabled={loading}
+              >
+                <Wallet className="w-4 h-4 mr-2" />
+                {loading ? "Processing..." : `Pay Full Amount — ₦${program.price.toLocaleString()}`}
+              </Button>
+              {program.allows_part_payment && program.first_tranche_amount && (
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => initializePayment(program.id, "first", "program")}
+                  disabled={loading}
+                >
+                  <CreditCard className="w-4 h-4 mr-2" />
+                  {loading ? "Processing..." : `Pay First Tranche — ₦${program.first_tranche_amount.toLocaleString()}`}
+                </Button>
+              )}
+            </>
+          )}
+          {(paymentStatus === "partial" || paymentStatus === "defaulted") && program.second_tranche_amount && (
+            <Button
+              className="w-full"
+              onClick={() => initializePayment(program.id, "second", "program")}
+              disabled={loading}
+            >
+              <CreditCard className="w-4 h-4 mr-2" />
+              {loading ? "Processing..." : `Pay Second Tranche — ₦${program.second_tranche_amount.toLocaleString()}`}
+            </Button>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+/* ─── Admission Letter Card ─── */
+const AdmissionLetterCard = ({ program, profile, enrollment }: { program: ProgramInfo; profile: any; enrollment: any }) => {
+  const handleDownload = () => {
+    const studentName = profile?.full_name || "Student";
+    const enrolledDate = enrollment?.enrolled_at ? format(new Date(enrollment.enrolled_at), "MMMM d, yyyy") : format(new Date(), "MMMM d, yyyy");
+    const startDate = program.start_date ? format(new Date(program.start_date), "MMMM d, yyyy") : "TBD";
+
+    const letterHtml = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Admission Letter - ${program.title}</title>
+        <style>
+          body { font-family: 'Georgia', serif; max-width: 700px; margin: 40px auto; padding: 40px; line-height: 1.8; color: #1a1a1a; }
+          .header { text-align: center; border-bottom: 3px double #2563eb; padding-bottom: 20px; margin-bottom: 30px; }
+          .header h1 { font-size: 24px; color: #2563eb; margin: 0; }
+          .header p { color: #666; margin: 5px 0 0; }
+          .date { text-align: right; margin-bottom: 20px; color: #555; }
+          .body { margin-bottom: 30px; }
+          .body p { margin: 12px 0; }
+          .highlight { background: #eff6ff; padding: 16px 20px; border-left: 4px solid #2563eb; border-radius: 4px; margin: 20px 0; }
+          .highlight strong { color: #2563eb; }
+          .footer { margin-top: 40px; border-top: 1px solid #ddd; padding-top: 20px; }
+          .signature { margin-top: 30px; }
+          @media print { body { margin: 0; padding: 20px; } }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>ScraAd Academy</h1>
+          <p>Training & Development</p>
+        </div>
+        <div class="date">${enrolledDate}</div>
+        <div class="body">
+          <p>Dear <strong>${studentName}</strong>,</p>
+          <p>We are pleased to inform you that you have been <strong>admitted</strong> into the following program:</p>
+          <div class="highlight">
+            <strong>Program:</strong> ${program.title}<br/>
+            <strong>Mode:</strong> ${program.mode.charAt(0).toUpperCase() + program.mode.slice(1)}<br/>
+            ${program.location ? `<strong>Location:</strong> ${program.location}<br/>` : ""}
+            ${program.duration ? `<strong>Duration:</strong> ${program.duration}<br/>` : ""}
+            <strong>Start Date:</strong> ${startDate}
+          </div>
+          <p>Your payment has been confirmed and your enrollment is now active. You now have full access to all program materials, assignments, and examinations.</p>
+          <p>We look forward to supporting you throughout your learning journey. Please ensure you log in regularly to stay up to date with your program schedule and assignments.</p>
+          <p>Congratulations and welcome aboard!</p>
+        </div>
+        <div class="footer">
+          <div class="signature">
+            <p>Warm regards,</p>
+            <p><strong>The Admissions Team</strong><br/>ScraAd Academy</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const printWindow = window.open("", "_blank");
+    if (printWindow) {
+      printWindow.document.write(letterHtml);
+      printWindow.document.close();
+      setTimeout(() => printWindow.print(), 500);
+    }
+  };
+
+  return (
+    <Card className="border-green-500/30 bg-green-500/5">
+      <CardContent className="p-4 flex items-center justify-between">
+        <div>
+          <h3 className="font-semibold text-green-700">✅ Payment Complete</h3>
+          <p className="text-sm text-muted-foreground">Your admission is confirmed. Download your admission letter below.</p>
+        </div>
+        <Button variant="outline" onClick={handleDownload}>
+          <Download className="w-4 h-4 mr-2" /> Admission Letter
+        </Button>
+      </CardContent>
+    </Card>
   );
 };
 

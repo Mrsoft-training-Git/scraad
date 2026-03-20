@@ -316,6 +316,20 @@ const ProgramFormFields = ({ form, setForm }: { form: any; setForm: (f: any) => 
       <div><Label>Location</Label><Input value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} /></div>
       <div><Label>Start Date</Label><Input type="date" value={form.start_date} onChange={e => setForm({ ...form, start_date: e.target.value })} /></div>
     </div>
+    <div><Label>Price (₦) *</Label><Input type="number" min="0" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="0" /></div>
+    <div className="flex items-center gap-2">
+      <input type="checkbox" id="allows_part_payment" checked={form.allows_part_payment} onChange={e => setForm({ ...form, allows_part_payment: e.target.checked })} className="rounded border-border" />
+      <Label htmlFor="allows_part_payment">Allow Part Payment (Installments)</Label>
+    </div>
+    {form.allows_part_payment && (
+      <div className="grid grid-cols-2 gap-4">
+        <div><Label>First Tranche (₦)</Label><Input type="number" min="0" value={form.first_tranche_amount} onChange={e => setForm({ ...form, first_tranche_amount: e.target.value })} /></div>
+        <div><Label>Second Tranche (₦)</Label><Input type="number" min="0" value={form.second_tranche_amount} onChange={e => setForm({ ...form, second_tranche_amount: e.target.value })} /></div>
+      </div>
+    )}
+    {form.allows_part_payment && (
+      <div><Label>Second Payment Due (days after first)</Label><Input type="number" min="1" value={form.second_payment_due_days} onChange={e => setForm({ ...form, second_payment_due_days: e.target.value })} placeholder="30" /></div>
+    )}
     <div><Label>Status</Label>
       <Select value={form.status} onValueChange={v => setForm({ ...form, status: v })}>
         <SelectTrigger><SelectValue /></SelectTrigger>
@@ -341,7 +355,7 @@ const CreateProgramDialog = ({ open, onOpenChange, onCreated }: { open: boolean;
   const [submitting, setSubmitting] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [form, setForm] = useState({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", status: "open" });
+  const [form, setForm] = useState({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", status: "open", price: "0", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "" });
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -361,13 +375,16 @@ const CreateProgramDialog = ({ open, onOpenChange, onCreated }: { open: boolean;
       const { error } = await supabase.from("programs").insert({
         title: form.title.trim(), short_description: form.short_description.trim() || null, description: form.description.trim() || null,
         duration: form.duration.trim() || null, mode: form.mode, location: form.location.trim() || null, start_date: form.start_date || null, status: form.status,
-        banner_image_url: bannerUrl,
+        banner_image_url: bannerUrl, price: parseFloat(form.price) || 0, allows_part_payment: form.allows_part_payment,
+        first_tranche_amount: form.allows_part_payment && form.first_tranche_amount ? parseInt(form.first_tranche_amount) : null,
+        second_tranche_amount: form.allows_part_payment && form.second_tranche_amount ? parseInt(form.second_tranche_amount) : null,
+        second_payment_due_days: form.allows_part_payment && form.second_payment_due_days ? parseInt(form.second_payment_due_days) : null,
       });
       if (error) throw error;
       toast({ title: "Program created!" });
       onCreated();
       onOpenChange(false);
-      setForm({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", status: "open" });
+      setForm({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", status: "open", price: "0", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "" });
       setImageFile(null);
       setImagePreview(null);
     } catch (err: any) {
@@ -395,7 +412,7 @@ const EditProgramDialog = ({ program, onOpenChange, onUpdated }: { program: Full
   const [submitting, setSubmitting] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [form, setForm] = useState({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", status: "open" });
+  const [form, setForm] = useState({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", status: "open", price: "0", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "" });
 
   useEffect(() => {
     if (program) {
@@ -408,6 +425,11 @@ const EditProgramDialog = ({ program, onOpenChange, onUpdated }: { program: Full
         location: program.location || "",
         start_date: program.start_date || "",
         status: program.status || "open",
+        price: String((program as any).price || "0"),
+        allows_part_payment: (program as any).allows_part_payment || false,
+        first_tranche_amount: String((program as any).first_tranche_amount || ""),
+        second_tranche_amount: String((program as any).second_tranche_amount || ""),
+        second_payment_due_days: String((program as any).second_payment_due_days || ""),
       });
       setImagePreview(program.banner_image_url || null);
       setImageFile(null);
@@ -436,7 +458,10 @@ const EditProgramDialog = ({ program, onOpenChange, onUpdated }: { program: Full
       const { error } = await supabase.from("programs").update({
         title: form.title.trim(), short_description: form.short_description.trim() || null, description: form.description.trim() || null,
         duration: form.duration.trim() || null, mode: form.mode, location: form.location.trim() || null, start_date: form.start_date || null, status: form.status,
-        banner_image_url: bannerUrl,
+        banner_image_url: bannerUrl, price: parseFloat(form.price) || 0, allows_part_payment: form.allows_part_payment,
+        first_tranche_amount: form.allows_part_payment && form.first_tranche_amount ? parseInt(form.first_tranche_amount) : null,
+        second_tranche_amount: form.allows_part_payment && form.second_tranche_amount ? parseInt(form.second_tranche_amount) : null,
+        second_payment_due_days: form.allows_part_payment && form.second_payment_due_days ? parseInt(form.second_payment_due_days) : null,
       }).eq("id", program.id);
       if (error) throw error;
       toast({ title: "Program updated!" });

@@ -20,11 +20,14 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { email, courseId, paymentType, fullName } = await req.json();
+    const { email, courseId, programId, paymentType, fullName } = await req.json();
 
-    if (!email || !courseId || !paymentType) {
+    const entityId = courseId || programId;
+    const entityType = courseId ? "course" : "program";
+
+    if (!email || !entityId || !paymentType) {
       return new Response(
-        JSON.stringify({ error: "Missing required fields: email, courseId, paymentType" }),
+        JSON.stringify({ error: "Missing required fields" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -40,51 +43,81 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { data: course, error: courseError } = await supabase
-      .from("courses")
-      .select("id, title, price, allows_part_payment, first_tranche_amount, second_tranche_amount")
-      .eq("id", courseId)
-      .single();
+    let title: string;
+    let price: number;
+    let allows_part_payment: boolean;
+    let first_tranche_amount: number | null;
+    let second_tranche_amount: number | null;
 
-    if (courseError || !course) {
-      return new Response(
-        JSON.stringify({ error: "Course not found" }),
-        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    if (entityType === "course") {
+      const { data: course, error: courseError } = await supabase
+        .from("courses")
+        .select("id, title, price, allows_part_payment, first_tranche_amount, second_tranche_amount")
+        .eq("id", entityId)
+        .single();
+
+      if (courseError || !course) {
+        return new Response(JSON.stringify({ error: "Course not found" }),
+          { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      title = course.title;
+      price = course.price;
+      allows_part_payment = course.allows_part_payment;
+      first_tranche_amount = course.first_tranche_amount;
+      second_tranche_amount = course.second_tranche_amount;
+    } else {
+      const { data: program, error: programError } = await supabase
+        .from("programs")
+        .select("id, title, price, allows_part_payment, first_tranche_amount, second_tranche_amount")
+        .eq("id", entityId)
+        .single();
+
+      if (programError || !program) {
+        return new Response(JSON.stringify({ error: "Program not found" }),
+          { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      title = program.title;
+      price = program.price;
+      allows_part_payment = program.allows_part_payment;
+      first_tranche_amount = program.first_tranche_amount;
+      second_tranche_amount = program.second_tranche_amount;
     }
 
     let amount: number;
 
     if (paymentType === "full") {
-      amount = course.price;
+      amount = price;
     } else if (paymentType === "first") {
-      if (!course.allows_part_payment || !course.first_tranche_amount) {
+      if (!allows_part_payment || !first_tranche_amount) {
         return new Response(
-          JSON.stringify({ error: "This course does not support part payment" }),
+          JSON.stringify({ error: "This does not support part payment" }),
           { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      amount = course.first_tranche_amount;
+      amount = first_tranche_amount;
     } else {
-      if (!course.allows_part_payment || !course.second_tranche_amount) {
+      if (!allows_part_payment || !second_tranche_amount) {
         return new Response(
-          JSON.stringify({ error: "This course does not support part payment" }),
+          JSON.stringify({ error: "This does not support part payment" }),
           { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      amount = course.second_tranche_amount;
+      amount = second_tranche_amount;
     }
 
-    // Paystack expects amount in kobo (smallest unit)
     const amountInKobo = Math.round(amount * 100);
+
+    const callbackPath = entityType === "course" ? "/dashboard/courses" : "/dashboard/programs";
 
     const paystackBody: any = {
       email,
       amount: amountInKobo,
       metadata: {
-        courseId,
+        courseId: courseId || null,
+        programId: programId || null,
+        entityType,
         paymentType,
-        courseTitle: course.title,
+        title,
         custom_fields: [
           {
             display_name: "Student Name",
@@ -93,7 +126,7 @@ Deno.serve(async (req) => {
           },
         ],
       },
-      callback_url: `${req.headers.get("origin") || ""}/dashboard/courses`,
+      callback_url: `${req.headers.get("origin") || ""}${callbackPath}`,
     };
 
     const paystackResponse = await fetch("https://api.paystack.co/transaction/initialize", {
