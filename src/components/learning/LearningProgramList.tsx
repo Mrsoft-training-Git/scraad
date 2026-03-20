@@ -150,6 +150,7 @@ export const LearningProgramList = ({ userId }: Props) => {
         payment_status: p.payment_status,
         start_date: p.start_date,
         end_date: p.end_date,
+        program_status: p.program_status,
       }),
     }));
 
