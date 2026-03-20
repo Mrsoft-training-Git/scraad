@@ -128,7 +128,7 @@ const CBTExamCreate = () => {
               </div>
               <div>
                 <Label>Exam Type *</Label>
-                <Select value={form.exam_type} onValueChange={(v: "course" | "program") => setForm({ ...form, exam_type: v, course_id: "", program_id: "" })}>
+                <Select value={form.exam_type} onValueChange={(v: "course" | "program") => setForm({ ...form, exam_type: v, course_id: "", program_id: "", track: "" })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="course">Course Exam</SelectItem>
@@ -145,13 +145,27 @@ const CBTExamCreate = () => {
                   </Select>
                 </div>
               ) : (
-                <div>
-                  <Label>Select Program *</Label>
-                  <Select value={form.program_id} onValueChange={v => setForm({ ...form, program_id: v })}>
-                    <SelectTrigger><SelectValue placeholder="Choose program..." /></SelectTrigger>
-                    <SelectContent>{programs.map(p => <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
+                <>
+                  <div>
+                    <Label>Select Program *</Label>
+                    <Select value={form.program_id} onValueChange={v => setForm({ ...form, program_id: v })}>
+                      <SelectTrigger><SelectValue placeholder="Choose program..." /></SelectTrigger>
+                      <SelectContent>{programs.map(p => <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
+                  {tracks.length > 0 && (
+                    <div>
+                      <Label>Track (optional — leave empty for all tracks)</Label>
+                      <Select value={form.track} onValueChange={v => setForm({ ...form, track: v })}>
+                        <SelectTrigger><SelectValue placeholder="All tracks" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">All Tracks</SelectItem>
+                          {tracks.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </>
               )}
             </CardContent>
           </Card>

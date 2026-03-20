@@ -255,7 +255,7 @@ const CBTExamManage = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>Exam Type</Label>
-                  <Select value={examForm.exam_type} onValueChange={(v: "course" | "program") => setExamForm({ ...examForm, exam_type: v, course_id: "", program_id: "" })}>
+                  <Select value={examForm.exam_type} onValueChange={(v: "course" | "program") => setExamForm({ ...examForm, exam_type: v, course_id: "", program_id: "", track: "" })}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="course">Course Exam</SelectItem>
@@ -281,6 +281,18 @@ const CBTExamManage = () => {
                   </div>
                 )}
               </div>
+              {examForm.exam_type === "program" && tracks.length > 0 && (
+                <div>
+                  <Label>Track (optional — leave empty for all tracks)</Label>
+                  <Select value={examForm.track} onValueChange={v => setExamForm({ ...examForm, track: v })}>
+                    <SelectTrigger><SelectValue placeholder="All tracks" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">All Tracks</SelectItem>
+                      {tracks.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-4">
                 <div><Label>Start Time *</Label><Input type="datetime-local" value={examForm.start_time} onChange={e => {
                   const start = e.target.value;

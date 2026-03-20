@@ -134,6 +134,7 @@ const CBTExamList = () => {
                       <span className="flex items-center gap-1">
                         {exam.exam_type === 'course' ? <BookOpen className="w-3.5 h-3.5" /> : <GraduationCap className="w-3.5 h-3.5" />}
                         {exam.exam_type === 'course' ? 'Course' : 'Program'} Exam
+                        {exam.track && <Badge variant="outline" className="ml-1 text-[10px] px-1.5 py-0">{exam.track}</Badge>}
                       </span>
                       <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{exam.duration_minutes} min</span>
                       <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" />{format(new Date(exam.start_time), "MMM d, h:mm a")}</span>
