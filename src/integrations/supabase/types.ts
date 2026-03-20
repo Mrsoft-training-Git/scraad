@@ -1714,6 +1714,7 @@ export type Database = {
           start_date: string | null
           status: string
           title: string
+          track: string | null
           updated_at: string
         }
         Insert: {
@@ -1741,6 +1742,7 @@ export type Database = {
           start_date?: string | null
           status?: string
           title: string
+          track?: string | null
           updated_at?: string
         }
         Update: {
@@ -1768,6 +1770,7 @@ export type Database = {
           start_date?: string | null
           status?: string
           title?: string
+          track?: string | null
           updated_at?: string
         }
         Relationships: []
