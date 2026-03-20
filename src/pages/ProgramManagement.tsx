@@ -16,8 +16,17 @@ import { useDashboardAuth } from "@/hooks/useDashboardAuth";
 import { format } from "date-fns";
 import { Check, X, Clock, Mail, Phone, FileText, Loader2, Plus, ImagePlus, Pencil, MapPin, Calendar, Users } from "lucide-react";
 
+const computeProgramStatus = (startDate: string | null, endDate: string | null): string => {
+  const now = new Date();
+  const start = startDate ? new Date(startDate) : null;
+  const end = endDate ? new Date(endDate) : null;
+  if (end && end < now) return "closed";
+  if (start && start <= now) return "ongoing";
+  return "open";
+};
+
 interface FullProgram {
-  id: string; title: string; status: string; start_date: string | null; mode: string;
+  id: string; title: string; status: string; start_date: string | null; end_date: string | null; mode: string;
   short_description: string | null; description: string | null; duration: string | null;
   location: string | null; banner_image_url: string | null; created_at: string;
   max_participants: number | null; learning_outcomes: string[] | null; requirements: string[] | null;
