@@ -504,7 +504,7 @@ const EditProgramDialog = ({ program, onOpenChange, onUpdated }: { program: Full
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [instructors, setInstructors] = useState<InstructorOption[]>([]);
-  const [form, setForm] = useState({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", status: "open", price: "0", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "", track: "", instructor_id: "", instructor_name: "" });
+  const [form, setForm] = useState({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", status: "open", price: "0", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "", instructor_id: "", instructor_name: "" });
 
   useEffect(() => {
     if (program) {
