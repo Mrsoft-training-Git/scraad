@@ -41,19 +41,17 @@ const CBTExamList = () => {
       const courseIds = (courseEnr.data || []).map(e => e.course_id);
       const programIds = (progEnr.data || []).map(e => e.program_id);
 
-      const queries: Promise<{ data: any[] | null }>[] = [];
+      let allExams: CBTExam[] = [];
       if (courseIds.length > 0) {
-        queries.push(
-          supabase.from("cbt_exams").select("*").eq("is_published", true).eq("exam_type", "course").in("course_id", courseIds).then(r => r)
-        );
+        const { data } = await supabase.from("cbt_exams").select("*").eq("is_published", true).eq("exam_type", "course").in("course_id", courseIds);
+        if (data) allExams.push(...(data as unknown as CBTExam[]));
       }
       if (programIds.length > 0) {
-        queries.push(
-          supabase.from("cbt_exams").select("*").eq("is_published", true).eq("exam_type", "program").in("program_id", programIds).then(r => r)
-        );
+        const { data } = await supabase.from("cbt_exams").select("*").eq("is_published", true).eq("exam_type", "program").in("program_id", programIds);
+        if (data) allExams.push(...(data as unknown as CBTExam[]));
       }
 
-      if (queries.length === 0) {
+      if (allExams.length === 0) {
         setExams([]);
         setLoading(false);
         return;
