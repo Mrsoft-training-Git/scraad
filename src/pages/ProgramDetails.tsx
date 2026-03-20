@@ -29,6 +29,7 @@ interface Program {
   learning_outcomes: string[];
   schedule: any;
   instructor_name: string | null;
+  instructor_id: string | null;
   price: number;
   allows_part_payment: boolean;
   first_tranche_amount: number | null;
