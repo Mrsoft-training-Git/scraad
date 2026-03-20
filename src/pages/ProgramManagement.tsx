@@ -518,7 +518,7 @@ const EditProgramDialog = ({ program, onOpenChange, onUpdated }: { program: Full
         first_tranche_amount: String((program as any).first_tranche_amount || ""),
         second_tranche_amount: String((program as any).second_tranche_amount || ""),
         second_payment_due_days: String((program as any).second_payment_due_days || ""),
-        track: program.track || "",
+        
         instructor_id: program.instructor_id || "",
         instructor_name: program.instructor_name || "",
       });
