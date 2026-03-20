@@ -21,7 +21,7 @@ interface FullProgram {
   short_description: string | null; description: string | null; duration: string | null;
   location: string | null; banner_image_url: string | null; created_at: string;
   max_participants: number | null; learning_outcomes: string[] | null; requirements: string[] | null;
-  instructor_id: string | null; instructor_name: string | null;
+  track: string | null; instructor_id: string | null; instructor_name: string | null;
 }
 interface Application { id: string; program_id: string; user_id: string; full_name: string; email: string; phone: string | null; experience_level: string | null; motivation: string | null; cv_url: string | null; status: string; created_at: string; }
 interface InstructorOption { id: string; full_name: string | null; email: string | null; }
