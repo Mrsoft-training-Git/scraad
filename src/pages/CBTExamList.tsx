@@ -51,14 +51,6 @@ const CBTExamList = () => {
         if (data) allExams.push(...(data as unknown as CBTExam[]));
       }
 
-      if (allExams.length === 0) {
-        setExams([]);
-        setLoading(false);
-        return;
-      }
-
-      const results = await Promise.all(queries);
-      const allExams = results.flatMap(r => (r.data || []) as unknown as CBTExam[]);
       // Deduplicate by id
       const unique = Array.from(new Map(allExams.map(e => [e.id, e])).values());
       unique.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
