@@ -78,6 +78,7 @@ const CBTExamCreate = () => {
       exam_type: form.exam_type,
       course_id: form.exam_type === "course" ? form.course_id : null,
       program_id: form.exam_type === "program" ? form.program_id : null,
+      track: form.exam_type === "program" && form.track ? form.track : null,
       start_time: form.start_time,
       end_time: form.end_time,
       duration_minutes: form.duration_minutes,
