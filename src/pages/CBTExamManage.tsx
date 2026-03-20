@@ -107,6 +107,7 @@ const CBTExamManage = () => {
       exam_type: examForm.exam_type,
       course_id: examForm.exam_type === "course" ? examForm.course_id : null,
       program_id: examForm.exam_type === "program" ? examForm.program_id : null,
+      track: examForm.exam_type === "program" && examForm.track ? examForm.track : null,
       start_time: examForm.start_time,
       end_time: examForm.end_time,
       duration_minutes: examForm.duration_minutes,
