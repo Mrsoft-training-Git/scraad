@@ -26,6 +26,8 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
     full_name: "",
     email: userEmail,
     phone: "",
+    age: "",
+    address: "",
     experience_level: "",
     motivation: "",
   });
