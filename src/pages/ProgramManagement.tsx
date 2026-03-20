@@ -527,7 +527,7 @@ const EditProgramDialog = ({ program, onOpenChange, onUpdated }: { program: Full
         mode: program.mode || "physical",
         location: program.location || "",
         start_date: program.start_date || "",
-        status: program.status || "open",
+        end_date: program.end_date || "",
         price: String((program as any).price || "0"),
         allows_part_payment: (program as any).allows_part_payment || false,
         first_tranche_amount: String((program as any).first_tranche_amount || ""),
