@@ -125,6 +125,15 @@ const ProgramManagement = () => {
                                 <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{program.short_description}</p>
                               )}
                               <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                                {program.theme && (
+                                  <Badge variant="outline" className="text-xs">{program.theme}</Badge>
+                                )}
+                                {program.track && (
+                                  <Badge variant="secondary" className="text-xs">{program.track}</Badge>
+                                )}
+                                {program.instructor_name && (
+                                  <span className="flex items-center gap-1"><Users className="w-3 h-3" />Instructor: {program.instructor_name}</span>
+                                )}
                                 {program.mode && (
                                   <span className="capitalize flex items-center gap-1">
                                     <Users className="w-3 h-3" />{program.mode}
