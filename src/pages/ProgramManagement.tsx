@@ -425,6 +425,11 @@ const EditProgramDialog = ({ program, onOpenChange, onUpdated }: { program: Full
         location: program.location || "",
         start_date: program.start_date || "",
         status: program.status || "open",
+        price: String((program as any).price || "0"),
+        allows_part_payment: (program as any).allows_part_payment || false,
+        first_tranche_amount: String((program as any).first_tranche_amount || ""),
+        second_tranche_amount: String((program as any).second_tranche_amount || ""),
+        second_payment_due_days: String((program as any).second_payment_due_days || ""),
       });
       setImagePreview(program.banner_image_url || null);
       setImageFile(null);
