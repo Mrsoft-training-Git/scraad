@@ -24,6 +24,7 @@ const allMenuItems = [
   { icon: Megaphone, label: "Announcements", path: "/dashboard/announcements", roles: ["admin", "student", "instructor"] },
   { icon: MessageSquare, label: "Discussions", path: "/dashboard/discussions", roles: ["admin", "student", "instructor"] },
   { icon: ClipboardList, label: "Assignments", path: "/dashboard/assignments", roles: ["admin", "student", "instructor"] },
+  { icon: Monitor, label: "CBT Exams", path: "/dashboard/cbt", roles: ["admin", "student", "instructor"] },
   { icon: CreditCard, label: "Payments", path: "/dashboard/payments", roles: ["admin"] },
   { icon: UserPlus, label: "Enrollments", path: "/dashboard/enrollments", roles: ["admin"] },
   { icon: CreditCard, label: "Bills", path: "/dashboard/bills", roles: ["student", "instructor"] },

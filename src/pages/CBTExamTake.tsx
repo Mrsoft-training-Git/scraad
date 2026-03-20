@@ -32,8 +32,8 @@ const CBTExamTake = () => {
   const [showTabWarning, setShowTabWarning] = useState(false);
   const [questions, setQuestions] = useState<CBTQuestion[]>([]);
   const tabSwitchRef = useRef(0);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const autoSaveRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Initialize questions (shuffle if needed)
   useEffect(() => {
