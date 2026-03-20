@@ -360,9 +360,7 @@ const ImageUploadField = ({ imagePreview, onImageChange, onClear }: { imagePrevi
 const ProgramFormFields = ({ form, setForm, instructors }: { form: any; setForm: (f: any) => void; instructors?: InstructorOption[] }) => (
   <>
     <div><Label>Title *</Label><Input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} required /></div>
-    <div className="grid grid-cols-2 gap-4">
-      <div><Label>Track</Label><Input placeholder="e.g. Python Programming" value={form.track} onChange={e => setForm({ ...form, track: e.target.value })} /></div>
-    </div>
+    
     <div><Label>Short Description</Label><Input value={form.short_description} onChange={e => setForm({ ...form, short_description: e.target.value })} /></div>
     <div><Label>Full Description</Label><Textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={3} /></div>
     <div className="grid grid-cols-2 gap-4">
