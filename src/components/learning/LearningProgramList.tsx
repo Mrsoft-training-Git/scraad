@@ -130,6 +130,7 @@ export const LearningProgramList = ({ userId }: Props) => {
           mode: prog.mode,
           start_date: prog.start_date,
           end_date: prog.end_date,
+          program_status: prog.status,
           progress: enr.progress,
           payment_status: enr.payment_status,
           access_status: enr.access_status,
