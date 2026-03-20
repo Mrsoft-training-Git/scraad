@@ -41,6 +41,12 @@ import Enrollments from "./pages/Enrollments";
 import ResetPassword from "./pages/ResetPassword";
 import ProgramManagement from "./pages/ProgramManagement";
 import ProgramDashboard from "./pages/ProgramDashboard";
+import CBTExamList from "./pages/CBTExamList";
+import CBTExamCreate from "./pages/CBTExamCreate";
+import CBTExamManage from "./pages/CBTExamManage";
+import CBTExamView from "./pages/CBTExamView";
+import CBTExamTake from "./pages/CBTExamTake";
+import CBTSubmissions from "./pages/CBTSubmissions";
 
 const queryClient = new QueryClient();
 
@@ -78,6 +84,12 @@ const App = () => (
           <Route path="/dashboard/programs" element={<ProgramManagement />} />
           <Route path="/dashboard/programs/:programId" element={<ProgramDashboard />} />
           <Route path="/dashboard/users" element={<UserManagement />} />
+          <Route path="/dashboard/cbt" element={<CBTExamList />} />
+          <Route path="/dashboard/cbt/create" element={<CBTExamCreate />} />
+          <Route path="/dashboard/cbt/:examId" element={<CBTExamView />} />
+          <Route path="/dashboard/cbt/:examId/manage" element={<CBTExamManage />} />
+          <Route path="/dashboard/cbt/:examId/take" element={<CBTExamTake />} />
+          <Route path="/dashboard/cbt/:examId/submissions" element={<CBTSubmissions />} />
           <Route path="/courses" element={<Courses />} />
           <Route path="/signup/individual" element={<IndividualLearner />} />
           <Route path="/signup/organization" element={<BusinessTeams />} />
