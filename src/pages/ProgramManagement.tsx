@@ -84,6 +84,59 @@ const ProgramManagement = () => {
 
   if (authLoading) return null;
 
+  // Instructor view: show only assigned programs with manage link
+  if (userRole === "instructor") {
+    const assignedPrograms = programs.filter(p => p.instructor_id === user?.id);
+    return (
+      <DashboardLayout user={user} userRole={userRole} profile={profile}>
+        <div className="space-y-6">
+          <div>
+            <h1 className="font-heading text-2xl font-bold">My Programs</h1>
+            <p className="text-sm text-muted-foreground">Programs assigned to you</p>
+          </div>
+          {assignedPrograms.length === 0 ? (
+            <Card className="border-border/60"><CardContent className="py-12 text-center text-muted-foreground">No programs assigned to you yet.</CardContent></Card>
+          ) : (
+            <div className="grid gap-4">
+              {assignedPrograms.map(program => (
+                <Card key={program.id} className="border-border/60 overflow-hidden hover:border-primary/20 transition-colors">
+                  <CardContent className="p-0">
+                    <div className="flex flex-col sm:flex-row">
+                      {program.banner_image_url && (
+                        <div className="sm:w-48 h-32 sm:h-auto flex-shrink-0">
+                          <img src={program.banner_image_url} alt={program.title} className="w-full h-full object-cover" />
+                        </div>
+                      )}
+                      <div className="flex-1 p-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className="font-semibold text-lg truncate">{program.title}</h3>
+                              {programStatusBadge(program.status)}
+                            </div>
+                            {program.short_description && <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{program.short_description}</p>}
+                            <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+                              {program.theme && <Badge variant="outline" className="text-xs">{program.theme}</Badge>}
+                              {program.track && <Badge variant="secondary" className="text-xs">{program.track}</Badge>}
+                              {program.duration && <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{program.duration}</span>}
+                            </div>
+                          </div>
+                          <Button size="sm" asChild>
+                            <Link to={`/dashboard/programs/${program.id}/manage`}>Manage</Link>
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout user={user} userRole={userRole} profile={profile}>
       <div className="space-y-6">
