@@ -178,9 +178,6 @@ const ProgramManagement = () => {
                                 <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{program.short_description}</p>
                               )}
                               <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-                                {program.theme && (
-                                  <Badge variant="outline" className="text-xs">{program.theme}</Badge>
-                                )}
                                 {program.track && (
                                   <Badge variant="secondary" className="text-xs">{program.track}</Badge>
                                 )}
