@@ -133,6 +133,20 @@ const ProgramDashboard = () => {
           </div>
         </div>
 
+        {/* Payment Section */}
+        {!hasPaid && (
+          <ProgramPaymentCard
+            program={program}
+            paymentStatus={paymentStatus}
+            onPaymentComplete={fetchAll}
+          />
+        )}
+
+        {/* Admission Letter */}
+        {hasPaid && (
+          <AdmissionLetterCard program={program} profile={profile} enrollment={enrollment} />
+        )}
+
         {/* Progress Bar */}
         <Card className="border-border/60">
           <CardContent className="p-4">
