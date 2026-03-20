@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useDashboardAuth } from "@/hooks/useDashboardAuth";
@@ -11,8 +11,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, ArrowLeft, Plus, Trash2, GripVertical, Save, Eye, EyeOff } from "lucide-react";
+import { Loader2, ArrowLeft, Plus, Trash2, Save, Eye, EyeOff, Pencil } from "lucide-react";
 import type { CBTQuestion, CBTOption } from "@/types/cbt";
 
 interface QuestionForm {
@@ -44,6 +45,74 @@ const CBTExamManage = () => {
   const [publishing, setPublishing] = useState(false);
   const [form, setForm] = useState<QuestionForm>({ ...emptyQuestion });
   const [editingId, setEditingId] = useState<string | null>(null);
+
+  // Exam details editing state
+  const [editingExam, setEditingExam] = useState(false);
+  const [savingExam, setSavingExam] = useState(false);
+  const [courses, setCourses] = useState<any[]>([]);
+  const [programs, setPrograms] = useState<any[]>([]);
+  const [examForm, setExamForm] = useState({
+    title: "", description: "", exam_type: "course" as "course" | "program",
+    course_id: "", program_id: "", start_time: "", end_time: "",
+    duration_minutes: 60, shuffle_questions: false, allow_retake: false,
+    max_attempts: 1, auto_submit: true,
+  });
+
+  useEffect(() => {
+    if (exam) {
+      setExamForm({
+        title: exam.title,
+        description: exam.description || "",
+        exam_type: exam.exam_type,
+        course_id: exam.course_id || "",
+        program_id: exam.program_id || "",
+        start_time: exam.start_time ? new Date(exam.start_time).toISOString().slice(0, 16) : "",
+        end_time: exam.end_time ? new Date(exam.end_time).toISOString().slice(0, 16) : "",
+        duration_minutes: exam.duration_minutes,
+        shuffle_questions: exam.shuffle_questions,
+        allow_retake: exam.allow_retake,
+        max_attempts: exam.max_attempts,
+        auto_submit: exam.auto_submit,
+      });
+    }
+  }, [exam]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const [c, p] = await Promise.all([
+        supabase.from("courses").select("id, title").order("title"),
+        supabase.from("programs").select("id, title").order("title"),
+      ]);
+      if (c.data) setCourses(c.data);
+      if (p.data) setPrograms(p.data);
+    };
+    fetchData();
+  }, []);
+
+  const handleSaveExam = async () => {
+    if (!exam || !examForm.title || !examForm.start_time || !examForm.end_time) {
+      toast({ title: "Please fill all required fields", variant: "destructive" });
+      return;
+    }
+    setSavingExam(true);
+    const { error } = await supabase.from("cbt_exams").update({
+      title: examForm.title,
+      description: examForm.description || null,
+      exam_type: examForm.exam_type,
+      course_id: examForm.exam_type === "course" ? examForm.course_id : null,
+      program_id: examForm.exam_type === "program" ? examForm.program_id : null,
+      start_time: examForm.start_time,
+      end_time: examForm.end_time,
+      duration_minutes: examForm.duration_minutes,
+      shuffle_questions: examForm.shuffle_questions,
+      allow_retake: examForm.allow_retake,
+      max_attempts: examForm.max_attempts,
+      auto_submit: examForm.auto_submit,
+    } as any).eq("id", exam.id);
+    if (error) toast({ title: "Error updating exam", description: error.message, variant: "destructive" });
+    else { toast({ title: "Exam updated!" }); setEditingExam(false); refetch(); }
+    setSavingExam(false);
+  };
 
   const handleSaveQuestion = async () => {
     if (!examId || !form.question_text.trim()) {
@@ -152,11 +221,82 @@ const CBTExamManage = () => {
               <span className="text-sm text-muted-foreground">{questions.length} questions · {totalMarks} marks</span>
             </div>
           </div>
-          <Button variant={exam.is_published ? "outline" : "default"} onClick={togglePublish} disabled={publishing}>
-            {publishing ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : exam.is_published ? <EyeOff className="w-4 h-4 mr-1" /> : <Eye className="w-4 h-4 mr-1" />}
-            {exam.is_published ? "Unpublish" : "Publish"}
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => setEditingExam(!editingExam)}>
+              <Pencil className="w-4 h-4 mr-1" />Edit Details
+            </Button>
+            <Button variant={exam.is_published ? "outline" : "default"} size="sm" onClick={togglePublish} disabled={publishing}>
+              {publishing ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : exam.is_published ? <EyeOff className="w-4 h-4 mr-1" /> : <Eye className="w-4 h-4 mr-1" />}
+              {exam.is_published ? "Unpublish" : "Publish"}
+            </Button>
+          </div>
         </div>
+
+        {/* Exam details edit form */}
+        {editingExam && (
+          <Card className="border-primary/30">
+            <CardHeader><CardTitle className="text-lg">Edit Exam Details</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label>Exam Title *</Label>
+                <Input value={examForm.title} onChange={e => setExamForm({ ...examForm, title: e.target.value })} />
+              </div>
+              <div>
+                <Label>Description</Label>
+                <Textarea value={examForm.description} onChange={e => setExamForm({ ...examForm, description: e.target.value })} rows={2} />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Exam Type</Label>
+                  <Select value={examForm.exam_type} onValueChange={(v: "course" | "program") => setExamForm({ ...examForm, exam_type: v, course_id: "", program_id: "" })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="course">Course Exam</SelectItem>
+                      <SelectItem value="program">Program Exam</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                {examForm.exam_type === "course" ? (
+                  <div>
+                    <Label>Course</Label>
+                    <Select value={examForm.course_id} onValueChange={v => setExamForm({ ...examForm, course_id: v })}>
+                      <SelectTrigger><SelectValue placeholder="Choose..." /></SelectTrigger>
+                      <SelectContent>{courses.map(c => <SelectItem key={c.id} value={c.id}>{c.title}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
+                ) : (
+                  <div>
+                    <Label>Program</Label>
+                    <Select value={examForm.program_id} onValueChange={v => setExamForm({ ...examForm, program_id: v })}>
+                      <SelectTrigger><SelectValue placeholder="Choose..." /></SelectTrigger>
+                      <SelectContent>{programs.map(p => <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div><Label>Start Time *</Label><Input type="datetime-local" value={examForm.start_time} onChange={e => setExamForm({ ...examForm, start_time: e.target.value })} /></div>
+                <div><Label>End Time *</Label><Input type="datetime-local" value={examForm.end_time} onChange={e => setExamForm({ ...examForm, end_time: e.target.value })} /></div>
+              </div>
+              <div>
+                <Label>Duration (minutes)</Label>
+                <Input type="number" min={1} value={examForm.duration_minutes} onChange={e => setExamForm({ ...examForm, duration_minutes: parseInt(e.target.value) || 60 })} />
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between"><Label>Shuffle Questions</Label><Switch checked={examForm.shuffle_questions} onCheckedChange={v => setExamForm({ ...examForm, shuffle_questions: v })} /></div>
+                <div className="flex items-center justify-between"><Label>Allow Retake</Label><Switch checked={examForm.allow_retake} onCheckedChange={v => setExamForm({ ...examForm, allow_retake: v })} /></div>
+                {examForm.allow_retake && <div><Label>Max Attempts</Label><Input type="number" min={1} value={examForm.max_attempts} onChange={e => setExamForm({ ...examForm, max_attempts: parseInt(e.target.value) || 1 })} /></div>}
+                <div className="flex items-center justify-between"><Label>Auto-submit when time ends</Label><Switch checked={examForm.auto_submit} onCheckedChange={v => setExamForm({ ...examForm, auto_submit: v })} /></div>
+              </div>
+              <div className="flex gap-2">
+                <Button onClick={handleSaveExam} disabled={savingExam}>
+                  {savingExam && <Loader2 className="w-4 h-4 animate-spin mr-1" />}Save Changes
+                </Button>
+                <Button variant="outline" onClick={() => setEditingExam(false)}>Cancel</Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Questions list */}
         <div className="space-y-3">
@@ -183,7 +323,7 @@ const CBTExamManage = () => {
                   </div>
                   <div className="flex gap-1">
                     <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(q)}>
-                      <Save className="w-3.5 h-3.5" />
+                      <Pencil className="w-3.5 h-3.5" />
                     </Button>
                     <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDelete(q.id)}>
                       <Trash2 className="w-3.5 h-3.5" />
