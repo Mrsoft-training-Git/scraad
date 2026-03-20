@@ -458,7 +458,10 @@ const EditProgramDialog = ({ program, onOpenChange, onUpdated }: { program: Full
       const { error } = await supabase.from("programs").update({
         title: form.title.trim(), short_description: form.short_description.trim() || null, description: form.description.trim() || null,
         duration: form.duration.trim() || null, mode: form.mode, location: form.location.trim() || null, start_date: form.start_date || null, status: form.status,
-        banner_image_url: bannerUrl,
+        banner_image_url: bannerUrl, price: parseFloat(form.price) || 0, allows_part_payment: form.allows_part_payment,
+        first_tranche_amount: form.allows_part_payment && form.first_tranche_amount ? parseInt(form.first_tranche_amount) : null,
+        second_tranche_amount: form.allows_part_payment && form.second_tranche_amount ? parseInt(form.second_tranche_amount) : null,
+        second_payment_due_days: form.allows_part_payment && form.second_payment_due_days ? parseInt(form.second_payment_due_days) : null,
       }).eq("id", program.id);
       if (error) throw error;
       toast({ title: "Program updated!" });
