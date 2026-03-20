@@ -355,7 +355,7 @@ const CreateProgramDialog = ({ open, onOpenChange, onCreated }: { open: boolean;
   const [submitting, setSubmitting] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [form, setForm] = useState({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", status: "open" });
+  const [form, setForm] = useState({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", status: "open", price: "0", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "" });
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
