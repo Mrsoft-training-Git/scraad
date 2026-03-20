@@ -316,6 +316,20 @@ const ProgramFormFields = ({ form, setForm }: { form: any; setForm: (f: any) => 
       <div><Label>Location</Label><Input value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} /></div>
       <div><Label>Start Date</Label><Input type="date" value={form.start_date} onChange={e => setForm({ ...form, start_date: e.target.value })} /></div>
     </div>
+    <div><Label>Price (₦) *</Label><Input type="number" min="0" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="0" /></div>
+    <div className="flex items-center gap-2">
+      <input type="checkbox" id="allows_part_payment" checked={form.allows_part_payment} onChange={e => setForm({ ...form, allows_part_payment: e.target.checked })} className="rounded border-border" />
+      <Label htmlFor="allows_part_payment">Allow Part Payment (Installments)</Label>
+    </div>
+    {form.allows_part_payment && (
+      <div className="grid grid-cols-2 gap-4">
+        <div><Label>First Tranche (₦)</Label><Input type="number" min="0" value={form.first_tranche_amount} onChange={e => setForm({ ...form, first_tranche_amount: e.target.value })} /></div>
+        <div><Label>Second Tranche (₦)</Label><Input type="number" min="0" value={form.second_tranche_amount} onChange={e => setForm({ ...form, second_tranche_amount: e.target.value })} /></div>
+      </div>
+    )}
+    {form.allows_part_payment && (
+      <div><Label>Second Payment Due (days after first)</Label><Input type="number" min="1" value={form.second_payment_due_days} onChange={e => setForm({ ...form, second_payment_due_days: e.target.value })} placeholder="30" /></div>
+    )}
     <div><Label>Status</Label>
       <Select value={form.status} onValueChange={v => setForm({ ...form, status: v })}>
         <SelectTrigger><SelectValue /></SelectTrigger>
