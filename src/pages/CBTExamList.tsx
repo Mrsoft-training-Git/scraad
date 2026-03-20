@@ -41,15 +41,15 @@ const CBTExamList = () => {
       const courseIds = (courseEnr.data || []).map(e => e.course_id);
       const programIds = (progEnr.data || []).map(e => e.program_id);
 
-      const queries: Promise<any>[] = [];
+      const queries: Promise<{ data: any[] | null }>[] = [];
       if (courseIds.length > 0) {
         queries.push(
-          supabase.from("cbt_exams").select("*").eq("is_published", true).eq("exam_type", "course").in("course_id", courseIds)
+          supabase.from("cbt_exams").select("*").eq("is_published", true).eq("exam_type", "course").in("course_id", courseIds).then(r => r)
         );
       }
       if (programIds.length > 0) {
         queries.push(
-          supabase.from("cbt_exams").select("*").eq("is_published", true).eq("exam_type", "program").in("program_id", programIds)
+          supabase.from("cbt_exams").select("*").eq("is_published", true).eq("exam_type", "program").in("program_id", programIds).then(r => r)
         );
       }
 
