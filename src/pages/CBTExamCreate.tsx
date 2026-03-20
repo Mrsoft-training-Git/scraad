@@ -21,6 +21,7 @@ const CBTExamCreate = () => {
   const [saving, setSaving] = useState(false);
   const [courses, setCourses] = useState<any[]>([]);
   const [programs, setPrograms] = useState<any[]>([]);
+  const [tracks, setTracks] = useState<string[]>([]);
 
   const [form, setForm] = useState({
     title: "",
@@ -28,6 +29,7 @@ const CBTExamCreate = () => {
     exam_type: "course" as "course" | "program",
     course_id: "",
     program_id: "",
+    track: "",
     start_time: "",
     end_time: "",
     duration_minutes: 60,
@@ -41,10 +43,14 @@ const CBTExamCreate = () => {
     const fetchData = async () => {
       const [c, p] = await Promise.all([
         supabase.from("courses").select("id, title").order("title"),
-        supabase.from("programs").select("id, title").order("title"),
+        supabase.from("programs").select("id, title, track").order("title"),
       ]);
       if (c.data) setCourses(c.data);
-      if (p.data) setPrograms(p.data);
+      if (p.data) {
+        setPrograms(p.data);
+        const uniqueTracks = [...new Set(p.data.map((pr: any) => pr.track).filter(Boolean))] as string[];
+        setTracks(uniqueTracks);
+      }
     };
     fetchData();
   }, []);
