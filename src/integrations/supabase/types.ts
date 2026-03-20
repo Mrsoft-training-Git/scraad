@@ -1292,6 +1292,10 @@ export type Database = {
           email: string
           experience_level: string | null
           full_name: string
+          guardian_email: string | null
+          guardian_name: string | null
+          guardian_phone: string | null
+          guardian_relationship: string | null
           id: string
           motivation: string | null
           phone: string | null
@@ -1310,6 +1314,10 @@ export type Database = {
           email: string
           experience_level?: string | null
           full_name: string
+          guardian_email?: string | null
+          guardian_name?: string | null
+          guardian_phone?: string | null
+          guardian_relationship?: string | null
           id?: string
           motivation?: string | null
           phone?: string | null
@@ -1328,6 +1336,10 @@ export type Database = {
           email?: string
           experience_level?: string | null
           full_name?: string
+          guardian_email?: string | null
+          guardian_name?: string | null
+          guardian_phone?: string | null
+          guardian_relationship?: string | null
           id?: string
           motivation?: string | null
           phone?: string | null
