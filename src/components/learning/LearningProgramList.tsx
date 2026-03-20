@@ -78,7 +78,7 @@ export const LearningProgramList = ({ userId }: Props) => {
     const [appRes, enrollRes] = await Promise.all([
       supabase
         .from("program_applications")
-        .select("id, program_id, status, program:programs(id, title, short_description, banner_image_url, duration, mode, start_date, end_date)")
+        .select("id, program_id, status, program:programs(id, title, short_description, banner_image_url, duration, mode, start_date, end_date, status)")
         .eq("user_id", userId),
       supabase
         .from("program_enrollments")
