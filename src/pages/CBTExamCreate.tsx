@@ -155,17 +155,32 @@ const CBTExamCreate = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>Start Date & Time *</Label>
-                  <Input type="datetime-local" value={form.start_time} onChange={e => setForm({ ...form, start_time: e.target.value })} />
+                  <Input type="datetime-local" value={form.start_time} onChange={e => {
+                    const start = e.target.value;
+                    const updated = { ...form, start_time: start };
+                    if (start && form.end_time) {
+                      updated.duration_minutes = Math.max(1, Math.round((new Date(form.end_time).getTime() - new Date(start).getTime()) / 60000));
+                    }
+                    setForm(updated);
+                  }} />
                 </div>
                 <div>
                   <Label>End Date & Time *</Label>
-                  <Input type="datetime-local" value={form.end_time} onChange={e => setForm({ ...form, end_time: e.target.value })} />
+                  <Input type="datetime-local" value={form.end_time} onChange={e => {
+                    const end = e.target.value;
+                    const updated = { ...form, end_time: end };
+                    if (form.start_time && end) {
+                      updated.duration_minutes = Math.max(1, Math.round((new Date(end).getTime() - new Date(form.start_time).getTime()) / 60000));
+                    }
+                    setForm(updated);
+                  }} />
                 </div>
               </div>
-              <div>
-                <Label>Duration (minutes)</Label>
-                <Input type="number" min={1} value={form.duration_minutes} onChange={e => setForm({ ...form, duration_minutes: parseInt(e.target.value) || 60 })} />
-              </div>
+              {form.start_time && form.end_time && (
+                <p className="text-sm text-muted-foreground">
+                  Duration: <strong>{form.duration_minutes} minutes</strong> (auto-calculated from start & end time)
+                </p>
+              )}
             </CardContent>
           </Card>
 
