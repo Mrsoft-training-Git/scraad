@@ -102,7 +102,7 @@ const InstructorProgramManage = () => {
             <div>
               <h1 className="font-heading text-2xl font-bold">{program.title}</h1>
               <div className="flex flex-wrap gap-2 mt-1 text-sm text-muted-foreground">
-                {program.track && <Badge variant="secondary">{program.track}</Badge>}
+                
                 <Badge className="capitalize">{program.status}</Badge>
               </div>
             </div>
