@@ -351,7 +351,7 @@ const Index = () => {
               { icon: Clock, title: "Self-Paced Learning", desc: "Learn on your own schedule, anywhere in the world" },
               { icon: Award, title: "Recognized Certificates", desc: "Earn credentials valued by employers" },
               { icon: TrendingUp, title: "Progress Tracking", desc: "Monitor your learning journey with detailed analytics" },
-              { icon: BookOpen, title: "Hands-on Training", desc: "Real-world projects and practical exercises" },
+              { icon: BookOpen, title: "Hands-on Training", desc: "Real-world projects and practical Programs" },
             ].map((f, i) => (
               <Card key={i} className="border border-border bg-card hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300 min-w-[75vw] shrink-0 sm:min-w-0">
                 <CardContent className="p-6 flex flex-col items-center text-center">
