@@ -123,7 +123,7 @@ const Learning = () => {
           <p className="text-sm text-muted-foreground mt-0.5">Manage your enrolled courses and programs</p>
         </div>
 
-        <Tabs defaultValue="courses" className="w-full">
+        <Tabs defaultValue={defaultTab} className="w-full">
           <TabsList className="w-full sm:w-auto">
             <TabsTrigger value="courses" className="flex items-center gap-2">
               <BookOpen className="w-4 h-4" />
