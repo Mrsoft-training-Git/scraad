@@ -84,6 +84,7 @@ const App = () => (
           <Route path="/dashboard/roles" element={<RoleManagement />} />
           <Route path="/dashboard/programs" element={<ProgramManagement />} />
           <Route path="/dashboard/programs/:programId" element={<ProgramDashboard />} />
+          <Route path="/dashboard/programs/:programId/manage" element={<InstructorProgramManage />} />
           <Route path="/dashboard/users" element={<UserManagement />} />
           <Route path="/dashboard/cbt" element={<CBTExamList />} />
           <Route path="/dashboard/cbt/create" element={<CBTExamCreate />} />
