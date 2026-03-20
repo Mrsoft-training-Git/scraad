@@ -16,8 +16,17 @@ import { useDashboardAuth } from "@/hooks/useDashboardAuth";
 import { format } from "date-fns";
 import { Check, X, Clock, Mail, Phone, FileText, Loader2, Plus, ImagePlus, Pencil, MapPin, Calendar, Users } from "lucide-react";
 
+const computeProgramStatus = (startDate: string | null, endDate: string | null): string => {
+  const now = new Date();
+  const start = startDate ? new Date(startDate) : null;
+  const end = endDate ? new Date(endDate) : null;
+  if (end && end < now) return "closed";
+  if (start && start <= now) return "ongoing";
+  return "open";
+};
+
 interface FullProgram {
-  id: string; title: string; status: string; start_date: string | null; mode: string;
+  id: string; title: string; status: string; start_date: string | null; end_date: string | null; mode: string;
   short_description: string | null; description: string | null; duration: string | null;
   location: string | null; banner_image_url: string | null; created_at: string;
   max_participants: number | null; learning_outcomes: string[] | null; requirements: string[] | null;
@@ -377,7 +386,13 @@ const ProgramFormFields = ({ form, setForm, instructors }: { form: any; setForm:
     <div className="grid grid-cols-2 gap-4">
       <div><Label>Location</Label><Input value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} /></div>
       <div><Label>Start Date</Label><Input type="date" value={form.start_date} onChange={e => setForm({ ...form, start_date: e.target.value })} /></div>
+      <div><Label>End Date</Label><Input type="date" value={form.end_date} onChange={e => setForm({ ...form, end_date: e.target.value })} /></div>
     </div>
+    {form.start_date && form.end_date && (
+      <div className="text-sm text-muted-foreground">
+        Auto-computed Status: <Badge variant="secondary">{computeProgramStatus(form.start_date, form.end_date)}</Badge>
+      </div>
+    )}
     {instructors && (
       <div><Label>Assign Instructor</Label>
         <Select value={form.instructor_id || "none"} onValueChange={v => {
@@ -408,12 +423,6 @@ const ProgramFormFields = ({ form, setForm, instructors }: { form: any; setForm:
     {form.allows_part_payment && (
       <div><Label>Second Payment Due (days after first)</Label><Input type="number" min="1" value={form.second_payment_due_days} onChange={e => setForm({ ...form, second_payment_due_days: e.target.value })} placeholder="30" /></div>
     )}
-    <div><Label>Status</Label>
-      <Select value={form.status} onValueChange={v => setForm({ ...form, status: v })}>
-        <SelectTrigger><SelectValue /></SelectTrigger>
-        <SelectContent><SelectItem value="open">Open</SelectItem><SelectItem value="ongoing">Ongoing</SelectItem><SelectItem value="closed">Closed</SelectItem></SelectContent>
-      </Select>
-    </div>
   </>
 );
 
@@ -434,7 +443,7 @@ const CreateProgramDialog = ({ open, onOpenChange, onCreated }: { open: boolean;
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [instructors, setInstructors] = useState<InstructorOption[]>([]);
-  const [form, setForm] = useState({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", status: "open", price: "0", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "", track: "", instructor_id: "", instructor_name: "" });
+  const [form, setForm] = useState({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", end_date: "", price: "0", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "", track: "", instructor_id: "", instructor_name: "" });
 
   useEffect(() => {
     if (open) fetchInstructors();
@@ -465,7 +474,7 @@ const CreateProgramDialog = ({ open, onOpenChange, onCreated }: { open: boolean;
       const bannerUrl = imageFile ? await uploadBannerImage(imageFile) : null;
       const { error } = await supabase.from("programs").insert({
         title: form.title.trim(), short_description: form.short_description.trim() || null, description: form.description.trim() || null,
-        duration: form.duration.trim() || null, mode: form.mode, location: form.location.trim() || null, start_date: form.start_date || null, status: form.status,
+        duration: form.duration.trim() || null, mode: form.mode, location: form.location.trim() || null, start_date: form.start_date || null, end_date: form.end_date || null, status: computeProgramStatus(form.start_date, form.end_date),
         banner_image_url: bannerUrl, price: parseFloat(form.price) || 0, allows_part_payment: form.allows_part_payment,
         first_tranche_amount: form.allows_part_payment && form.first_tranche_amount ? parseInt(form.first_tranche_amount) : null,
         second_tranche_amount: form.allows_part_payment && form.second_tranche_amount ? parseInt(form.second_tranche_amount) : null,
@@ -477,7 +486,7 @@ const CreateProgramDialog = ({ open, onOpenChange, onCreated }: { open: boolean;
       toast({ title: "Program created!" });
       onCreated();
       onOpenChange(false);
-      setForm({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", status: "open", price: "0", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "", track: "", instructor_id: "", instructor_name: "" });
+      setForm({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", end_date: "", price: "0", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "", track: "", instructor_id: "", instructor_name: "" });
       setImageFile(null);
       setImagePreview(null);
     } catch (err: any) {
@@ -506,7 +515,7 @@ const EditProgramDialog = ({ program, onOpenChange, onUpdated }: { program: Full
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [instructors, setInstructors] = useState<InstructorOption[]>([]);
-  const [form, setForm] = useState({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", status: "open", price: "0", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "", track: "", instructor_id: "", instructor_name: "" });
+  const [form, setForm] = useState({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", end_date: "", price: "0", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "", track: "", instructor_id: "", instructor_name: "" });
 
   useEffect(() => {
     if (program) {
@@ -518,7 +527,7 @@ const EditProgramDialog = ({ program, onOpenChange, onUpdated }: { program: Full
         mode: program.mode || "physical",
         location: program.location || "",
         start_date: program.start_date || "",
-        status: program.status || "open",
+        end_date: program.end_date || "",
         price: String((program as any).price || "0"),
         allows_part_payment: (program as any).allows_part_payment || false,
         first_tranche_amount: String((program as any).first_tranche_amount || ""),
@@ -563,7 +572,7 @@ const EditProgramDialog = ({ program, onOpenChange, onUpdated }: { program: Full
 
       const { error } = await supabase.from("programs").update({
         title: form.title.trim(), short_description: form.short_description.trim() || null, description: form.description.trim() || null,
-        duration: form.duration.trim() || null, mode: form.mode, location: form.location.trim() || null, start_date: form.start_date || null, status: form.status,
+        duration: form.duration.trim() || null, mode: form.mode, location: form.location.trim() || null, start_date: form.start_date || null, end_date: form.end_date || null, status: computeProgramStatus(form.start_date, form.end_date),
         banner_image_url: bannerUrl, price: parseFloat(form.price) || 0, allows_part_payment: form.allows_part_payment,
         first_tranche_amount: form.allows_part_payment && form.first_tranche_amount ? parseInt(form.first_tranche_amount) : null,
         second_tranche_amount: form.allows_part_payment && form.second_tranche_amount ? parseInt(form.second_tranche_amount) : null,
