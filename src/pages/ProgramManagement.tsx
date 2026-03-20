@@ -21,7 +21,7 @@ interface FullProgram {
   short_description: string | null; description: string | null; duration: string | null;
   location: string | null; banner_image_url: string | null; created_at: string;
   max_participants: number | null; learning_outcomes: string[] | null; requirements: string[] | null;
-  instructor_id: string | null; instructor_name: string | null;
+  track: string | null; instructor_id: string | null; instructor_name: string | null;
 }
 interface Application { id: string; program_id: string; user_id: string; full_name: string; email: string; phone: string | null; experience_level: string | null; motivation: string | null; cv_url: string | null; status: string; created_at: string; }
 interface InstructorOption { id: string; full_name: string | null; email: string | null; }
@@ -43,7 +43,7 @@ const ProgramManagement = () => {
 
   const fetchPrograms = async () => {
     const { data } = await supabase.from("programs").select("*").order("created_at", { ascending: false });
-    if (data) setPrograms(data as FullProgram[]);
+    if (data) setPrograms(data.map((d: any) => ({ ...d, track: d.track || null })) as FullProgram[]);
   };
 
   const fetchApplications = async () => {
@@ -116,6 +116,7 @@ const ProgramManagement = () => {
                             </div>
                             {program.short_description && <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{program.short_description}</p>}
                             <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+                              {program.track && <Badge variant="secondary" className="text-xs">{program.track}</Badge>}
                               {program.duration && <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{program.duration}</span>}
                             </div>
                           </div>
@@ -177,6 +178,9 @@ const ProgramManagement = () => {
                                 <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{program.short_description}</p>
                               )}
                               <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                                {program.track && (
+                                  <Badge variant="secondary" className="text-xs">{program.track}</Badge>
+                                )}
                                 {program.instructor_name && (
                                   <span className="flex items-center gap-1"><Users className="w-3 h-3" />Instructor: {program.instructor_name}</span>
                                 )}
@@ -358,6 +362,9 @@ const ImageUploadField = ({ imagePreview, onImageChange, onClear }: { imagePrevi
 const ProgramFormFields = ({ form, setForm, instructors }: { form: any; setForm: (f: any) => void; instructors?: InstructorOption[] }) => (
   <>
     <div><Label>Title *</Label><Input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} required /></div>
+    <div className="grid grid-cols-2 gap-4">
+      <div><Label>Track</Label><Input placeholder="e.g. Python Programming" value={form.track} onChange={e => setForm({ ...form, track: e.target.value })} /></div>
+    </div>
     <div><Label>Short Description</Label><Input value={form.short_description} onChange={e => setForm({ ...form, short_description: e.target.value })} /></div>
     <div><Label>Full Description</Label><Textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={3} /></div>
     <div className="grid grid-cols-2 gap-4">
@@ -429,7 +436,7 @@ const CreateProgramDialog = ({ open, onOpenChange, onCreated }: { open: boolean;
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [instructors, setInstructors] = useState<InstructorOption[]>([]);
-  const [form, setForm] = useState({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", status: "open", price: "0", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "", instructor_id: "", instructor_name: "" });
+  const [form, setForm] = useState({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", status: "open", price: "0", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "", track: "", instructor_id: "", instructor_name: "" });
 
   useEffect(() => {
     if (open) fetchInstructors();
@@ -465,13 +472,14 @@ const CreateProgramDialog = ({ open, onOpenChange, onCreated }: { open: boolean;
         first_tranche_amount: form.allows_part_payment && form.first_tranche_amount ? parseInt(form.first_tranche_amount) : null,
         second_tranche_amount: form.allows_part_payment && form.second_tranche_amount ? parseInt(form.second_tranche_amount) : null,
         second_payment_due_days: form.allows_part_payment && form.second_payment_due_days ? parseInt(form.second_payment_due_days) : null,
+        track: form.track.trim() || null,
         instructor_id: form.instructor_id || null, instructor_name: form.instructor_name.trim() || null,
       });
       if (error) throw error;
       toast({ title: "Program created!" });
       onCreated();
       onOpenChange(false);
-      setForm({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", status: "open", price: "0", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "", instructor_id: "", instructor_name: "" });
+      setForm({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", status: "open", price: "0", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "", track: "", instructor_id: "", instructor_name: "" });
       setImageFile(null);
       setImagePreview(null);
     } catch (err: any) {
@@ -500,7 +508,7 @@ const EditProgramDialog = ({ program, onOpenChange, onUpdated }: { program: Full
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [instructors, setInstructors] = useState<InstructorOption[]>([]);
-  const [form, setForm] = useState({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", status: "open", price: "0", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "", instructor_id: "", instructor_name: "" });
+  const [form, setForm] = useState({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", status: "open", price: "0", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "", track: "", instructor_id: "", instructor_name: "" });
 
   useEffect(() => {
     if (program) {
@@ -518,7 +526,7 @@ const EditProgramDialog = ({ program, onOpenChange, onUpdated }: { program: Full
         first_tranche_amount: String((program as any).first_tranche_amount || ""),
         second_tranche_amount: String((program as any).second_tranche_amount || ""),
         second_payment_due_days: String((program as any).second_payment_due_days || ""),
-        
+        track: program.track || "",
         instructor_id: program.instructor_id || "",
         instructor_name: program.instructor_name || "",
       });
@@ -562,7 +570,7 @@ const EditProgramDialog = ({ program, onOpenChange, onUpdated }: { program: Full
         first_tranche_amount: form.allows_part_payment && form.first_tranche_amount ? parseInt(form.first_tranche_amount) : null,
         second_tranche_amount: form.allows_part_payment && form.second_tranche_amount ? parseInt(form.second_tranche_amount) : null,
         second_payment_due_days: form.allows_part_payment && form.second_payment_due_days ? parseInt(form.second_payment_due_days) : null,
-        
+        track: form.track.trim() || null,
         instructor_id: form.instructor_id || null, instructor_name: form.instructor_name.trim() || null,
       }).eq("id", program.id);
       if (error) throw error;
