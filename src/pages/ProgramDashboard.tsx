@@ -52,7 +52,31 @@ const ProgramDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
 
   useEffect(() => {
-    if (programId && user) fetchAll();
+    if (programId && user) {
+      fetchAll();
+      // If returning from payment gateway, poll for webhook to update enrollment
+      const params = new URLSearchParams(window.location.search);
+      if (params.has("trxref") || params.has("reference")) {
+        let attempts = 0;
+        const poll = setInterval(async () => {
+          attempts++;
+          const { data } = await supabase
+            .from("program_enrollments")
+            .select("payment_status")
+            .eq("program_id", programId)
+            .eq("user_id", user.id)
+            .maybeSingle();
+          if (data && (data.payment_status === "paid" || data.payment_status === "partial")) {
+            clearInterval(poll);
+            fetchAll();
+            // Clean URL
+            window.history.replaceState({}, "", window.location.pathname);
+          }
+          if (attempts >= 15) clearInterval(poll);
+        }, 2000);
+        return () => clearInterval(poll);
+      }
+    }
   }, [programId, user]);
 
   const fetchAll = async () => {
@@ -133,8 +157,8 @@ const ProgramDashboard = () => {
           </div>
         </div>
 
-        {/* Payment Section */}
-        {!hasPaid && (
+        {/* Payment Section - only for unpaid */}
+        {paymentStatus === "unpaid" && (
           <ProgramPaymentCard
             program={program}
             paymentStatus={paymentStatus}
@@ -142,8 +166,21 @@ const ProgramDashboard = () => {
           />
         )}
 
-        {/* Admission Letter */}
-        {hasPaid && (
+        {/* Second tranche reminder for partial/defaulted */}
+        {(isPartial || paymentStatus === "defaulted") && program.second_tranche_amount && (
+          <Card className="border-warning/30 bg-warning/5">
+            <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div>
+                <h3 className="font-semibold text-sm">Second Payment Due</h3>
+                <p className="text-xs text-muted-foreground">Complete your second installment of ₦{program.second_tranche_amount.toLocaleString()}</p>
+              </div>
+              <SecondTrancheButton program={program} onPaymentComplete={fetchAll} />
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Admission Letter - show when paid or partial (has active access) */}
+        {(hasPaid || isPartial) && (
           <AdmissionLetterCard program={program} profile={profile} enrollment={enrollment} />
         )}
 
@@ -505,6 +542,21 @@ const ProgramPaymentCard = ({ program, paymentStatus, onPaymentComplete }: { pro
         </div>
       </CardContent>
     </Card>
+  );
+};
+
+/* ─── Second Tranche Button ─── */
+const SecondTrancheButton = ({ program, onPaymentComplete }: { program: ProgramInfo; onPaymentComplete: () => void }) => {
+  const { initializePayment, loading } = usePayment({ onSuccess: onPaymentComplete });
+  return (
+    <Button
+      size="sm"
+      onClick={() => initializePayment(program.id, "second", "program")}
+      disabled={loading}
+    >
+      <CreditCard className="w-4 h-4 mr-2" />
+      {loading ? "Processing..." : `Pay ₦${(program.second_tranche_amount || 0).toLocaleString()}`}
+    </Button>
   );
 };
 
