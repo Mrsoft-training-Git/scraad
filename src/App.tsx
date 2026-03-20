@@ -41,6 +41,7 @@ import Enrollments from "./pages/Enrollments";
 import ResetPassword from "./pages/ResetPassword";
 import ProgramManagement from "./pages/ProgramManagement";
 import ProgramDashboard from "./pages/ProgramDashboard";
+import InstructorProgramManage from "./pages/InstructorProgramManage";
 import CBTExamList from "./pages/CBTExamList";
 import CBTExamCreate from "./pages/CBTExamCreate";
 import CBTExamManage from "./pages/CBTExamManage";
