@@ -568,7 +568,7 @@ const EditProgramDialog = ({ program, onOpenChange, onUpdated }: { program: Full
         first_tranche_amount: form.allows_part_payment && form.first_tranche_amount ? parseInt(form.first_tranche_amount) : null,
         second_tranche_amount: form.allows_part_payment && form.second_tranche_amount ? parseInt(form.second_tranche_amount) : null,
         second_payment_due_days: form.allows_part_payment && form.second_payment_due_days ? parseInt(form.second_payment_due_days) : null,
-        
+        track: form.track.trim() || null,
         instructor_id: form.instructor_id || null, instructor_name: form.instructor_name.trim() || null,
       }).eq("id", program.id);
       if (error) throw error;
