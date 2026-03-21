@@ -21,7 +21,7 @@ const CBTExamList = () => {
   const isAdmin = userRole === "admin" || userRole === "instructor";
 
   const fetchExams = useCallback(async () => {
-    if (!user) return;
+    if (!user || authLoading) return;
     setLoading(true);
 
     if (isAdmin) {
@@ -47,7 +47,6 @@ const CBTExamList = () => {
         if (data) allExams.push(...(data as unknown as CBTExam[]));
       }
       if (programIds.length > 0) {
-        // RLS already filters by track — just fetch published program exams for enrolled programs
         const { data } = await supabase.from("cbt_exams").select("*").eq("is_published", true).eq("exam_type", "program").in("program_id", programIds);
         if (data) allExams.push(...(data as unknown as CBTExam[]));
       }
@@ -58,7 +57,7 @@ const CBTExamList = () => {
       setExams(unique);
     }
     setLoading(false);
-  }, [user, isAdmin]);
+  }, [user, isAdmin, authLoading]);
 
   useEffect(() => { fetchExams(); }, [fetchExams]);
 
