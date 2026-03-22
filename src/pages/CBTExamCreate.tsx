@@ -156,10 +156,10 @@ const CBTExamCreate = () => {
                   {tracks.length > 0 && (
                     <div>
                       <Label>Track (optional — leave empty for all tracks)</Label>
-                      <Select value={form.track} onValueChange={v => setForm({ ...form, track: v })}>
+                      <Select value={form.track || "__all__"} onValueChange={v => setForm({ ...form, track: v === "__all__" ? "" : v })}>
                         <SelectTrigger><SelectValue placeholder="All tracks" /></SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">All Tracks</SelectItem>
+                          <SelectItem value="__all__">All Tracks</SelectItem>
                           {tracks.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
                         </SelectContent>
                       </Select>

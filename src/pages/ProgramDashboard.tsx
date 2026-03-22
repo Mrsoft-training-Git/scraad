@@ -316,7 +316,17 @@ const ProgramDashboard = () => {
           </TabsContent>
 
           <TabsContent value="exams" className="mt-6">
-            <ExamsList exams={exams} results={examResults} onComplete={fetchAll} />
+            {!hasAccess ? (
+              <Card className="border-warning/30 bg-warning/5">
+                <CardContent className="p-8 text-center">
+                  <FileText className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                  <h3 className="font-semibold mb-1">Exams Locked</h3>
+                  <p className="text-sm text-muted-foreground">Complete your payment to access exams.</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <ExamsList exams={exams} results={examResults} onComplete={fetchAll} />
+            )}
           </TabsContent>
         </Tabs>
       </div>
