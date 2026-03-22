@@ -132,10 +132,10 @@ export const StudentDashboard = ({ userName }: { userName: string }) => {
   const recommended = popularCourses.filter(c => !enrolledIds.has(c.id));
 
   const statsConfig = [
-    { title: "Enrolled", value: courses.length, icon: BookOpen, accent: "bg-primary/10 text-primary" },
+    { title: "Enrolled", value: totalEnrolled, icon: BookOpen, accent: "bg-primary/10 text-primary" },
     { title: "Progress", value: `${averageProgress}%`, icon: TrendingUp, accent: "bg-secondary/15 text-secondary" },
-    { title: "In Progress", value: inProgressCourses.length, icon: Clock, accent: "bg-warning/15 text-warning-foreground" },
-    { title: "Completed", value: completedCourses.length, icon: CheckCircle, accent: "bg-success/15 text-success" },
+    { title: "In Progress", value: totalInProgress, icon: Clock, accent: "bg-warning/15 text-warning-foreground" },
+    { title: "Completed", value: totalCompleted, icon: CheckCircle, accent: "bg-success/15 text-success" },
   ];
 
   const CourseScrollSection = ({ title, children, viewAllLink }: { title: string; children: React.ReactNode; viewAllLink?: string }) => (

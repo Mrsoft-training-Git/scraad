@@ -284,10 +284,10 @@ const CBTExamManage = () => {
               {examForm.exam_type === "program" && tracks.length > 0 && (
                 <div>
                   <Label>Track (optional — leave empty for all tracks)</Label>
-                  <Select value={examForm.track} onValueChange={v => setExamForm({ ...examForm, track: v })}>
+                  <Select value={examForm.track || "__all__"} onValueChange={v => setExamForm({ ...examForm, track: v === "__all__" ? "" : v })}>
                     <SelectTrigger><SelectValue placeholder="All tracks" /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Tracks</SelectItem>
+                      <SelectItem value="__all__">All Tracks</SelectItem>
                       {tracks.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
                     </SelectContent>
                   </Select>
