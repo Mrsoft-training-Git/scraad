@@ -98,8 +98,8 @@ const ProgramDashboard = () => {
     if (materialsRes.data) setMaterials(materialsRes.data);
     if (assignmentsRes.data) setAssignments(assignmentsRes.data);
     if (subsRes.data) setSubmissions(subsRes.data);
-    if (examsRes.data) setExams(examsRes.data);
-    if (resultsRes.data) setExamResults(resultsRes.data);
+    if (cbtExamsRes.data) setExams(cbtExamsRes.data as any[]);
+    setExamResults([]);
     setLoading(false);
   };
 
