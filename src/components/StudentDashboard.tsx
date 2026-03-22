@@ -49,7 +49,7 @@ export const StudentDashboard = ({ userName }: { userName: string }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const [coursesData, popularData, progressData] = await Promise.all([
+      const [coursesData, popularData, progressData, programEnrollData] = await Promise.all([
         supabase
           .from("enrolled_courses")
           .select("id, course_id, course_name, progress, enrolled_at, course:courses(image_url, instructor, category, students_count)")
@@ -68,6 +68,10 @@ export const StudentDashboard = ({ userName }: { userName: string }) => {
           .not("completed_at", "is", null)
           .order("completed_at", { ascending: false })
           .limit(30),
+        supabase
+          .from("program_enrollments")
+          .select("id, status, progress, program_id")
+          .eq("user_id", user.id),
       ]);
 
       if (coursesData.data) setCourses(coursesData.data as EnrolledCourse[]);
