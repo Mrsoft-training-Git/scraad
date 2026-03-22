@@ -82,15 +82,14 @@ const ProgramDashboard = () => {
     if (!user || !programId) return;
     setLoading(true);
 
-    const [programRes, enrollRes, modulesRes, materialsRes, assignmentsRes, subsRes, examsRes, resultsRes] = await Promise.all([
+    const [programRes, enrollRes, modulesRes, materialsRes, assignmentsRes, subsRes, cbtExamsRes] = await Promise.all([
       supabase.from("programs").select("*").eq("id", programId).single(),
       supabase.from("program_enrollments").select("*").eq("program_id", programId).eq("user_id", user.id).maybeSingle(),
       supabase.from("program_modules").select("*").eq("program_id", programId).order("order_index"),
       supabase.from("program_materials").select("*").eq("program_id", programId).order("order_index"),
       supabase.from("program_assignments").select("*").eq("program_id", programId).eq("is_published", true).order("due_date"),
       supabase.from("program_submissions").select("*").eq("user_id", user.id),
-      supabase.from("program_exams").select("*").eq("program_id", programId).eq("is_published", true),
-      supabase.from("program_exam_results").select("*").eq("user_id", user.id),
+      supabase.from("cbt_exams").select("*").eq("program_id", programId).eq("is_published", true).eq("exam_type", "program").order("start_time"),
     ]);
 
     if (programRes.data) setProgram(programRes.data as ProgramInfo);
