@@ -76,6 +76,7 @@ export const StudentDashboard = ({ userName }: { userName: string }) => {
 
       if (coursesData.data) setCourses(coursesData.data as EnrolledCourse[]);
       if (popularData.data) setPopularCourses(popularData.data);
+      if (programEnrollData.data) setProgramEnrollments(programEnrollData.data);
 
       // Calculate streak from content_progress
       if (progressData.data && progressData.data.length > 0) {
