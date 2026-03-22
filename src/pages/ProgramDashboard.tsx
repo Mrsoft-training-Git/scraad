@@ -323,8 +323,39 @@ const ProgramDashboard = () => {
                   <p className="text-sm text-muted-foreground">Complete your payment to access exams.</p>
                 </CardContent>
               </Card>
+            ) : exams.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8">No exams available yet.</p>
             ) : (
-              <ExamsList exams={exams} results={examResults} onComplete={fetchAll} />
+              <div className="space-y-3">
+                {exams.map((exam: any) => {
+                  const now = new Date();
+                  const start = new Date(exam.start_time);
+                  const end = new Date(exam.end_time);
+                  const isUpcoming = now < start;
+                  const isEnded = now > end;
+                  const isActive = !isUpcoming && !isEnded;
+                  const statusLabel = isUpcoming ? "Upcoming" : isEnded ? "Ended" : "Active";
+                  const statusColor = isUpcoming ? "bg-blue-500/10 text-blue-600" : isEnded ? "bg-muted text-muted-foreground" : "bg-green-500/10 text-green-600";
+                  return (
+                    <Card key={exam.id} className="border-border/60">
+                      <CardContent className="p-4 flex items-center justify-between">
+                        <div>
+                          <h4 className="font-semibold">{exam.title}</h4>
+                          <p className="text-xs text-muted-foreground">{exam.duration_minutes} min · {format(start, "MMM d, h:mm a")}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge className={statusColor}>{statusLabel}</Badge>
+                          <Button size="sm" asChild>
+                            <Link to={`/dashboard/cbt/${exam.id}`}>
+                              {isActive ? "Take Exam" : isUpcoming ? "View Details" : "View Result"}
+                            </Link>
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
             )}
           </TabsContent>
         </Tabs>
