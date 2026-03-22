@@ -56,7 +56,7 @@ const InstructorProgramManage = () => {
       supabase.from("program_submissions").select("*, program_assignments(title)"),
       supabase.from("program_exams").select("*").eq("program_id", programId),
       supabase.from("program_enrollments").select("*, profiles:user_id(full_name, email)").eq("program_id", programId),
-      supabase.from("live_sessions").select("*").eq("instructor_id", user.id).is("course_id", null).order("scheduled_at", { ascending: false }),
+      supabase.from("live_sessions").select("*").eq("instructor_id", user.id).order("scheduled_at", { ascending: false }),
     ]);
     if (progRes.data) setProgram(progRes.data);
     if (modRes.data) setModules(modRes.data);
