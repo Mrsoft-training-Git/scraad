@@ -82,15 +82,14 @@ const ProgramDashboard = () => {
     if (!user || !programId) return;
     setLoading(true);
 
-    const [programRes, enrollRes, modulesRes, materialsRes, assignmentsRes, subsRes, examsRes, resultsRes] = await Promise.all([
+    const [programRes, enrollRes, modulesRes, materialsRes, assignmentsRes, subsRes, cbtExamsRes] = await Promise.all([
       supabase.from("programs").select("*").eq("id", programId).single(),
       supabase.from("program_enrollments").select("*").eq("program_id", programId).eq("user_id", user.id).maybeSingle(),
       supabase.from("program_modules").select("*").eq("program_id", programId).order("order_index"),
       supabase.from("program_materials").select("*").eq("program_id", programId).order("order_index"),
       supabase.from("program_assignments").select("*").eq("program_id", programId).eq("is_published", true).order("due_date"),
       supabase.from("program_submissions").select("*").eq("user_id", user.id),
-      supabase.from("program_exams").select("*").eq("program_id", programId).eq("is_published", true),
-      supabase.from("program_exam_results").select("*").eq("user_id", user.id),
+      supabase.from("cbt_exams").select("*").eq("program_id", programId).eq("is_published", true).eq("exam_type", "program").order("start_time"),
     ]);
 
     if (programRes.data) setProgram(programRes.data as ProgramInfo);
@@ -99,8 +98,8 @@ const ProgramDashboard = () => {
     if (materialsRes.data) setMaterials(materialsRes.data);
     if (assignmentsRes.data) setAssignments(assignmentsRes.data);
     if (subsRes.data) setSubmissions(subsRes.data);
-    if (examsRes.data) setExams(examsRes.data);
-    if (resultsRes.data) setExamResults(resultsRes.data);
+    if (cbtExamsRes.data) setExams(cbtExamsRes.data as any[]);
+    setExamResults([]);
     setLoading(false);
   };
 
@@ -324,8 +323,39 @@ const ProgramDashboard = () => {
                   <p className="text-sm text-muted-foreground">Complete your payment to access exams.</p>
                 </CardContent>
               </Card>
+            ) : exams.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8">No exams available yet.</p>
             ) : (
-              <ExamsList exams={exams} results={examResults} onComplete={fetchAll} />
+              <div className="space-y-3">
+                {exams.map((exam: any) => {
+                  const now = new Date();
+                  const start = new Date(exam.start_time);
+                  const end = new Date(exam.end_time);
+                  const isUpcoming = now < start;
+                  const isEnded = now > end;
+                  const isActive = !isUpcoming && !isEnded;
+                  const statusLabel = isUpcoming ? "Upcoming" : isEnded ? "Ended" : "Active";
+                  const statusColor = isUpcoming ? "bg-blue-500/10 text-blue-600" : isEnded ? "bg-muted text-muted-foreground" : "bg-green-500/10 text-green-600";
+                  return (
+                    <Card key={exam.id} className="border-border/60">
+                      <CardContent className="p-4 flex items-center justify-between">
+                        <div>
+                          <h4 className="font-semibold">{exam.title}</h4>
+                          <p className="text-xs text-muted-foreground">{exam.duration_minutes} min · {format(start, "MMM d, h:mm a")}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge className={statusColor}>{statusLabel}</Badge>
+                          <Button size="sm" asChild>
+                            <Link to={`/dashboard/cbt/${exam.id}`}>
+                              {isActive ? "Take Exam" : isUpcoming ? "View Details" : "View Result"}
+                            </Link>
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
             )}
           </TabsContent>
         </Tabs>

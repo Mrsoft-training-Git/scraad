@@ -34,7 +34,7 @@ const CBTExamList = () => {
     } else {
       // Students: fetch exams for their enrolled courses AND programs (filtered by track via RLS)
       const [courseEnr, progEnr] = await Promise.all([
-        supabase.from("enrollments").select("course_id").eq("user_id", user.id).in("payment_status", ["paid", "partial"]),
+        supabase.from("enrollments").select("course_id").eq("user_id", user.id),
         supabase.from("program_enrollments").select("program_id").eq("user_id", user.id),
       ]);
 
