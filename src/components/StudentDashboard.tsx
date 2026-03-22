@@ -112,8 +112,19 @@ export const StudentDashboard = ({ userName }: { userName: string }) => {
 
   const inProgressCourses = courses.filter(c => (c.progress ?? 0) > 0 && (c.progress ?? 0) < 100);
   const completedCourses = courses.filter(c => (c.progress ?? 0) >= 100);
-  const averageProgress = courses.length > 0
-    ? Math.round(courses.reduce((acc, c) => acc + (c.progress ?? 0), 0) / courses.length)
+  
+  const activePrograms = programEnrollments.filter(p => p.status === "active" || p.status === "admitted");
+  const completedPrograms = programEnrollments.filter(p => p.status === "completed");
+  const totalEnrolled = courses.length + programEnrollments.length;
+  const totalInProgress = inProgressCourses.length + activePrograms.length;
+  const totalCompleted = completedCourses.length + completedPrograms.length;
+  
+  const allProgressValues = [
+    ...courses.map(c => c.progress ?? 0),
+    ...programEnrollments.map(p => p.progress ?? 0),
+  ];
+  const averageProgress = allProgressValues.length > 0
+    ? Math.round(allProgressValues.reduce((acc, v) => acc + v, 0) / allProgressValues.length)
     : 0;
 
   // Filter popular courses that user isn't already enrolled in
