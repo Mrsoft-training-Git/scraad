@@ -129,6 +129,7 @@ const ProgramDashboard = () => {
   const paymentStatus = enrollment.payment_status || "unpaid";
   const hasPaid = paymentStatus === "paid";
   const isPartial = paymentStatus === "partial";
+  const hasAccess = hasPaid || isPartial;
 
   const completedAssignments = assignments.filter(a =>
     submissions.some(s => s.assignment_id === a.id && s.status === "graded")
@@ -258,7 +259,15 @@ const ProgramDashboard = () => {
           </TabsContent>
 
           <TabsContent value="materials" className="mt-6">
-            {materials.length > 0 ? (
+            {!hasAccess ? (
+              <Card className="border-warning/30 bg-warning/5">
+                <CardContent className="p-8 text-center">
+                  <BookOpen className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                  <h3 className="font-semibold mb-1">Materials Locked</h3>
+                  <p className="text-sm text-muted-foreground">Complete your payment to access program materials.</p>
+                </CardContent>
+              </Card>
+            ) : materials.length > 0 ? (
               <div className="space-y-3">
                 {materials.map(mat => {
                   const icons: Record<string, React.ReactNode> = {
@@ -293,11 +302,31 @@ const ProgramDashboard = () => {
           </TabsContent>
 
           <TabsContent value="assignments" className="mt-6">
-            <AssignmentsList assignments={assignments} submissions={submissions} onSubmit={fetchAll} />
+            {!hasAccess ? (
+              <Card className="border-warning/30 bg-warning/5">
+                <CardContent className="p-8 text-center">
+                  <ClipboardList className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                  <h3 className="font-semibold mb-1">Assignments Locked</h3>
+                  <p className="text-sm text-muted-foreground">Complete your payment to access assignments.</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <AssignmentsList assignments={assignments} submissions={submissions} onSubmit={fetchAll} />
+            )}
           </TabsContent>
 
           <TabsContent value="exams" className="mt-6">
-            <ExamsList exams={exams} results={examResults} onComplete={fetchAll} />
+            {!hasAccess ? (
+              <Card className="border-warning/30 bg-warning/5">
+                <CardContent className="p-8 text-center">
+                  <FileText className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                  <h3 className="font-semibold mb-1">Exams Locked</h3>
+                  <p className="text-sm text-muted-foreground">Complete your payment to access exams.</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <ExamsList exams={exams} results={examResults} onComplete={fetchAll} />
+            )}
           </TabsContent>
         </Tabs>
       </div>

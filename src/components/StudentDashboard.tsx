@@ -37,6 +37,7 @@ interface PopularCourse {
 export const StudentDashboard = ({ userName }: { userName: string }) => {
   const [courses, setCourses] = useState<EnrolledCourse[]>([]);
   const [popularCourses, setPopularCourses] = useState<PopularCourse[]>([]);
+  const [programEnrollments, setProgramEnrollments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [streak, setStreak] = useState(0);
 
@@ -49,7 +50,7 @@ export const StudentDashboard = ({ userName }: { userName: string }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const [coursesData, popularData, progressData] = await Promise.all([
+      const [coursesData, popularData, progressData, programEnrollData] = await Promise.all([
         supabase
           .from("enrolled_courses")
           .select("id, course_id, course_name, progress, enrolled_at, course:courses(image_url, instructor, category, students_count)")
@@ -68,10 +69,15 @@ export const StudentDashboard = ({ userName }: { userName: string }) => {
           .not("completed_at", "is", null)
           .order("completed_at", { ascending: false })
           .limit(30),
+        supabase
+          .from("program_enrollments")
+          .select("id, status, progress, program_id")
+          .eq("user_id", user.id),
       ]);
 
       if (coursesData.data) setCourses(coursesData.data as EnrolledCourse[]);
       if (popularData.data) setPopularCourses(popularData.data);
+      if (programEnrollData.data) setProgramEnrollments(programEnrollData.data);
 
       // Calculate streak from content_progress
       if (progressData.data && progressData.data.length > 0) {
@@ -106,8 +112,19 @@ export const StudentDashboard = ({ userName }: { userName: string }) => {
 
   const inProgressCourses = courses.filter(c => (c.progress ?? 0) > 0 && (c.progress ?? 0) < 100);
   const completedCourses = courses.filter(c => (c.progress ?? 0) >= 100);
-  const averageProgress = courses.length > 0
-    ? Math.round(courses.reduce((acc, c) => acc + (c.progress ?? 0), 0) / courses.length)
+  
+  const activePrograms = programEnrollments.filter(p => p.status === "active" || p.status === "admitted");
+  const completedPrograms = programEnrollments.filter(p => p.status === "completed");
+  const totalEnrolled = courses.length + programEnrollments.length;
+  const totalInProgress = inProgressCourses.length + activePrograms.length;
+  const totalCompleted = completedCourses.length + completedPrograms.length;
+  
+  const allProgressValues = [
+    ...courses.map(c => c.progress ?? 0),
+    ...programEnrollments.map(p => p.progress ?? 0),
+  ];
+  const averageProgress = allProgressValues.length > 0
+    ? Math.round(allProgressValues.reduce((acc, v) => acc + v, 0) / allProgressValues.length)
     : 0;
 
   // Filter popular courses that user isn't already enrolled in
@@ -115,10 +132,10 @@ export const StudentDashboard = ({ userName }: { userName: string }) => {
   const recommended = popularCourses.filter(c => !enrolledIds.has(c.id));
 
   const statsConfig = [
-    { title: "Enrolled", value: courses.length, icon: BookOpen, accent: "bg-primary/10 text-primary" },
+    { title: "Enrolled", value: totalEnrolled, icon: BookOpen, accent: "bg-primary/10 text-primary" },
     { title: "Progress", value: `${averageProgress}%`, icon: TrendingUp, accent: "bg-secondary/15 text-secondary" },
-    { title: "In Progress", value: inProgressCourses.length, icon: Clock, accent: "bg-warning/15 text-warning-foreground" },
-    { title: "Completed", value: completedCourses.length, icon: CheckCircle, accent: "bg-success/15 text-success" },
+    { title: "In Progress", value: totalInProgress, icon: Clock, accent: "bg-warning/15 text-warning-foreground" },
+    { title: "Completed", value: totalCompleted, icon: CheckCircle, accent: "bg-success/15 text-success" },
   ];
 
   const CourseScrollSection = ({ title, children, viewAllLink }: { title: string; children: React.ReactNode; viewAllLink?: string }) => (

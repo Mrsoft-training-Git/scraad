@@ -209,9 +209,14 @@ const ProgramManagement = () => {
                                 )}
                               </div>
                             </div>
-                            <Button size="sm" variant="outline" onClick={() => setEditingProgram(program)}>
-                              <Pencil className="w-3.5 h-3.5 mr-1" /> Edit
-                            </Button>
+                            <div className="flex gap-2">
+                              <Button size="sm" variant="default" asChild>
+                                <Link to={`/dashboard/programs/${program.id}/manage`}>Manage Content</Link>
+                              </Button>
+                              <Button size="sm" variant="outline" onClick={() => setEditingProgram(program)}>
+                                <Pencil className="w-3.5 h-3.5 mr-1" /> Edit
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       </div>
