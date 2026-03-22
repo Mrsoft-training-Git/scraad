@@ -37,6 +37,7 @@ interface PopularCourse {
 export const StudentDashboard = ({ userName }: { userName: string }) => {
   const [courses, setCourses] = useState<EnrolledCourse[]>([]);
   const [popularCourses, setPopularCourses] = useState<PopularCourse[]>([]);
+  const [programEnrollments, setProgramEnrollments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [streak, setStreak] = useState(0);
 
