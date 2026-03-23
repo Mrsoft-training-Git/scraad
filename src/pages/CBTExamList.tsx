@@ -10,7 +10,7 @@ import { Loader2, Plus, Clock, BookOpen, GraduationCap, Calendar } from "lucide-
 import { format, isPast, isFuture } from "date-fns";
 import type { CBTExam } from "@/types/cbt";
 
-type ExamStatus = "upcoming" | "active" | "ended";
+type ExamStatus = "upcoming" | "active" | "ended" | "completed";
 
 const CBTExamList = () => {
   const { user, profile, userRole, loading: authLoading } = useDashboardAuth();
