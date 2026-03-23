@@ -11,11 +11,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useDashboardAuth } from "@/hooks/useDashboardAuth";
 import { usePayment } from "@/hooks/usePayment";
+import { ContentPreview } from "@/components/ContentPreview";
+import { KnowledgeCheckPlayer } from "@/components/KnowledgeCheckPlayer";
 import { format } from "date-fns";
 import {
   BookOpen, Calendar, FileText, ClipboardList, BarChart3,
   CheckCircle, Clock, Upload, Loader2, Play, ArrowLeft,
-  Video, File, ExternalLink, CreditCard, Wallet, Download,
+  Video, File, ExternalLink, CreditCard, Wallet, Download, HelpCircle, Link as LinkIcon,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
