@@ -10,11 +10,12 @@ import { Loader2, Plus, Clock, BookOpen, GraduationCap, Calendar } from "lucide-
 import { format, isPast, isFuture } from "date-fns";
 import type { CBTExam } from "@/types/cbt";
 
-type ExamStatus = "upcoming" | "active" | "ended";
+type ExamStatus = "upcoming" | "active" | "ended" | "completed";
 
 const CBTExamList = () => {
   const { user, profile, userRole, loading: authLoading } = useDashboardAuth();
   const [exams, setExams] = useState<CBTExam[]>([]);
+  const [completedExamIds, setCompletedExamIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | ExamStatus>("all");
 
@@ -24,15 +25,20 @@ const CBTExamList = () => {
     if (!user || authLoading) return;
     setLoading(true);
 
+    // Fetch user's completed exams
+    const { data: results } = await supabase
+      .from("cbt_results")
+      .select("exam_id")
+      .eq("user_id", user.id);
+    setCompletedExamIds(new Set((results || []).map(r => r.exam_id)));
+
     if (isAdmin) {
-      // Admins/instructors see all exams
       const { data } = await supabase
         .from("cbt_exams")
         .select("*")
         .order("created_at", { ascending: false });
       setExams((data as unknown as CBTExam[]) || []);
     } else {
-      // Students: fetch exams for their enrolled courses AND programs (filtered by track via RLS)
       const [courseEnr, progEnr] = await Promise.all([
         supabase.from("enrollments").select("course_id").eq("user_id", user.id),
         supabase.from("program_enrollments").select("program_id").eq("user_id", user.id),
@@ -51,7 +57,6 @@ const CBTExamList = () => {
         if (data) allExams.push(...(data as unknown as CBTExam[]));
       }
 
-      // Deduplicate by id
       const unique = Array.from(new Map(allExams.map(e => [e.id, e])).values());
       unique.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
       setExams(unique);
@@ -62,6 +67,7 @@ const CBTExamList = () => {
   useEffect(() => { fetchExams(); }, [fetchExams]);
 
   const getExamStatus = (exam: CBTExam): { label: string; status: ExamStatus; color: string } => {
+    if (completedExamIds.has(exam.id)) return { label: "Completed", status: "completed", color: "bg-purple-500/10 text-purple-600 border-purple-500/20" };
     if (isFuture(new Date(exam.start_time))) return { label: "Upcoming", status: "upcoming", color: "bg-blue-500/10 text-blue-600 border-blue-500/20" };
     if (isPast(new Date(exam.end_time))) return { label: "Ended", status: "ended", color: "bg-muted text-muted-foreground border-border" };
     return { label: "Active", status: "active", color: "bg-green-500/10 text-green-600 border-green-500/20" };
@@ -97,7 +103,7 @@ const CBTExamList = () => {
 
         {/* Status filter tabs */}
         <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
-          {(["all", "upcoming", "active", "ended"] as const).map(status => (
+          {(["all", "upcoming", "active", "completed", "ended"] as const).map(status => (
             <Badge
               key={status}
               variant={filter === status ? "default" : "outline"}
@@ -151,7 +157,7 @@ const CBTExamList = () => {
                       ) : (
                         <Button size="sm" asChild>
                           <Link to={`/dashboard/cbt/${exam.id}`}>
-                            {status.status === "active" ? "Take Exam" : status.status === "upcoming" ? "View Details" : "View Result"}
+                            {status.status === "completed" ? "View Result" : status.status === "active" ? "Take Exam" : status.status === "upcoming" ? "View Details" : "View Result"}
                           </Link>
                         </Button>
                       )}
