@@ -157,7 +157,7 @@ const CBTExamList = () => {
                       ) : (
                         <Button size="sm" asChild>
                           <Link to={`/dashboard/cbt/${exam.id}`}>
-                            {status.status === "active" ? "Take Exam" : status.status === "upcoming" ? "View Details" : "View Result"}
+                            {status.status === "completed" ? "View Result" : status.status === "active" ? "Take Exam" : status.status === "upcoming" ? "View Details" : "View Result"}
                           </Link>
                         </Button>
                       )}
