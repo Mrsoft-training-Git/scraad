@@ -339,6 +339,114 @@ const ProgramDashboard = () => {
   );
 };
 
+/* ─── Program Materials List ─── */
+const ProgramMaterialsList = ({ materials, modules }: { materials: any[]; modules: any[] }) => {
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewMat, setPreviewMat] = useState<any>(null);
+  const [quizMat, setQuizMat] = useState<any>(null);
+
+  const getIcon = (type: string) => {
+    if (type === "video") return <Video className="w-4 h-4 text-primary" />;
+    if (type === "quiz") return <HelpCircle className="w-4 h-4 text-primary" />;
+    if (type === "link") return <LinkIcon className="w-4 h-4 text-primary" />;
+    return <File className="w-4 h-4 text-primary" />;
+  };
+
+  const handleOpenMaterial = (mat: any) => {
+    if (mat.material_type === "quiz") {
+      setQuizMat(mat);
+    } else if (mat.material_type === "link") {
+      window.open(mat.content_url, "_blank");
+    } else {
+      setPreviewMat(mat);
+      setPreviewOpen(true);
+    }
+  };
+
+  if (quizMat) {
+    const quizData = (quizMat.quiz_data || []) as any[];
+    const questions = quizData.map((q: any, i: number) => ({
+      id: q.id || `q-${i}`,
+      question: q.question,
+      options: q.options,
+      correct_answer: q.correct_answer,
+      explanation: q.explanation,
+      order_index: q.order_index ?? i,
+    }));
+
+    return (
+      <div className="space-y-4">
+        <Button variant="ghost" size="sm" onClick={() => setQuizMat(null)}>
+          <ArrowLeft className="w-4 h-4 mr-1" /> Back to Materials
+        </Button>
+        <KnowledgeCheckPlayer
+          questions={questions}
+          contentTitle={quizMat.title}
+          contentId={quizMat.id}
+          onComplete={() => {}}
+          onGoBack={() => setQuizMat(null)}
+        />
+      </div>
+    );
+  }
+
+  // Group by module
+  const grouped = modules.map(mod => ({
+    ...mod,
+    items: materials.filter(m => m.module_id === mod.id),
+  })).filter(g => g.items.length > 0);
+
+  const ungrouped = materials.filter(m => !m.module_id);
+
+  return (
+    <div className="space-y-4">
+      {grouped.map(group => (
+        <div key={group.id} className="space-y-2">
+          <h4 className="font-semibold text-sm text-muted-foreground">{group.title}</h4>
+          {group.items.map((mat: any) => (
+            <Card key={mat.id} className="border-border/60 hover:border-primary/20 transition-colors cursor-pointer" onClick={() => handleOpenMaterial(mat)}>
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  {getIcon(mat.material_type)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-medium truncate">{mat.title}</h4>
+                  {mat.description && <p className="text-xs text-muted-foreground truncate">{mat.description}</p>}
+                </div>
+                <Badge variant="outline" className="text-[10px] capitalize">{mat.material_type}</Badge>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ))}
+      {ungrouped.map((mat: any) => (
+        <Card key={mat.id} className="border-border/60 hover:border-primary/20 transition-colors cursor-pointer" onClick={() => handleOpenMaterial(mat)}>
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+              {getIcon(mat.material_type)}
+            </div>
+            <div className="flex-1 min-w-0">
+              <h4 className="font-medium truncate">{mat.title}</h4>
+              {mat.description && <p className="text-xs text-muted-foreground truncate">{mat.description}</p>}
+            </div>
+            <Badge variant="outline" className="text-[10px] capitalize">{mat.material_type}</Badge>
+          </CardContent>
+        </Card>
+      ))}
+      <ContentPreview
+        open={previewOpen}
+        onOpenChange={setPreviewOpen}
+        content={previewMat ? {
+          title: previewMat.title,
+          description: previewMat.description,
+          content_type: previewMat.material_type === "document" ? "document" : "video",
+          content_url: previewMat.content_url,
+        } : null}
+      />
+    </div>
+  );
+};
+
 const AssignmentsList = ({ assignments, submissions, onSubmit }: { assignments: any[]; submissions: any[]; onSubmit: () => void }) => {
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState<string | null>(null);
