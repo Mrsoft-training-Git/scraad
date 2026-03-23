@@ -366,6 +366,18 @@ const InstructorProgramManage = () => {
         onOpenChange={setShowSessionDialog}
         onSaved={fetchAll}
       />
+
+      {/* Content Preview */}
+      <ContentPreview
+        open={previewOpen}
+        onOpenChange={setPreviewOpen}
+        content={previewMaterial ? {
+          title: previewMaterial.title,
+          description: previewMaterial.description,
+          content_type: previewMaterial.material_type,
+          content_url: previewMaterial.content_url,
+        } : null}
+      />
     </DashboardLayout>
   );
 };
