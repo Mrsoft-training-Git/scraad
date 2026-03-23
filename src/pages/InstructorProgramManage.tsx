@@ -169,13 +169,27 @@ const InstructorProgramManage = () => {
                     {/* Materials under this module */}
                     {materials.filter(m => m.module_id === mod.id).length > 0 && (
                       <div className="mt-3 space-y-2 pl-4 border-l-2 border-border">
-                        {materials.filter(m => m.module_id === mod.id).map(mat => (
-                          <div key={mat.id} className="flex items-center gap-2 text-sm">
-                            <FileText className="w-3.5 h-3.5 text-muted-foreground" />
-                            <span>{mat.title}</span>
-                            <Badge variant="outline" className="text-[10px]">{mat.material_type}</Badge>
-                          </div>
-                        ))}
+                        {materials.filter(m => m.module_id === mod.id).map(mat => {
+                          const typeIcon = mat.material_type === "video" ? <Video className="w-3.5 h-3.5 text-muted-foreground" /> :
+                            mat.material_type === "quiz" ? <HelpCircle className="w-3.5 h-3.5 text-muted-foreground" /> :
+                            mat.material_type === "link" ? <LinkIcon className="w-3.5 h-3.5 text-muted-foreground" /> :
+                            <FileText className="w-3.5 h-3.5 text-muted-foreground" />;
+                          return (
+                            <div key={mat.id} className="flex items-center gap-2 text-sm group">
+                              {typeIcon}
+                              <span className="flex-1">{mat.title}</span>
+                              <Badge variant="outline" className="text-[10px]">{mat.material_type}</Badge>
+                              {(mat.content_url || mat.file_path) && mat.material_type !== "quiz" && (
+                                <Button size="icon" variant="ghost" className="h-6 w-6 opacity-0 group-hover:opacity-100" onClick={() => { setPreviewMaterial(mat); setPreviewOpen(true); }}>
+                                  <Eye className="w-3 h-3" />
+                                </Button>
+                              )}
+                              <Button size="icon" variant="ghost" className="h-6 w-6 text-destructive opacity-0 group-hover:opacity-100" onClick={() => handleDeleteMaterial(mat.id)}>
+                                <Trash2 className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
                   </CardContent>
