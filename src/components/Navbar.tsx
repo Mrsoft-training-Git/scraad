@@ -22,11 +22,11 @@ export const Navbar = () => {
   }, []);
 
   const navLinks = [
-    { to: "/", label: "Home" },
-    { to: "/courses", label: "Courses" },
-    { to: "/programs", label: "Programs" },
-    { to: "/career", label: "Career" },
-  ];
+  { to: "/", label: "Home" },
+  { to: "/courses", label: "Courses" },
+  { to: "/programs", label: "Programs" },
+  { to: "/career", label: "Career" }];
+
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -38,37 +38,37 @@ export const Navbar = () => {
           <Link to="/" className="flex items-center gap-2.5 group flex-shrink-0">
             <img src={logo} alt="ScraAd Logo" className="w-9 h-9 object-contain" />
             <div>
-              <div className="font-heading font-bold text-base leading-tight text-foreground">ScraAd</div>
+              <div className="font-heading font-bold text-base leading-tight text-foreground">ScraAD</div>
               <div className="text-[10px] text-muted-foreground leading-tight">Scratch to Advance</div>
             </div>
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                className={cn(
-                  "px-3.5 py-2 text-sm font-medium rounded-lg transition-colors",
-                  isActive(link.to)
-                    ? "text-primary bg-primary/8"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
-                )}
-              >
+            {navLinks.map((link) =>
+            <Link
+              key={link.to}
+              to={link.to}
+              className={cn(
+                "px-3.5 py-2 text-sm font-medium rounded-lg transition-colors",
+                isActive(link.to) ?
+                "text-primary bg-primary/8" :
+                "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+              )}>
+              
                 {link.label}
               </Link>
-            ))}
+            )}
           </div>
 
           {/* Right side */}
           <div className="hidden lg:flex items-center gap-2">
-            {isAuthenticated ? (
-              <Button className="bg-primary hover:bg-accent text-primary-foreground font-semibold shadow-sm" asChild>
+            {isAuthenticated ?
+            <Button className="bg-primary hover:bg-accent text-primary-foreground font-semibold shadow-sm" asChild>
                 <Link to="/dashboard">Dashboard</Link>
-              </Button>
-            ) : (
-              <>
+              </Button> :
+
+            <>
                 <Button variant="ghost" className="text-foreground hover:text-primary font-medium" asChild>
                   <Link to="/auth">Log in</Link>
                 </Button>
@@ -76,7 +76,7 @@ export const Navbar = () => {
                   <Link to="/auth">Sign Up Free</Link>
                 </Button>
               </>
-            )}
+            }
           </div>
 
           {/* Mobile Menu Button */}
@@ -86,30 +86,30 @@ export const Navbar = () => {
         </div>
 
         {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div className="lg:hidden pb-4 space-y-1 border-t border-border pt-3">
-            {navLinks.map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                onClick={() => setIsMenuOpen(false)}
-                className={cn(
-                  "block px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-                  isActive(link.to)
-                    ? "text-primary bg-primary/8"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
-                )}
-              >
+        {isMenuOpen &&
+        <div className="lg:hidden pb-4 space-y-1 border-t border-border pt-3">
+            {navLinks.map((link) =>
+          <Link
+            key={link.to}
+            to={link.to}
+            onClick={() => setIsMenuOpen(false)}
+            className={cn(
+              "block px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+              isActive(link.to) ?
+              "text-primary bg-primary/8" :
+              "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+            )}>
+            
                 {link.label}
               </Link>
-            ))}
+          )}
             <div className="pt-3 space-y-2 border-t border-border mt-2">
-              {isAuthenticated ? (
-                <Button className="w-full bg-primary hover:bg-accent text-primary-foreground font-semibold" asChild>
+              {isAuthenticated ?
+            <Button className="w-full bg-primary hover:bg-accent text-primary-foreground font-semibold" asChild>
                   <Link to="/dashboard">Dashboard</Link>
-                </Button>
-              ) : (
-                <>
+                </Button> :
+
+            <>
                   <Button variant="outline" className="w-full font-medium" asChild>
                     <Link to="/auth">Log in</Link>
                   </Button>
@@ -117,11 +117,11 @@ export const Navbar = () => {
                     <Link to="/auth">Sign Up Free</Link>
                   </Button>
                 </>
-              )}
+            }
             </div>
           </div>
-        )}
+        }
       </div>
-    </nav>
-  );
+    </nav>);
+
 };
