@@ -44,6 +44,8 @@ const InstructorProgramManage = () => {
   const [showAssignmentDialog, setShowAssignmentDialog] = useState(false);
   const [showSessionDialog, setShowSessionDialog] = useState(false);
   const [editingModule, setEditingModule] = useState<any>(null);
+  const [previewMaterial, setPreviewMaterial] = useState<any>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   useEffect(() => {
     if (programId && user) fetchAll();
