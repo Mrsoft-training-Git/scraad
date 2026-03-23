@@ -597,13 +597,8 @@ const AddMaterialDialog = ({ open, onOpenChange, programId, modules, onSaved }: 
     </Dialog>
   );
 };
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-};
 
-/* ─── Add Assignment Dialog ─── */
+
 const AddAssignmentDialog = ({ open, onOpenChange, programId, modules, onSaved }: { open: boolean; onOpenChange: (v: boolean) => void; programId: string; modules: any[]; onSaved: () => void }) => {
   const { toast } = useToast();
   const [title, setTitle] = useState("");
