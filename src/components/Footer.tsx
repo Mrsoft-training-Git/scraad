@@ -13,7 +13,7 @@ export const Footer = () => {
                 <BookOpen className="w-4 h-4 text-secondary-foreground" />
               </div>
               <div>
-                <div className="font-heading font-bold text-primary-foreground text-sm">ScraAd</div>
+                <div className="font-heading font-bold text-primary-foreground text-sm">ScraAD</div>
                 <div className="text-[10px] text-primary-foreground/50">Scratch to Advance</div>
               </div>
             </Link>
@@ -27,38 +27,38 @@ export const Footer = () => {
             <h4 className="font-heading font-semibold text-primary-foreground text-xs uppercase tracking-wider mb-3">Platform</h4>
             <ul className="space-y-2">
               {[
-                { to: "/courses", label: "Courses" },
-                { to: "/programs", label: "Programs" },
-                { to: "/career", label: "Careers" },
-              ].map(link => (
-                <li key={link.to}>
+              { to: "/courses", label: "Courses" },
+              { to: "/programs", label: "Programs" },
+              { to: "/career", label: "Careers" }].
+              map((link) =>
+              <li key={link.to}>
                   <Link to={link.to} className="text-sm text-primary-foreground/50 hover:text-primary-foreground transition-colors">{link.label}</Link>
                 </li>
-              ))}
+              )}
             </ul>
           </div>
           <div>
             <h4 className="font-heading font-semibold text-primary-foreground text-xs uppercase tracking-wider mb-3">Company</h4>
             <ul className="space-y-2">
-              {["About", "Contact", "Privacy Policy"].map(label => (
-                <li key={label}>
+              {["About", "Contact", "Privacy Policy"].map((label) =>
+              <li key={label}>
                   <span className="text-sm text-primary-foreground/50 hover:text-primary-foreground transition-colors cursor-pointer">{label}</span>
                 </li>
-              ))}
+              )}
             </ul>
           </div>
           <div>
             <h4 className="font-heading font-semibold text-primary-foreground text-xs uppercase tracking-wider mb-3">Get Started</h4>
             <ul className="space-y-2">
               {[
-                { to: "/auth", label: "Sign Up" },
-                { to: "/auth", label: "Log In" },
-                { to: "/signup/organization", label: "For Business" },
-              ].map(link => (
-                <li key={link.label}>
+              { to: "/auth", label: "Sign Up" },
+              { to: "/auth", label: "Log In" },
+              { to: "/signup/organization", label: "For Business" }].
+              map((link) =>
+              <li key={link.label}>
                   <Link to={link.to} className="text-sm text-primary-foreground/50 hover:text-primary-foreground transition-colors">{link.label}</Link>
                 </li>
-              ))}
+              )}
             </ul>
           </div>
         </div>
@@ -68,6 +68,6 @@ export const Footer = () => {
           <p className="text-xs text-primary-foreground/30">Scratch to Advance</p>
         </div>
       </div>
-    </footer>
-  );
+    </footer>);
+
 };
