@@ -67,6 +67,7 @@ const CBTExamList = () => {
   useEffect(() => { fetchExams(); }, [fetchExams]);
 
   const getExamStatus = (exam: CBTExam): { label: string; status: ExamStatus; color: string } => {
+    if (completedExamIds.has(exam.id)) return { label: "Completed", status: "completed", color: "bg-purple-500/10 text-purple-600 border-purple-500/20" };
     if (isFuture(new Date(exam.start_time))) return { label: "Upcoming", status: "upcoming", color: "bg-blue-500/10 text-blue-600 border-blue-500/20" };
     if (isPast(new Date(exam.end_time))) return { label: "Ended", status: "ended", color: "bg-muted text-muted-foreground border-border" };
     return { label: "Active", status: "active", color: "bg-green-500/10 text-green-600 border-green-500/20" };
