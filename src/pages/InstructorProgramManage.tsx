@@ -10,13 +10,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useDashboardAuth } from "@/hooks/useDashboardAuth";
+import { KnowledgeCheckBuilder, QuizQuestion } from "@/components/KnowledgeCheckBuilder";
+import { ContentPreview } from "@/components/ContentPreview";
 import { format } from "date-fns";
 import {
   ArrowLeft, BookOpen, ClipboardList, FileText, Users, Video,
   Plus, Loader2, Pencil, Trash2, CheckCircle, Clock, Calendar,
+  Link as LinkIcon, Eye, HelpCircle,
 } from "lucide-react";
 
 const InstructorProgramManage = () => {
