@@ -451,35 +451,89 @@ const AddModuleDialog = ({ open, onOpenChange, programId, editing, onSaved }: { 
 const AddMaterialDialog = ({ open, onOpenChange, programId, modules, onSaved }: { open: boolean; onOpenChange: (v: boolean) => void; programId: string; modules: any[]; onSaved: () => void }) => {
   const { toast } = useToast();
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [moduleId, setModuleId] = useState("");
   const [type, setType] = useState("document");
   const [url, setUrl] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
   const [saving, setSaving] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+
+  const resetForm = () => {
+    setTitle(""); setDescription(""); setUrl(""); setFile(null); setQuizQuestions([]); setUploadProgress(0);
+  };
 
   const handleSave = async () => {
     if (!title.trim() || !moduleId) return;
+    if (type === "quiz" && quizQuestions.length === 0) {
+      toast({ title: "Add at least one question", variant: "destructive" });
+      return;
+    }
     setSaving(true);
+
+    let fileUrl: string | null = url.trim() || null;
+    let filePath: string | null = null;
+
     try {
+      if (file) {
+        if (type === "video") {
+          const { data: uploadData, error: fnError } = await supabase.functions.invoke("s3-get-upload-url", {
+            body: { courseId: programId, fileName: file.name, contentType: file.type, fileSize: file.size },
+          });
+          if (fnError || !uploadData?.uploadUrl) throw new Error(fnError?.message || "Failed to get upload URL");
+
+          await new Promise<void>((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.upload.addEventListener("progress", (e) => { if (e.lengthComputable) setUploadProgress(Math.round((e.loaded / e.total) * 100)); });
+            xhr.addEventListener("load", () => xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(`Upload failed (${xhr.status})`)));
+            xhr.addEventListener("error", () => reject(new Error("Upload failed")));
+            xhr.open("PUT", uploadData.uploadUrl);
+            xhr.setRequestHeader("Content-Type", file.type);
+            xhr.send(file);
+          });
+
+          filePath = uploadData.s3Key;
+          fileUrl = uploadData.s3Url;
+        } else {
+          const fileExt = file.name.split(".").pop();
+          const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+          filePath = `programs/${programId}/${fileName}`;
+          const { error: uploadError } = await supabase.storage.from("course-content").upload(filePath, file);
+          if (uploadError) throw uploadError;
+          const { data: urlData } = supabase.storage.from("course-content").getPublicUrl(filePath);
+          fileUrl = urlData.publicUrl;
+        }
+      }
+
       const { error } = await supabase.from("program_materials").insert({
-        program_id: programId, module_id: moduleId, title: title.trim(),
-        material_type: type, content_url: url.trim() || null,
-      });
+        program_id: programId,
+        module_id: moduleId,
+        title: title.trim(),
+        description: description.trim() || null,
+        material_type: type,
+        content_url: fileUrl,
+        file_path: filePath,
+        quiz_data: type === "quiz" ? quizQuestions : [],
+      } as any);
       if (error) throw error;
+
       toast({ title: "Material added!" });
       onSaved();
       onOpenChange(false);
-      setTitle(""); setUrl("");
+      resetForm();
     } catch (err: any) {
       toast({ title: "Failed", description: err.message, variant: "destructive" });
     } finally { setSaving(false); }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+    <Dialog open={open} onOpenChange={(v) => { onOpenChange(v); if (!v) resetForm(); }}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle>Add Material</DialogTitle><DialogDescription>Add a learning resource to a module.</DialogDescription></DialogHeader>
         <div className="space-y-4">
           <div><Label>Title *</Label><Input value={title} onChange={e => setTitle(e.target.value)} /></div>
+          <div><Label>Description</Label><Textarea value={description} onChange={e => setDescription(e.target.value)} rows={2} /></div>
           <div><Label>Module *</Label>
             <Select value={moduleId} onValueChange={setModuleId}>
               <SelectTrigger><SelectValue placeholder="Select module" /></SelectTrigger>
@@ -487,17 +541,62 @@ const AddMaterialDialog = ({ open, onOpenChange, programId, modules, onSaved }: 
             </Select>
           </div>
           <div><Label>Type</Label>
-            <Select value={type} onValueChange={setType}>
+            <Select value={type} onValueChange={(v) => { setType(v); setFile(null); setUrl(""); }}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="document">Document</SelectItem>
                 <SelectItem value="video">Video</SelectItem>
                 <SelectItem value="link">Link</SelectItem>
+                <SelectItem value="quiz">Quiz</SelectItem>
               </SelectContent>
             </Select>
           </div>
-          <div><Label>URL</Label><Input value={url} onChange={e => setUrl(e.target.value)} placeholder="https://..." /></div>
-          <Button onClick={handleSave} disabled={saving} className="w-full">{saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}Add Material</Button>
+
+          {type === "document" && (
+            <div><Label>Upload Document</Label>
+              <Input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt" onChange={e => setFile(e.target.files?.[0] || null)} />
+            </div>
+          )}
+
+          {type === "video" && (
+            <>
+              <div><Label>Upload Video File</Label>
+                <Input type="file" accept="video/mp4,video/quicktime,video/webm" onChange={e => setFile(e.target.files?.[0] || null)} />
+                {file && uploadProgress > 0 && uploadProgress < 100 && (
+                  <div className="mt-2">
+                    <Progress value={uploadProgress} className="h-2" />
+                    <p className="text-xs text-muted-foreground mt-1">{uploadProgress}% uploaded</p>
+                  </div>
+                )}
+              </div>
+              <div className="relative flex items-center gap-2">
+                <div className="flex-1 h-px bg-border" /><span className="text-xs text-muted-foreground">OR</span><div className="flex-1 h-px bg-border" />
+              </div>
+              <div><Label>YouTube URL</Label>
+                <Input value={url} onChange={e => { setUrl(e.target.value); setFile(null); }} placeholder="https://youtube.com/watch?v=..." disabled={!!file} />
+              </div>
+            </>
+          )}
+
+          {type === "link" && (
+            <div><Label>URL *</Label><Input value={url} onChange={e => setUrl(e.target.value)} placeholder="https://..." /></div>
+          )}
+
+          {type === "quiz" && (
+            <div>
+              <Label className="mb-2 block">Quiz Questions</Label>
+              <KnowledgeCheckBuilder questions={quizQuestions} onChange={setQuizQuestions} />
+            </div>
+          )}
+
+          <Button onClick={handleSave} disabled={saving} className="w-full">
+            {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}Add Material
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
         </div>
       </DialogContent>
     </Dialog>
