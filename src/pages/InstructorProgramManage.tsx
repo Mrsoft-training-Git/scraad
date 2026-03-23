@@ -75,6 +75,13 @@ const InstructorProgramManage = () => {
     setLoading(false);
   };
 
+  const handleDeleteMaterial = async (materialId: string) => {
+    if (!confirm("Delete this material?")) return;
+    const { error } = await supabase.from("program_materials").delete().eq("id", materialId);
+    if (error) toast({ title: "Failed to delete", variant: "destructive" });
+    else { toast({ title: "Material deleted" }); fetchAll(); }
+  };
+
   if (authLoading || loading) {
     return (
       <DashboardLayout user={user} userRole={userRole} profile={profile}>
