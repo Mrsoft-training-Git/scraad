@@ -103,7 +103,7 @@ const CBTExamList = () => {
 
         {/* Status filter tabs */}
         <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
-          {(["all", "upcoming", "active", "ended"] as const).map(status => (
+          {(["all", "upcoming", "active", "completed", "ended"] as const).map(status => (
             <Badge
               key={status}
               variant={filter === status ? "default" : "outline"}
