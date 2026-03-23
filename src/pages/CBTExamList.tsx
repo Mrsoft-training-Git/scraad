@@ -15,6 +15,7 @@ type ExamStatus = "upcoming" | "active" | "ended" | "completed";
 const CBTExamList = () => {
   const { user, profile, userRole, loading: authLoading } = useDashboardAuth();
   const [exams, setExams] = useState<CBTExam[]>([]);
+  const [completedExamIds, setCompletedExamIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | ExamStatus>("all");
 
