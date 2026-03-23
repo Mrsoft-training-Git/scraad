@@ -269,34 +269,7 @@ const ProgramDashboard = () => {
                 </CardContent>
               </Card>
             ) : materials.length > 0 ? (
-              <div className="space-y-3">
-                {materials.map(mat => {
-                  const icons: Record<string, React.ReactNode> = {
-                    video: <Video className="w-4 h-4 text-primary" />,
-                    document: <File className="w-4 h-4 text-primary" />,
-                    link: <ExternalLink className="w-4 h-4 text-primary" />,
-                    file: <File className="w-4 h-4 text-primary" />,
-                  };
-                  return (
-                    <Card key={mat.id} className="border-border/60 hover:border-primary/20 transition-colors">
-                      <CardContent className="p-4 flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                          {icons[mat.material_type] || icons.file}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-medium truncate">{mat.title}</h4>
-                          {mat.description && <p className="text-xs text-muted-foreground truncate">{mat.description}</p>}
-                        </div>
-                        {mat.content_url && (
-                          <Button size="sm" variant="outline" asChild>
-                            <a href={mat.content_url} target="_blank" rel="noopener noreferrer">Open</a>
-                          </Button>
-                        )}
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
+              <ProgramMaterialsList materials={materials} modules={modules} />
             ) : (
               <p className="text-center text-muted-foreground py-8">No materials available yet.</p>
             )}
