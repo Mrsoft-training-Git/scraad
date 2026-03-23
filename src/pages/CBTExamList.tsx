@@ -25,15 +25,20 @@ const CBTExamList = () => {
     if (!user || authLoading) return;
     setLoading(true);
 
+    // Fetch user's completed exams
+    const { data: results } = await supabase
+      .from("cbt_results")
+      .select("exam_id")
+      .eq("user_id", user.id);
+    setCompletedExamIds(new Set((results || []).map(r => r.exam_id)));
+
     if (isAdmin) {
-      // Admins/instructors see all exams
       const { data } = await supabase
         .from("cbt_exams")
         .select("*")
         .order("created_at", { ascending: false });
       setExams((data as unknown as CBTExam[]) || []);
     } else {
-      // Students: fetch exams for their enrolled courses AND programs (filtered by track via RLS)
       const [courseEnr, progEnr] = await Promise.all([
         supabase.from("enrollments").select("course_id").eq("user_id", user.id),
         supabase.from("program_enrollments").select("program_id").eq("user_id", user.id),
@@ -52,7 +57,6 @@ const CBTExamList = () => {
         if (data) allExams.push(...(data as unknown as CBTExam[]));
       }
 
-      // Deduplicate by id
       const unique = Array.from(new Map(allExams.map(e => [e.id, e])).values());
       unique.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
       setExams(unique);
