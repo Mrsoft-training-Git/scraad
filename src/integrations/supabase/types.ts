@@ -1560,6 +1560,7 @@ export type Database = {
           module_id: string
           order_index: number | null
           program_id: string
+          quiz_data: Json | null
           title: string
         }
         Insert: {
@@ -1572,6 +1573,7 @@ export type Database = {
           module_id: string
           order_index?: number | null
           program_id: string
+          quiz_data?: Json | null
           title: string
         }
         Update: {
@@ -1584,6 +1586,7 @@ export type Database = {
           module_id?: string
           order_index?: number | null
           program_id?: string
+          quiz_data?: Json | null
           title?: string
         }
         Relationships: [

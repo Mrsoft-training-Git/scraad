@@ -10,13 +10,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useDashboardAuth } from "@/hooks/useDashboardAuth";
+import { KnowledgeCheckBuilder, QuizQuestion } from "@/components/KnowledgeCheckBuilder";
+import { ContentPreview } from "@/components/ContentPreview";
 import { format } from "date-fns";
 import {
   ArrowLeft, BookOpen, ClipboardList, FileText, Users, Video,
   Plus, Loader2, Pencil, Trash2, CheckCircle, Clock, Calendar,
+  Link as LinkIcon, Eye, HelpCircle,
 } from "lucide-react";
 
 const InstructorProgramManage = () => {
@@ -40,6 +44,8 @@ const InstructorProgramManage = () => {
   const [showAssignmentDialog, setShowAssignmentDialog] = useState(false);
   const [showSessionDialog, setShowSessionDialog] = useState(false);
   const [editingModule, setEditingModule] = useState<any>(null);
+  const [previewMaterial, setPreviewMaterial] = useState<any>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   useEffect(() => {
     if (programId && user) fetchAll();
@@ -67,6 +73,13 @@ const InstructorProgramManage = () => {
     if (enrollRes.data) setEnrollments(enrollRes.data);
     if (sessRes.data) setSessions(sessRes.data);
     setLoading(false);
+  };
+
+  const handleDeleteMaterial = async (materialId: string) => {
+    if (!confirm("Delete this material?")) return;
+    const { error } = await supabase.from("program_materials").delete().eq("id", materialId);
+    if (error) toast({ title: "Failed to delete", variant: "destructive" });
+    else { toast({ title: "Material deleted" }); fetchAll(); }
   };
 
   if (authLoading || loading) {
@@ -165,13 +178,27 @@ const InstructorProgramManage = () => {
                     {/* Materials under this module */}
                     {materials.filter(m => m.module_id === mod.id).length > 0 && (
                       <div className="mt-3 space-y-2 pl-4 border-l-2 border-border">
-                        {materials.filter(m => m.module_id === mod.id).map(mat => (
-                          <div key={mat.id} className="flex items-center gap-2 text-sm">
-                            <FileText className="w-3.5 h-3.5 text-muted-foreground" />
-                            <span>{mat.title}</span>
-                            <Badge variant="outline" className="text-[10px]">{mat.material_type}</Badge>
-                          </div>
-                        ))}
+                        {materials.filter(m => m.module_id === mod.id).map(mat => {
+                          const typeIcon = mat.material_type === "video" ? <Video className="w-3.5 h-3.5 text-muted-foreground" /> :
+                            mat.material_type === "quiz" ? <HelpCircle className="w-3.5 h-3.5 text-muted-foreground" /> :
+                            mat.material_type === "link" ? <LinkIcon className="w-3.5 h-3.5 text-muted-foreground" /> :
+                            <FileText className="w-3.5 h-3.5 text-muted-foreground" />;
+                          return (
+                            <div key={mat.id} className="flex items-center gap-2 text-sm group">
+                              {typeIcon}
+                              <span className="flex-1">{mat.title}</span>
+                              <Badge variant="outline" className="text-[10px]">{mat.material_type}</Badge>
+                              {(mat.content_url || mat.file_path) && mat.material_type !== "quiz" && (
+                                <Button size="icon" variant="ghost" className="h-6 w-6 opacity-0 group-hover:opacity-100" onClick={() => { setPreviewMaterial(mat); setPreviewOpen(true); }}>
+                                  <Eye className="w-3 h-3" />
+                                </Button>
+                              )}
+                              <Button size="icon" variant="ghost" className="h-6 w-6 text-destructive opacity-0 group-hover:opacity-100" onClick={() => handleDeleteMaterial(mat.id)}>
+                                <Trash2 className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
                   </CardContent>
@@ -339,6 +366,18 @@ const InstructorProgramManage = () => {
         onOpenChange={setShowSessionDialog}
         onSaved={fetchAll}
       />
+
+      {/* Content Preview */}
+      <ContentPreview
+        open={previewOpen}
+        onOpenChange={setPreviewOpen}
+        content={previewMaterial ? {
+          title: previewMaterial.title,
+          description: previewMaterial.description,
+          content_type: previewMaterial.material_type,
+          content_url: previewMaterial.content_url,
+        } : null}
+      />
     </DashboardLayout>
   );
 };
@@ -433,35 +472,89 @@ const AddModuleDialog = ({ open, onOpenChange, programId, editing, onSaved }: { 
 const AddMaterialDialog = ({ open, onOpenChange, programId, modules, onSaved }: { open: boolean; onOpenChange: (v: boolean) => void; programId: string; modules: any[]; onSaved: () => void }) => {
   const { toast } = useToast();
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [moduleId, setModuleId] = useState("");
   const [type, setType] = useState("document");
   const [url, setUrl] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
   const [saving, setSaving] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+
+  const resetForm = () => {
+    setTitle(""); setDescription(""); setUrl(""); setFile(null); setQuizQuestions([]); setUploadProgress(0);
+  };
 
   const handleSave = async () => {
     if (!title.trim() || !moduleId) return;
+    if (type === "quiz" && quizQuestions.length === 0) {
+      toast({ title: "Add at least one question", variant: "destructive" });
+      return;
+    }
     setSaving(true);
+
+    let fileUrl: string | null = url.trim() || null;
+    let filePath: string | null = null;
+
     try {
+      if (file) {
+        if (type === "video") {
+          const { data: uploadData, error: fnError } = await supabase.functions.invoke("s3-get-upload-url", {
+            body: { courseId: programId, fileName: file.name, contentType: file.type, fileSize: file.size },
+          });
+          if (fnError || !uploadData?.uploadUrl) throw new Error(fnError?.message || "Failed to get upload URL");
+
+          await new Promise<void>((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.upload.addEventListener("progress", (e) => { if (e.lengthComputable) setUploadProgress(Math.round((e.loaded / e.total) * 100)); });
+            xhr.addEventListener("load", () => xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(`Upload failed (${xhr.status})`)));
+            xhr.addEventListener("error", () => reject(new Error("Upload failed")));
+            xhr.open("PUT", uploadData.uploadUrl);
+            xhr.setRequestHeader("Content-Type", file.type);
+            xhr.send(file);
+          });
+
+          filePath = uploadData.s3Key;
+          fileUrl = uploadData.s3Url;
+        } else {
+          const fileExt = file.name.split(".").pop();
+          const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+          filePath = `programs/${programId}/${fileName}`;
+          const { error: uploadError } = await supabase.storage.from("course-content").upload(filePath, file);
+          if (uploadError) throw uploadError;
+          const { data: urlData } = supabase.storage.from("course-content").getPublicUrl(filePath);
+          fileUrl = urlData.publicUrl;
+        }
+      }
+
       const { error } = await supabase.from("program_materials").insert({
-        program_id: programId, module_id: moduleId, title: title.trim(),
-        material_type: type, content_url: url.trim() || null,
-      });
+        program_id: programId,
+        module_id: moduleId,
+        title: title.trim(),
+        description: description.trim() || null,
+        material_type: type,
+        content_url: fileUrl,
+        file_path: filePath,
+        quiz_data: type === "quiz" ? quizQuestions : [],
+      } as any);
       if (error) throw error;
+
       toast({ title: "Material added!" });
       onSaved();
       onOpenChange(false);
-      setTitle(""); setUrl("");
+      resetForm();
     } catch (err: any) {
       toast({ title: "Failed", description: err.message, variant: "destructive" });
     } finally { setSaving(false); }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+    <Dialog open={open} onOpenChange={(v) => { onOpenChange(v); if (!v) resetForm(); }}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle>Add Material</DialogTitle><DialogDescription>Add a learning resource to a module.</DialogDescription></DialogHeader>
         <div className="space-y-4">
           <div><Label>Title *</Label><Input value={title} onChange={e => setTitle(e.target.value)} /></div>
+          <div><Label>Description</Label><Textarea value={description} onChange={e => setDescription(e.target.value)} rows={2} /></div>
           <div><Label>Module *</Label>
             <Select value={moduleId} onValueChange={setModuleId}>
               <SelectTrigger><SelectValue placeholder="Select module" /></SelectTrigger>
@@ -469,24 +562,64 @@ const AddMaterialDialog = ({ open, onOpenChange, programId, modules, onSaved }: 
             </Select>
           </div>
           <div><Label>Type</Label>
-            <Select value={type} onValueChange={setType}>
+            <Select value={type} onValueChange={(v) => { setType(v); setFile(null); setUrl(""); }}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="document">Document</SelectItem>
                 <SelectItem value="video">Video</SelectItem>
                 <SelectItem value="link">Link</SelectItem>
+                <SelectItem value="quiz">Quiz</SelectItem>
               </SelectContent>
             </Select>
           </div>
-          <div><Label>URL</Label><Input value={url} onChange={e => setUrl(e.target.value)} placeholder="https://..." /></div>
-          <Button onClick={handleSave} disabled={saving} className="w-full">{saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}Add Material</Button>
+
+          {type === "document" && (
+            <div><Label>Upload Document</Label>
+              <Input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt" onChange={e => setFile(e.target.files?.[0] || null)} />
+            </div>
+          )}
+
+          {type === "video" && (
+            <>
+              <div><Label>Upload Video File</Label>
+                <Input type="file" accept="video/mp4,video/quicktime,video/webm" onChange={e => setFile(e.target.files?.[0] || null)} />
+                {file && uploadProgress > 0 && uploadProgress < 100 && (
+                  <div className="mt-2">
+                    <Progress value={uploadProgress} className="h-2" />
+                    <p className="text-xs text-muted-foreground mt-1">{uploadProgress}% uploaded</p>
+                  </div>
+                )}
+              </div>
+              <div className="relative flex items-center gap-2">
+                <div className="flex-1 h-px bg-border" /><span className="text-xs text-muted-foreground">OR</span><div className="flex-1 h-px bg-border" />
+              </div>
+              <div><Label>YouTube URL</Label>
+                <Input value={url} onChange={e => { setUrl(e.target.value); setFile(null); }} placeholder="https://youtube.com/watch?v=..." disabled={!!file} />
+              </div>
+            </>
+          )}
+
+          {type === "link" && (
+            <div><Label>URL *</Label><Input value={url} onChange={e => setUrl(e.target.value)} placeholder="https://..." /></div>
+          )}
+
+          {type === "quiz" && (
+            <div>
+              <Label className="mb-2 block">Quiz Questions</Label>
+              <KnowledgeCheckBuilder questions={quizQuestions} onChange={setQuizQuestions} />
+            </div>
+          )}
+
+          <Button onClick={handleSave} disabled={saving} className="w-full">
+            {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}Add Material
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
   );
 };
 
-/* ─── Add Assignment Dialog ─── */
+
 const AddAssignmentDialog = ({ open, onOpenChange, programId, modules, onSaved }: { open: boolean; onOpenChange: (v: boolean) => void; programId: string; modules: any[]; onSaved: () => void }) => {
   const { toast } = useToast();
   const [title, setTitle] = useState("");

@@ -1,0 +1,1 @@
+ALTER TABLE public.program_materials ADD COLUMN IF NOT EXISTS quiz_data jsonb DEFAULT '[]'::jsonb;
