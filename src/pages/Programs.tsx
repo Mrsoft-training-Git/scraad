@@ -22,7 +22,10 @@ interface Program {
   start_date: string | null;
   status: string;
   max_participants: number | null;
+  track: string | null;
 }
+
+const programTracks = ["All", "PGD", "B.Sc", "M.Sc", "HND", "Professional Certs"] as const;
 
 const modeIcons: Record<string, React.ReactNode> = {
   physical: <Building className="w-4 h-4" />,
