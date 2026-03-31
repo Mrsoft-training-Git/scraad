@@ -55,7 +55,7 @@ const Programs = () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("programs")
-      .select("id, title, short_description, banner_image_url, duration, mode, location, start_date, status, max_participants")
+      .select("id, title, short_description, banner_image_url, duration, mode, location, start_date, status, max_participants, track")
       .neq("status", "closed")
       .order("created_at", { ascending: false });
     if (!error && data) {
