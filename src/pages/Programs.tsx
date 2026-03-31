@@ -68,7 +68,8 @@ const Programs = () => {
     const matchesSearch = !search || p.title.toLowerCase().includes(search.toLowerCase());
     const matchesMode = modeFilter === "all" || p.mode === modeFilter;
     const matchesStatus = statusFilter === "all" || p.status === statusFilter;
-    return matchesSearch && matchesMode && matchesStatus;
+    const matchesTrack = trackFilter === "All" || p.track === trackFilter;
+    return matchesSearch && matchesMode && matchesStatus && matchesTrack;
   });
 
   return (
