@@ -94,10 +94,18 @@ const Programs = () => {
             fully accredited courses — study online, on-site, or hybrid.
           </p>
           <div className="flex flex-wrap justify-center gap-3 mt-6">
-            {["PGD", "B.Sc", "M.Sc", "HND", "Professional Certs"].map((tag) => (
-              <span key={tag} className="px-4 py-1.5 rounded-full bg-primary-foreground/10 border border-primary-foreground/20 text-sm font-medium">
+            {programTracks.map((tag) => (
+              <button
+                key={tag}
+                onClick={() => setTrackFilter(tag)}
+                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+                  trackFilter === tag
+                    ? "bg-primary-foreground text-primary shadow-md"
+                    : "bg-primary-foreground/10 border border-primary-foreground/20 hover:bg-primary-foreground/20"
+                }`}
+              >
                 {tag}
-              </span>
+              </button>
             ))}
           </div>
         </div>
