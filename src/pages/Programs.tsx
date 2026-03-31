@@ -22,7 +22,10 @@ interface Program {
   start_date: string | null;
   status: string;
   max_participants: number | null;
+  track: string | null;
 }
+
+const programTracks = ["All", "PGD", "B.Sc", "M.Sc", "HND", "Professional Certs"] as const;
 
 const modeIcons: Record<string, React.ReactNode> = {
   physical: <Building className="w-4 h-4" />,
@@ -42,6 +45,7 @@ const Programs = () => {
   const [search, setSearch] = useState("");
   const [modeFilter, setModeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [trackFilter, setTrackFilter] = useState("All");
 
   useEffect(() => {
     fetchPrograms();
@@ -51,7 +55,7 @@ const Programs = () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("programs")
-      .select("id, title, short_description, banner_image_url, duration, mode, location, start_date, status, max_participants")
+      .select("id, title, short_description, banner_image_url, duration, mode, location, start_date, status, max_participants, track")
       .neq("status", "closed")
       .order("created_at", { ascending: false });
     if (!error && data) {
@@ -64,7 +68,8 @@ const Programs = () => {
     const matchesSearch = !search || p.title.toLowerCase().includes(search.toLowerCase());
     const matchesMode = modeFilter === "all" || p.mode === modeFilter;
     const matchesStatus = statusFilter === "all" || p.status === statusFilter;
-    return matchesSearch && matchesMode && matchesStatus;
+    const matchesTrack = trackFilter === "All" || p.track === trackFilter;
+    return matchesSearch && matchesMode && matchesStatus && matchesTrack;
   });
 
   return (
@@ -89,10 +94,18 @@ const Programs = () => {
             fully accredited courses — study online, on-site, or hybrid.
           </p>
           <div className="flex flex-wrap justify-center gap-3 mt-6">
-            {["PGD", "B.Sc", "M.Sc", "HND", "Professional Certs"].map((tag) => (
-              <span key={tag} className="px-4 py-1.5 rounded-full bg-primary-foreground/10 border border-primary-foreground/20 text-sm font-medium">
+            {programTracks.map((tag) => (
+              <button
+                key={tag}
+                onClick={() => setTrackFilter(tag)}
+                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+                  trackFilter === tag
+                    ? "bg-primary-foreground text-primary shadow-md"
+                    : "bg-primary-foreground/10 border border-primary-foreground/20 hover:bg-primary-foreground/20"
+                }`}
+              >
                 {tag}
-              </span>
+              </button>
             ))}
           </div>
         </div>
