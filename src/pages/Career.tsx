@@ -8,12 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Briefcase, MapPin, DollarSign, ArrowRight, Upload, Loader2, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 
@@ -69,9 +64,7 @@ const Career = () => {
       const fileName = `${Date.now()}-${applicationData.name.replace(/\s+/g, "-")}.${fileExt}`;
       const filePath = `cvs/${fileName}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from("cv-uploads")
-        .upload(filePath, applicationData.cvFile);
+      const { error: uploadError } = await supabase.storage.from("cv-uploads").upload(filePath, applicationData.cvFile);
 
       if (uploadError) throw uploadError;
 
@@ -149,8 +142,7 @@ const Career = () => {
               </span>
             </h1>
             <p className="text-xl text-muted-foreground mb-8">
-              Join the Cradua team at M-R International and help shape the
-              future of online education.
+              Join the ScraAD team at M-R International and help shape the future of online education.
             </p>
           </div>
         </div>
@@ -159,9 +151,7 @@ const Career = () => {
       {/* Jobs Listing */}
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <h2 className="font-heading text-4xl font-bold text-center text-foreground mb-12">
-            Current Openings
-          </h2>
+          <h2 className="font-heading text-4xl font-bold text-center text-foreground mb-12">Current Openings</h2>
           <div className="max-w-5xl mx-auto space-y-6">
             {isLoading ? (
               <div className="text-center py-12">
@@ -223,15 +213,10 @@ const Career = () => {
       <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <h2 className="font-heading text-4xl font-bold text-center text-foreground mb-12">
-              Why Work With Us?
-            </h2>
+            <h2 className="font-heading text-4xl font-bold text-center text-foreground mb-12">Why Work With Us?</h2>
             <div className="grid md:grid-cols-2 gap-6">
               {benefits.map((benefit, index) => (
-                <div
-                  key={index}
-                  className="flex items-start gap-3 bg-card border border-border rounded-lg p-4"
-                >
+                <div key={index} className="flex items-start gap-3 bg-card border border-border rounded-lg p-4">
                   <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                     <CheckCircle className="w-4 h-4 text-primary-foreground" />
                   </div>
@@ -247,9 +232,7 @@ const Career = () => {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto bg-gradient-to-br from-primary to-accent rounded-2xl p-12 text-center text-white shadow-2xl">
-            <h2 className="font-heading text-4xl font-bold mb-4">
-              Don't See a Role That Fits?
-            </h2>
+            <h2 className="font-heading text-4xl font-bold mb-4">Don't See a Role That Fits?</h2>
             <p className="text-xl mb-8 text-white/90">
               Send us your resume and we'll keep you in mind for future opportunities.
             </p>
@@ -315,19 +298,12 @@ const Career = () => {
                     }
                   }}
                 />
-                <label
-                  htmlFor="cv"
-                  className="cursor-pointer flex flex-col items-center gap-2"
-                >
+                <label htmlFor="cv" className="cursor-pointer flex flex-col items-center gap-2">
                   <Upload className="w-8 h-8 text-muted-foreground" />
                   {applicationData.cvFile ? (
-                    <span className="text-sm text-primary font-medium">
-                      {applicationData.cvFile.name}
-                    </span>
+                    <span className="text-sm text-primary font-medium">{applicationData.cvFile.name}</span>
                   ) : (
-                    <span className="text-sm text-muted-foreground">
-                      Click to upload PDF, DOC, or DOCX (max 10MB)
-                    </span>
+                    <span className="text-sm text-muted-foreground">Click to upload PDF, DOC, or DOCX (max 10MB)</span>
                   )}
                 </label>
               </div>
@@ -338,20 +314,14 @@ const Career = () => {
               <Textarea
                 id="coverLetter"
                 value={applicationData.coverLetter}
-                onChange={(e) =>
-                  setApplicationData({ ...applicationData, coverLetter: e.target.value })
-                }
+                onChange={(e) => setApplicationData({ ...applicationData, coverLetter: e.target.value })}
                 placeholder="Tell us why you're interested in this position..."
                 rows={4}
               />
             </div>
 
             <div className="flex justify-end gap-2 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsApplyDialogOpen(false)}
-              >
+              <Button type="button" variant="outline" onClick={() => setIsApplyDialogOpen(false)}>
                 Cancel
               </Button>
               <Button type="submit" disabled={applyMutation.isPending || isUploading}>
