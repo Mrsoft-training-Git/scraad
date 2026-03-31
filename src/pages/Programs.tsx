@@ -75,15 +75,26 @@ const Programs = () => {
       <section className="py-20 bg-gradient-to-br from-primary via-primary/90 to-primary/80 text-primary-foreground">
         <div className="container mx-auto px-4 text-center max-w-4xl">
           <Badge className="mb-4 bg-secondary/20 text-secondary border-secondary/30 font-semibold">
-            Training Programs
+            Advanced Training Programs
           </Badge>
           <h1 className="font-heading text-4xl md:text-5xl font-bold mb-4">
-            Structured Training Programs
+            Earn Accredited Degrees from
+            <span className="block bg-gradient-to-r from-secondary to-accent bg-clip-text text-transparent mt-1">
+              Top Nigerian Universities
+            </span>
           </h1>
-          <p className="text-lg text-primary-foreground/80 mb-8 max-w-2xl mx-auto">
-            Apply for our hands-on training programs — physical, hybrid, or online. 
-            Get admitted, learn with structure, and earn your certificate.
+          <p className="text-lg text-primary-foreground/80 mb-4 max-w-2xl mx-auto">
+            Apply for advanced online training programs from leading universities and tertiary 
+            institutions in Nigeria. Land a <strong>PGD</strong>, <strong>B.Sc</strong>, or <strong>M.Sc</strong> on 
+            fully accredited courses — study online, on-site, or hybrid.
           </p>
+          <div className="flex flex-wrap justify-center gap-3 mt-6">
+            {["PGD", "B.Sc", "M.Sc", "HND", "Professional Certs"].map((tag) => (
+              <span key={tag} className="px-4 py-1.5 rounded-full bg-primary-foreground/10 border border-primary-foreground/20 text-sm font-medium">
+                {tag}
+              </span>
+            ))}
+          </div>
         </div>
       </section>
 
