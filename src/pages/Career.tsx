@@ -142,7 +142,7 @@ const Career = () => {
               </span>
             </h1>
             <p className="text-xl text-muted-foreground mb-8">
-              Join the ScraAD team at M-R International and help shape the future of online education.
+              Join the Scra<span className="text-secondary">AD</span> team at M-R International and help shape the future of online education.
             </p>
           </div>
         </div>

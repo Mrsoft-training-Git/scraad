@@ -342,7 +342,7 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-10">
             <h2 className="font-heading font-bold text-2xl md:text-3xl text-foreground">
-              Why learners choose <span className="text-primary">ScraAD</span>
+              Why learners choose Scra<span className="text-secondary">AD</span>
             </h2>
             <p className="text-muted-foreground mt-2 max-w-md mx-auto">Everything you need to build skills and advance your career</p>
           </div>
@@ -375,7 +375,7 @@ const Index = () => {
               <div className="p-8 lg:p-12 space-y-5">
                 <div className="inline-flex items-center gap-2 bg-primary-foreground/10 px-3 py-1.5 rounded-full text-xs font-medium text-primary-foreground">
                   <Users className="w-3.5 h-3.5" />
-                  ScraAd for Business
+                  Scra<span className="text-secondary">AD</span> for Business
                 </div>
                 <h2 className="font-heading font-bold text-2xl md:text-3xl lg:text-4xl leading-tight text-primary-foreground">
                   Upskill your entire team
@@ -405,7 +405,7 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-8">
             <h2 className="font-heading font-bold text-2xl md:text-3xl text-foreground">What our learners say</h2>
-            <p className="text-muted-foreground text-sm md:text-base mt-2">Join thousands achieving their goals on ScraAd</p>
+            <p className="text-muted-foreground text-sm md:text-base mt-2">Join thousands achieving their goals on Scra<span className="text-secondary">AD</span></p>
           </div>
 
           <div className="flex gap-3 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide md:grid md:grid-cols-3 md:overflow-visible md:pb-0 max-w-5xl mx-auto px-1">
@@ -439,7 +439,7 @@ const Index = () => {
             Start learning today
           </h2>
           <p className="text-primary-foreground/75 text-sm md:text-base max-w-lg mx-auto">
-            Join ScraAd and gain the skills to advance your career, earn certificates, and learn from the best.
+            Join Scra<span className="text-secondary">AD</span> and gain the skills to advance your career, earn certificates, and learn from the best.
           </p>
           <div className="flex justify-center gap-3">
             <Button size="lg" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold h-12 px-8 shadow-lg" asChild>

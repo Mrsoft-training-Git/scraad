@@ -38,7 +38,7 @@ export const Navbar = () => {
           <Link to="/" className="flex items-center gap-2.5 group flex-shrink-0">
             <img src={logo} alt="ScraAd Logo" className="w-9 h-9 object-contain" />
             <div>
-              <div className="font-heading font-bold text-base leading-tight text-foreground">ScraAD</div>
+              <div className="font-heading font-bold text-base leading-tight text-foreground">Scra<span className="text-secondary">AD</span></div>
               <div className="text-[10px] text-muted-foreground leading-tight">Scratch to Advance</div>
             </div>
           </Link>
