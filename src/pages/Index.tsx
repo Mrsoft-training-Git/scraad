@@ -375,7 +375,7 @@ const Index = () => {
               <div className="p-8 lg:p-12 space-y-5">
                 <div className="inline-flex items-center gap-2 bg-primary-foreground/10 px-3 py-1.5 rounded-full text-xs font-medium text-primary-foreground">
                   <Users className="w-3.5 h-3.5" />
-                  ScraAd for Business
+                  Scra<span className="text-secondary">AD</span> for Business
                 </div>
                 <h2 className="font-heading font-bold text-2xl md:text-3xl lg:text-4xl leading-tight text-primary-foreground">
                   Upskill your entire team
@@ -405,7 +405,7 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-8">
             <h2 className="font-heading font-bold text-2xl md:text-3xl text-foreground">What our learners say</h2>
-            <p className="text-muted-foreground text-sm md:text-base mt-2">Join thousands achieving their goals on ScraAd</p>
+            <p className="text-muted-foreground text-sm md:text-base mt-2">Join thousands achieving their goals on Scra<span className="text-secondary">AD</span></p>
           </div>
 
           <div className="flex gap-3 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide md:grid md:grid-cols-3 md:overflow-visible md:pb-0 max-w-5xl mx-auto px-1">

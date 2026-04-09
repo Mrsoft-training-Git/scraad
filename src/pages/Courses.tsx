@@ -228,7 +228,7 @@ const Courses = () => {
                   <h3 className="font-heading font-bold text-sm mb-1 line-clamp-2 group-hover:text-primary transition-colors min-h-[2.5rem] text-foreground">
                     {course.title}
                   </h3>
-                  <p className="text-xs text-muted-foreground mb-2">{course.instructor || "ScraAd Instructor"}</p>
+                  <p className="text-xs text-muted-foreground mb-2">{course.instructor || "ScraAD Instructor"}</p>
                   
                   <div className="flex items-center gap-2 mb-3">
                     {course.level && (
