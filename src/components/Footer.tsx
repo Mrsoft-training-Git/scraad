@@ -13,7 +13,7 @@ export const Footer = () => {
                 <BookOpen className="w-4 h-4 text-secondary-foreground" />
               </div>
               <div>
-                <div className="font-heading font-bold text-primary-foreground text-sm">ScraAD</div>
+                <div className="font-heading font-bold text-primary-foreground text-sm">Scra<span className="text-secondary">AD</span></div>
                 <div className="text-[10px] text-primary-foreground/50">Scratch to Advance</div>
               </div>
             </Link>

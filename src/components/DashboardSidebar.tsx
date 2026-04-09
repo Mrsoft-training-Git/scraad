@@ -61,7 +61,7 @@ export const DashboardSidebar = ({ userRole, unreadAnnouncementsCount = 0, unrea
           <Link to="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
             <img src={logo} alt="ScraAd Logo" className="h-8 w-8 object-contain" />
             <div className="text-sm">
-              <div className="font-heading font-bold text-sidebar-foreground">ScraAd</div>
+              <div className="font-heading font-bold text-sidebar-foreground">Scra<span className="text-sidebar-primary">AD</span></div>
               <div className="text-[10px] text-sidebar-foreground/50">Scratch to Advance</div>
             </div>
           </Link>

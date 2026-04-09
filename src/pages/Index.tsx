@@ -342,7 +342,7 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-10">
             <h2 className="font-heading font-bold text-2xl md:text-3xl text-foreground">
-              Why learners choose <span className="text-primary">ScraAD</span>
+              Why learners choose Scra<span className="text-secondary">AD</span>
             </h2>
             <p className="text-muted-foreground mt-2 max-w-md mx-auto">Everything you need to build skills and advance your career</p>
           </div>
@@ -439,7 +439,7 @@ const Index = () => {
             Start learning today
           </h2>
           <p className="text-primary-foreground/75 text-sm md:text-base max-w-lg mx-auto">
-            Join ScraAd and gain the skills to advance your career, earn certificates, and learn from the best.
+            Join Scra<span className="text-secondary">AD</span> and gain the skills to advance your career, earn certificates, and learn from the best.
           </p>
           <div className="flex justify-center gap-3">
             <Button size="lg" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold h-12 px-8 shadow-lg" asChild>
