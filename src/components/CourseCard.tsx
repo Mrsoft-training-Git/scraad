@@ -80,12 +80,9 @@ export const CourseCard = ({ course, onEnroll, showEnrollButton = true }: Course
               className="flex-1 bg-primary hover:bg-accent text-primary-foreground font-semibold shadow-sm"
               asChild
             >
-              <Link to={`/enroll/${course.id}`}>Apply Now</Link>
+              <Link to={`/enroll/${course.id}`}>Go to Course</Link>
             </Button>
           )}
-          <Button variant="ghost" size="icon" onClick={handleShare} className="shrink-0 text-muted-foreground hover:text-primary" title="Share course">
-            {copied ? <Check className="w-4 h-4 text-success" /> : <Share2 className="w-4 h-4" />}
-          </Button>
           <Button variant="outline" className={`${!showEnrollButton ? 'flex-1' : ''} border-border hover:bg-muted`} asChild>
             <Link to={`/courses/${course.id}`}>View Details</Link>
           </Button>
