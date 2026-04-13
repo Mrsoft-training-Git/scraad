@@ -209,7 +209,7 @@ const Courses = () => {
               <Card
                 key={course.id}
                 className="group overflow-hidden border border-border bg-card hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300 flex flex-col cursor-pointer"
-                onClick={() => navigate(`/programs/${course.id}`)}
+                onClick={() => navigate(`/courses/${course.id}`)}
               >
                 <div className="aspect-video overflow-hidden relative">
                   {course.top_rated && (
@@ -245,23 +245,33 @@ const Courses = () => {
                     ) : (
                       <span className="text-base font-bold text-foreground">₦{course.price.toLocaleString()}</span>
                     )}
-                    {isEnrolled(course.id) ? (
+                    <div className="flex gap-2">
+                      {isEnrolled(course.id) ? (
+                        <Button
+                          size="sm"
+                          className="bg-success hover:bg-success/90 text-success-foreground text-xs h-8"
+                          onClick={(e) => { e.stopPropagation(); navigate("/dashboard/learning"); }}
+                        >
+                          Go to Course
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          className="bg-primary hover:bg-accent text-primary-foreground text-xs h-8"
+                          onClick={(e) => { e.stopPropagation(); navigate(`/enroll/${course.id}`); }}
+                        >
+                          Enroll Now
+                        </Button>
+                      )}
                       <Button
                         size="sm"
-                        className="bg-success hover:bg-success/90 text-success-foreground text-xs h-8"
-                        onClick={(e) => { e.stopPropagation(); navigate("/dashboard/learning"); }}
+                        variant="outline"
+                        className="text-xs h-8"
+                        onClick={(e) => { e.stopPropagation(); navigate(`/courses/${course.id}`); }}
                       >
-                        Go to Course
+                        View Details
                       </Button>
-                    ) : (
-                      <Button
-                        size="sm"
-                        className="bg-primary hover:bg-accent text-primary-foreground text-xs h-8"
-                        onClick={(e) => { e.stopPropagation(); navigate(`/enroll/${course.id}`); }}
-                      >
-                        Enroll Now
-                      </Button>
-                    )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
