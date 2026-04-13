@@ -87,7 +87,7 @@ export const CourseCard = ({ course, onEnroll, showEnrollButton = true }: Course
             {copied ? <Check className="w-4 h-4 text-success" /> : <Share2 className="w-4 h-4" />}
           </Button>
           <Button variant="outline" className={`${!showEnrollButton ? 'flex-1' : ''} border-border hover:bg-muted`} asChild>
-            <Link to={`/programs/${course.id}`}>View Details</Link>
+            <Link to={`/courses/${course.id}`}>View Details</Link>
           </Button>
         </div>
       </CardContent>

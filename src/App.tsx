@@ -48,6 +48,7 @@ import CBTExamManage from "./pages/CBTExamManage";
 import CBTExamView from "./pages/CBTExamView";
 import CBTExamTake from "./pages/CBTExamTake";
 import CBTSubmissions from "./pages/CBTSubmissions";
+import CourseDetails from "./pages/CourseDetails";
 
 const queryClient = new QueryClient();
 
@@ -93,6 +94,7 @@ const App = () => (
           <Route path="/dashboard/cbt/:examId/take" element={<CBTExamTake />} />
           <Route path="/dashboard/cbt/:examId/submissions" element={<CBTSubmissions />} />
           <Route path="/courses" element={<Courses />} />
+          <Route path="/courses/:id" element={<CourseDetails />} />
           <Route path="/signup/individual" element={<IndividualLearner />} />
           <Route path="/signup/organization" element={<BusinessTeams />} />
           <Route path="/programs" element={<Programs />} />
