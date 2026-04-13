@@ -48,6 +48,7 @@ import CBTExamManage from "./pages/CBTExamManage";
 import CBTExamView from "./pages/CBTExamView";
 import CBTExamTake from "./pages/CBTExamTake";
 import CBTSubmissions from "./pages/CBTSubmissions";
+import CourseDetails from "./pages/CourseDetails";
 
 const queryClient = new QueryClient();
 
