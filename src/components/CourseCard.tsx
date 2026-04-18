@@ -39,9 +39,9 @@ export const CourseCard = ({ course, onEnroll, showEnrollButton = true }: Course
   };
 
   return (
-    <Card className="group overflow-hidden bg-card border border-border hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300 flex flex-col">
+    <Card className="group overflow-hidden bg-card border border-border hover:border-secondary/40 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 flex flex-col rounded-2xl">
       <div className="aspect-video overflow-hidden relative">
-        <Badge className="absolute top-3 right-3 bg-card/90 backdrop-blur-sm text-foreground border-0 z-10 text-xs">
+        <Badge className="absolute top-3 right-3 bg-card/95 backdrop-blur-sm text-foreground border-0 z-10 text-xs">
           {course.category}
         </Badge>
         {course.top_rated && (
@@ -53,8 +53,9 @@ export const CourseCard = ({ course, onEnroll, showEnrollButton = true }: Course
         <img
           src={course.image_url || "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80"}
           alt={course.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
         />
+        <div className="absolute inset-0 bg-gradient-to-t from-primary/60 via-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       </div>
       <CardContent className="p-5 flex flex-col flex-grow">
         <h3 className="font-heading font-bold text-base mb-2 line-clamp-2 group-hover:text-primary transition-colors min-h-[3rem] text-foreground">
