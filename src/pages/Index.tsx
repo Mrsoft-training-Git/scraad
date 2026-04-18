@@ -210,8 +210,8 @@ const Index = () => {
         <div className="container mx-auto px-4 py-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {stats.map((stat, i) =>
-            <div key={i} className="text-center">
-                <div className="font-heading font-bold text-2xl md:text-3xl text-primary">{stat.value}</div>
+            <div key={i} className="text-center group cursor-default" style={{ animationDelay: `${i * 0.1}s` }}>
+                <div className="font-heading font-bold text-2xl md:text-3xl text-primary group-hover:scale-110 group-hover:text-secondary transition-all duration-300">{stat.value}</div>
                 <div className="text-sm text-muted-foreground mt-1">{stat.label}</div>
               </div>
             )}
@@ -227,18 +227,19 @@ const Index = () => {
             <p className="text-muted-foreground text-sm md:text-base mt-2">Browse courses by field of study</p>
           </div>
           <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide lg:grid lg:grid-cols-6 lg:overflow-visible lg:pb-0">
-            {categories.map((cat) => {
+            {categories.map((cat, idx) => {
               const Icon = cat.icon;
               return (
                 <Link
                   key={cat.name}
                   to={`/courses?category=${encodeURIComponent(cat.name)}`}
-                  className="group flex flex-col items-center gap-3 p-5 rounded-xl bg-card border border-border hover:border-primary/30 hover:shadow-card-hover transition-all duration-300 min-w-[130px] shrink-0 lg:min-w-0">
+                  style={{ animationDelay: `${idx * 0.08}s`, opacity: 0 }}
+                  className="group flex flex-col items-center gap-3 p-5 rounded-xl bg-card border border-border hover:border-secondary/50 hover:shadow-card-hover hover:-translate-y-1 transition-all duration-500 ease-out min-w-[130px] shrink-0 lg:min-w-0 animate-fade-in-up">
                   
-                  <div className={`w-12 h-12 rounded-xl ${cat.color} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                  <div className={`w-12 h-12 rounded-xl ${cat.color} flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all duration-500`}>
                     <Icon className="w-6 h-6" />
                   </div>
-                  <span className="text-sm font-medium text-foreground text-center whitespace-nowrap">{cat.name}</span>
+                  <span className="text-sm font-medium text-foreground text-center whitespace-nowrap group-hover:text-primary transition-colors">{cat.name}</span>
                 </Link>);
 
             })}
