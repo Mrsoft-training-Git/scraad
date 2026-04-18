@@ -273,21 +273,23 @@ const Index = () => {
             </div> :
 
           <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:overflow-visible sm:pb-0">
-              {courses.map((course) =>
+              {courses.map((course, idx) =>
             <Card
               key={course.id}
-              className="group overflow-hidden bg-card border border-border hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300 flex flex-col min-w-[260px] shrink-0 sm:min-w-0">
+              style={{ animationDelay: `${idx * 0.1}s`, opacity: 0 }}
+              className="group overflow-hidden bg-card border border-border hover:shadow-card-hover hover:-translate-y-2 transition-all duration-500 ease-out flex flex-col min-w-[260px] shrink-0 sm:min-w-0 animate-fade-in-up">
               
                   <Link to={`/programs/${course.id}`} className="block aspect-video overflow-hidden relative">
                     <img
                   src={course.image_url || "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80"}
                   alt={course.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                 
                     {course.price === 0 &&
                 <Badge className="absolute top-2.5 left-2.5 bg-success text-success-foreground text-xs border-0 shadow-sm">Free</Badge>
                 }
                     <Badge className="absolute top-2.5 right-2.5 bg-card/90 backdrop-blur-sm text-foreground text-xs border-0">{course.category}</Badge>
+                    <div className="absolute inset-0 bg-gradient-to-t from-primary/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   </Link>
 
                   <CardContent className="p-4 flex flex-col flex-grow">
@@ -317,12 +319,13 @@ const Index = () => {
                   <span className="font-bold text-foreground text-base">₦{course.price.toLocaleString()}</span>
                   }
                       {isEnrolled(course.id) ?
-                  <Button size="sm" className="text-xs font-semibold bg-primary hover:bg-accent" onClick={() => navigate("/dashboard/learning")}>
+                  <Button size="sm" className="text-xs font-semibold bg-primary hover:bg-accent hover-scale" onClick={() => navigate("/dashboard/learning")}>
                           Continue
                         </Button> :
 
-                  <Button size="sm" className="text-xs font-semibold bg-secondary text-secondary-foreground hover:bg-secondary/90" onClick={() => handleEnroll(course)}>
+                  <Button size="sm" className="text-xs font-semibold bg-secondary text-secondary-foreground hover:bg-secondary/90 hover-glow group/btn" onClick={() => handleEnroll(course)}>
                           Enroll Now
+                          <ArrowRight className="ml-1 w-3 h-3 group-hover/btn:translate-x-0.5 transition-transform" />
                         </Button>
                   }
                     </div>
@@ -358,10 +361,10 @@ const Index = () => {
             { icon: TrendingUp, title: "Progress Tracking", desc: "Monitor your learning journey with detailed analytics" },
             { icon: BookOpen, title: "Hands-on Training", desc: "Real-world projects and practical Programs" }].
             map((f, i) =>
-            <Card key={i} className="border border-border bg-card hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300 min-w-[75vw] shrink-0 sm:min-w-0">
+            <Card key={i} style={{ animationDelay: `${i * 0.12}s`, opacity: 0 }} className="border border-border bg-card hover:shadow-card-hover hover:-translate-y-2 hover:border-secondary/40 transition-all duration-500 ease-out min-w-[75vw] shrink-0 sm:min-w-0 group animate-fade-in-up">
                 <CardContent className="p-6 flex flex-col items-center text-center">
-                  <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
-                    <f.icon className="w-7 h-7 text-primary" />
+                  <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-secondary/15 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                    <f.icon className="w-7 h-7 text-primary group-hover:text-secondary transition-colors duration-500" />
                   </div>
                   <h3 className="font-heading font-bold text-base mb-2 text-foreground">{f.title}</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
