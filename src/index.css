@@ -1,10 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ScraAd Design System — Deep Blue / Gold palette */
+/* ScraAd Design System — Editorial premium palette */
 
 @layer base {
   :root {
@@ -43,6 +43,14 @@
     --ring: 203 78% 21%;
 
     --radius: 0.75rem;
+
+    /* Pastel palette for category cards */
+    --pastel-lilac: 270 70% 92%;
+    --pastel-mint: 152 55% 90%;
+    --pastel-peach: 24 95% 91%;
+    --pastel-cream: 45 90% 92%;
+    --pastel-sky: 203 80% 92%;
+    --pastel-rose: 350 80% 93%;
 
     --sidebar-background: 203 78% 15%;
     --sidebar-foreground: 210 20% 96%;
@@ -123,14 +131,20 @@
     animation-duration: 0.2s;
     animation-fill-mode: both;
   }
-  
+
   @keyframes slide-in-from-top-2 {
     from { transform: translateY(-0.5rem); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
   }
-  
+
   .slide-in-from-top-2 {
     animation-name: slide-in-from-top-2;
+  }
+
+  /* Editorial display font */
+  .font-display {
+    font-family: 'Fraunces', 'DM Sans', serif;
+    font-optical-sizing: auto;
   }
 
   /* Modern hover utilities */
@@ -149,6 +163,10 @@
   /* Glass morphism */
   .glass {
     @apply bg-white/10 backdrop-blur-xl border border-white/20;
+  }
+
+  .glass-card {
+    @apply bg-white/70 backdrop-blur-xl border border-white/40 shadow-xl;
   }
 
   .glass-dark {
@@ -188,7 +206,7 @@
     @apply scale-x-100 origin-bottom-left;
   }
 
-  /* Smooth scroll reveal */
+  /* Scroll reveal */
   .reveal-on-scroll {
     opacity: 0;
     transform: translateY(30px);
@@ -204,5 +222,179 @@
     background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)), hsl(var(--primary)));
     background-size: 200% 200%;
     @apply animate-gradient-shift;
+  }
+
+  /* AURORA — multi-layer mesh gradient for premium hero */
+  .aurora-bg {
+    position: relative;
+    background:
+      radial-gradient(at 20% 20%, hsl(var(--secondary) / 0.35) 0px, transparent 50%),
+      radial-gradient(at 80% 10%, hsl(var(--accent) / 0.55) 0px, transparent 55%),
+      radial-gradient(at 70% 80%, hsl(var(--primary) / 0.65) 0px, transparent 50%),
+      radial-gradient(at 10% 90%, hsl(var(--warning) / 0.25) 0px, transparent 50%),
+      linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
+    background-size: 200% 200%;
+    animation: aurora-shift 18s ease-in-out infinite;
+  }
+
+  @keyframes aurora-shift {
+    0%, 100% { background-position: 0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 50%; }
+    50% { background-position: 30% 30%, 70% 30%, 70% 70%, 30% 70%, 100% 50%; }
+  }
+
+  /* Soft pastel section background */
+  .bg-pastel-cream {
+    background-color: hsl(var(--pastel-cream));
+  }
+  .bg-pastel-mint {
+    background-color: hsl(var(--pastel-mint));
+  }
+  .bg-pastel-lilac {
+    background-color: hsl(var(--pastel-lilac));
+  }
+  .bg-pastel-peach {
+    background-color: hsl(var(--pastel-peach));
+  }
+  .bg-pastel-sky {
+    background-color: hsl(var(--pastel-sky));
+  }
+  .bg-pastel-rose {
+    background-color: hsl(var(--pastel-rose));
+  }
+
+  /* CURSOR GLOW — uses CSS vars set by useCursorGlow hook */
+  .cursor-glow {
+    position: relative;
+  }
+  .cursor-glow::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(
+      400px circle at var(--mx, 50%) var(--my, 50%),
+      hsl(var(--secondary) / 0.18),
+      transparent 60%
+    );
+    z-index: 1;
+    transition: opacity 0.3s;
+  }
+
+  /* TILT CARD — 3D perspective hover */
+  .tilt-card {
+    transform-style: preserve-3d;
+    perspective: 1000px;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .tilt-card:hover {
+    transform: perspective(1000px) rotateX(4deg) rotateY(-6deg) translateY(-6px);
+  }
+  .tilt-card-inner {
+    transform: translateZ(20px);
+  }
+
+  /* MARQUEE — infinite horizontal scroll */
+  .marquee {
+    display: flex;
+    overflow: hidden;
+    user-select: none;
+    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  }
+  .marquee-track {
+    display: flex;
+    flex-shrink: 0;
+    min-width: 100%;
+    gap: 3rem;
+    animation: marquee-scroll 30s linear infinite;
+  }
+  .marquee:hover .marquee-track {
+    animation-play-state: paused;
+  }
+  @keyframes marquee-scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-100%); }
+  }
+
+  /* BLOB — organic shapes */
+  .blob-1 {
+    border-radius: 63% 37% 54% 46% / 55% 48% 52% 45%;
+    animation: blob-morph 12s ease-in-out infinite;
+  }
+  .blob-2 {
+    border-radius: 41% 59% 35% 65% / 60% 50% 50% 40%;
+    animation: blob-morph 15s ease-in-out infinite reverse;
+  }
+  @keyframes blob-morph {
+    0%, 100% { border-radius: 63% 37% 54% 46% / 55% 48% 52% 45%; }
+    50% { border-radius: 38% 62% 63% 37% / 41% 44% 56% 59%; }
+  }
+
+  /* DOODLE underline animation */
+  .doodle-underline {
+    position: relative;
+    display: inline-block;
+  }
+  .doodle-underline::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -0.15em;
+    height: 0.4em;
+    background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 12' preserveAspectRatio='none'><path d='M2 8 Q 50 0 100 6 T 198 6' stroke='%23F4A85A' stroke-width='3' fill='none' stroke-linecap='round'/></svg>") no-repeat;
+    background-size: 100% 100%;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .doodle-underline.is-active::after,
+  .group:hover .doodle-underline::after {
+    transform: scaleX(1);
+  }
+
+  /* Magnetic button hover */
+  .magnetic-btn {
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .magnetic-btn:hover {
+    transform: translateY(-2px) scale(1.02);
+  }
+
+  /* Bounce soft */
+  @keyframes bounce-soft {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  .animate-bounce-soft {
+    animation: bounce-soft 2.4s ease-in-out infinite;
+  }
+
+  /* Text reveal mask */
+  @keyframes text-reveal {
+    from { clip-path: inset(0 100% 0 0); }
+    to { clip-path: inset(0 0 0 0); }
+  }
+  .animate-text-reveal {
+    animation: text-reveal 1s cubic-bezier(0.7, 0, 0.3, 1) forwards;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .aurora-bg,
+  .marquee-track,
+  .blob-1,
+  .blob-2,
+  .animate-bounce-soft,
+  .animate-float,
+  .animate-gradient-shift {
+    animation: none !important;
+  }
+  .tilt-card:hover {
+    transform: none !important;
+  }
+  .cursor-glow::before {
+    display: none;
   }
 }
