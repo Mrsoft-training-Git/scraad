@@ -121,71 +121,75 @@ const Index = () => {
 
       {/* ─── Hero Section ─── */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-hero-gradient" />
+        <div className="absolute inset-0 bg-animated-gradient" />
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImciIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTTAgMGg2MHY2MEgweiIgZmlsbD0ibm9uZSIvPjxjaXJjbGUgY3g9IjMwIiBjeT0iMzAiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZykiLz48L3N2Zz4=')] opacity-50" />
+        {/* Floating glow orbs */}
+        <div className="absolute top-20 -left-20 w-72 h-72 bg-secondary/20 rounded-full blur-3xl animate-float pointer-events-none" />
+        <div className="absolute bottom-10 right-10 w-96 h-96 bg-accent/30 rounded-full blur-3xl animate-float pointer-events-none" style={{ animationDelay: '2s' }} />
         <div className="container mx-auto px-4 py-16 lg:py-24 relative z-10">
           <div className="grid lg:grid-cols-2 gap-10 items-center">
             <div className="space-y-6">
-              <div className="inline-flex items-center gap-2 bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 px-4 py-2 rounded-full">
-                <Zap className="w-4 h-4 text-secondary" />
+              <div className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full animate-fade-in">
+                <Zap className="w-4 h-4 text-secondary animate-pulse" />
                 <span className="text-sm font-medium text-primary-foreground/90">Trusted by 10,000+ professionals</span>
               </div>
-              <h1 className="font-heading font-bold text-3xl md:text-4xl lg:text-[3.25rem] text-primary-foreground leading-[1.12] tracking-tight">
-                Go from <span className="text-secondary">Scratch</span> to{" "}
-                <span className="text-secondary">Advance</span>
+              <h1 className="font-heading font-bold text-3xl md:text-4xl lg:text-[3.25rem] text-primary-foreground leading-[1.12] tracking-tight animate-fade-in-up">
+                Go from <span className="text-gradient-gold">Scratch</span> to{" "}
+                <span className="text-gradient-gold">Advance</span>
               </h1>
-              <p className="text-primary-foreground/75 text-base md:text-lg max-w-lg leading-relaxed">
+              <p className="text-primary-foreground/75 text-base md:text-lg max-w-lg leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.15s', opacity: 0 }}>
                 Build in-demand skills with courses, certifications, and hands-on training from industry experts. Your transformation starts here.
               </p>
 
               {/* Search bar */}
-              <form onSubmit={handleSearch} className="flex gap-2 max-w-lg">
+              <form onSubmit={handleSearch} className="flex gap-2 max-w-lg animate-fade-in-up" style={{ animationDelay: '0.3s', opacity: 0 }}>
                 <div className="relative flex-1">
                   <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                   <Input
                     placeholder="What do you want to learn?"
-                    className="pl-11 h-13 text-base bg-primary-foreground border-0 text-foreground placeholder:text-muted-foreground shadow-lg"
+                    className="pl-11 h-13 text-base bg-primary-foreground border-0 text-foreground placeholder:text-muted-foreground shadow-lg focus-visible:ring-2 focus-visible:ring-secondary transition-all"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)} />
                   
                 </div>
-                <Button type="submit" size="lg" className="h-13 px-6 font-semibold bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-lg">
+                <Button type="submit" size="lg" className="h-13 px-6 font-semibold bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-lg hover-glow transition-all">
                   Search
                 </Button>
               </form>
 
-              <div className="flex flex-wrap items-center gap-4 pt-2">
-                <Button size="lg" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold h-12 px-8 shadow-lg" asChild>
-                  <Link to="/auth">Get Started Free <ArrowRight className="ml-2 w-4 h-4" /></Link>
+              <div className="flex flex-wrap items-center gap-4 pt-2 animate-fade-in-up" style={{ animationDelay: '0.45s', opacity: 0 }}>
+                <Button size="lg" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold h-12 px-8 shadow-lg hover-glow group transition-all" asChild>
+                  <Link to="/auth">Get Started Free <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" /></Link>
                 </Button>
-                <Button size="lg" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 font-medium h-12 px-6 shadow-lg" asChild>
+                <Button size="lg" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 font-medium h-12 px-6 shadow-lg hover-scale" asChild>
                   <Link to="/courses">Explore Courses</Link>
                 </Button>
               </div>
             </div>
 
             {/* Hero card */}
-            <div className="relative">
-              <div className="bg-card rounded-2xl shadow-2xl overflow-hidden border border-border/50">
-                <img
-                  src={heroTraining}
-                  alt="Professionals learning on ScraAd"
-                  className="w-full h-72 object-cover" />
-                
+            <div className="relative animate-scale-in" style={{ animationDelay: '0.3s', opacity: 0 }}>
+              <div className="bg-card rounded-2xl shadow-2xl overflow-hidden border border-border/50 hover-lift group">
+                <div className="overflow-hidden">
+                  <img
+                    src={heroTraining}
+                    alt="Professionals learning on ScraAd"
+                    className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-700" />
+                </div>
                 <div className="p-5 space-y-3">
                   <div className="flex items-center gap-2">
                     <Play className="w-4 h-4 text-primary" />
                     <span className="text-sm font-medium text-foreground">Self-paced courses · Expert instructors</span>
                   </div>
                   <div className="flex gap-2 flex-wrap">
-                    <Badge className="text-xs bg-primary/10 text-primary border-0">Certificates</Badge>
-                    <Badge className="text-xs bg-secondary/15 text-secondary border-0">Hands-on Projects</Badge>
-                    <Badge className="text-xs bg-success/10 text-success border-0">Career Growth</Badge>
+                    <Badge className="text-xs bg-primary/10 text-primary border-0 hover:bg-primary/20 transition-colors">Certificates</Badge>
+                    <Badge className="text-xs bg-secondary/15 text-secondary border-0 hover:bg-secondary/25 transition-colors">Hands-on Projects</Badge>
+                    <Badge className="text-xs bg-success/10 text-success border-0 hover:bg-success/20 transition-colors">Career Growth</Badge>
                   </div>
                 </div>
               </div>
               {/* Floating stats card */}
-              <div className="absolute -bottom-4 -left-6 bg-card rounded-xl shadow-xl border border-border/60 px-5 py-3.5">
+              <div className="absolute -bottom-4 -left-6 bg-card rounded-xl shadow-xl border border-border/60 px-5 py-3.5 animate-float" style={{ animationDelay: '1s' }}>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-lg bg-secondary/15 flex items-center justify-center">
                     <TrendingUp className="w-5 h-5 text-secondary" />
@@ -206,8 +210,8 @@ const Index = () => {
         <div className="container mx-auto px-4 py-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {stats.map((stat, i) =>
-            <div key={i} className="text-center">
-                <div className="font-heading font-bold text-2xl md:text-3xl text-primary">{stat.value}</div>
+            <div key={i} className="text-center group cursor-default" style={{ animationDelay: `${i * 0.1}s` }}>
+                <div className="font-heading font-bold text-2xl md:text-3xl text-primary group-hover:scale-110 group-hover:text-secondary transition-all duration-300">{stat.value}</div>
                 <div className="text-sm text-muted-foreground mt-1">{stat.label}</div>
               </div>
             )}
@@ -223,18 +227,19 @@ const Index = () => {
             <p className="text-muted-foreground text-sm md:text-base mt-2">Browse courses by field of study</p>
           </div>
           <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide lg:grid lg:grid-cols-6 lg:overflow-visible lg:pb-0">
-            {categories.map((cat) => {
+            {categories.map((cat, idx) => {
               const Icon = cat.icon;
               return (
                 <Link
                   key={cat.name}
                   to={`/courses?category=${encodeURIComponent(cat.name)}`}
-                  className="group flex flex-col items-center gap-3 p-5 rounded-xl bg-card border border-border hover:border-primary/30 hover:shadow-card-hover transition-all duration-300 min-w-[130px] shrink-0 lg:min-w-0">
+                  style={{ animationDelay: `${idx * 0.08}s`, opacity: 0 }}
+                  className="group flex flex-col items-center gap-3 p-5 rounded-xl bg-card border border-border hover:border-secondary/50 hover:shadow-card-hover hover:-translate-y-1 transition-all duration-500 ease-out min-w-[130px] shrink-0 lg:min-w-0 animate-fade-in-up">
                   
-                  <div className={`w-12 h-12 rounded-xl ${cat.color} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                  <div className={`w-12 h-12 rounded-xl ${cat.color} flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all duration-500`}>
                     <Icon className="w-6 h-6" />
                   </div>
-                  <span className="text-sm font-medium text-foreground text-center whitespace-nowrap">{cat.name}</span>
+                  <span className="text-sm font-medium text-foreground text-center whitespace-nowrap group-hover:text-primary transition-colors">{cat.name}</span>
                 </Link>);
 
             })}
@@ -268,21 +273,23 @@ const Index = () => {
             </div> :
 
           <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:overflow-visible sm:pb-0">
-              {courses.map((course) =>
+              {courses.map((course, idx) =>
             <Card
               key={course.id}
-              className="group overflow-hidden bg-card border border-border hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300 flex flex-col min-w-[260px] shrink-0 sm:min-w-0">
+              style={{ animationDelay: `${idx * 0.1}s`, opacity: 0 }}
+              className="group overflow-hidden bg-card border border-border hover:shadow-card-hover hover:-translate-y-2 transition-all duration-500 ease-out flex flex-col min-w-[260px] shrink-0 sm:min-w-0 animate-fade-in-up">
               
                   <Link to={`/programs/${course.id}`} className="block aspect-video overflow-hidden relative">
                     <img
                   src={course.image_url || "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80"}
                   alt={course.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                 
                     {course.price === 0 &&
                 <Badge className="absolute top-2.5 left-2.5 bg-success text-success-foreground text-xs border-0 shadow-sm">Free</Badge>
                 }
                     <Badge className="absolute top-2.5 right-2.5 bg-card/90 backdrop-blur-sm text-foreground text-xs border-0">{course.category}</Badge>
+                    <div className="absolute inset-0 bg-gradient-to-t from-primary/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   </Link>
 
                   <CardContent className="p-4 flex flex-col flex-grow">
@@ -312,12 +319,13 @@ const Index = () => {
                   <span className="font-bold text-foreground text-base">₦{course.price.toLocaleString()}</span>
                   }
                       {isEnrolled(course.id) ?
-                  <Button size="sm" className="text-xs font-semibold bg-primary hover:bg-accent" onClick={() => navigate("/dashboard/learning")}>
+                  <Button size="sm" className="text-xs font-semibold bg-primary hover:bg-accent hover-scale" onClick={() => navigate("/dashboard/learning")}>
                           Continue
                         </Button> :
 
-                  <Button size="sm" className="text-xs font-semibold bg-secondary text-secondary-foreground hover:bg-secondary/90" onClick={() => handleEnroll(course)}>
+                  <Button size="sm" className="text-xs font-semibold bg-secondary text-secondary-foreground hover:bg-secondary/90 hover-glow group/btn" onClick={() => handleEnroll(course)}>
                           Enroll Now
+                          <ArrowRight className="ml-1 w-3 h-3 group-hover/btn:translate-x-0.5 transition-transform" />
                         </Button>
                   }
                     </div>
@@ -353,10 +361,10 @@ const Index = () => {
             { icon: TrendingUp, title: "Progress Tracking", desc: "Monitor your learning journey with detailed analytics" },
             { icon: BookOpen, title: "Hands-on Training", desc: "Real-world projects and practical Programs" }].
             map((f, i) =>
-            <Card key={i} className="border border-border bg-card hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300 min-w-[75vw] shrink-0 sm:min-w-0">
+            <Card key={i} style={{ animationDelay: `${i * 0.12}s`, opacity: 0 }} className="border border-border bg-card hover:shadow-card-hover hover:-translate-y-2 hover:border-secondary/40 transition-all duration-500 ease-out min-w-[75vw] shrink-0 sm:min-w-0 group animate-fade-in-up">
                 <CardContent className="p-6 flex flex-col items-center text-center">
-                  <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
-                    <f.icon className="w-7 h-7 text-primary" />
+                  <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-secondary/15 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                    <f.icon className="w-7 h-7 text-primary group-hover:text-secondary transition-colors duration-500" />
                   </div>
                   <h3 className="font-heading font-bold text-base mb-2 text-foreground">{f.title}</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
@@ -370,10 +378,12 @@ const Index = () => {
       {/* ─── Corporate CTA ─── */}
       <section className="py-12 lg:py-16 bg-muted/40">
         <div className="container mx-auto px-4">
-          <div className="bg-primary rounded-2xl overflow-hidden">
-            <div className="grid lg:grid-cols-2 items-center">
+          <div className="bg-primary rounded-2xl overflow-hidden relative group">
+            <div className="absolute -top-20 -right-20 w-64 h-64 bg-secondary/20 rounded-full blur-3xl animate-float pointer-events-none" />
+            <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-accent/30 rounded-full blur-3xl animate-float pointer-events-none" style={{ animationDelay: '2s' }} />
+            <div className="grid lg:grid-cols-2 items-center relative">
               <div className="p-8 lg:p-12 space-y-5">
-                <div className="inline-flex items-center gap-2 bg-primary-foreground/10 px-3 py-1.5 rounded-full text-xs font-medium text-primary-foreground">
+                <div className="inline-flex items-center gap-2 glass px-3 py-1.5 rounded-full text-xs font-medium text-primary-foreground">
                   <Users className="w-3.5 h-3.5" />
                   Scra<span className="text-secondary">AD</span> for Business
                 </div>
@@ -384,16 +394,16 @@ const Index = () => {
                   Get unlimited access to courses, learning paths, and analytics. Help your organisation stay competitive in a changing world.
                 </p>
                 <div className="flex flex-wrap gap-3">
-                  <Button size="lg" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold h-12 px-6 shadow-lg">
-                    Request a Demo <ArrowRight className="ml-2 w-4 h-4" />
+                  <Button size="lg" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold h-12 px-6 shadow-lg hover-glow group/btn">
+                    Request a Demo <ArrowRight className="ml-2 w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
                   </Button>
-                  <Button size="lg" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 font-medium h-12 px-6 shadow-lg">
+                  <Button size="lg" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 font-medium h-12 px-6 shadow-lg hover-scale">
                     View Plans
                   </Button>
                 </div>
               </div>
-              <div className="h-48 lg:h-full">
-                <img src={teamTraining} alt="Business teams training on ScraAd" className="w-full h-full object-cover" />
+              <div className="h-48 lg:h-full overflow-hidden">
+                <img src={teamTraining} alt="Business teams training on ScraAd" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
               </div>
             </div>
           </div>
@@ -410,16 +420,16 @@ const Index = () => {
 
           <div className="flex gap-3 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide md:grid md:grid-cols-3 md:overflow-visible md:pb-0 max-w-5xl mx-auto px-1">
             {testimonials.map((t, i) =>
-            <Card key={i} className="border border-border bg-card hover:shadow-card-hover transition-all duration-300 min-w-[72vw] max-w-[72vw] shrink-0 snap-start md:min-w-0 md:max-w-none">
+            <Card key={i} style={{ animationDelay: `${i * 0.15}s`, opacity: 0 }} className="border border-border bg-card hover:shadow-card-hover hover:-translate-y-2 hover:border-secondary/40 transition-all duration-500 ease-out min-w-[72vw] max-w-[72vw] shrink-0 snap-start md:min-w-0 md:max-w-none animate-fade-in-up group">
                 <CardContent className="p-6">
                   <div className="flex gap-0.5 mb-4">
                     {[...Array(5)].map((_, j) =>
-                  <Star key={j} className="w-4 h-4 fill-secondary text-secondary" />
+                  <Star key={j} className="w-4 h-4 fill-secondary text-secondary group-hover:scale-110 transition-transform" style={{ transitionDelay: `${j * 50}ms` }} />
                   )}
                   </div>
                   <p className="text-foreground text-sm leading-relaxed mb-5">"{t.text}"</p>
                   <div className="flex items-center gap-3 pt-4 border-t border-border">
-                    <img src={t.avatar} alt={t.name} className="w-10 h-10 rounded-full bg-muted" />
+                    <img src={t.avatar} alt={t.name} className="w-10 h-10 rounded-full bg-muted ring-2 ring-transparent group-hover:ring-secondary/50 transition-all" />
                     <div>
                       <div className="font-semibold text-sm text-foreground">{t.name}</div>
                       <div className="text-xs text-muted-foreground">{t.role}</div>
@@ -433,8 +443,10 @@ const Index = () => {
       </section>
 
       {/* ─── Final CTA ─── */}
-      <section className="bg-primary">
-        <div className="container mx-auto px-4 py-12 lg:py-16 text-center space-y-5">
+      <section className="bg-animated-gradient relative overflow-hidden">
+        <div className="absolute top-0 left-1/4 w-72 h-72 bg-secondary/20 rounded-full blur-3xl animate-float pointer-events-none" />
+        <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-accent/30 rounded-full blur-3xl animate-float pointer-events-none" style={{ animationDelay: '1.5s' }} />
+        <div className="container mx-auto px-4 py-12 lg:py-16 text-center space-y-5 relative z-10">
           <h2 className="font-heading font-bold text-2xl md:text-3xl text-primary-foreground">
             Start learning today
           </h2>
@@ -442,9 +454,9 @@ const Index = () => {
             Join Scra<span className="text-secondary">AD</span> and gain the skills to advance your career, earn certificates, and learn from the best.
           </p>
           <div className="flex justify-center gap-3">
-            <Button size="lg" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold h-12 px-8 shadow-lg" asChild>
+            <Button size="lg" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold h-12 px-8 shadow-lg hover-glow group" asChild>
               <Link to="/auth">
-                Get Started Free <ArrowRight className="ml-2 w-4 h-4" />
+                Get Started Free <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
             </Button>
           </div>
