@@ -69,6 +69,7 @@ export default {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
         heading: ['DM Sans', 'system-ui', 'sans-serif'],
+        display: ['Fraunces', 'DM Sans', 'serif'],
       },
       boxShadow: {
         'card': 'var(--card-shadow)',
