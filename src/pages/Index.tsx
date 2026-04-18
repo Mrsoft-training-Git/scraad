@@ -378,10 +378,12 @@ const Index = () => {
       {/* ─── Corporate CTA ─── */}
       <section className="py-12 lg:py-16 bg-muted/40">
         <div className="container mx-auto px-4">
-          <div className="bg-primary rounded-2xl overflow-hidden">
-            <div className="grid lg:grid-cols-2 items-center">
+          <div className="bg-primary rounded-2xl overflow-hidden relative group">
+            <div className="absolute -top-20 -right-20 w-64 h-64 bg-secondary/20 rounded-full blur-3xl animate-float pointer-events-none" />
+            <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-accent/30 rounded-full blur-3xl animate-float pointer-events-none" style={{ animationDelay: '2s' }} />
+            <div className="grid lg:grid-cols-2 items-center relative">
               <div className="p-8 lg:p-12 space-y-5">
-                <div className="inline-flex items-center gap-2 bg-primary-foreground/10 px-3 py-1.5 rounded-full text-xs font-medium text-primary-foreground">
+                <div className="inline-flex items-center gap-2 glass px-3 py-1.5 rounded-full text-xs font-medium text-primary-foreground">
                   <Users className="w-3.5 h-3.5" />
                   Scra<span className="text-secondary">AD</span> for Business
                 </div>
@@ -392,16 +394,16 @@ const Index = () => {
                   Get unlimited access to courses, learning paths, and analytics. Help your organisation stay competitive in a changing world.
                 </p>
                 <div className="flex flex-wrap gap-3">
-                  <Button size="lg" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold h-12 px-6 shadow-lg">
-                    Request a Demo <ArrowRight className="ml-2 w-4 h-4" />
+                  <Button size="lg" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold h-12 px-6 shadow-lg hover-glow group/btn">
+                    Request a Demo <ArrowRight className="ml-2 w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
                   </Button>
-                  <Button size="lg" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 font-medium h-12 px-6 shadow-lg">
+                  <Button size="lg" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 font-medium h-12 px-6 shadow-lg hover-scale">
                     View Plans
                   </Button>
                 </div>
               </div>
-              <div className="h-48 lg:h-full">
-                <img src={teamTraining} alt="Business teams training on ScraAd" className="w-full h-full object-cover" />
+              <div className="h-48 lg:h-full overflow-hidden">
+                <img src={teamTraining} alt="Business teams training on ScraAd" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
               </div>
             </div>
           </div>
@@ -418,16 +420,16 @@ const Index = () => {
 
           <div className="flex gap-3 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide md:grid md:grid-cols-3 md:overflow-visible md:pb-0 max-w-5xl mx-auto px-1">
             {testimonials.map((t, i) =>
-            <Card key={i} className="border border-border bg-card hover:shadow-card-hover transition-all duration-300 min-w-[72vw] max-w-[72vw] shrink-0 snap-start md:min-w-0 md:max-w-none">
+            <Card key={i} style={{ animationDelay: `${i * 0.15}s`, opacity: 0 }} className="border border-border bg-card hover:shadow-card-hover hover:-translate-y-2 hover:border-secondary/40 transition-all duration-500 ease-out min-w-[72vw] max-w-[72vw] shrink-0 snap-start md:min-w-0 md:max-w-none animate-fade-in-up group">
                 <CardContent className="p-6">
                   <div className="flex gap-0.5 mb-4">
                     {[...Array(5)].map((_, j) =>
-                  <Star key={j} className="w-4 h-4 fill-secondary text-secondary" />
+                  <Star key={j} className="w-4 h-4 fill-secondary text-secondary group-hover:scale-110 transition-transform" style={{ transitionDelay: `${j * 50}ms` }} />
                   )}
                   </div>
                   <p className="text-foreground text-sm leading-relaxed mb-5">"{t.text}"</p>
                   <div className="flex items-center gap-3 pt-4 border-t border-border">
-                    <img src={t.avatar} alt={t.name} className="w-10 h-10 rounded-full bg-muted" />
+                    <img src={t.avatar} alt={t.name} className="w-10 h-10 rounded-full bg-muted ring-2 ring-transparent group-hover:ring-secondary/50 transition-all" />
                     <div>
                       <div className="font-semibold text-sm text-foreground">{t.name}</div>
                       <div className="text-xs text-muted-foreground">{t.role}</div>
@@ -441,8 +443,10 @@ const Index = () => {
       </section>
 
       {/* ─── Final CTA ─── */}
-      <section className="bg-primary">
-        <div className="container mx-auto px-4 py-12 lg:py-16 text-center space-y-5">
+      <section className="bg-animated-gradient relative overflow-hidden">
+        <div className="absolute top-0 left-1/4 w-72 h-72 bg-secondary/20 rounded-full blur-3xl animate-float pointer-events-none" />
+        <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-accent/30 rounded-full blur-3xl animate-float pointer-events-none" style={{ animationDelay: '1.5s' }} />
+        <div className="container mx-auto px-4 py-12 lg:py-16 text-center space-y-5 relative z-10">
           <h2 className="font-heading font-bold text-2xl md:text-3xl text-primary-foreground">
             Start learning today
           </h2>
@@ -450,9 +454,9 @@ const Index = () => {
             Join Scra<span className="text-secondary">AD</span> and gain the skills to advance your career, earn certificates, and learn from the best.
           </p>
           <div className="flex justify-center gap-3">
-            <Button size="lg" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold h-12 px-8 shadow-lg" asChild>
+            <Button size="lg" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold h-12 px-8 shadow-lg hover-glow group" asChild>
               <Link to="/auth">
-                Get Started Free <ArrowRight className="ml-2 w-4 h-4" />
+                Get Started Free <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
             </Button>
           </div>
