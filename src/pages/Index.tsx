@@ -121,71 +121,75 @@ const Index = () => {
 
       {/* ─── Hero Section ─── */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-hero-gradient" />
+        <div className="absolute inset-0 bg-animated-gradient" />
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImciIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTTAgMGg2MHY2MEgweiIgZmlsbD0ibm9uZSIvPjxjaXJjbGUgY3g9IjMwIiBjeT0iMzAiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZykiLz48L3N2Zz4=')] opacity-50" />
+        {/* Floating glow orbs */}
+        <div className="absolute top-20 -left-20 w-72 h-72 bg-secondary/20 rounded-full blur-3xl animate-float pointer-events-none" />
+        <div className="absolute bottom-10 right-10 w-96 h-96 bg-accent/30 rounded-full blur-3xl animate-float pointer-events-none" style={{ animationDelay: '2s' }} />
         <div className="container mx-auto px-4 py-16 lg:py-24 relative z-10">
           <div className="grid lg:grid-cols-2 gap-10 items-center">
             <div className="space-y-6">
-              <div className="inline-flex items-center gap-2 bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 px-4 py-2 rounded-full">
-                <Zap className="w-4 h-4 text-secondary" />
+              <div className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full animate-fade-in">
+                <Zap className="w-4 h-4 text-secondary animate-pulse" />
                 <span className="text-sm font-medium text-primary-foreground/90">Trusted by 10,000+ professionals</span>
               </div>
-              <h1 className="font-heading font-bold text-3xl md:text-4xl lg:text-[3.25rem] text-primary-foreground leading-[1.12] tracking-tight">
-                Go from <span className="text-secondary">Scratch</span> to{" "}
-                <span className="text-secondary">Advance</span>
+              <h1 className="font-heading font-bold text-3xl md:text-4xl lg:text-[3.25rem] text-primary-foreground leading-[1.12] tracking-tight animate-fade-in-up">
+                Go from <span className="text-gradient-gold">Scratch</span> to{" "}
+                <span className="text-gradient-gold">Advance</span>
               </h1>
-              <p className="text-primary-foreground/75 text-base md:text-lg max-w-lg leading-relaxed">
+              <p className="text-primary-foreground/75 text-base md:text-lg max-w-lg leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.15s', opacity: 0 }}>
                 Build in-demand skills with courses, certifications, and hands-on training from industry experts. Your transformation starts here.
               </p>
 
               {/* Search bar */}
-              <form onSubmit={handleSearch} className="flex gap-2 max-w-lg">
+              <form onSubmit={handleSearch} className="flex gap-2 max-w-lg animate-fade-in-up" style={{ animationDelay: '0.3s', opacity: 0 }}>
                 <div className="relative flex-1">
                   <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                   <Input
                     placeholder="What do you want to learn?"
-                    className="pl-11 h-13 text-base bg-primary-foreground border-0 text-foreground placeholder:text-muted-foreground shadow-lg"
+                    className="pl-11 h-13 text-base bg-primary-foreground border-0 text-foreground placeholder:text-muted-foreground shadow-lg focus-visible:ring-2 focus-visible:ring-secondary transition-all"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)} />
                   
                 </div>
-                <Button type="submit" size="lg" className="h-13 px-6 font-semibold bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-lg">
+                <Button type="submit" size="lg" className="h-13 px-6 font-semibold bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-lg hover-glow transition-all">
                   Search
                 </Button>
               </form>
 
-              <div className="flex flex-wrap items-center gap-4 pt-2">
-                <Button size="lg" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold h-12 px-8 shadow-lg" asChild>
-                  <Link to="/auth">Get Started Free <ArrowRight className="ml-2 w-4 h-4" /></Link>
+              <div className="flex flex-wrap items-center gap-4 pt-2 animate-fade-in-up" style={{ animationDelay: '0.45s', opacity: 0 }}>
+                <Button size="lg" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold h-12 px-8 shadow-lg hover-glow group transition-all" asChild>
+                  <Link to="/auth">Get Started Free <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" /></Link>
                 </Button>
-                <Button size="lg" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 font-medium h-12 px-6 shadow-lg" asChild>
+                <Button size="lg" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 font-medium h-12 px-6 shadow-lg hover-scale" asChild>
                   <Link to="/courses">Explore Courses</Link>
                 </Button>
               </div>
             </div>
 
             {/* Hero card */}
-            <div className="relative">
-              <div className="bg-card rounded-2xl shadow-2xl overflow-hidden border border-border/50">
-                <img
-                  src={heroTraining}
-                  alt="Professionals learning on ScraAd"
-                  className="w-full h-72 object-cover" />
-                
+            <div className="relative animate-scale-in" style={{ animationDelay: '0.3s', opacity: 0 }}>
+              <div className="bg-card rounded-2xl shadow-2xl overflow-hidden border border-border/50 hover-lift group">
+                <div className="overflow-hidden">
+                  <img
+                    src={heroTraining}
+                    alt="Professionals learning on ScraAd"
+                    className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-700" />
+                </div>
                 <div className="p-5 space-y-3">
                   <div className="flex items-center gap-2">
                     <Play className="w-4 h-4 text-primary" />
                     <span className="text-sm font-medium text-foreground">Self-paced courses · Expert instructors</span>
                   </div>
                   <div className="flex gap-2 flex-wrap">
-                    <Badge className="text-xs bg-primary/10 text-primary border-0">Certificates</Badge>
-                    <Badge className="text-xs bg-secondary/15 text-secondary border-0">Hands-on Projects</Badge>
-                    <Badge className="text-xs bg-success/10 text-success border-0">Career Growth</Badge>
+                    <Badge className="text-xs bg-primary/10 text-primary border-0 hover:bg-primary/20 transition-colors">Certificates</Badge>
+                    <Badge className="text-xs bg-secondary/15 text-secondary border-0 hover:bg-secondary/25 transition-colors">Hands-on Projects</Badge>
+                    <Badge className="text-xs bg-success/10 text-success border-0 hover:bg-success/20 transition-colors">Career Growth</Badge>
                   </div>
                 </div>
               </div>
               {/* Floating stats card */}
-              <div className="absolute -bottom-4 -left-6 bg-card rounded-xl shadow-xl border border-border/60 px-5 py-3.5">
+              <div className="absolute -bottom-4 -left-6 bg-card rounded-xl shadow-xl border border-border/60 px-5 py-3.5 animate-float" style={{ animationDelay: '1s' }}>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-lg bg-secondary/15 flex items-center justify-center">
                     <TrendingUp className="w-5 h-5 text-secondary" />
