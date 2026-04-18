@@ -84,6 +84,23 @@ const Courses = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
 
+      {/* Editorial Hero */}
+      <section className="relative aurora-bg overflow-hidden">
+        <div className="absolute -top-20 -left-20 w-72 h-72 bg-secondary/25 blur-3xl blob-1 pointer-events-none" />
+        <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-accent/30 blur-3xl blob-2 pointer-events-none" />
+        <div className="container mx-auto px-4 py-14 md:py-20 relative z-10 text-center max-w-3xl">
+          <p className="text-xs uppercase tracking-[0.25em] text-secondary font-semibold mb-3">— Course Catalog</p>
+          <h1 className="font-heading font-bold text-4xl md:text-5xl lg:text-6xl text-primary-foreground leading-tight">
+            Skills that{" "}
+            <span className="font-display italic font-light text-secondary">unlock</span>{" "}
+            new chapters
+          </h1>
+          <p className="text-primary-foreground/80 text-base md:text-lg mt-4 max-w-xl mx-auto">
+            Browse expert-led courses across every discipline — at your own pace, on any device.
+          </p>
+        </div>
+      </section>
+
       {/* Sticky Search Header */}
       <section className="sticky top-0 z-20 bg-card border-b border-border shadow-sm">
         <div className="container mx-auto px-4 py-3 md:py-4">

@@ -76,29 +76,29 @@ const Programs = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      {/* Hero */}
-      <section className="py-20 bg-gradient-to-br from-primary via-primary/90 to-primary/80 text-primary-foreground">
-        <div className="container mx-auto px-4 text-center max-w-4xl">
+      {/* Editorial Hero */}
+      <section className="relative aurora-bg overflow-hidden text-primary-foreground">
+        <div className="absolute -top-24 -left-20 w-80 h-80 bg-secondary/25 blur-3xl blob-1 pointer-events-none" />
+        <div className="absolute -bottom-24 -right-20 w-96 h-96 bg-accent/30 blur-3xl blob-2 pointer-events-none" />
+        <div className="container mx-auto px-4 py-16 md:py-24 text-center max-w-4xl relative z-10">
           <Badge className="mb-4 bg-secondary/20 text-secondary border-secondary/30 font-semibold">
             Advanced Training Programs
           </Badge>
-          <h1 className="font-heading text-4xl md:text-5xl font-bold mb-4">
-            Earn Accredited Degrees from
-            <span className="block bg-gradient-to-r from-secondary to-accent bg-clip-text text-transparent mt-1">
-              Top Nigerian Universities
-            </span>
+          <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
+            Earn accredited degrees from{" "}
+            <span className="font-display italic font-light text-secondary">top universities</span>
           </h1>
           <p className="text-lg text-primary-foreground/80 mb-4 max-w-2xl mx-auto">
-            Apply for advanced online training programs from leading universities and tertiary 
-            institutions in Nigeria. Land a <strong>PGD</strong>, <strong>B.Sc</strong>, or <strong>M.Sc</strong> on 
+            Apply for advanced online training programs from leading universities and tertiary
+            institutions in Nigeria. Land a <strong>PGD</strong>, <strong>B.Sc</strong>, or <strong>M.Sc</strong> on
             fully accredited courses — study online, on-site, or hybrid.
           </p>
-          <div className="flex flex-wrap justify-center gap-3 mt-6">
+          <div className="flex flex-wrap justify-center gap-2 mt-6">
             {programTracks.map((tag) => (
               <button
                 key={tag}
                 onClick={() => setTrackFilter(tag)}
-                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all magnetic-btn ${
                   trackFilter === tag
                     ? "bg-primary-foreground text-primary shadow-md"
                     : "bg-primary-foreground/10 border border-primary-foreground/20 hover:bg-primary-foreground/20"
