@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Users, Star, SlidersHorizontal, BookOpen, X } from "lucide-react";
+import { Search, SlidersHorizontal, BookOpen, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { CourseCard } from "@/components/CourseCard";
 
 interface Course {
   id: string;
@@ -223,75 +223,11 @@ const Courses = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {filteredCourses.map((course) => (
-              <Card
+              <CourseCard
                 key={course.id}
-                className="group overflow-hidden border border-border bg-card hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300 flex flex-col cursor-pointer"
-                onClick={() => navigate(`/courses/${course.id}`)}
-              >
-                <div className="aspect-video overflow-hidden relative">
-                  {course.top_rated && (
-                    <Badge className="absolute top-2.5 left-2.5 bg-secondary text-secondary-foreground border-0 z-10 text-[10px] font-bold">
-                      <Star className="w-3 h-3 mr-0.5 fill-current" /> Top Rated
-                    </Badge>
-                  )}
-                  <img
-                    src={course.image_url || "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&q=80"}
-                    alt={course.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    loading="lazy"
-                  />
-                </div>
-                <CardContent className="p-4 flex flex-col flex-grow">
-                  <h3 className="font-heading font-bold text-sm mb-1 line-clamp-2 group-hover:text-primary transition-colors min-h-[2.5rem] text-foreground">
-                    {course.title}
-                  </h3>
-                  <p className="text-xs text-muted-foreground mb-2">{course.instructor || "ScraAD Instructor"}</p>
-                  
-                  <div className="flex items-center gap-2 mb-3">
-                    {course.level && (
-                      <Badge variant="secondary" className="text-[10px] bg-muted text-muted-foreground px-2 py-0.5">{course.level}</Badge>
-                    )}
-                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Users className="w-3 h-3" /> {course.students_count || 0}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between mt-auto pt-2 border-t border-border">
-                    {course.price === 0 ? (
-                      <Badge className="bg-success/10 text-success border-0 text-xs">Free</Badge>
-                    ) : (
-                      <span className="text-base font-bold text-foreground">₦{course.price.toLocaleString()}</span>
-                    )}
-                    <div className="flex gap-2">
-                      {isEnrolled(course.id) ? (
-                        <Button
-                          size="sm"
-                          className="bg-success hover:bg-success/90 text-success-foreground text-xs h-8"
-                          onClick={(e) => { e.stopPropagation(); navigate("/dashboard/learning"); }}
-                        >
-                          Go to Course
-                        </Button>
-                      ) : (
-                        <Button
-                          size="sm"
-                          className="bg-primary hover:bg-accent text-primary-foreground text-xs h-8"
-                          onClick={(e) => { e.stopPropagation(); navigate(`/enroll/${course.id}`); }}
-                        >
-                          Enroll Now
-                        </Button>
-                      )}
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="text-xs h-8"
-                        onClick={(e) => { e.stopPropagation(); navigate(`/courses/${course.id}`); }}
-                      >
-                        View Details
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                course={course}
+                isEnrolled={isEnrolled(course.id)}
+              />
             ))}
           </div>
         )}
