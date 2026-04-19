@@ -17,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { PromoBar } from "@/components/PromoBar";
 import { LogoMarquee } from "@/components/LogoMarquee";
 import { TiltCard } from "@/components/TiltCard";
+import { CourseCard } from "@/components/CourseCard";
 import { useReveal } from "@/hooks/useReveal";
 import { useCursorGlow } from "@/hooks/useCursorGlow";
 import { Squiggle, StarBurst, Sparkle, ArrowDoodle, Lightning, Underline } from "@/components/Doodles";
@@ -369,91 +370,17 @@ const Index = () => {
               <p>No featured courses yet. Check back soon!</p>
             </div>
           ) : (
-            <div className="flex gap-5 overflow-x-auto pb-4 scrollbar-hide sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:overflow-visible sm:pb-0">
+            <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 snap-x snap-mandatory scrollbar-hide sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:overflow-visible sm:pb-0 sm:mx-0 sm:px-0 sm:snap-none">
               {courses.map((course, idx) => (
                 <div
                   key={course.id}
                   style={{ animationDelay: `${idx * 0.1}s`, opacity: 0 }}
-                  className="animate-fade-in-up min-w-[260px] shrink-0 sm:min-w-0"
+                  className="animate-fade-in-up w-[78vw] max-w-[300px] shrink-0 snap-start sm:w-auto sm:max-w-none"
                 >
-                  <TiltCard intensity={6}>
-                    <Card className="group overflow-hidden bg-card border border-border hover:border-secondary/40 hover:shadow-2xl transition-all duration-500 flex flex-col h-full rounded-2xl relative">
-                      {/* Gradient ring on hover */}
-                      <div className="absolute -inset-px rounded-2xl bg-gradient-to-br from-secondary/0 via-secondary/0 to-accent/0 group-hover:from-secondary/40 group-hover:to-accent/40 transition-all duration-500 pointer-events-none -z-10 blur-sm" />
-
-                      <Link to={`/programs/${course.id}`} className="block aspect-video overflow-hidden relative">
-                        <img
-                          src={course.image_url || "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80"}
-                          alt={course.title}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                        />
-                        {course.price === 0 && (
-                          <Badge className="absolute top-2.5 left-2.5 bg-success text-success-foreground text-xs border-0 shadow-sm">
-                            Free
-                          </Badge>
-                        )}
-                        <Badge className="absolute top-2.5 right-2.5 bg-card/95 backdrop-blur text-foreground text-xs border-0">
-                          {course.category}
-                        </Badge>
-                        {/* Play overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-primary/70 via-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
-                          <div className="w-14 h-14 rounded-full bg-secondary/95 flex items-center justify-center shadow-2xl scale-75 group-hover:scale-100 transition-transform duration-500">
-                            <Play className="w-6 h-6 text-secondary-foreground fill-current ml-0.5" />
-                          </div>
-                        </div>
-                      </Link>
-
-                      <CardContent className="p-5 flex flex-col flex-grow">
-                        <Link to={`/programs/${course.id}`}>
-                          <h3 className="font-heading font-semibold text-base text-foreground line-clamp-2 mb-1.5 group-hover:text-primary transition-colors leading-snug">
-                            {course.title}
-                          </h3>
-                        </Link>
-                        <p className="text-xs text-muted-foreground mb-3 truncate">
-                          {course.instructor || "Expert Instructor"}
-                        </p>
-
-                        <div className="flex items-center gap-1.5 mb-4">
-                          <span className="text-sm font-bold text-secondary">4.5</span>
-                          <div className="flex gap-0.5">
-                            {[...Array(5)].map((_, i) => (
-                              <Star
-                                key={i}
-                                className={`w-3.5 h-3.5 ${i < 4 ? "fill-secondary text-secondary" : "fill-secondary/30 text-secondary/30"}`}
-                              />
-                            ))}
-                          </div>
-                          <span className="text-xs text-muted-foreground">({course.students_count})</span>
-                        </div>
-
-                        <div className="mt-auto flex items-center justify-between pt-3 border-t border-border">
-                          {course.price === 0 ? (
-                            <span className="font-bold text-success text-sm">Free</span>
-                          ) : (
-                            <span className="font-bold text-foreground text-base">₦{course.price.toLocaleString()}</span>
-                          )}
-                          {isEnrolled(course.id) ? (
-                            <Button
-                              size="sm"
-                              className="text-xs font-semibold bg-primary hover:bg-accent magnetic-btn"
-                              onClick={() => navigate("/dashboard/learning")}
-                            >
-                              Continue
-                            </Button>
-                          ) : (
-                            <Button
-                              size="sm"
-                              className="text-xs font-semibold bg-secondary text-secondary-foreground hover:bg-secondary/90 magnetic-btn group/btn"
-                              onClick={() => handleEnroll(course)}
-                            >
-                              Enroll
-                              <ArrowRight className="ml-1 w-3 h-3 group-hover/btn:translate-x-0.5 transition-transform" />
-                            </Button>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </TiltCard>
+                  <CourseCard
+                    course={course}
+                    isEnrolled={isEnrolled(course.id)}
+                  />
                 </div>
               ))}
             </div>
