@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
   ArrowRight, Award, BookOpen, Clock, GraduationCap, TrendingUp,
-  Users, Search, Star, Play, Briefcase, Monitor, Target, BarChart3,
+  Users, Star, Briefcase, Monitor, Target, BarChart3,
   Palette, Code2, Megaphone, Heart, Quote
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
@@ -59,7 +59,6 @@ const Index = () => {
     }
   };
 
-  const handleEnroll = (course: Course) => navigate(`/enroll/${course.id}`);
   const isEnrolled = (courseId: string) => enrolledCourseIds.includes(courseId);
 
   const fetchFeaturedCourses = async () => {
