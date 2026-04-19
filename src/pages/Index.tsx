@@ -164,30 +164,30 @@ const Index = () => {
                 Build in-demand skills with expert-led courses, hands-on programs, and certifications that move careers forward — at your own pace, from anywhere.
               </p>
 
-              {/* Search */}
-              <form
-                onSubmit={handleSearch}
-                className="flex gap-2 max-w-xl animate-fade-in-up"
+              {/* CTAs */}
+              <div
+                className="flex flex-wrap gap-3 animate-fade-in-up"
                 style={{ animationDelay: "0.4s", opacity: 0 }}
               >
-                <div className="relative flex-1">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <Input
-                    placeholder="What do you want to learn today?"
-                    className="pl-12 h-14 text-base bg-card/95 backdrop-blur border-0 text-foreground placeholder:text-muted-foreground shadow-2xl rounded-2xl focus-visible:ring-2 focus-visible:ring-secondary"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </div>
                 <Button
-                  type="submit"
                   size="lg"
+                  asChild
                   className="h-14 px-7 font-semibold bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-2xl rounded-2xl magnetic-btn"
                 >
-                  Search
-                  <ArrowRight className="ml-1.5 w-4 h-4" />
+                  <Link to="/courses">
+                    Explore Courses
+                    <ArrowRight className="ml-1.5 w-4 h-4" />
+                  </Link>
                 </Button>
-              </form>
+                <Button
+                  size="lg"
+                  asChild
+                  variant="outline"
+                  className="h-14 px-7 font-semibold rounded-2xl bg-card/10 backdrop-blur border-primary-foreground/30 text-primary-foreground hover:bg-card/20 hover:text-primary-foreground"
+                >
+                  <Link to="/programs">View Programs</Link>
+                </Button>
+              </div>
 
               {/* Suggested chips */}
               <div

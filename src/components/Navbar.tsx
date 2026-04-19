@@ -1,6 +1,7 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Menu, X, Search } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/scraad-logo.png";
@@ -11,7 +12,9 @@ export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
@@ -39,6 +42,15 @@ export const Navbar = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/courses?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery("");
+      setIsMenuOpen(false);
+    }
+  };
+
   return (
     <nav
       className={cn(
@@ -47,10 +59,10 @@ export const Navbar = () => {
       )}
     >
       <div className="container mx-auto px-4">
-        <div className={cn("flex items-center justify-between transition-all duration-300", scrolled ? "h-14" : "h-16")}>
+        <div className={cn("flex items-center justify-between gap-4 transition-all duration-300", scrolled ? "h-14" : "h-16")}>
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5 group flex-shrink-0">
-            <img src={logo} alt="ScraAd Logo" className={cn("object-contain transition-all duration-300", scrolled ? "w-8 h-8" : "w-9 h-9")} />
+            <img src={logo} alt="ScraAD Logo" className={cn("object-contain transition-all duration-300", scrolled ? "w-8 h-8" : "w-9 h-9")} />
             <div>
               <div className="font-heading font-bold text-base leading-tight text-foreground">
                 Scra<span className="text-secondary">AD</span>
@@ -60,7 +72,7 @@ export const Navbar = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-1">
+          <div className="hidden lg:flex items-center gap-1 flex-shrink-0">
             {navLinks.map((link) => {
               const active = isActive(link.to);
               return (
@@ -86,8 +98,23 @@ export const Navbar = () => {
             })}
           </div>
 
+          {/* Search (desktop) */}
+          <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-md mx-2">
+            <div className="relative w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+              <Input
+                type="search"
+                placeholder="Search courses, programs..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 h-9 rounded-full bg-muted/60 border-transparent focus-visible:bg-card focus-visible:border-border focus-visible:ring-1 focus-visible:ring-secondary/50 text-sm"
+                aria-label="Search courses and programs"
+              />
+            </div>
+          </form>
+
           {/* Right side */}
-          <div className="hidden lg:flex items-center gap-2">
+          <div className="hidden lg:flex items-center gap-2 flex-shrink-0">
             {isAuthenticated ? (
               <Button className="bg-primary hover:bg-accent text-primary-foreground font-semibold shadow-sm magnetic-btn" asChild>
                 <Link to="/dashboard">Dashboard</Link>
@@ -107,7 +134,7 @@ export const Navbar = () => {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="lg:hidden p-2 rounded-lg hover:bg-muted transition-colors"
+            className="lg:hidden p-2 rounded-lg hover:bg-muted transition-colors flex-shrink-0"
             aria-label="Toggle menu"
           >
             {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -117,6 +144,20 @@ export const Navbar = () => {
         {/* Mobile Menu */}
         {isMenuOpen && (
           <div className="lg:hidden pb-4 space-y-1 border-t border-border pt-3">
+            {/* Mobile search */}
+            <form onSubmit={handleSearch} className="md:hidden mb-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                <Input
+                  type="search"
+                  placeholder="Search courses, programs..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 h-10 rounded-full bg-muted/60 border-transparent text-sm"
+                  aria-label="Search courses and programs"
+                />
+              </div>
+            </form>
             {navLinks.map((link) => (
               <Link
                 key={link.to}
