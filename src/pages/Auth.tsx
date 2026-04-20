@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { MRsoftAttribution } from "@/components/MRsoftAttribution";
 
 const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
