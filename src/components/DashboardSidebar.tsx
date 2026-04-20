@@ -120,6 +120,26 @@ export const DashboardSidebar = ({ userRole, unreadAnnouncementsCount = 0, unrea
           );
         })}
       </nav>
+
+      {/* Footer attribution */}
+      <div className="border-t border-sidebar-border px-2 py-3">
+        {!collapsed ? (
+          <MRsoftAttribution
+            textClassName="text-[10px] text-sidebar-foreground/50"
+            logoClassName="h-3.5"
+          />
+        ) : (
+          <a
+            href="https://m-rinternational.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="MRsoft - M-R International"
+            className="bg-white rounded-md px-1.5 py-1 flex items-center justify-center hover:opacity-90 transition-opacity mx-auto w-fit"
+          >
+            <img src="/src/assets/mrsoft-logo.jpeg" alt="MRsoft" className="h-3 w-auto object-contain" />
+          </a>
+        )}
+      </div>
     </aside>
   );
 };
