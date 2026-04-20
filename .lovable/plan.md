@@ -1,118 +1,49 @@
 
+The user wants the "Product of MRsoft" attribution more visible but still professional. Currently it only lives in the footer's bottom strip. Let me think through the best additional placements without making it look like an ad.
 
-## What makes AQskill feel "premium" (and us feel dated)
+**Where it makes sense (professional, subtle, recurring):**
 
-Looking at their hero & site, the wow comes from a few specific things — none of them are technically hard:
+1. **Auth page (`src/pages/Auth.tsx`)** — Login/signup screens are high-trust moments. A small "Product of [MRsoft logo]" under the form builds credibility (think: "Powered by Stripe" on checkouts).
 
-1. **Editorial typography** — huge serif/italic accent words ("*dynamic Courses*") mixed with a clean sans. We currently use only DM Sans + a generic gradient.
-2. **Hand-drawn doodles & confetti accents** — squiggles, stars, lightning, sparkles scattered around the hero. Adds personality vs. our flat blue gradient.
-3. **A real lifestyle photo collage** with floating "stat pills" (26 Instructors / 65 Courses / 50K Students / 4.8 Rating) overlapping organic blob shapes.
-4. **A persistent promo bar** with live countdown across the top.
-5. **Soft pastel category cards** (lilac, mint, peach, cream) instead of generic muted tones.
-6. **Micro-interactions everywhere** — magnetic buttons, cursor-follow blobs, tilt on cards, marquee logo strip, scroll-reveal.
-7. **Generous whitespace & oversized headings** (60–80px on desktop).
+2. **Navbar (very subtle)** — A tiny "by MRsoft" tagline next to the ScraAD logo on desktop only. Risky — could clutter. I'll make it optional / behind a small divider.
 
-## The plan — give ScraAd a "wow" pass
+3. **About section on the homepage** — One line in `AboutCourseSection` or near the bottom of the hero: "A product of MRsoft / M-R International" with the logo. Visible to every visitor but contextual.
 
-A focused visual & motion overhaul of the **landing page first**, then propagate the design language to Courses, Programs, and Course Details. No backend or feature changes.
+4. **Loading splash / PWA install prompt** — Already exists (`PWAInstallPrompt.tsx`). Adding "by MRsoft" there reinforces ownership when users install.
 
-### Phase 1 — Design tokens & motion library (foundation)
+5. **Email/transactional surfaces** — Out of scope for now (no email templates being touched).
 
-**`src/index.css` + `tailwind.config.ts`**
-- Add an **editorial display font**: `Fraunces` (variable serif with italic) for accent words. Keep DM Sans for headings, Inter for body.
-- New utility classes:
-  - `.magnetic-btn` — JS-free pointer-tracking via CSS `transform`
-  - `.tilt-card` — 3D perspective tilt on hover
-  - `.marquee` — infinite horizontal scroll
-  - `.blob` — organic SVG mask shapes
-  - `.cursor-glow` — radial gradient that follows mouse
-  - `.aurora-bg` — multi-layer animated mesh gradient (replacing the flat hero gradient)
-- Add SVG doodle assets in `src/assets/doodles/` (squiggle, star burst, arrow, sparkle, underline) — reusable inline as decorative accents.
-- New keyframes: `marquee`, `tilt`, `blob-morph`, `text-reveal` (mask-based), `bounce-soft`.
+**My recommendation — pick the 3 highest-impact, lowest-clutter spots:**
 
-### Phase 2 — Landing page rebuild (`src/pages/Index.tsx`)
+### Plan: Add "Product of MRsoft" in 3 strategic places
 
-```text
-┌─────────────────────────────────────────┐
-│  [Promo Bar] Free trial · ⏱ 02d 14h 22m │  ← new sticky countdown
-├─────────────────────────────────────────┤
-│  HERO                                   │
-│  ✨ doodle  ⚡ doodle                    │
-│  Where ambition meets                   │
-│  *opportunity* ← Fraunces italic gold   │
-│              [photo collage w/ blobs]   │
-│  [Search ▸]  [Get Started]              │
-│                  ┌─ 10K+ Learners ──┐   │ ← floating stat pills
-│                  └─ 95% Completion ─┘   │
-├─────────────────────────────────────────┤
-│  TRUST MARQUEE  → infinite logo scroll  │
-├─────────────────────────────────────────┤
-│  CATEGORIES (pastel cards, tilt, doodle│
-│   underline on hover)                   │
-├─────────────────────────────────────────┤
-│  FEATURED COURSES (3D tilt cards w/    │
-│   gradient glow on hover, play-icon)   │
-├─────────────────────────────────────────┤
-│  WHY SCRAAD - alternating split with   │
-│   reveal-on-scroll & doodle accents    │
-├─────────────────────────────────────────┤
-│  TESTIMONIALS - draggable carousel +   │
-│   big quote mark in Fraunces           │
-├─────────────────────────────────────────┤
-│  CTA banner with aurora bg + parallax  │
-└─────────────────────────────────────────┘
-```
+**1. Auth page (`src/pages/Auth.tsx`)**
+- Add a small centered attribution below the auth card: `Product of [MRsoft logo]` linking to m-rinternational.com.
+- Pattern: muted text + small logo, same as footer.
+- High visibility: every user sees this when logging in/signing up.
 
-Specific upgrades:
-- **Hero headline**: mix DM Sans bold + Fraunces italic for the accent word, with text-reveal mask animation on load.
-- **Hero visual**: replace single image with a 2-image collage inside organic blob clip-paths + 3 floating glass stat pills using `animate-float` with staggered delays.
-- **Search bar**: glass-morphism with gold focus glow + suggested-search chips below ("UI/UX", "Data Analysis", "Public Speaking").
-- **Promo bar**: thin top strip with live countdown (`useEffect` + `setInterval`) — dismissible.
-- **Categories**: 6 pastel cards (lilac/mint/peach/cream/sky/rose) with tilt-on-hover, doodle-underline reveal, icon micro-bounce.
-- **Course cards**: 3D tilt, image zoom + dark overlay + play-button reveal on hover, gradient ring border on hover.
-- **Logo marquee**: "Trusted by" infinite scroll using duplicated track + `animate-marquee`.
-- **Scroll reveal**: `IntersectionObserver` hook (`useReveal`) toggles `is-visible` on sections.
-- **Cursor glow**: subtle 400px radial gradient follows the cursor on hero only (desktop).
+**2. Homepage hero — bottom of hero section (`src/pages/Index.tsx`)**
+- Add a tiny inline attribution under the hero CTAs or just above the LogoMarquee: "A product of [MRsoft logo]".
+- Subtle, professional, doesn't compete with the main hero message.
 
-### Phase 3 — Propagate language
+**3. Dashboard sidebar footer (`src/components/DashboardSidebar.tsx`)**
+- Add the attribution at the very bottom of the sidebar (below nav items, above collapse button if any).
+- Logged-in users see it persistently across all dashboard pages — reinforces ownership without ever being intrusive.
 
-Apply the same tokens (Fraunces accents, doodles, tilt cards, aurora CTA blocks) to:
-- `src/pages/Courses.tsx` — pastel category chips, hero with editorial heading
-- `src/pages/Programs.tsx` — same hero treatment
-- `src/pages/CourseDetails.tsx` — Fraunces section accents, sticky enroll card with glass effect
-- `src/components/Navbar.tsx` — add subtle scroll-shrink + active-link doodle underline
+**Consistent styling across all placements:**
+- Same "Product of" text + white-bg rounded logo container as footer
+- Logo height: `h-4` to `h-5` (smaller than footer for subtlety)
+- Always linked to `https://m-rinternational.com/` with `target="_blank"` and `rel="noopener noreferrer"`
+- Muted text color matching surrounding context
 
-### Phase 4 — Performance & a11y guardrails
-- All new motion respects `prefers-reduced-motion: reduce` (disable cursor-glow, marquee, tilt, parallax).
-- Doodles ship as inline SVG (no extra requests).
-- Fraunces loaded via `display=swap` with only the weights needed (variable, italic).
-- Mobile: disable tilt + cursor-glow, keep reveal + marquee.
+**Skipped on purpose:**
+- Navbar: too crowded already with logo, search, nav links, CTA
+- Every page footer: already has it (would be redundant)
+- Course/program cards: would look like ads
 
-### Files that will change
+**Files to edit:**
+- `src/pages/Auth.tsx` — attribution under auth card
+- `src/pages/Index.tsx` — attribution above LogoMarquee section
+- `src/components/DashboardSidebar.tsx` — attribution at sidebar bottom
 
-| File | Change |
-|---|---|
-| `src/index.css` | Add Fraunces import, new utilities, keyframes, aurora bg, cursor-glow |
-| `tailwind.config.ts` | Register `font-display`, `marquee`/`tilt`/`blob-morph`/`text-reveal` animations |
-| `src/assets/doodles/*.svg` (new) | 5–6 hand-drawn SVG accents |
-| `src/hooks/useReveal.ts` (new) | IntersectionObserver scroll-reveal hook |
-| `src/hooks/useCursorGlow.ts` (new) | Pointer tracking for hero glow (desktop only) |
-| `src/components/PromoBar.tsx` (new) | Sticky top countdown bar |
-| `src/components/LogoMarquee.tsx` (new) | Infinite logo scroll |
-| `src/components/TiltCard.tsx` (new) | Reusable 3D tilt wrapper |
-| `src/pages/Index.tsx` | Full rebuild around new components & language |
-| `src/components/CourseCard.tsx` | Tilt + gradient ring + play overlay |
-| `src/pages/Courses.tsx` | New editorial hero + pastel chips |
-| `src/pages/Programs.tsx` | New editorial hero |
-| `src/pages/CourseDetails.tsx` | Editorial accents + glass sticky card |
-| `src/components/Navbar.tsx` | Scroll-shrink + doodle active underline |
-
-### What this delivers vs. AQskill
-- Editorial typography mixing serif italic + sans → matches their personality
-- Doodles + pastel palette → adds warmth and approachability we currently lack
-- Tilt, marquee, scroll-reveal, cursor-glow → modern motion that reads as "premium"
-- Promo bar + countdown → urgency + the same conversion pattern they use
-- Photo collage with floating stat pills → more human than our single hero card
-
-After your approval I'll switch to default mode and ship it in the order above (Phase 1 → 2 → 3 → 4), so the wow is visible after Phase 2.
-
+After approval I'll implement all three with consistent styling matching the footer pattern.
