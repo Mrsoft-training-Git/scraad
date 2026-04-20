@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { BookOpen, ArrowUpRight } from "lucide-react";
+import mrsoftLogo from "@/assets/mrsoft-logo.jpeg";
 
 export const Footer = () => {
   return (
@@ -65,7 +66,12 @@ export const Footer = () => {
 
         <div className="border-t border-primary-foreground/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs text-primary-foreground/40">&copy; {new Date().getFullYear()} ScraAd. All rights reserved.</p>
-          <p className="text-xs text-primary-foreground/30">Scratch to Advance</p>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-primary-foreground/40">Product of</span>
+            <div className="bg-white rounded-md px-2 py-1 flex items-center">
+              <img src={mrsoftLogo} alt="MRsoft" className="h-5 w-auto object-contain" />
+            </div>
+          </div>
         </div>
       </div>
     </footer>);
