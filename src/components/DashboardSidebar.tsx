@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import logo from "@/assets/scraad-logo.png";
+import mrsoftLogo from "@/assets/mrsoft-logo.jpeg";
 import { MRsoftAttribution } from "@/components/MRsoftAttribution";
 
 const allMenuItems = [
