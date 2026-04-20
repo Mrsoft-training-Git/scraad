@@ -381,6 +381,10 @@ const Auth = () => {
                 </div>
               </TabsContent>
             </Tabs>
+
+            <div className="mt-8">
+              <MRsoftAttribution />
+            </div>
           </div>
         </div>
       </section>
