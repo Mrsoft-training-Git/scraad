@@ -16,6 +16,7 @@ import teamTraining from "@/assets/team-training.jpg";
 import { supabase } from "@/integrations/supabase/client";
 import { PromoBar } from "@/components/PromoBar";
 import { LogoMarquee } from "@/components/LogoMarquee";
+import { MRsoftAttribution } from "@/components/MRsoftAttribution";
 import { TiltCard } from "@/components/TiltCard";
 import { CourseCard } from "@/components/CourseCard";
 import { useReveal } from "@/hooks/useReveal";
