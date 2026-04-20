@@ -270,11 +270,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* ─── ATTRIBUTION ─── */}
-      <div className="py-6 bg-background">
-        <MRsoftAttribution />
-      </div>
-
       {/* ─── TRUST MARQUEE ─── */}
       <LogoMarquee />
 
