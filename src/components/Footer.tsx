@@ -68,9 +68,15 @@ export const Footer = () => {
           <p className="text-xs text-primary-foreground/40">&copy; {new Date().getFullYear()} ScraAd. All rights reserved.</p>
           <div className="flex items-center gap-2">
             <span className="text-xs text-primary-foreground/40">Product of</span>
-            <div className="bg-white rounded-md px-2 py-1 flex items-center">
+            <a
+              href="https://m-rinternational.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-white rounded-md px-2 py-1 flex items-center hover:opacity-90 transition-opacity"
+              aria-label="MRsoft - Visit M-R International website"
+            >
               <img src={mrsoftLogo} alt="MRsoft" className="h-5 w-auto object-contain" />
-            </div>
+            </a>
           </div>
         </div>
       </div>
