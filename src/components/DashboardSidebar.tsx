@@ -137,7 +137,7 @@ export const DashboardSidebar = ({ userRole, unreadAnnouncementsCount = 0, unrea
             aria-label="MRsoft - M-R International"
             className="bg-white rounded-md px-1.5 py-1 flex items-center justify-center hover:opacity-90 transition-opacity mx-auto w-fit"
           >
-            <img src="/src/assets/mrsoft-logo.jpeg" alt="MRsoft" className="h-3 w-auto object-contain" />
+            <img src={mrsoftLogo} alt="MRsoft" className="h-3 w-auto object-contain" />
           </a>
         )}
       </div>
