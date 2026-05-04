@@ -371,9 +371,13 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave, us
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="col-span-2">
-                <Label htmlFor="title">Course Title *</Label>
+            {/* Intro Video — shown on cards (hover preview) and details hero */}
+            <IntroVideoUploader
+              value={formData.intro_video_url}
+              onChange={(url) => setFormData({ ...formData, intro_video_url: url })}
+              pathPrefix={`courses/${editingCourse?.id || `new-${Date.now()}`}/intro`}
+            />
+
                 <Input
                   id="title"
                   value={formData.title}
