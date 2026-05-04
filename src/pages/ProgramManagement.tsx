@@ -506,6 +506,11 @@ const CreateProgramDialog = ({ open, onOpenChange, onCreated }: { open: boolean;
         <DialogHeader><DialogTitle>Create Training Program</DialogTitle><DialogDescription>Set up a new training program.</DialogDescription></DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <ImageUploadField imagePreview={imagePreview} onImageChange={handleImageChange} onClear={() => { setImageFile(null); setImagePreview(null); }} />
+          <IntroVideoUploader
+            value={form.intro_video_url}
+            onChange={(url) => setForm({ ...form, intro_video_url: url })}
+            pathPrefix={`programs/new-${Date.now()}/intro`}
+          />
           <ProgramFormFields form={form} setForm={setForm} instructors={instructors} />
           <Button type="submit" className="w-full" disabled={submitting}>{submitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />} Create Program</Button>
         </form>
