@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useDashboardAuth } from "@/hooks/useDashboardAuth";
 import { format } from "date-fns";
 import { Check, X, Clock, Mail, Phone, FileText, Loader2, Plus, ImagePlus, Pencil, MapPin, Calendar, Users } from "lucide-react";
+import { IntroVideoUploader } from "@/components/IntroVideoUploader";
 
 const computeProgramStatus = (startDate: string | null, endDate: string | null): string => {
   const now = new Date();
@@ -28,7 +29,7 @@ const computeProgramStatus = (startDate: string | null, endDate: string | null):
 interface FullProgram {
   id: string; title: string; status: string; start_date: string | null; end_date: string | null; mode: string;
   short_description: string | null; description: string | null; duration: string | null;
-  location: string | null; banner_image_url: string | null; created_at: string;
+  location: string | null; banner_image_url: string | null; intro_video_url: string | null; created_at: string;
   max_participants: number | null; learning_outcomes: string[] | null; requirements: string[] | null;
   track: string | null; instructor_id: string | null; instructor_name: string | null;
 }
@@ -448,7 +449,7 @@ const CreateProgramDialog = ({ open, onOpenChange, onCreated }: { open: boolean;
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [instructors, setInstructors] = useState<InstructorOption[]>([]);
-  const [form, setForm] = useState({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", end_date: "", price: "0", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "", track: "", instructor_id: "", instructor_name: "" });
+  const [form, setForm] = useState({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", end_date: "", price: "0", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "", track: "", instructor_id: "", instructor_name: "", intro_video_url: "" });
 
   useEffect(() => {
     if (open) fetchInstructors();
@@ -480,7 +481,7 @@ const CreateProgramDialog = ({ open, onOpenChange, onCreated }: { open: boolean;
       const { error } = await supabase.from("programs").insert({
         title: form.title.trim(), short_description: form.short_description.trim() || null, description: form.description.trim() || null,
         duration: form.duration.trim() || null, mode: form.mode, location: form.location.trim() || null, start_date: form.start_date || null, end_date: form.end_date || null, status: computeProgramStatus(form.start_date, form.end_date),
-        banner_image_url: bannerUrl, price: parseFloat(form.price) || 0, allows_part_payment: form.allows_part_payment,
+        banner_image_url: bannerUrl, intro_video_url: form.intro_video_url || null, price: parseFloat(form.price) || 0, allows_part_payment: form.allows_part_payment,
         first_tranche_amount: form.allows_part_payment && form.first_tranche_amount ? parseInt(form.first_tranche_amount) : null,
         second_tranche_amount: form.allows_part_payment && form.second_tranche_amount ? parseInt(form.second_tranche_amount) : null,
         second_payment_due_days: form.allows_part_payment && form.second_payment_due_days ? parseInt(form.second_payment_due_days) : null,
@@ -491,7 +492,7 @@ const CreateProgramDialog = ({ open, onOpenChange, onCreated }: { open: boolean;
       toast({ title: "Program created!" });
       onCreated();
       onOpenChange(false);
-      setForm({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", end_date: "", price: "0", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "", track: "", instructor_id: "", instructor_name: "" });
+      setForm({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", end_date: "", price: "0", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "", track: "", instructor_id: "", instructor_name: "", intro_video_url: "" });
       setImageFile(null);
       setImagePreview(null);
     } catch (err: any) {
@@ -505,6 +506,11 @@ const CreateProgramDialog = ({ open, onOpenChange, onCreated }: { open: boolean;
         <DialogHeader><DialogTitle>Create Training Program</DialogTitle><DialogDescription>Set up a new training program.</DialogDescription></DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <ImageUploadField imagePreview={imagePreview} onImageChange={handleImageChange} onClear={() => { setImageFile(null); setImagePreview(null); }} />
+          <IntroVideoUploader
+            value={form.intro_video_url}
+            onChange={(url) => setForm({ ...form, intro_video_url: url })}
+            pathPrefix={`programs/new-${Date.now()}/intro`}
+          />
           <ProgramFormFields form={form} setForm={setForm} instructors={instructors} />
           <Button type="submit" className="w-full" disabled={submitting}>{submitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />} Create Program</Button>
         </form>
@@ -520,7 +526,7 @@ const EditProgramDialog = ({ program, onOpenChange, onUpdated }: { program: Full
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [instructors, setInstructors] = useState<InstructorOption[]>([]);
-  const [form, setForm] = useState({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", end_date: "", price: "0", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "", track: "", instructor_id: "", instructor_name: "" });
+  const [form, setForm] = useState({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", end_date: "", price: "0", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "", track: "", instructor_id: "", instructor_name: "", intro_video_url: "" });
 
   useEffect(() => {
     if (program) {
@@ -541,6 +547,7 @@ const EditProgramDialog = ({ program, onOpenChange, onUpdated }: { program: Full
         track: (program as any).track || "",
         instructor_id: program.instructor_id || "",
         instructor_name: program.instructor_name || "",
+        intro_video_url: (program as any).intro_video_url || "",
       });
       setImagePreview(program.banner_image_url || null);
       setImageFile(null);
@@ -578,7 +585,7 @@ const EditProgramDialog = ({ program, onOpenChange, onUpdated }: { program: Full
       const { error } = await supabase.from("programs").update({
         title: form.title.trim(), short_description: form.short_description.trim() || null, description: form.description.trim() || null,
         duration: form.duration.trim() || null, mode: form.mode, location: form.location.trim() || null, start_date: form.start_date || null, end_date: form.end_date || null, status: computeProgramStatus(form.start_date, form.end_date),
-        banner_image_url: bannerUrl, price: parseFloat(form.price) || 0, allows_part_payment: form.allows_part_payment,
+        banner_image_url: bannerUrl, intro_video_url: form.intro_video_url || null, price: parseFloat(form.price) || 0, allows_part_payment: form.allows_part_payment,
         first_tranche_amount: form.allows_part_payment && form.first_tranche_amount ? parseInt(form.first_tranche_amount) : null,
         second_tranche_amount: form.allows_part_payment && form.second_tranche_amount ? parseInt(form.second_tranche_amount) : null,
         second_payment_due_days: form.allows_part_payment && form.second_payment_due_days ? parseInt(form.second_payment_due_days) : null,
@@ -600,6 +607,11 @@ const EditProgramDialog = ({ program, onOpenChange, onUpdated }: { program: Full
         <DialogHeader><DialogTitle>Edit Program</DialogTitle><DialogDescription>Update program details.</DialogDescription></DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <ImageUploadField imagePreview={imagePreview} onImageChange={handleImageChange} onClear={() => { setImageFile(null); setImagePreview(null); }} />
+          <IntroVideoUploader
+            value={form.intro_video_url}
+            onChange={(url) => setForm({ ...form, intro_video_url: url })}
+            pathPrefix={`programs/${program?.id || `new-${Date.now()}`}/intro`}
+          />
           <ProgramFormFields form={form} setForm={setForm} instructors={instructors} />
           <Button type="submit" className="w-full" disabled={submitting}>{submitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />} Save Changes</Button>
         </form>

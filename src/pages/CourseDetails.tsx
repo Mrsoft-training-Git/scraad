@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Clock, Users, Award, CheckCircle, BookOpen, ArrowLeft, Share2, Check, ChevronDown, ChevronUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { IntroVideoHero } from "@/components/IntroVideo";
 
 interface Course {
   id: string;
@@ -18,6 +19,7 @@ interface Course {
   overview: string | null;
   price: number;
   image_url: string | null;
+  intro_video_url: string | null;
   category: string;
   instructor: string | null;
   duration: string | null;
@@ -167,11 +169,12 @@ const CourseDetails = () => {
               </div>
             </div>
 
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl">
-              <img
-                src={course.image_url || "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&q=80"}
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl aspect-video bg-black">
+              <IntroVideoHero
+                videoUrl={course.intro_video_url}
+                posterUrl={course.image_url}
                 alt={course.title}
-                className="w-full h-auto"
+                className="w-full h-full"
               />
             </div>
           </div>

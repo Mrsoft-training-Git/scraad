@@ -16,6 +16,7 @@ interface Course {
   description: string | null;
   price: number;
   image_url: string | null;
+  intro_video_url: string | null;
   category: string;
   students_count: number;
   top_rated: boolean;
@@ -52,7 +53,7 @@ const Courses = () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("courses")
-      .select("id, title, description, price, image_url, category, students_count, top_rated, instructor, level, duration")
+      .select("id, title, description, price, image_url, intro_video_url, category, students_count, top_rated, instructor, level, duration")
       .eq("published", true)
       .order("created_at", { ascending: false });
     if (!error && data) setCourses(data);

@@ -755,6 +755,7 @@ export type Database = {
           image_url: string | null
           instructor: string | null
           instructor_id: string | null
+          intro_video_url: string | null
           level: string | null
           overview: string | null
           pending_review: boolean | null
@@ -782,6 +783,7 @@ export type Database = {
           image_url?: string | null
           instructor?: string | null
           instructor_id?: string | null
+          intro_video_url?: string | null
           level?: string | null
           overview?: string | null
           pending_review?: boolean | null
@@ -809,6 +811,7 @@ export type Database = {
           image_url?: string | null
           instructor?: string | null
           instructor_id?: string | null
+          intro_video_url?: string | null
           level?: string | null
           overview?: string | null
           pending_review?: boolean | null
@@ -1707,6 +1710,7 @@ export type Database = {
           id: string
           instructor_id: string | null
           instructor_name: string | null
+          intro_video_url: string | null
           learning_outcomes: string[] | null
           location: string | null
           max_participants: number | null
@@ -1735,6 +1739,7 @@ export type Database = {
           id?: string
           instructor_id?: string | null
           instructor_name?: string | null
+          intro_video_url?: string | null
           learning_outcomes?: string[] | null
           location?: string | null
           max_participants?: number | null
@@ -1763,6 +1768,7 @@ export type Database = {
           id?: string
           instructor_id?: string | null
           instructor_name?: string | null
+          intro_video_url?: string | null
           learning_outcomes?: string[] | null
           location?: string | null
           max_participants?: number | null

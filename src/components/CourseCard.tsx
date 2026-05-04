@@ -2,8 +2,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Star, Play, ArrowRight } from "lucide-react";
+import { Star, ArrowRight } from "lucide-react";
 import { TiltCard } from "@/components/TiltCard";
+import { IntroVideoCard } from "@/components/IntroVideo";
 
 interface CourseCardProps {
   course: {
@@ -12,6 +13,7 @@ interface CourseCardProps {
     description?: string | null;
     price: number;
     image_url?: string | null;
+    intro_video_url?: string | null;
     category: string;
     students_count?: number | null;
     featured?: boolean;
@@ -54,17 +56,13 @@ export const CourseCard = ({
       <div className="absolute -inset-px rounded-2xl bg-gradient-to-br from-secondary/0 via-secondary/0 to-accent/0 group-hover:from-secondary/40 group-hover:to-accent/40 transition-all duration-500 pointer-events-none -z-10 blur-sm" />
 
       <Link to={`/courses/${course.id}`} className="block aspect-video overflow-hidden relative">
-        <img
-          src={
-            course.image_url ||
-            "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80"
-          }
+        <IntroVideoCard
+          videoUrl={course.intro_video_url}
+          posterUrl={course.image_url}
           alt={course.title}
-          loading="lazy"
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
         />
         {course.price === 0 && (
-          <Badge className="absolute top-2.5 left-2.5 bg-success text-success-foreground text-[10px] border-0 shadow-sm">
+          <Badge className="absolute top-2.5 left-2.5 bg-success text-success-foreground text-[10px] border-0 shadow-sm z-10">
             Free
           </Badge>
         )}
@@ -73,16 +71,9 @@ export const CourseCard = ({
             <Star className="w-3 h-3 mr-0.5 fill-current" /> Top Rated
           </Badge>
         )}
-        <Badge className="absolute top-2.5 right-2.5 bg-card/95 backdrop-blur text-foreground text-[10px] border-0">
+        <Badge className="absolute top-2.5 right-2.5 bg-card/95 backdrop-blur text-foreground text-[10px] border-0 z-10">
           {course.category}
         </Badge>
-
-        {/* Play overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-primary/70 via-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
-          <div className="w-12 h-12 rounded-full bg-secondary/95 flex items-center justify-center shadow-2xl scale-75 group-hover:scale-100 transition-transform duration-500">
-            <Play className="w-5 h-5 text-secondary-foreground fill-current ml-0.5" />
-          </div>
-        </div>
       </Link>
 
       <CardContent className="p-4 sm:p-5 flex flex-col flex-grow">
