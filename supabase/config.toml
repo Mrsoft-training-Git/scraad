@@ -1,1 +1,5 @@
 project_id = "hhhylhihtfdmbhhqzxqu"
+
+# Public — intro video previews must be viewable without login
+[functions.get-intro-video-url]
+verify_jwt = false
