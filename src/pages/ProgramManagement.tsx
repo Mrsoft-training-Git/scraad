@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useDashboardAuth } from "@/hooks/useDashboardAuth";
 import { format } from "date-fns";
 import { Check, X, Clock, Mail, Phone, FileText, Loader2, Plus, ImagePlus, Pencil, MapPin, Calendar, Users } from "lucide-react";
+import { IntroVideoUploader } from "@/components/IntroVideoUploader";
 
 const computeProgramStatus = (startDate: string | null, endDate: string | null): string => {
   const now = new Date();
@@ -28,7 +29,7 @@ const computeProgramStatus = (startDate: string | null, endDate: string | null):
 interface FullProgram {
   id: string; title: string; status: string; start_date: string | null; end_date: string | null; mode: string;
   short_description: string | null; description: string | null; duration: string | null;
-  location: string | null; banner_image_url: string | null; created_at: string;
+  location: string | null; banner_image_url: string | null; intro_video_url: string | null; created_at: string;
   max_participants: number | null; learning_outcomes: string[] | null; requirements: string[] | null;
   track: string | null; instructor_id: string | null; instructor_name: string | null;
 }
