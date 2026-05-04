@@ -607,6 +607,11 @@ const EditProgramDialog = ({ program, onOpenChange, onUpdated }: { program: Full
         <DialogHeader><DialogTitle>Edit Program</DialogTitle><DialogDescription>Update program details.</DialogDescription></DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <ImageUploadField imagePreview={imagePreview} onImageChange={handleImageChange} onClear={() => { setImageFile(null); setImagePreview(null); }} />
+          <IntroVideoUploader
+            value={form.intro_video_url}
+            onChange={(url) => setForm({ ...form, intro_video_url: url })}
+            pathPrefix={`programs/${program?.id || `new-${Date.now()}`}/intro`}
+          />
           <ProgramFormFields form={form} setForm={setForm} instructors={instructors} />
           <Button type="submit" className="w-full" disabled={submitting}>{submitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />} Save Changes</Button>
         </form>
