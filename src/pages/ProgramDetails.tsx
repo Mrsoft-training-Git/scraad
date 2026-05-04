@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ProgramApplicationForm } from "@/components/programs/ProgramApplicationForm";
 import { format } from "date-fns";
+import { IntroVideoHero } from "@/components/IntroVideo";
 
 interface Program {
   id: string;
@@ -18,6 +19,7 @@ interface Program {
   description: string | null;
   short_description: string | null;
   banner_image_url: string | null;
+  intro_video_url: string | null;
   duration: string | null;
   mode: string;
   location: string | null;
@@ -160,13 +162,14 @@ const ProgramDetails = () => {
 
       {/* Hero */}
       <section className="relative">
-        <div className="aspect-[3/1] md:aspect-[4/1] overflow-hidden">
-          <img
-            src={program.banner_image_url || "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1600&q=80"}
+        <div className="aspect-[3/1] md:aspect-[4/1] overflow-hidden bg-black">
+          <IntroVideoHero
+            videoUrl={program.intro_video_url}
+            posterUrl={program.banner_image_url}
             alt={program.title}
-            className="w-full h-full object-cover"
+            className="w-full h-full"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none" />
         </div>
         <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12 text-white">
           <div className="container mx-auto">
