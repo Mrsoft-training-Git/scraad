@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Menu, X, Search, ChevronDown, Home, BookOpen, GraduationCap, Briefcase } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import logo from "@/assets/scraad-logo.png";
+import logo from "@/assets/scraad-logo-official.png";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -77,13 +77,14 @@ export const Navbar = () => {
       <div className="container mx-auto px-4">
         <div className={cn("flex items-center justify-between gap-3 transition-all duration-300", scrolled ? "h-14" : "h-16")}>
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2.5 group flex-shrink-0">
-            <img src={logo} alt="ScraAD Logo" className={cn("object-contain transition-all duration-300", scrolled ? "w-8 h-8" : "w-9 h-9")} />
-            <div className="hidden sm:block">
-              <div className="font-heading font-bold text-base leading-tight text-foreground">
-                Scra<span className="text-secondary">AD</span>
-              </div>
-              <div className="text-[10px] text-muted-foreground leading-tight">Scratch to Advance</div>
+          <Link to="/" className="flex flex-col items-start leading-none group flex-shrink-0">
+            <img
+              src={logo}
+              alt="ScraAD"
+              className={cn("object-contain w-auto transition-all duration-300", scrolled ? "h-7" : "h-8")}
+            />
+            <div className="text-[9px] text-muted-foreground tracking-[0.18em] uppercase mt-1 pl-0.5">
+              Scratch to Advance
             </div>
           </Link>
 

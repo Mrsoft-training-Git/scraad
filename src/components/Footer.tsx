@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
-import { BookOpen, ArrowUpRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import mrsoftLogo from "@/assets/mrsoft-logo.jpeg";
+import scraadLogoOfficial from "@/assets/scraad-logo-official.png";
 
 export const Footer = () => {
   return (
@@ -9,13 +10,10 @@ export const Footer = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
-            <Link to="/" className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
-                <BookOpen className="w-4 h-4 text-secondary-foreground" />
-              </div>
-              <div>
-                <div className="font-heading font-bold text-primary-foreground text-sm">Scra<span className="text-secondary">AD</span></div>
-                <div className="text-[10px] text-primary-foreground/50">Scratch to Advance</div>
+            <Link to="/" className="inline-flex flex-col items-start leading-none mb-3 bg-white rounded-lg px-2.5 py-2">
+              <img src={scraadLogoOfficial} alt="ScraAD" className="h-7 w-auto object-contain" />
+              <div className="text-[9px] text-foreground/60 tracking-[0.18em] uppercase mt-1">
+                Scratch to Advance
               </div>
             </Link>
             <p className="text-xs text-primary-foreground/50 leading-relaxed max-w-xs">
