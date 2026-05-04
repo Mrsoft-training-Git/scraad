@@ -10,12 +10,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Clock, Users, MapPin, Calendar, Search, ArrowRight, Laptop, Building, Globe } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
+import { IntroVideoCard } from "@/components/IntroVideo";
 
 interface Program {
   id: string;
   title: string;
   short_description: string | null;
   banner_image_url: string | null;
+  intro_video_url: string | null;
   duration: string | null;
   mode: string;
   location: string | null;
@@ -55,7 +57,7 @@ const Programs = () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("programs")
-      .select("id, title, short_description, banner_image_url, duration, mode, location, start_date, status, max_participants, track")
+      .select("id, title, short_description, banner_image_url, intro_video_url, duration, mode, location, start_date, status, max_participants, track")
       .neq("status", "closed")
       .order("created_at", { ascending: false });
     if (!error && data) {
@@ -164,10 +166,11 @@ const Programs = () => {
                     <Badge className="absolute top-3 right-3 z-10 bg-background/90 backdrop-blur-sm text-foreground border-0 capitalize">
                       {modeIcons[program.mode]} <span className="ml-1">{program.mode}</span>
                     </Badge>
-                    <img
-                      src={program.banner_image_url || "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&q=80"}
+                    <IntroVideoCard
+                      videoUrl={program.intro_video_url}
+                      posterUrl={program.banner_image_url}
                       alt={program.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="group-hover:scale-105 transition-transform duration-500"
                     />
                   </div>
                   <CardContent className="p-5 flex flex-col flex-grow">
