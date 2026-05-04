@@ -378,6 +378,9 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave, us
               pathPrefix={`courses/${editingCourse?.id || `new-${Date.now()}`}/intro`}
             />
 
+            <div className="grid grid-cols-2 gap-4">
+              <div className="col-span-2">
+                <Label htmlFor="title">Course Title *</Label>
                 <Input
                   id="title"
                   value={formData.title}
