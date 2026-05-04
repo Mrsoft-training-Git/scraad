@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
-import scraadLogo from "@/assets/scraad-logo.png";
+import scraadLogo from "@/assets/scraad-logo-official.png";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -38,9 +38,9 @@ const PWAInstallPrompt = () => {
   return (
     <div className="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-md animate-in slide-in-from-bottom-4">
       <div className="flex items-center gap-3 rounded-xl border bg-card p-4 shadow-lg">
-        <img src={scraadLogo} alt="ScraAd" className="h-10 w-10 shrink-0 rounded-lg" />
+        <img src={scraadLogo} alt="ScraAD" className="h-8 w-auto shrink-0 object-contain" />
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-sm text-foreground">Install ScraAd</p>
+          <p className="font-semibold text-sm text-foreground">Install ScraAD</p>
           <p className="text-xs text-muted-foreground">Add to home screen for quick access</p>
         </div>
         <Button size="sm" onClick={handleInstall}>

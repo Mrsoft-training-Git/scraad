@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
-import logo from "@/assets/scraad-logo.png";
+import logo from "@/assets/scraad-logo-official.png";
 import mrsoftLogo from "@/assets/mrsoft-logo.jpeg";
 import { MRsoftAttribution } from "@/components/MRsoftAttribution";
 
@@ -60,16 +60,15 @@ export const DashboardSidebar = ({ userRole, unreadAnnouncementsCount = 0, unrea
       {/* Header */}
       <div className="px-4 py-5 border-b border-sidebar-border flex items-center justify-between">
         {!collapsed ? (
-          <Link to="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
-            <img src={logo} alt="ScraAd Logo" className="h-8 w-8 object-contain" />
-            <div className="text-sm">
-              <div className="font-heading font-bold text-sidebar-foreground">Scra<span className="text-sidebar-primary">AD</span></div>
-              <div className="text-[10px] text-sidebar-foreground/50">Scratch to Advance</div>
+          <Link to="/" className="flex flex-col items-start leading-none hover:opacity-80 transition-opacity">
+            <img src={logo} alt="ScraAD" className="h-7 w-auto object-contain bg-white rounded-md px-1.5 py-1" />
+            <div className="text-[9px] text-sidebar-foreground/50 tracking-[0.18em] uppercase mt-1 pl-0.5">
+              Scratch to Advance
             </div>
           </Link>
         ) : (
-          <Link to="/" className="hover:opacity-80 transition-opacity mx-auto">
-            <img src={logo} alt="ScraAd Logo" className="h-8 w-8 object-contain" />
+          <Link to="/" className="hover:opacity-80 transition-opacity mx-auto bg-white rounded-md px-1 py-1 flex items-center justify-center">
+            <img src={logo} alt="ScraAD" className="h-5 w-auto object-contain" />
           </Link>
         )}
         <Button

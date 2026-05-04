@@ -20,7 +20,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { MRsoftAttribution } from "@/components/MRsoftAttribution";
-import scraadLogo from "@/assets/scraad-logo.png";
+import scraadLogo from "@/assets/scraad-logo-official.png";
 
 const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -202,19 +202,10 @@ const Auth = () => {
         <div className="relative z-10 flex flex-col h-full">
           {/* Logo + back */}
           <div className="flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-3 group">
-              <img
-                src={scraadLogo}
-                alt="ScraAD"
-                className="h-10 w-10 rounded-lg bg-white/10 p-1.5 backdrop-blur-sm"
-              />
-              <div>
-                <div className="font-heading text-lg font-bold leading-none">
-                  Scra<span className="text-secondary">AD</span>
-                </div>
-                <div className="text-[10px] uppercase tracking-[0.18em] text-primary-foreground/60 mt-1">
-                  Scratch to Advance
-                </div>
+            <Link to="/" className="inline-flex flex-col items-start leading-none group bg-white rounded-lg px-3 py-2">
+              <img src={scraadLogo} alt="ScraAD" className="h-8 w-auto object-contain" />
+              <div className="text-[10px] uppercase tracking-[0.18em] text-foreground/60 mt-1">
+                Scratch to Advance
               </div>
             </Link>
             <Link
@@ -269,11 +260,8 @@ const Auth = () => {
       <main className="flex-1 flex flex-col">
         {/* Mobile top bar */}
         <div className="lg:hidden flex items-center justify-between px-5 py-4 border-b border-border">
-          <Link to="/" className="flex items-center gap-2">
-            <img src={scraadLogo} alt="ScraAD" className="h-8 w-8" />
-            <span className="font-heading font-bold text-foreground">
-              Scra<span className="text-primary">AD</span>
-            </span>
+          <Link to="/" className="flex items-center">
+            <img src={scraadLogo} alt="ScraAD" className="h-7 w-auto object-contain" />
           </Link>
           <Link
             to="/"
