@@ -173,9 +173,10 @@ Deno.serve(async (req) => {
     const awsRegion = Deno.env.get("AWS_REGION")!;
     const awsBucket = Deno.env.get("AWS_S3_BUCKET_NAME")!;
 
-    // Build S3 key: courses/{courseId}/lessons/{timestamp}-{sanitizedFileName}
+    // Build S3 key: prefer explicit pathPrefix, else default to courses/{courseId}/lessons/
     const sanitizedName = fileName.replace(/[^a-zA-Z0-9._-]/g, "_");
-    const s3Key = `courses/${courseId}/lessons/${Date.now()}-${sanitizedName}`;
+    const prefix = (pathPrefix?.replace(/^\/+|\/+$/g, "")) || `courses/${courseId}/lessons`;
+    const s3Key = `${prefix}/${Date.now()}-${sanitizedName}`;
 
     const uploadUrl = await generatePresignedPutUrl(
       awsBucket,
