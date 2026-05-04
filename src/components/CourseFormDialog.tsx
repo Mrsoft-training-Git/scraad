@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Upload, X, Plus, BookOpen, CheckCircle, List } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { IntroVideoUploader } from "@/components/IntroVideoUploader";
 
 const COURSE_CATEGORIES = [
   "Technology",
@@ -34,6 +35,7 @@ interface CourseFormData {
   price: string;
   is_free: boolean;
   image_url: string;
+  intro_video_url: string;
   category: string;
   instructor: string;
   duration: string;
@@ -68,6 +70,7 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave, us
     price: "",
     is_free: false,
     image_url: "",
+    intro_video_url: "",
     category: "",
     instructor: "",
     duration: "",
@@ -94,6 +97,7 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave, us
         price: editingCourse.price?.toString() || "",
         is_free: editingCourse.price === 0,
         image_url: editingCourse.image_url || "",
+        intro_video_url: editingCourse.intro_video_url || "",
         category: editingCourse.category || "",
         instructor: editingCourse.instructor || "",
         duration: editingCourse.duration || "",
@@ -117,6 +121,7 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave, us
         price: "",
         is_free: false,
         image_url: "",
+        intro_video_url: "",
         category: "",
         instructor: "",
         duration: "",
@@ -252,6 +257,7 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave, us
       overview: formData.overview,
       price: formData.is_free ? 0 : parseFloat(formData.price),
       image_url: formData.image_url,
+      intro_video_url: formData.intro_video_url || null,
       category: formData.category,
       instructor: formData.instructor,
       duration: formData.duration,
