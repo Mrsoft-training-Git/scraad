@@ -138,10 +138,14 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { courseId, fileName, contentType, fileSize } = await req.json();
+    const body = await req.json();
+    const { courseId, fileName, contentType, fileSize } = body;
+    // Optional: pathPrefix overrides default `courses/{courseId}/lessons/`
+    // Accepted values: "courses/{id}/lessons", "courses/{id}/intro", "programs/{id}/intro", etc.
+    const pathPrefix: string | undefined = body.pathPrefix;
 
-    if (!courseId || !fileName || !contentType) {
-      return new Response(JSON.stringify({ error: "courseId, fileName, and contentType are required" }), {
+    if ((!courseId && !pathPrefix) || !fileName || !contentType) {
+      return new Response(JSON.stringify({ error: "fileName, contentType, and (courseId or pathPrefix) are required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
