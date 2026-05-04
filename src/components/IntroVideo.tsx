@@ -11,9 +11,13 @@ import { cn } from "@/lib/utils";
  */
 async function resolveVideoUrl(rawUrl: string): Promise<string | null> {
   if (!rawUrl) return null;
-  if (rawUrl.startsWith("s3://")) {
+  // External http(s) URLs that aren't S3 — return as-is
+  if ((rawUrl.startsWith("http://") || rawUrl.startsWith("https://")) && !/\.amazonaws\.com\//.test(rawUrl)) {
+    return rawUrl;
+  }
+  if (rawUrl.startsWith("s3://") || /\.amazonaws\.com\//.test(rawUrl)) {
     try {
-      const { data, error } = await supabase.functions.invoke("s3-get-signed-url", {
+      const { data, error } = await supabase.functions.invoke("get-intro-video-url", {
         body: { s3Url: rawUrl },
       });
       if (error) throw error;
