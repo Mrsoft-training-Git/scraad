@@ -78,9 +78,10 @@ export const IntroVideoCard = ({
     return null;
   })();
 
+  // Resolve the video URL eagerly (not just on hover) so the first frame shows
   useEffect(() => {
     let cancelled = false;
-    if (hovering && playable && !isEmbed && videoUrl && !resolvedSrc) {
+    if (playable && !isEmbed && videoUrl && !resolvedSrc) {
       resolveVideoUrl(videoUrl).then((u) => {
         if (!cancelled) setResolvedSrc(u);
       });
@@ -88,46 +89,51 @@ export const IntroVideoCard = ({
     return () => {
       cancelled = true;
     };
-  }, [hovering, playable, isEmbed, videoUrl, resolvedSrc]);
+  }, [playable, isEmbed, videoUrl, resolvedSrc]);
 
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
     if (hovering && resolvedSrc) {
-      v.play().catch(() => {});
+      // Try to play with sound first; if browser blocks, fall back to muted
+      v.muted = false;
+      v.volume = 1;
+      v.play().catch(() => {
+        v.muted = true;
+        v.play().catch(() => {});
+      });
     } else {
       v.pause();
       v.currentTime = 0;
     }
   }, [hovering, resolvedSrc]);
 
+  const showVideoLayer = playable && !isEmbed && !!resolvedSrc;
+
   return (
     <div
-      className={cn("relative w-full h-full overflow-hidden", className)}
+      className={cn("relative w-full h-full overflow-hidden bg-black", className)}
       onMouseEnter={() => hoverPlay && setHovering(true)}
       onMouseLeave={() => setHovering(false)}
     >
-      <img
-        src={fallbackPoster}
-        alt={alt}
-        loading="lazy"
-        className={cn(
-          "w-full h-full object-cover transition-opacity duration-300",
-          hovering && (resolvedSrc || isEmbed) ? "opacity-0" : "opacity-100"
-        )}
-      />
-      {playable && !isEmbed && resolvedSrc && (
+      {/* Poster only shown when no playable video resolved yet */}
+      {!showVideoLayer && (
+        <img
+          src={fallbackPoster}
+          alt={alt}
+          loading="lazy"
+          className="w-full h-full object-cover"
+        />
+      )}
+      {showVideoLayer && (
         <video
           ref={videoRef}
           src={resolvedSrc}
-          muted
+          poster={fallbackPoster}
           playsInline
           loop
-          preload="none"
-          className={cn(
-            "absolute inset-0 w-full h-full object-cover transition-opacity duration-300",
-            hovering ? "opacity-100" : "opacity-0"
-          )}
+          preload="metadata"
+          className="absolute inset-0 w-full h-full object-cover"
         />
       )}
       {playable && isEmbed && hovering && embedUrl && (
