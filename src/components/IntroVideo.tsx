@@ -112,10 +112,10 @@ export const IntroVideoCard = ({
         loading="lazy"
         className={cn(
           "w-full h-full object-cover transition-opacity duration-300",
-          hovering && resolvedSrc ? "opacity-0" : "opacity-100"
+          hovering && (resolvedSrc || isEmbed) ? "opacity-0" : "opacity-100"
         )}
       />
-      {playable && resolvedSrc && (
+      {playable && !isEmbed && resolvedSrc && (
         <video
           ref={videoRef}
           src={resolvedSrc}
@@ -127,6 +127,15 @@ export const IntroVideoCard = ({
             "absolute inset-0 w-full h-full object-cover transition-opacity duration-300",
             hovering ? "opacity-100" : "opacity-0"
           )}
+        />
+      )}
+      {playable && isEmbed && hovering && embedUrl && (
+        <iframe
+          src={embedUrl}
+          title={alt}
+          className="absolute inset-0 w-full h-full pointer-events-none"
+          allow="autoplay; encrypted-media; picture-in-picture"
+          frameBorder={0}
         />
       )}
       {playable && (
