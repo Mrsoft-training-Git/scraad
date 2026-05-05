@@ -40,6 +40,11 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [enrolledCourseIds, setEnrolledCourseIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [statsData, setStatsData] = useState<{
+    instructors: number | null;
+    catalog: number | null;
+    learners: number | null;
+  }>({ instructors: null, catalog: null, learners: null });
   const navigate = useNavigate();
 
   const heroRef = useCursorGlow<HTMLDivElement>();
@@ -50,7 +55,26 @@ const Index = () => {
   useEffect(() => {
     fetchFeaturedCourses();
     checkEnrollmentStatus();
+    fetchStats();
   }, []);
+
+  const fetchStats = async () => {
+    try {
+      const [coursesRes, programsRes, learnersRes, instructorsRes] = await Promise.all([
+        supabase.from("courses").select("id", { count: "exact", head: true }).eq("published", true),
+        supabase.from("programs").select("id", { count: "exact", head: true }),
+        supabase.from("enrolled_courses").select("user_id", { count: "exact", head: true }),
+        supabase.from("user_roles").select("user_id", { count: "exact", head: true }).eq("role", "instructor"),
+      ]);
+      setStatsData({
+        instructors: instructorsRes.count ?? 0,
+        catalog: (coursesRes.count ?? 0) + (programsRes.count ?? 0),
+        learners: learnersRes.count ?? 0,
+      });
+    } catch {
+      setStatsData({ instructors: 0, catalog: 0, learners: 0 });
+    }
+  };
 
   const checkEnrollmentStatus = async () => {
     const { data: { user } } = await supabase.auth.getUser();
