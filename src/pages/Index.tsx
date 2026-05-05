@@ -168,7 +168,7 @@ const Index = () => {
               <div className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full animate-fade-in">
                 <Sparkle className="w-3.5 h-3.5 text-secondary animate-pulse" />
                 <span className="text-xs sm:text-sm font-medium text-primary-foreground/90">
-                  Trusted by 10,000+ learners across Africa
+                  A new home for ambitious African learners
                 </span>
               </div>
 
