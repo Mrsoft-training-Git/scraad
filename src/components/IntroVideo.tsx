@@ -64,12 +64,22 @@ export const IntroVideoCard = ({
     posterUrl ||
     "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80";
 
-  // YouTube/Vimeo can't be auto-played as a <video> source; treat as image-only on cards
-  const playable = !!videoUrl && !isYoutubeOrVimeo(videoUrl);
+  const isEmbed = !!videoUrl && isYoutubeOrVimeo(videoUrl);
+  const playable = !!videoUrl;
+
+  // Build an embed URL for YouTube/Vimeo with autoplay+mute for hover preview
+  const embedUrl = (() => {
+    if (!videoUrl || !isEmbed) return null;
+    const yt = videoUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{6,})/);
+    if (yt) return `https://www.youtube.com/embed/${yt[1]}?autoplay=1&mute=1&controls=0&loop=1&playlist=${yt[1]}&modestbranding=1&rel=0&playsinline=1`;
+    const vi = videoUrl.match(/vimeo\.com\/(\d+)/);
+    if (vi) return `https://player.vimeo.com/video/${vi[1]}?autoplay=1&muted=1&loop=1&background=1`;
+    return null;
+  })();
 
   useEffect(() => {
     let cancelled = false;
-    if (hovering && playable && videoUrl && !resolvedSrc) {
+    if (hovering && playable && !isEmbed && videoUrl && !resolvedSrc) {
       resolveVideoUrl(videoUrl).then((u) => {
         if (!cancelled) setResolvedSrc(u);
       });
@@ -77,7 +87,7 @@ export const IntroVideoCard = ({
     return () => {
       cancelled = true;
     };
-  }, [hovering, playable, videoUrl, resolvedSrc]);
+  }, [hovering, playable, isEmbed, videoUrl, resolvedSrc]);
 
   useEffect(() => {
     const v = videoRef.current;
