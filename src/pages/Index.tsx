@@ -115,11 +115,12 @@ const Index = () => {
     { name: "Personal Dev", icon: Heart, bg: "bg-pastel-rose", iconColor: "text-destructive" },
   ];
 
+  const fmt = (n: number | null) => (n === null ? null : n.toLocaleString());
   const stats = [
-    { value: "26", label: "Expert Instructors" },
-    { value: "65+", label: "Courses & Programs" },
-    { value: "10K+", label: "Active Learners" },
-    { value: "4.8", label: "Average Rating" },
+    { value: fmt(statsData.instructors), label: "Expert Instructors" },
+    { value: fmt(statsData.catalog), label: "Courses & Programs" },
+    { value: fmt(statsData.learners), label: "Active Learners" },
+    { value: "New", label: "Platform — Growing Daily" },
   ];
 
   const testimonials = [
