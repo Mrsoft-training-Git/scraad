@@ -308,8 +308,12 @@ const Index = () => {
                 className="text-center group animate-fade-in-up"
                 style={{ animationDelay: `${i * 0.08}s`, opacity: 0 }}
               >
-                <div className="font-display italic font-light text-5xl md:text-6xl text-primary group-hover:text-secondary transition-colors duration-500">
-                  {s.value}
+                <div className="font-display italic font-light text-5xl md:text-6xl text-primary group-hover:text-secondary transition-colors duration-500 min-h-[60px] flex items-center justify-center">
+                  {s.value === null ? (
+                    <span className="inline-block w-16 h-10 rounded-md bg-muted animate-pulse" />
+                  ) : (
+                    s.value
+                  )}
                 </div>
                 <div className="text-xs uppercase tracking-[0.18em] text-muted-foreground mt-2 font-medium">
                   {s.label}
