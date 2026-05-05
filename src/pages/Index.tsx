@@ -261,7 +261,9 @@ const Index = () => {
                     <Users className="w-4.5 h-4.5 text-secondary" />
                   </div>
                   <div>
-                    <div className="font-heading font-bold text-sm text-foreground">10K+</div>
+                    <div className="font-heading font-bold text-sm text-foreground">
+                      {statsData.learners === null ? "—" : statsData.learners.toLocaleString()}
+                    </div>
                     <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Learners</div>
                   </div>
                 </div>
@@ -273,8 +275,8 @@ const Index = () => {
                     <TrendingUp className="w-4.5 h-4.5 text-success" />
                   </div>
                   <div>
-                    <div className="font-heading font-bold text-sm text-foreground">95%</div>
-                    <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Completion</div>
+                    <div className="font-heading font-bold text-sm text-foreground">Live</div>
+                    <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Cohorts</div>
                   </div>
                 </div>
               </div>
@@ -285,8 +287,8 @@ const Index = () => {
                     <Star className="w-4.5 h-4.5 fill-warning text-warning" />
                   </div>
                   <div>
-                    <div className="font-heading font-bold text-sm text-foreground">4.8</div>
-                    <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Rating</div>
+                    <div className="font-heading font-bold text-sm text-foreground">New</div>
+                    <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Platform</div>
                   </div>
                 </div>
               </div>
