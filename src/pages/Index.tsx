@@ -40,6 +40,11 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [enrolledCourseIds, setEnrolledCourseIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [statsData, setStatsData] = useState<{
+    instructors: number | null;
+    catalog: number | null;
+    learners: number | null;
+  }>({ instructors: null, catalog: null, learners: null });
   const navigate = useNavigate();
 
   const heroRef = useCursorGlow<HTMLDivElement>();
@@ -50,7 +55,26 @@ const Index = () => {
   useEffect(() => {
     fetchFeaturedCourses();
     checkEnrollmentStatus();
+    fetchStats();
   }, []);
+
+  const fetchStats = async () => {
+    try {
+      const [coursesRes, programsRes, learnersRes, instructorsRes] = await Promise.all([
+        supabase.from("courses").select("id", { count: "exact", head: true }).eq("published", true),
+        supabase.from("programs").select("id", { count: "exact", head: true }),
+        supabase.from("enrolled_courses").select("user_id", { count: "exact", head: true }),
+        supabase.from("user_roles").select("user_id", { count: "exact", head: true }).eq("role", "instructor"),
+      ]);
+      setStatsData({
+        instructors: instructorsRes.count ?? 0,
+        catalog: (coursesRes.count ?? 0) + (programsRes.count ?? 0),
+        learners: learnersRes.count ?? 0,
+      });
+    } catch {
+      setStatsData({ instructors: 0, catalog: 0, learners: 0 });
+    }
+  };
 
   const checkEnrollmentStatus = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -91,11 +115,12 @@ const Index = () => {
     { name: "Personal Dev", icon: Heart, bg: "bg-pastel-rose", iconColor: "text-destructive" },
   ];
 
+  const fmt = (n: number | null) => (n === null ? null : n.toLocaleString());
   const stats = [
-    { value: "26", label: "Expert Instructors" },
-    { value: "65+", label: "Courses & Programs" },
-    { value: "10K+", label: "Active Learners" },
-    { value: "4.8", label: "Average Rating" },
+    { value: fmt(statsData.instructors), label: "Expert Instructors" },
+    { value: fmt(statsData.catalog), label: "Courses & Programs" },
+    { value: fmt(statsData.learners), label: "Active Learners" },
+    { value: "New", label: "Platform — Growing Daily" },
   ];
 
   const testimonials = [
@@ -143,7 +168,7 @@ const Index = () => {
               <div className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full animate-fade-in">
                 <Sparkle className="w-3.5 h-3.5 text-secondary animate-pulse" />
                 <span className="text-xs sm:text-sm font-medium text-primary-foreground/90">
-                  Trusted by 10,000+ learners across Africa
+                  A new home for ambitious African learners
                 </span>
               </div>
 
@@ -236,7 +261,9 @@ const Index = () => {
                     <Users className="w-4.5 h-4.5 text-secondary" />
                   </div>
                   <div>
-                    <div className="font-heading font-bold text-sm text-foreground">10K+</div>
+                    <div className="font-heading font-bold text-sm text-foreground">
+                      {statsData.learners === null ? "—" : statsData.learners.toLocaleString()}
+                    </div>
                     <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Learners</div>
                   </div>
                 </div>
@@ -248,8 +275,8 @@ const Index = () => {
                     <TrendingUp className="w-4.5 h-4.5 text-success" />
                   </div>
                   <div>
-                    <div className="font-heading font-bold text-sm text-foreground">95%</div>
-                    <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Completion</div>
+                    <div className="font-heading font-bold text-sm text-foreground">Live</div>
+                    <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Cohorts</div>
                   </div>
                 </div>
               </div>
@@ -260,8 +287,8 @@ const Index = () => {
                     <Star className="w-4.5 h-4.5 fill-warning text-warning" />
                   </div>
                   <div>
-                    <div className="font-heading font-bold text-sm text-foreground">4.8</div>
-                    <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Rating</div>
+                    <div className="font-heading font-bold text-sm text-foreground">New</div>
+                    <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Platform</div>
                   </div>
                 </div>
               </div>
@@ -283,8 +310,12 @@ const Index = () => {
                 className="text-center group animate-fade-in-up"
                 style={{ animationDelay: `${i * 0.08}s`, opacity: 0 }}
               >
-                <div className="font-display italic font-light text-5xl md:text-6xl text-primary group-hover:text-secondary transition-colors duration-500">
-                  {s.value}
+                <div className="font-display italic font-light text-5xl md:text-6xl text-primary group-hover:text-secondary transition-colors duration-500 min-h-[60px] flex items-center justify-center">
+                  {s.value === null ? (
+                    <span className="inline-block w-16 h-10 rounded-md bg-muted animate-pulse" />
+                  ) : (
+                    s.value
+                  )}
                 </div>
                 <div className="text-xs uppercase tracking-[0.18em] text-muted-foreground mt-2 font-medium">
                   {s.label}
