@@ -21,7 +21,7 @@ import { TiltCard } from "@/components/TiltCard";
 import { CourseCard } from "@/components/CourseCard";
 import { useReveal } from "@/hooks/useReveal";
 import { useCursorGlow } from "@/hooks/useCursorGlow";
-import { Squiggle, StarBurst, Sparkle, ArrowDoodle, Lightning, Underline } from "@/components/Doodles";
+import { Squiggle, ArrowDoodle, Lightning, Underline } from "@/components/Doodles";
 
 interface Course {
   id: string;
@@ -151,8 +151,8 @@ const Index = () => {
       {/* ─── HERO ─── */}
       <section className="relative overflow-hidden aurora-bg cursor-glow" ref={heroRef}>
         {/* Doodle accents (decorative) */}
-        <Sparkle className="hidden md:block absolute top-16 left-[8%] w-6 h-6 text-secondary/70 animate-bounce-soft" aria-hidden />
-        <StarBurst className="hidden md:block absolute top-24 right-[12%] w-8 h-8 text-warning/60 animate-spin" style={{ animationDuration: "12s" }} aria-hidden />
+
+
         <Lightning className="hidden lg:block absolute bottom-32 left-[6%] w-7 h-7 text-secondary/80 animate-bounce-soft" style={{ animationDelay: "0.6s" }} aria-hidden />
         <Squiggle className="hidden lg:block absolute bottom-20 right-[18%] w-20 h-5 text-secondary/70" aria-hidden />
 
@@ -165,7 +165,6 @@ const Index = () => {
             {/* LEFT — editorial copy */}
             <div className="space-y-6 lg:space-y-8">
               <div className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full animate-fade-in">
-                <Sparkle className="w-3.5 h-3.5 text-secondary animate-pulse" />
                 <span className="text-xs sm:text-sm font-medium text-primary-foreground/90">
                   A new home for ambitious African learners
                 </span>
@@ -548,8 +547,6 @@ const Index = () => {
       <section className="aurora-bg relative overflow-hidden">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-secondary/20 blur-3xl blob-1 pointer-events-none" />
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/30 blur-3xl blob-2 pointer-events-none" />
-        <Sparkle className="hidden md:block absolute top-12 left-[15%] w-6 h-6 text-secondary animate-bounce-soft" aria-hidden />
-        <StarBurst className="hidden md:block absolute bottom-12 right-[15%] w-7 h-7 text-warning/60 animate-spin" style={{ animationDuration: "10s" }} aria-hidden />
 
         <div className="container mx-auto px-4 py-20 lg:py-28 text-center space-y-6 relative z-10 max-w-3xl">
           <h2 className="font-heading font-bold text-4xl md:text-5xl lg:text-6xl text-primary-foreground leading-tight">
