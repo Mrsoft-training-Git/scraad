@@ -75,9 +75,9 @@ export const IntroVideoCard = ({
   const embedUrl = (() => {
     if (!videoUrl || !isEmbed) return null;
     const yt = videoUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{6,})/);
-    if (yt) return `https://www.youtube.com/embed/${yt[1]}?autoplay=1&mute=1&controls=0&loop=1&playlist=${yt[1]}&modestbranding=1&rel=0&playsinline=1`;
+    if (yt) return `https://www.youtube.com/embed/${yt[1]}?autoplay=1&mute=0&controls=0&loop=1&playlist=${yt[1]}&modestbranding=1&rel=0&playsinline=1`;
     const vi = videoUrl.match(/vimeo\.com\/(\d+)/);
-    if (vi) return `https://player.vimeo.com/video/${vi[1]}?autoplay=1&muted=1&loop=1&background=1`;
+    if (vi) return `https://player.vimeo.com/video/${vi[1]}?autoplay=1&muted=0&loop=1&background=1`;
     return null;
   })();
 
