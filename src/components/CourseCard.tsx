@@ -51,8 +51,14 @@ export const CourseCard = ({
     navigate(isEnrolled ? "/dashboard/learning" : `/enroll/${course.id}`);
   };
 
+  const [cardHover, setCardHover] = useState(false);
+
   const card = (
-    <Card className="group overflow-hidden bg-card border border-border hover:border-secondary/40 hover:shadow-2xl transition-all duration-500 flex flex-col h-full rounded-2xl relative">
+    <Card
+      className="group overflow-hidden bg-card border border-border hover:border-secondary/40 hover:shadow-2xl transition-all duration-500 flex flex-col h-full rounded-2xl relative"
+      onMouseEnter={() => setCardHover(true)}
+      onMouseLeave={() => setCardHover(false)}
+    >
       {/* Gradient ring on hover */}
       <div className="absolute -inset-px rounded-2xl bg-gradient-to-br from-secondary/0 via-secondary/0 to-accent/0 group-hover:from-secondary/40 group-hover:to-accent/40 transition-all duration-500 pointer-events-none -z-10 blur-sm" />
 
@@ -61,6 +67,7 @@ export const CourseCard = ({
           videoUrl={course.intro_video_url}
           posterUrl={course.image_url}
           alt={course.title}
+          externalHover={cardHover}
         />
         {course.price === 0 && (
           <Badge className="absolute top-2.5 left-2.5 bg-success text-success-foreground text-[10px] border-0 shadow-sm z-10">
