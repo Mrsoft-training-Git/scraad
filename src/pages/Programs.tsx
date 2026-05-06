@@ -158,21 +158,8 @@ const Programs = () => {
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filtered.map((program) => (
-                <Card key={program.id} className="group overflow-hidden border-border/50 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 flex flex-col">
-                  <div className="aspect-video overflow-hidden relative">
-                    <Badge className={`absolute top-3 left-3 z-10 capitalize ${statusColors[program.status] || ""}`}>
-                      {program.status}
-                    </Badge>
-                    <Badge className="absolute top-3 right-3 z-10 bg-background/90 backdrop-blur-sm text-foreground border-0 capitalize">
-                      {modeIcons[program.mode]} <span className="ml-1">{program.mode}</span>
-                    </Badge>
-                    <IntroVideoCard
-                      videoUrl={program.intro_video_url}
-                      posterUrl={program.banner_image_url}
-                      alt={program.title}
-                      className="group-hover:scale-105 transition-transform duration-500"
-                    />
-                  </div>
+                <ProgramGridCard key={program.id} program={program} />
+              ))}
                   <CardContent className="p-5 flex flex-col flex-grow">
                     <h3 className="font-heading font-bold text-lg mb-2 group-hover:text-primary transition-colors line-clamp-2">
                       {program.title}
