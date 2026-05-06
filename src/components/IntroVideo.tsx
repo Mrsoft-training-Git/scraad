@@ -116,8 +116,8 @@ export const IntroVideoCard = ({
   return (
     <div
       className={cn("relative w-full h-full overflow-hidden bg-black", className)}
-      onMouseEnter={() => hoverPlay && setHovering(true)}
-      onMouseLeave={() => setHovering(false)}
+      onMouseEnter={() => hoverPlay && externalHover === undefined && setInternalHover(true)}
+      onMouseLeave={() => externalHover === undefined && setInternalHover(false)}
     >
       {/* Poster only shown when no playable video resolved yet */}
       {!showVideoLayer && (
