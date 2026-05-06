@@ -40,8 +40,10 @@ interface IntroVideoCardProps {
   posterUrl?: string | null;
   alt?: string;
   className?: string;
-  /** When true, the video will auto-play muted on hover. Disabled on touch. */
+  /** When true, the video will auto-play on hover. Disabled on touch. */
   hoverPlay?: boolean;
+  /** Optionally control hover state from a parent (e.g. hover the whole card). */
+  externalHover?: boolean;
 }
 
 /**
@@ -56,10 +58,12 @@ export const IntroVideoCard = ({
   alt = "",
   className,
   hoverPlay = true,
+  externalHover,
 }: IntroVideoCardProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [resolvedSrc, setResolvedSrc] = useState<string | null>(null);
-  const [hovering, setHovering] = useState(false);
+  const [internalHover, setInternalHover] = useState(false);
+  const hovering = externalHover !== undefined ? externalHover : internalHover;
   const fallbackPoster =
     posterUrl ||
     "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80";
@@ -71,9 +75,9 @@ export const IntroVideoCard = ({
   const embedUrl = (() => {
     if (!videoUrl || !isEmbed) return null;
     const yt = videoUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{6,})/);
-    if (yt) return `https://www.youtube.com/embed/${yt[1]}?autoplay=1&mute=1&controls=0&loop=1&playlist=${yt[1]}&modestbranding=1&rel=0&playsinline=1`;
+    if (yt) return `https://www.youtube.com/embed/${yt[1]}?autoplay=1&mute=0&controls=0&loop=1&playlist=${yt[1]}&modestbranding=1&rel=0&playsinline=1`;
     const vi = videoUrl.match(/vimeo\.com\/(\d+)/);
-    if (vi) return `https://player.vimeo.com/video/${vi[1]}?autoplay=1&muted=1&loop=1&background=1`;
+    if (vi) return `https://player.vimeo.com/video/${vi[1]}?autoplay=1&muted=0&loop=1&background=1`;
     return null;
   })();
 
@@ -112,8 +116,8 @@ export const IntroVideoCard = ({
   return (
     <div
       className={cn("relative w-full h-full overflow-hidden bg-black", className)}
-      onMouseEnter={() => hoverPlay && setHovering(true)}
-      onMouseLeave={() => setHovering(false)}
+      onMouseEnter={() => hoverPlay && externalHover === undefined && setInternalHover(true)}
+      onMouseLeave={() => externalHover === undefined && setInternalHover(false)}
     >
       {/* Poster only shown when no playable video resolved yet */}
       {!showVideoLayer && (

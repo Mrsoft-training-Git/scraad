@@ -41,6 +41,68 @@ const statusColors: Record<string, string> = {
   closed: "bg-muted text-muted-foreground border-border",
 };
 
+const ProgramGridCard = ({ program }: { program: Program }) => {
+  const [hover, setHover] = useState(false);
+  return (
+    <Card
+      className="group overflow-hidden border-border/50 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 flex flex-col"
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+    >
+      <div className="aspect-video overflow-hidden relative">
+        <Badge className={`absolute top-3 left-3 z-10 capitalize ${statusColors[program.status] || ""}`}>
+          {program.status}
+        </Badge>
+        <Badge className="absolute top-3 right-3 z-10 bg-background/90 backdrop-blur-sm text-foreground border-0 capitalize">
+          {modeIcons[program.mode]} <span className="ml-1">{program.mode}</span>
+        </Badge>
+        <IntroVideoCard
+          videoUrl={program.intro_video_url}
+          posterUrl={program.banner_image_url}
+          alt={program.title}
+          externalHover={hover}
+          className="group-hover:scale-105 transition-transform duration-500"
+        />
+      </div>
+      <CardContent className="p-5 flex flex-col flex-grow">
+        <h3 className="font-heading font-bold text-lg mb-2 group-hover:text-primary transition-colors line-clamp-2">
+          {program.title}
+        </h3>
+        {program.short_description && (
+          <p className="text-muted-foreground text-sm mb-4 line-clamp-2">{program.short_description}</p>
+        )}
+        <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mb-4 mt-auto">
+          {program.duration && (
+            <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{program.duration}</span>
+          )}
+          {program.location && (
+            <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{program.location}</span>
+          )}
+          {program.start_date && (
+            <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" />{format(new Date(program.start_date), "MMM d, yyyy")}</span>
+          )}
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          {program.status === "open" ? (
+            <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold" asChild>
+              <Link to={`/programs/${program.id}`}>Apply Now</Link>
+            </Button>
+          ) : (
+            <Button size="sm" variant="outline" disabled>
+              {program.status === "ongoing" ? "In Progress" : "Closed"}
+            </Button>
+          )}
+          <Button size="sm" variant="outline" asChild>
+            <Link to={`/programs/${program.id}`}>
+              View Details <ArrowRight className="w-3.5 h-3.5 ml-1" />
+            </Link>
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
 const Programs = () => {
   const [programs, setPrograms] = useState<Program[]>([]);
   const [loading, setLoading] = useState(true);
@@ -157,59 +219,9 @@ const Programs = () => {
             </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filtered.map((program) => (
-                <Card key={program.id} className="group overflow-hidden border-border/50 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 flex flex-col">
-                  <div className="aspect-video overflow-hidden relative">
-                    <Badge className={`absolute top-3 left-3 z-10 capitalize ${statusColors[program.status] || ""}`}>
-                      {program.status}
-                    </Badge>
-                    <Badge className="absolute top-3 right-3 z-10 bg-background/90 backdrop-blur-sm text-foreground border-0 capitalize">
-                      {modeIcons[program.mode]} <span className="ml-1">{program.mode}</span>
-                    </Badge>
-                    <IntroVideoCard
-                      videoUrl={program.intro_video_url}
-                      posterUrl={program.banner_image_url}
-                      alt={program.title}
-                      className="group-hover:scale-105 transition-transform duration-500"
-                    />
-                  </div>
-                  <CardContent className="p-5 flex flex-col flex-grow">
-                    <h3 className="font-heading font-bold text-lg mb-2 group-hover:text-primary transition-colors line-clamp-2">
-                      {program.title}
-                    </h3>
-                    {program.short_description && (
-                      <p className="text-muted-foreground text-sm mb-4 line-clamp-2">{program.short_description}</p>
-                    )}
-                    <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mb-4 mt-auto">
-                      {program.duration && (
-                        <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{program.duration}</span>
-                      )}
-                      {program.location && (
-                        <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{program.location}</span>
-                      )}
-                      {program.start_date && (
-                        <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" />{format(new Date(program.start_date), "MMM d, yyyy")}</span>
-                      )}
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      {program.status === "open" ? (
-                        <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold" asChild>
-                          <Link to={`/programs/${program.id}`}>Apply Now</Link>
-                        </Button>
-                      ) : (
-                        <Button size="sm" variant="outline" disabled>
-                          {program.status === "ongoing" ? "In Progress" : "Closed"}
-                        </Button>
-                      )}
-                      <Button size="sm" variant="outline" asChild>
-                        <Link to={`/programs/${program.id}`}>
-                          View Details <ArrowRight className="w-3.5 h-3.5 ml-1" />
-                        </Link>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+              {filtered.map((program) => {
+                return <ProgramGridCard key={program.id} program={program} />;
+              })}
             </div>
           )}
         </div>
