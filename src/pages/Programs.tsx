@@ -157,46 +157,9 @@ const Programs = () => {
             </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filtered.map((program) => (
-                <ProgramGridCard key={program.id} program={program} />
-              ))}
-                  <CardContent className="p-5 flex flex-col flex-grow">
-                    <h3 className="font-heading font-bold text-lg mb-2 group-hover:text-primary transition-colors line-clamp-2">
-                      {program.title}
-                    </h3>
-                    {program.short_description && (
-                      <p className="text-muted-foreground text-sm mb-4 line-clamp-2">{program.short_description}</p>
-                    )}
-                    <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mb-4 mt-auto">
-                      {program.duration && (
-                        <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{program.duration}</span>
-                      )}
-                      {program.location && (
-                        <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{program.location}</span>
-                      )}
-                      {program.start_date && (
-                        <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" />{format(new Date(program.start_date), "MMM d, yyyy")}</span>
-                      )}
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      {program.status === "open" ? (
-                        <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold" asChild>
-                          <Link to={`/programs/${program.id}`}>Apply Now</Link>
-                        </Button>
-                      ) : (
-                        <Button size="sm" variant="outline" disabled>
-                          {program.status === "ongoing" ? "In Progress" : "Closed"}
-                        </Button>
-                      )}
-                      <Button size="sm" variant="outline" asChild>
-                        <Link to={`/programs/${program.id}`}>
-                          View Details <ArrowRight className="w-3.5 h-3.5 ml-1" />
-                        </Link>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+              {filtered.map((program) => {
+                return <ProgramGridCard key={program.id} program={program} />;
+              })}
             </div>
           )}
         </div>
