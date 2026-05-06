@@ -58,10 +58,12 @@ export const IntroVideoCard = ({
   alt = "",
   className,
   hoverPlay = true,
+  externalHover,
 }: IntroVideoCardProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [resolvedSrc, setResolvedSrc] = useState<string | null>(null);
-  const [hovering, setHovering] = useState(false);
+  const [internalHover, setInternalHover] = useState(false);
+  const hovering = externalHover !== undefined ? externalHover : internalHover;
   const fallbackPoster =
     posterUrl ||
     "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80";
