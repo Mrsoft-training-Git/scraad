@@ -261,7 +261,7 @@ const Index = () => {
                   </div>
                   <div>
                     <div className="font-heading font-bold text-sm text-foreground">
-                      {statsData.learners === null ? "—" : statsData.learners.toLocaleString()}
+                      Loading…
                     </div>
                     <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Learners</div>
                   </div>
