@@ -40,8 +40,10 @@ interface IntroVideoCardProps {
   posterUrl?: string | null;
   alt?: string;
   className?: string;
-  /** When true, the video will auto-play muted on hover. Disabled on touch. */
+  /** When true, the video will auto-play on hover. Disabled on touch. */
   hoverPlay?: boolean;
+  /** Optionally control hover state from a parent (e.g. hover the whole card). */
+  externalHover?: boolean;
 }
 
 /**
