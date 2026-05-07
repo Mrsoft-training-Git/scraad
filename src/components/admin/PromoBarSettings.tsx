@@ -56,7 +56,7 @@ export const PromoBarSettings = () => {
     const { error } = await supabase
       .from("site_settings")
       .upsert(
-        [{ key: "promo_bar", value: settings as unknown as Record<string, unknown>, updated_by: user?.id }],
+        [{ key: "promo_bar", value: settings as never, updated_by: user?.id }],
         { onConflict: "key" }
       );
     setSaving(false);
