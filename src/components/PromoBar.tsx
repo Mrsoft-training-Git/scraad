@@ -1,42 +1,56 @@
 import { useEffect, useState } from "react";
 import { Sparkles, X, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 const STORAGE_KEY = "scraad_promo_dismissed_v1";
-const TARGET_OFFSET_MS = 1000 * 60 * 60 * 24 * 3; // 3 days from first mount
+
+interface PromoSettings {
+  enabled: boolean;
+  text: string;
+  cta_text: string;
+  cta_link: string;
+  countdown_enabled: boolean;
+  countdown_target: string;
+}
 
 export const PromoBar = () => {
   const [dismissed, setDismissed] = useState(false);
+  const [settings, setSettings] = useState<PromoSettings | null>(null);
   const [timeLeft, setTimeLeft] = useState({ d: 0, h: 0, m: 0, s: 0 });
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (sessionStorage.getItem(STORAGE_KEY) === "1") {
+    if (typeof window !== "undefined" && sessionStorage.getItem(STORAGE_KEY) === "1") {
       setDismissed(true);
-      return;
     }
+    supabase
+      .from("site_settings")
+      .select("value")
+      .eq("key", "promo_bar")
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.value) setSettings(data.value as unknown as PromoSettings);
+      });
+  }, []);
 
-    let target = Number(localStorage.getItem("scraad_promo_target") || 0);
-    if (!target || target < Date.now()) {
-      target = Date.now() + TARGET_OFFSET_MS;
-      localStorage.setItem("scraad_promo_target", String(target));
-    }
-
+  useEffect(() => {
+    if (!settings?.countdown_enabled || !settings?.countdown_target) return;
+    const target = new Date(settings.countdown_target).getTime();
     const tick = () => {
       const ms = Math.max(0, target - Date.now());
-      const d = Math.floor(ms / (1000 * 60 * 60 * 24));
-      const h = Math.floor((ms / (1000 * 60 * 60)) % 24);
-      const m = Math.floor((ms / (1000 * 60)) % 60);
-      const s = Math.floor((ms / 1000) % 60);
-      setTimeLeft({ d, h, m, s });
+      setTimeLeft({
+        d: Math.floor(ms / 86400000),
+        h: Math.floor((ms / 3600000) % 24),
+        m: Math.floor((ms / 60000) % 60),
+        s: Math.floor((ms / 1000) % 60),
+      });
     };
-
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
-  }, []);
+  }, [settings?.countdown_enabled, settings?.countdown_target]);
 
-  if (dismissed) return null;
+  if (dismissed || !settings || !settings.enabled) return null;
 
   const handleDismiss = () => {
     sessionStorage.setItem(STORAGE_KEY, "1");
@@ -50,21 +64,27 @@ export const PromoBar = () => {
       <div className="container mx-auto flex items-center justify-center gap-2 sm:gap-4 flex-wrap">
         <span className="inline-flex items-center gap-1.5 font-medium">
           <Sparkles className="w-3.5 h-3.5 text-secondary animate-pulse" />
-          Limited launch offer — Free trial on all programs
+          {settings.text}
         </span>
-        <span className="hidden sm:inline-block w-px h-4 bg-background/20" />
-        <span className="inline-flex items-center gap-1.5 font-mono tabular-nums">
-          <Clock className="w-3.5 h-3.5 text-secondary" />
-          <span className="text-secondary font-semibold">
-            {pad(timeLeft.d)}d {pad(timeLeft.h)}h {pad(timeLeft.m)}m {pad(timeLeft.s)}s
-          </span>
-        </span>
-        <Link
-          to="/auth"
-          className="hidden sm:inline-block underline-offset-4 hover:underline font-semibold text-secondary"
-        >
-          Claim now →
-        </Link>
+        {settings.countdown_enabled && (
+          <>
+            <span className="hidden sm:inline-block w-px h-4 bg-background/20" />
+            <span className="inline-flex items-center gap-1.5 font-mono tabular-nums">
+              <Clock className="w-3.5 h-3.5 text-secondary" />
+              <span className="text-secondary font-semibold">
+                {pad(timeLeft.d)}d {pad(timeLeft.h)}h {pad(timeLeft.m)}m {pad(timeLeft.s)}s
+              </span>
+            </span>
+          </>
+        )}
+        {settings.cta_text && settings.cta_link && (
+          <Link
+            to={settings.cta_link}
+            className="hidden sm:inline-block underline-offset-4 hover:underline font-semibold text-secondary"
+          >
+            {settings.cta_text}
+          </Link>
+        )}
       </div>
       <button
         onClick={handleDismiss}
