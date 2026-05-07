@@ -313,6 +313,8 @@ export const AdminDashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      <PromoBarSettings />
     </div>
   );
 };
