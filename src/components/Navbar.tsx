@@ -81,9 +81,9 @@ export const Navbar = () => {
             <img
               src={logo}
               alt="ScraAD"
-              className={cn("object-contain w-auto transition-all duration-300", scrolled ? "h-7" : "h-8")}
+              className={cn("object-contain w-auto transition-all duration-300", scrolled ? "h-9" : "h-11")}
             />
-            <div className="text-[9px] text-muted-foreground tracking-[0.18em] uppercase mt-1 pl-0.5">
+            <div className="text-[10px] text-muted-foreground tracking-[0.22em] uppercase mt-1.5 font-medium self-stretch text-center">
               Scratch to Advance
             </div>
           </Link>
