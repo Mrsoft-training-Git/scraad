@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, ShieldCheck, GraduationCap, BookOpen, CreditCard, ChevronDown, ChevronUp, TrendingUp, ArrowUpRight } from "lucide-react";
+import { PromoBarSettings } from "@/components/admin/PromoBarSettings";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -312,6 +313,8 @@ export const AdminDashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      <PromoBarSettings />
     </div>
   );
 };
