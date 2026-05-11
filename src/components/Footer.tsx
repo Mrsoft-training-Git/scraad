@@ -10,9 +10,9 @@ export const Footer = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
-            <Link to="/" className="inline-flex flex-col items-start leading-none mb-3 bg-white rounded-lg px-3 py-2.5">
+            <Link to="/" className="inline-flex flex-col items-start leading-none mb-3">
               <img src={scraadLogoOfficial} alt="ScraAD" className="h-9 w-auto object-contain" />
-              <div className="text-[10px] text-foreground/70 tracking-[0.22em] uppercase mt-1.5 font-medium self-stretch text-center">
+              <div className="text-[10px] text-primary-foreground/70 tracking-[0.22em] uppercase mt-1.5 font-medium self-stretch text-center">
                 Scratch to Advance
               </div>
             </Link>
