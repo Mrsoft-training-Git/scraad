@@ -629,49 +629,24 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave, us
                         />
                         
                         <div>
-                          <Label className="text-xs text-muted-foreground mb-1 block">
-                            Description <span className="text-muted-foreground/60">(supports **bold**, *italic*, - lists)</span>
-                          </Label>
-                          <Textarea
+                          <Label className="text-xs text-muted-foreground mb-1 block">Description</Label>
+                          <MarkdownEditor
                             value={module.description}
-                            onChange={(e) => updateModule(index, 'description', e.target.value)}
+                            onChange={(val) => updateModule(index, 'description', val)}
                             placeholder="Module description with rich formatting..."
-                            rows={2}
+                            rows={3}
                           />
                         </div>
                         
                         <div>
                           <Label className="text-xs text-muted-foreground mb-2 block">Topics</Label>
-                          <div className="flex gap-2 mb-2">
-                            <Input
-                              placeholder="Add a topic"
-                              onKeyPress={(e) => {
-                                if (e.key === 'Enter') {
-                                  addTopic(index, (e.target as HTMLInputElement).value);
-                                  (e.target as HTMLInputElement).value = '';
-                                }
-                              }}
-                            />
-                            <Button
-                              type="button"
-                              size="sm"
-                              onClick={(e) => {
-                                const input = (e.target as HTMLElement).parentElement?.querySelector('input');
-                                if (input) {
-                                  addTopic(index, input.value);
-                                  input.value = '';
-                                }
-                              }}
-                            >
-                              <Plus className="w-4 h-4" />
-                            </Button>
-                          </div>
+                          <TopicInput onAdd={(t) => addTopic(index, t)} />
                           {module.topics.length > 0 && (
-                            <ol className="list-decimal list-inside space-y-1 bg-muted/30 rounded p-2">
+                            <ol className="list-decimal list-inside space-y-1 bg-muted/30 rounded p-2 mt-2">
                               {module.topics.map((topic, topicIndex) => (
-                                <li key={topicIndex} className="flex items-center justify-between text-sm">
-                                  <span>{topic}</span>
-                                  <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => removeTopic(index, topicIndex)}>
+                                <li key={topicIndex} className="flex items-start justify-between text-sm gap-2">
+                                  <span className="flex-1 [&_strong]:font-semibold [&_em]:italic" dangerouslySetInnerHTML={{ __html: renderInline(topic) }} />
+                                  <Button size="icon" variant="ghost" className="h-6 w-6 flex-shrink-0" onClick={() => removeTopic(index, topicIndex)}>
                                     <X className="w-3 h-3" />
                                   </Button>
                                 </li>
