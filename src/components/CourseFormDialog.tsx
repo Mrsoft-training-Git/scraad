@@ -13,6 +13,28 @@ import { useToast } from "@/hooks/use-toast";
 import { IntroVideoUploader } from "@/components/IntroVideoUploader";
 import { MarkdownEditor } from "@/components/MarkdownEditor";
 
+function renderInline(text: string): string {
+  if (!text) return "";
+  let html = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-primary underline">$1</a>');
+  html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+  html = html.replace(/\*(.+?)\*/g, "<em>$1</em>");
+  return html;
+}
+
+function TopicInput({ onAdd }: { onAdd: (topic: string) => void }) {
+  const [val, setVal] = useState("");
+  const submit = () => { if (val.trim()) { onAdd(val); setVal(""); } };
+  return (
+    <div className="space-y-2">
+      <MarkdownEditor value={val} onChange={setVal} placeholder="Add a topic (rich text supported)" rows={2} />
+      <Button type="button" size="sm" onClick={submit}>
+        <Plus className="w-4 h-4 mr-1" /> Add Topic
+      </Button>
+    </div>
+  );
+}
+
 const COURSE_CATEGORIES = [
   "Technology",
   "Business",
