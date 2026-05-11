@@ -238,7 +238,16 @@ const CourseDetails = () => {
                               <p className="text-sm font-medium text-muted-foreground mb-2">Topics:</p>
                               <ol className="list-decimal list-inside space-y-1 ml-4">
                                 {module.topics.map((topic: string, topicIndex: number) => (
-                                  <li key={topicIndex} className="text-muted-foreground text-sm">{topic}</li>
+                                  <li
+                                    key={topicIndex}
+                                    className="text-muted-foreground text-sm [&_strong]:font-semibold [&_em]:italic [&_a]:text-primary [&_a]:underline"
+                                    dangerouslySetInnerHTML={{
+                                      __html: topic
+                                        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+                                        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                                        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+                                    }}
+                                  />
                                 ))}
                               </ol>
                             </div>
