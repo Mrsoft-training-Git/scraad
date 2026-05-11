@@ -11,6 +11,7 @@ import { Upload, X, Plus, BookOpen, CheckCircle, List } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { IntroVideoUploader } from "@/components/IntroVideoUploader";
+import { MarkdownEditor } from "@/components/MarkdownEditor";
 
 const COURSE_CATEGORIES = [
   "Technology",
