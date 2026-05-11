@@ -233,8 +233,21 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave, us
 
   const addTopic = (moduleIndex: number, topic: string) => {
     if (!topic.trim()) return;
+    // Split into multiple topics: by newlines, OR by numbered patterns like "1.1.", "1.2." on same line
+    let parts: string[] = topic.split(/\r?\n+/).flatMap((line) => {
+      const trimmed = line.trim();
+      if (!trimmed) return [];
+      // If line contains multiple "N.N." or "N." numbered items, split on them
+      if (/\d+(?:\.\d+)?\.\s+.+?\s+\d+(?:\.\d+)?\.\s+/.test(trimmed)) {
+        return trimmed.split(/\s+(?=\d+(?:\.\d+)?\.\s+)/).map((p) => p.trim()).filter(Boolean);
+      }
+      return [trimmed];
+    });
+    // Strip leading numbering like "1.1." or "1." since list is already numbered
+    parts = parts.map((p) => p.replace(/^\d+(?:\.\d+)?\.\s*/, "").trim()).filter(Boolean);
+    if (parts.length === 0) return;
     const updated = [...formData.syllabus];
-    updated[moduleIndex] = { ...updated[moduleIndex], topics: [...updated[moduleIndex].topics, topic.trim()] };
+    updated[moduleIndex] = { ...updated[moduleIndex], topics: [...updated[moduleIndex].topics, ...parts] };
     setFormData({ ...formData, syllabus: updated });
   };
 
