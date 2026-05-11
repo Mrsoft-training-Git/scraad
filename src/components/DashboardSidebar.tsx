@@ -61,14 +61,14 @@ export const DashboardSidebar = ({ userRole, unreadAnnouncementsCount = 0, unrea
       <div className="px-4 py-5 border-b border-sidebar-border flex items-center justify-between">
         {!collapsed ? (
           <Link to="/" className="flex flex-col items-start leading-none hover:opacity-80 transition-opacity">
-            <img src={logo} alt="ScraAD" className="h-7 w-auto object-contain bg-white rounded-md px-1.5 py-1" />
+            <img src={logo} alt="ScraAD" className="h-9 w-auto object-contain" />
             <div className="text-[9px] text-sidebar-foreground/50 tracking-[0.18em] uppercase mt-1 pl-0.5">
               Scratch to Advance
             </div>
           </Link>
         ) : (
-          <Link to="/" className="hover:opacity-80 transition-opacity mx-auto bg-white rounded-md px-1 py-1 flex items-center justify-center">
-            <img src={logo} alt="ScraAD" className="h-5 w-auto object-contain" />
+          <Link to="/" className="hover:opacity-80 transition-opacity mx-auto flex items-center justify-center">
+            <img src={logo} alt="ScraAD" className="h-7 w-auto object-contain" />
           </Link>
         )}
         <Button

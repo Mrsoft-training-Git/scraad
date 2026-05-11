@@ -202,9 +202,9 @@ const Auth = () => {
         <div className="relative z-10 flex flex-col h-full">
           {/* Logo + back */}
           <div className="flex items-center justify-between">
-            <Link to="/" className="inline-flex flex-col items-start leading-none group bg-white rounded-lg px-3 py-2">
-              <img src={scraadLogo} alt="ScraAD" className="h-8 w-auto object-contain" />
-              <div className="text-[10px] uppercase tracking-[0.18em] text-foreground/60 mt-1">
+            <Link to="/" className="inline-flex flex-col items-start leading-none group">
+              <img src={scraadLogo} alt="ScraAD" className="h-10 w-auto object-contain" />
+              <div className="text-[10px] uppercase tracking-[0.18em] text-primary-foreground/70 mt-1.5 self-stretch text-center">
                 Scratch to Advance
               </div>
             </Link>
