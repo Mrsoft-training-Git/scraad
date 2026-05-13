@@ -945,6 +945,35 @@ const CreateContent = () => {
                 </div>
               )}
 
+              {formData.module_id && moduleTopics.length > 0 && (
+                <div className="space-y-2">
+                  <Label>Topic</Label>
+                  <Select
+                    value=""
+                    onValueChange={(value) => {
+                      const clean = stripTopicMarkdown(value);
+                      setFormData(prev => ({
+                        ...prev,
+                        title: clean,
+                        description: prev.description || value,
+                      }));
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a topic from this module (optional)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {moduleTopics.map((topic, i) => (
+                        <SelectItem key={i} value={topic}>{stripTopicMarkdown(topic)}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Picking a topic fills in the title and description below.
+                  </p>
+                </div>
+              )}
+
               <div className="space-y-2">
                 <Label>Title *</Label>
                 <Input 
