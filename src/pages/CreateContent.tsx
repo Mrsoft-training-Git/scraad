@@ -974,14 +974,16 @@ const CreateContent = () => {
                 </div>
               )}
 
-              <div className="space-y-2">
-                <Label>Title *</Label>
-                <Input 
-                  placeholder="Enter content title"
-                  value={formData.title}
-                  onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                />
-              </div>
+              {!(formData.module_id && moduleTopics.length > 0) && (
+                <div className="space-y-2">
+                  <Label>Title *</Label>
+                  <Input 
+                    placeholder="Enter content title"
+                    value={formData.title}
+                    onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                  />
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label>Description</Label>
