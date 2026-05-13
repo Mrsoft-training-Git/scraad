@@ -644,6 +644,17 @@ const CreateContent = () => {
     ? modules.filter(m => m.course_id === formData.course_id)
     : [];
 
+  // Topics for the selected module — matched by module title against course syllabus
+  const selectedCourse = courses.find(c => c.id === formData.course_id);
+  const selectedModule = filteredModules.find(m => m.id === formData.module_id);
+  const syllabusArr: any[] = Array.isArray(selectedCourse?.syllabus) ? (selectedCourse!.syllabus as any[]) : [];
+  const moduleTopics: string[] = (
+    syllabusArr.find((m: any) => (m?.title || "").trim().toLowerCase() === (selectedModule?.title || "").trim().toLowerCase())?.topics || []
+  ).filter((t: any) => typeof t === "string" && t.trim().length > 0);
+
+  const stripTopicMarkdown = (t: string) =>
+    t.replace(/\*\*(.+?)\*\*/g, "$1").replace(/\*(.+?)\*/g, "$1").replace(/\[([^\]]+)\]\([^)]+\)/g, "$1").trim();
+
   // Get contents in the selected module for positioning knowledge checks
   const moduleContents = formData.module_id 
     ? contents
