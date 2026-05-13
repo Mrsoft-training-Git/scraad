@@ -677,7 +677,7 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave, us
                           <Label className="text-xs text-muted-foreground mb-2 block">Topics</Label>
                           <TopicInput onAdd={(t) => addTopic(index, t)} />
                           {module.topics.length > 0 && (
-                            <ol className="list-decimal list-inside space-y-1 bg-muted/30 rounded p-2 mt-2">
+                            <ul className="space-y-1 bg-muted/30 rounded p-2 mt-2">
                               {module.topics.map((topic, topicIndex) => (
                                 <li key={topicIndex} className="flex items-start justify-between text-sm gap-2">
                                   <span className="flex-1 [&_strong]:font-semibold [&_em]:italic" dangerouslySetInnerHTML={{ __html: renderInline(topic) }} />
@@ -686,7 +686,7 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave, us
                                   </Button>
                                 </li>
                               ))}
-                            </ol>
+                            </ul>
                           )}
                         </div>
                       </div>
