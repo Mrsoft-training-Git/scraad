@@ -644,6 +644,17 @@ const CreateContent = () => {
     ? modules.filter(m => m.course_id === formData.course_id)
     : [];
 
+  // Topics for the selected module — matched by module title against course syllabus
+  const selectedCourse = courses.find(c => c.id === formData.course_id);
+  const selectedModule = filteredModules.find(m => m.id === formData.module_id);
+  const syllabusArr: any[] = Array.isArray(selectedCourse?.syllabus) ? (selectedCourse!.syllabus as any[]) : [];
+  const moduleTopics: string[] = (
+    syllabusArr.find((m: any) => (m?.title || "").trim().toLowerCase() === (selectedModule?.title || "").trim().toLowerCase())?.topics || []
+  ).filter((t: any) => typeof t === "string" && t.trim().length > 0);
+
+  const stripTopicMarkdown = (t: string) =>
+    t.replace(/\*\*(.+?)\*\*/g, "$1").replace(/\*(.+?)\*/g, "$1").replace(/\[([^\]]+)\]\([^)]+\)/g, "$1").trim();
+
   // Get contents in the selected module for positioning knowledge checks
   const moduleContents = formData.module_id 
     ? contents
@@ -930,6 +941,35 @@ const CreateContent = () => {
                   </Select>
                   <p className="text-xs text-muted-foreground">
                     Choose where this knowledge check should appear in the module
+                  </p>
+                </div>
+              )}
+
+              {formData.module_id && moduleTopics.length > 0 && (
+                <div className="space-y-2">
+                  <Label>Topic</Label>
+                  <Select
+                    value=""
+                    onValueChange={(value) => {
+                      const clean = stripTopicMarkdown(value);
+                      setFormData(prev => ({
+                        ...prev,
+                        title: clean,
+                        description: prev.description || value,
+                      }));
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a topic from this module (optional)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {moduleTopics.map((topic, i) => (
+                        <SelectItem key={i} value={topic}>{stripTopicMarkdown(topic)}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Picking a topic fills in the title and description below.
                   </p>
                 </div>
               )}
