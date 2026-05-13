@@ -236,7 +236,7 @@ const CourseDetails = () => {
                           {module.topics && Array.isArray(module.topics) && module.topics.length > 0 && (
                             <div className="ml-2">
                               <p className="text-sm font-medium text-muted-foreground mb-2">Topics:</p>
-                              <ol className="list-decimal list-inside space-y-1 ml-4">
+                              <ul className="space-y-1 ml-4">
                                 {module.topics.map((topic: string, topicIndex: number) => (
                                   <li
                                     key={topicIndex}
@@ -249,7 +249,7 @@ const CourseDetails = () => {
                                     }}
                                   />
                                 ))}
-                              </ol>
+                              </ul>
                             </div>
                           )}
                         </div>
