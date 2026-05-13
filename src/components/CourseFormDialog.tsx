@@ -243,8 +243,8 @@ export const CourseFormDialog = ({ open, onOpenChange, editingCourse, onSave, us
       }
       return [trimmed];
     });
-    // Strip leading numbering like "1.1." or "1." since list is already numbered
-    parts = parts.map((p) => p.replace(/^\d+(?:\.\d+)?\.\s*/, "").trim()).filter(Boolean);
+    // Preserve any leading numbering (e.g. "1.1.", "1.") as authored
+    parts = parts.map((p) => p.trim()).filter(Boolean);
     if (parts.length === 0) return;
     const updated = [...formData.syllabus];
     updated[moduleIndex] = { ...updated[moduleIndex], topics: [...updated[moduleIndex].topics, ...parts] };
