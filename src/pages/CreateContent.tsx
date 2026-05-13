@@ -947,9 +947,9 @@ const CreateContent = () => {
 
               {formData.module_id && moduleTopics.length > 0 && (
                 <div className="space-y-2">
-                  <Label>Topic</Label>
+                  <Label>Topic *</Label>
                   <Select
-                    value=""
+                    value={moduleTopics.find(t => stripTopicMarkdown(t) === formData.title) || ""}
                     onValueChange={(value) => {
                       const clean = stripTopicMarkdown(value);
                       setFormData(prev => ({
@@ -960,7 +960,7 @@ const CreateContent = () => {
                     }}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a topic from this module (optional)" />
+                      <SelectValue placeholder="Select a topic from this module" />
                     </SelectTrigger>
                     <SelectContent>
                       {moduleTopics.map((topic, i) => (
@@ -969,7 +969,7 @@ const CreateContent = () => {
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-muted-foreground">
-                    Picking a topic fills in the title and description below.
+                    Topics come from this module. Picking one fills in the title and description.
                   </p>
                 </div>
               )}
