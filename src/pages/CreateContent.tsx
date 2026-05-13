@@ -947,9 +947,9 @@ const CreateContent = () => {
 
               {formData.module_id && moduleTopics.length > 0 && (
                 <div className="space-y-2">
-                  <Label>Topic</Label>
+                  <Label>Topic *</Label>
                   <Select
-                    value=""
+                    value={moduleTopics.find(t => stripTopicMarkdown(t) === formData.title) || ""}
                     onValueChange={(value) => {
                       const clean = stripTopicMarkdown(value);
                       setFormData(prev => ({
@@ -960,7 +960,7 @@ const CreateContent = () => {
                     }}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a topic from this module (optional)" />
+                      <SelectValue placeholder="Select a topic from this module" />
                     </SelectTrigger>
                     <SelectContent>
                       {moduleTopics.map((topic, i) => (
@@ -969,19 +969,21 @@ const CreateContent = () => {
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-muted-foreground">
-                    Picking a topic fills in the title and description below.
+                    Topics come from this module. Picking one fills in the title and description.
                   </p>
                 </div>
               )}
 
-              <div className="space-y-2">
-                <Label>Title *</Label>
-                <Input 
-                  placeholder="Enter content title"
-                  value={formData.title}
-                  onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                />
-              </div>
+              {!(formData.module_id && moduleTopics.length > 0) && (
+                <div className="space-y-2">
+                  <Label>Title *</Label>
+                  <Input 
+                    placeholder="Enter content title"
+                    value={formData.title}
+                    onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                  />
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label>Description</Label>
@@ -1129,11 +1131,56 @@ const CreateContent = () => {
 
               <div className="space-y-2">
                 <Label>Module Title *</Label>
-                <Input 
-                  placeholder="e.g., Introduction to Python"
-                  value={newModule.title}
-                  onChange={(e) => setNewModule(prev => ({ ...prev, title: e.target.value }))}
-                />
+                {(() => {
+                  const course = courses.find(c => c.id === newModule.course_id);
+                  const syllabus: any[] = Array.isArray(course?.syllabus) ? (course!.syllabus as any[]) : [];
+                  const existingTitles = new Set(
+                    modules
+                      .filter(m => m.course_id === newModule.course_id && m.id !== editingModule?.id)
+                      .map(m => m.title.trim().toLowerCase())
+                  );
+                  const availableTitles: string[] = syllabus
+                    .map((m: any) => (m?.title || m?.name || "").toString().trim())
+                    .filter((t: string) => t && !existingTitles.has(t.toLowerCase()));
+
+                  if (editingModule || !newModule.course_id || availableTitles.length === 0) {
+                    return (
+                      <>
+                        <Input
+                          placeholder="e.g., Introduction to Python"
+                          value={newModule.title}
+                          onChange={(e) => setNewModule(prev => ({ ...prev, title: e.target.value }))}
+                        />
+                        {!editingModule && newModule.course_id && availableTitles.length === 0 && syllabus.length > 0 && (
+                          <p className="text-xs text-muted-foreground">
+                            All syllabus modules from this course have already been created.
+                          </p>
+                        )}
+                      </>
+                    );
+                  }
+
+                  return (
+                    <>
+                      <Select
+                        value={newModule.title}
+                        onValueChange={(value) => setNewModule(prev => ({ ...prev, title: value }))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a module from the course syllabus" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableTitles.map((title) => (
+                            <SelectItem key={title} value={title}>{title}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground">
+                        Pulled from modules defined during course creation.
+                      </p>
+                    </>
+                  );
+                })()}
               </div>
 
               <div className="space-y-2">
