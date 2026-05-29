@@ -99,16 +99,18 @@ const Payments = () => {
 
         programEnrollments.forEach(e => {
           const p = programMap.get(e.program_id);
+          if (!p) return; // skip orphaned enrollments whose program was deleted
+          if (!profileMap.has(e.user_id)) return;
           let paid = 0;
-          if (e.payment_status === "paid") paid = p?.price || 0;
-          else if (e.payment_status === "partial") paid = p?.first_tranche_amount || 0;
+          if (e.payment_status === "paid") paid = p.price || 0;
+          else if (e.payment_status === "partial") paid = p.first_tranche_amount || 0;
 
           rows.push({
             id: e.id,
             student_name: profileMap.get(e.user_id) || "Unknown",
-            item_title: p?.title || "Unknown",
+            item_title: p.title,
             item_type: "program",
-            amount: p?.price || 0,
+            amount: p.price || 0,
             paid,
             status: e.payment_status,
             date: e.first_payment_date || e.enrolled_at,
