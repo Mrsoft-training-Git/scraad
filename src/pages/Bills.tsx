@@ -72,14 +72,15 @@ const Bills = () => {
 
         courseEnrollments.forEach(e => {
           const c = courseMap.get(e.course_id);
+          if (!c) return; // skip orphaned enrollments whose course was deleted
           bills.push({
             id: e.id,
-            item_title: c?.title || "Unknown Course",
+            item_title: c.title,
             item_type: "course",
-            total_price: c?.price || 0,
-            first_tranche: c?.first_tranche_amount || null,
-            second_tranche: c?.second_tranche_amount || null,
-            allows_part_payment: c?.allows_part_payment || false,
+            total_price: c.price || 0,
+            first_tranche: c.first_tranche_amount || null,
+            second_tranche: c.second_tranche_amount || null,
+            allows_part_payment: c.allows_part_payment || false,
             payment_status: e.payment_status,
             first_payment_date: e.first_payment_date,
             second_payment_date: e.second_payment_date,
@@ -99,14 +100,15 @@ const Bills = () => {
 
         programEnrollments.forEach(e => {
           const p = programMap.get(e.program_id);
+          if (!p) return; // skip orphaned enrollments whose program was deleted
           bills.push({
             id: e.id,
-            item_title: p?.title || "Unknown Program",
+            item_title: p.title,
             item_type: "program",
-            total_price: p?.price || 0,
-            first_tranche: p?.first_tranche_amount || null,
-            second_tranche: p?.second_tranche_amount || null,
-            allows_part_payment: p?.allows_part_payment || false,
+            total_price: p.price || 0,
+            first_tranche: p.first_tranche_amount || null,
+            second_tranche: p.second_tranche_amount || null,
+            allows_part_payment: p.allows_part_payment || false,
             payment_status: e.payment_status,
             first_payment_date: e.first_payment_date,
             second_payment_date: e.second_payment_date,
