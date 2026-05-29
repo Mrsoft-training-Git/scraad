@@ -17,7 +17,6 @@ export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
   const location = useLocation();
@@ -40,13 +39,6 @@ export const Navbar = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  useEffect(() => {
-    if (searchOpen) {
-      // focus next tick so the input is mounted
-      setTimeout(() => searchInputRef.current?.focus(), 50);
-    }
-  }, [searchOpen]);
-
   const navLinks = [
     { to: "/", label: "Home", icon: Home, description: "Back to homepage" },
     { to: "/courses", label: "Courses", icon: BookOpen, description: "Browse all courses" },
@@ -62,7 +54,6 @@ export const Navbar = () => {
     if (searchQuery.trim()) {
       navigate(`/courses?q=${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery("");
-      setSearchOpen(false);
       setIsMenuOpen(false);
     }
   };
@@ -151,37 +142,22 @@ export const Navbar = () => {
           {/* Spacer pushes search + actions to the right */}
           <div className="flex-1" />
 
-          {/* Search — collapsed icon that expands inline (desktop) */}
+          {/* Search — always open inline (desktop) */}
           <div className="hidden md:flex items-center">
-            {!searchOpen ? (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setSearchOpen(true)}
-                className="h-9 w-9 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/60"
-                aria-label="Open search"
-              >
-                <Search className="w-4 h-4" />
-              </Button>
-            ) : (
-              <form onSubmit={handleSearch} className="flex items-center">
-                <div className="relative animate-in slide-in-from-right-2 fade-in duration-200">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-                  <Input
-                    ref={searchInputRef}
-                    type="search"
-                    placeholder="Search courses..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onBlur={() => {
-                      if (!searchQuery) setSearchOpen(false);
-                    }}
-                    className="pl-9 pr-3 h-9 w-56 lg:w-64 rounded-full bg-muted/60 border-transparent focus-visible:bg-card focus-visible:border-border focus-visible:ring-1 focus-visible:ring-secondary/50 text-sm"
-                    aria-label="Search courses and programs"
-                  />
-                </div>
-              </form>
-            )}
+            <form onSubmit={handleSearch} className="flex items-center">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                <Input
+                  ref={searchInputRef}
+                  type="search"
+                  placeholder="Search courses..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 pr-3 h-9 w-56 lg:w-64 rounded-full bg-muted/60 border-transparent focus-visible:bg-card focus-visible:border-border focus-visible:ring-1 focus-visible:ring-secondary/50 text-sm"
+                  aria-label="Search courses and programs"
+                />
+              </div>
+            </form>
           </div>
 
           {/* Right side actions */}
