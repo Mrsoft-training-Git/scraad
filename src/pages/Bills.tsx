@@ -72,14 +72,15 @@ const Bills = () => {
 
         courseEnrollments.forEach(e => {
           const c = courseMap.get(e.course_id);
+          if (!c) return; // skip orphaned enrollments whose course was deleted
           bills.push({
             id: e.id,
-            item_title: c?.title || "Unknown Course",
+            item_title: c.title,
             item_type: "course",
-            total_price: c?.price || 0,
-            first_tranche: c?.first_tranche_amount || null,
-            second_tranche: c?.second_tranche_amount || null,
-            allows_part_payment: c?.allows_part_payment || false,
+            total_price: c.price || 0,
+            first_tranche: c.first_tranche_amount || null,
+            second_tranche: c.second_tranche_amount || null,
+            allows_part_payment: c.allows_part_payment || false,
             payment_status: e.payment_status,
             first_payment_date: e.first_payment_date,
             second_payment_date: e.second_payment_date,
