@@ -107,34 +107,30 @@ const ProgramManagement = () => {
           {assignedPrograms.length === 0 ? (
             <Card className="border-border/60"><CardContent className="py-12 text-center text-muted-foreground">No programs assigned to you yet.</CardContent></Card>
           ) : (
-            <div className="grid gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {assignedPrograms.map(program => (
-                <Card key={program.id} className="border-border/60 overflow-hidden hover:border-primary/20 transition-colors">
-                  <CardContent className="p-0">
-                    <div className="flex flex-col sm:flex-row">
-                      {program.banner_image_url && (
-                        <div className="sm:w-48 h-32 sm:h-auto flex-shrink-0">
-                          <img src={program.banner_image_url} alt={program.title} className="w-full h-full object-cover" />
-                        </div>
-                      )}
-                      <div className="flex-1 p-4">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <h3 className="font-semibold text-lg truncate">{program.title}</h3>
-                              {programStatusBadge(program.status)}
-                            </div>
-                            {program.short_description && <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{program.short_description}</p>}
-                            <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-                              {program.track && <Badge variant="secondary" className="text-xs">{program.track}</Badge>}
-                              {program.duration && <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{program.duration}</span>}
-                            </div>
-                          </div>
-                          <Button size="sm" asChild>
-                            <Link to={`/dashboard/programs/${program.id}/manage`}>Manage</Link>
-                          </Button>
-                        </div>
-                      </div>
+                <Card key={program.id} className="group overflow-hidden bg-card border border-border hover:border-secondary/40 hover:shadow-2xl transition-all duration-500 flex flex-col h-full rounded-2xl">
+                  <Link to={`/dashboard/programs/${program.id}/manage`} className="block aspect-video overflow-hidden relative bg-muted">
+                    {program.banner_image_url ? (
+                      <img src={program.banner_image_url} alt={program.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">No image</div>
+                    )}
+                    <div className="absolute top-2.5 right-2.5 z-10">{programStatusBadge(program.status)}</div>
+                  </Link>
+                  <CardContent className="p-4 sm:p-5 flex flex-col flex-grow">
+                    <h3 className="font-heading font-semibold text-sm sm:text-base text-foreground line-clamp-2 mb-1 group-hover:text-primary transition-colors leading-snug min-h-[2.5rem]">{program.title}</h3>
+                    {program.short_description && (
+                      <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{program.short_description}</p>
+                    )}
+                    <div className="flex flex-wrap gap-2 mb-3 text-[11px] text-muted-foreground">
+                      {program.track && <Badge variant="secondary" className="text-[10px]">{program.track}</Badge>}
+                      {program.duration && <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{program.duration}</span>}
+                    </div>
+                    <div className="mt-auto pt-3 border-t border-border">
+                      <Button size="sm" className="w-full text-xs h-9 font-semibold bg-secondary text-secondary-foreground hover:bg-secondary/90" asChild>
+                        <Link to={`/dashboard/programs/${program.id}/manage`}>Manage</Link>
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -167,59 +163,49 @@ const ProgramManagement = () => {
             {programs.length === 0 ? (
               <Card className="border-border/60"><CardContent className="py-12 text-center text-muted-foreground">No programs created yet.</CardContent></Card>
             ) : (
-              <div className="grid gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {programs.map(program => (
-                  <Card key={program.id} className="border-border/60 overflow-hidden hover:border-primary/20 transition-colors">
-                    <CardContent className="p-0">
-                      <div className="flex flex-col sm:flex-row">
-                        {program.banner_image_url && (
-                          <div className="sm:w-48 h-32 sm:h-auto flex-shrink-0">
-                            <img src={program.banner_image_url} alt={program.title} className="w-full h-full object-cover" />
-                          </div>
+                  <Card key={program.id} className="group overflow-hidden bg-card border border-border hover:border-secondary/40 hover:shadow-2xl transition-all duration-500 flex flex-col h-full rounded-2xl">
+                    <Link to={`/dashboard/programs/${program.id}/manage`} className="block aspect-video overflow-hidden relative bg-muted">
+                      {program.banner_image_url ? (
+                        <img src={program.banner_image_url} alt={program.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">No image</div>
+                      )}
+                      <div className="absolute top-2.5 right-2.5 z-10">{programStatusBadge(program.status)}</div>
+                      {program.track && (
+                        <Badge className="absolute top-2.5 left-2.5 bg-card/95 backdrop-blur text-foreground text-[10px] border-0 z-10">{program.track}</Badge>
+                      )}
+                    </Link>
+                    <CardContent className="p-4 sm:p-5 flex flex-col flex-grow">
+                      <h3 className="font-heading font-semibold text-sm sm:text-base text-foreground line-clamp-2 mb-1 group-hover:text-primary transition-colors leading-snug min-h-[2.5rem]">{program.title}</h3>
+                      {program.short_description && (
+                        <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{program.short_description}</p>
+                      )}
+                      <div className="flex flex-wrap gap-x-3 gap-y-1.5 mb-3 text-[11px] text-muted-foreground">
+                        {program.instructor_name && (
+                          <span className="flex items-center gap-1 truncate max-w-full"><Users className="w-3 h-3 shrink-0" />{program.instructor_name}</span>
                         )}
-                        <div className="flex-1 p-4">
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1">
-                                <h3 className="font-semibold text-lg truncate">{program.title}</h3>
-                                {programStatusBadge(program.status)}
-                              </div>
-                              {program.short_description && (
-                                <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{program.short_description}</p>
-                              )}
-                              <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-                                {program.track && (
-                                  <Badge variant="secondary" className="text-xs">{program.track}</Badge>
-                                )}
-                                {program.instructor_name && (
-                                  <span className="flex items-center gap-1"><Users className="w-3 h-3" />Instructor: {program.instructor_name}</span>
-                                )}
-                                {program.mode && (
-                                  <span className="capitalize flex items-center gap-1">
-                                    <Users className="w-3 h-3" />{program.mode}
-                                  </span>
-                                )}
-                                {program.location && (
-                                  <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{program.location}</span>
-                                )}
-                                {program.duration && (
-                                  <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{program.duration}</span>
-                                )}
-                                {program.start_date && (
-                                  <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{format(new Date(program.start_date), "MMM d, yyyy")}</span>
-                                )}
-                              </div>
-                            </div>
-                            <div className="flex gap-2">
-                              <Button size="sm" variant="default" asChild>
-                                <Link to={`/dashboard/programs/${program.id}/manage`}>Manage Content</Link>
-                              </Button>
-                              <Button size="sm" variant="outline" onClick={() => setEditingProgram(program)}>
-                                <Pencil className="w-3.5 h-3.5 mr-1" /> Edit
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
+                        {program.mode && (
+                          <span className="capitalize flex items-center gap-1"><Users className="w-3 h-3" />{program.mode}</span>
+                        )}
+                        {program.location && (
+                          <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{program.location}</span>
+                        )}
+                        {program.duration && (
+                          <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{program.duration}</span>
+                        )}
+                        {program.start_date && (
+                          <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{format(new Date(program.start_date), "MMM d, yyyy")}</span>
+                        )}
+                      </div>
+                      <div className="mt-auto pt-3 border-t border-border grid grid-cols-2 gap-2">
+                        <Button size="sm" variant="outline" className="text-xs h-9 border-border hover:bg-muted" onClick={() => setEditingProgram(program)}>
+                          <Pencil className="w-3.5 h-3.5 mr-1" /> Edit
+                        </Button>
+                        <Button size="sm" className="text-xs h-9 font-semibold bg-secondary text-secondary-foreground hover:bg-secondary/90" asChild>
+                          <Link to={`/dashboard/programs/${program.id}/manage`}>Manage</Link>
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
