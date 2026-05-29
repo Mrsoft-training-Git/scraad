@@ -54,7 +54,6 @@ export const Navbar = () => {
     if (searchQuery.trim()) {
       navigate(`/courses?q=${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery("");
-      setSearchOpen(false);
       setIsMenuOpen(false);
     }
   };
