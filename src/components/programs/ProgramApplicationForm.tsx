@@ -12,7 +12,7 @@ import { Loader2, ShieldAlert } from "lucide-react";
 interface Props {
   programId: string;
   programTitle: string;
-  userId: string;
+  userId: string | null;
   userEmail: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -22,6 +22,8 @@ interface Props {
 export const ProgramApplicationForm = ({ programId, programTitle, userId, userEmail, open, onOpenChange, onSuccess }: Props) => {
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState(false);
+  const isAuthenticated = !!userId;
+  const [password, setPassword] = useState("");
   const [form, setForm] = useState({
     full_name: "",
     email: userEmail,
