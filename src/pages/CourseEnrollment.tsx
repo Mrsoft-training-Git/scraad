@@ -255,14 +255,17 @@ const CourseEnrollment = () => {
       }
       return null;
     }
-    const newId = data.user?.id ?? null;
-    if (!newId) {
+    // If no session was returned, email confirmation is required — the user
+    // cannot insert enrollments via RLS until they log in.
+    if (!data.session) {
       toast({
-        title: "Please confirm your email",
-        description: "Check your inbox to confirm your account, then log in to complete payment.",
+        title: "Confirm your email to continue",
+        description: "We sent a confirmation link to your inbox. After confirming, log in to complete enrollment and payment.",
       });
+      navigate("/auth");
+      return null;
     }
-    return newId;
+    return data.user?.id ?? null;
   };
 
   const handlePayNow = async (paymentType: "full" | "first") => {
