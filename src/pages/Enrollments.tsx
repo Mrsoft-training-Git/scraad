@@ -8,7 +8,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users, BookOpen, TrendingUp, UserCheck, Search, GraduationCap } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Users, BookOpen, TrendingUp, UserCheck, Search, GraduationCap, Eye } from "lucide-react";
 import { format } from "date-fns";
 
 interface EnrollmentRecord {
