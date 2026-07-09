@@ -63,7 +63,6 @@ export const PromoBar = () => {
     <div className="relative bg-foreground text-background py-2 px-4 text-xs sm:text-sm overflow-hidden">
       <div className="container mx-auto flex items-center justify-center gap-2 sm:gap-4 flex-wrap">
         <span className="inline-flex items-center gap-1.5 font-medium">
-          <Sparkles className="w-3.5 h-3.5 text-secondary animate-pulse" />
           {settings.text}
         </span>
         {settings.countdown_enabled && (
