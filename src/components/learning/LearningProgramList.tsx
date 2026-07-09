@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { BookOpen, CheckCircle2, PlayCircle, CreditCard, Search, GraduationCap, Clock, UserCheck, Send } from "lucide-react";
+import { renderMarkdown } from "@/components/MarkdownEditor";
 
 type ProgramStatus = "applied" | "admitted" | "in-progress" | "ended";
 
