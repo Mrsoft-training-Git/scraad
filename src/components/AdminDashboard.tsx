@@ -316,7 +316,18 @@ export const AdminDashboard = () => {
         </Card>
       </div>
 
-      <PromoBarSettings />
+      <Tabs defaultValue="promo" className="w-full">
+        <TabsList>
+          <TabsTrigger value="promo">Promo Bar</TabsTrigger>
+          <TabsTrigger value="ads">Ads</TabsTrigger>
+        </TabsList>
+        <TabsContent value="promo" className="mt-4">
+          <PromoBarSettings />
+        </TabsContent>
+        <TabsContent value="ads" className="mt-4">
+          <AdsManager />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
