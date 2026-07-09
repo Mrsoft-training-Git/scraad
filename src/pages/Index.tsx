@@ -522,35 +522,52 @@ const Index = () => {
                         )}
                       </Link>
                       <CardContent className="p-4 sm:p-5 flex flex-col flex-grow">
-                        <div className="flex items-start justify-between gap-2 mb-1.5">
-                          <h3 className="font-heading font-semibold text-sm sm:text-base text-foreground line-clamp-2 group-hover:text-primary transition-colors leading-snug flex-1">
-                            {program.title}
-                          </h3>
-                          <div className="flex flex-col items-end gap-1 shrink-0">
-                            <Badge className={`capitalize text-[10px] ${programStatusColors[program.effectiveStatus] || ""}`}>
-                              {program.effectiveStatus}
-                            </Badge>
-                            <Badge variant="outline" className="capitalize text-[10px] gap-1">
+                        {/* Track + status pill row */}
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            {program.track && (
+                              <Badge variant="secondary" className="text-[10px] font-medium truncate max-w-[140px]">
+                                {program.track}
+                              </Badge>
+                            )}
+                            <Badge variant="outline" className="capitalize text-[10px] gap-1 border-border">
                               {programModeIcons[program.mode]}{program.mode}
                             </Badge>
                           </div>
+                          <span className={`inline-flex items-center gap-1 text-[10px] font-semibold capitalize shrink-0 ${
+                            program.effectiveStatus === "open" ? "text-green-600" :
+                            program.effectiveStatus === "ongoing" ? "text-secondary" : "text-muted-foreground"
+                          }`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${
+                              program.effectiveStatus === "open" ? "bg-green-500" :
+                              program.effectiveStatus === "ongoing" ? "bg-secondary" : "bg-muted-foreground"
+                            } ${program.effectiveStatus !== "closed" ? "animate-pulse" : ""}`} />
+                            {program.effectiveStatus}
+                          </span>
                         </div>
+
+                        {/* Title */}
+                        <h3 className="font-heading font-semibold text-sm sm:text-base text-foreground line-clamp-2 mb-2 group-hover:text-primary transition-colors leading-snug min-h-[2.5rem]">
+                          {program.title}
+                        </h3>
+
                         {program.short_description && (
                           <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{program.short_description}</p>
                         )}
-                        <div className="flex flex-wrap gap-2 mb-3 text-[11px] text-muted-foreground">
-                          {program.track && <Badge variant="secondary" className="text-[10px]">{program.track}</Badge>}
-                          {program.duration && (
-                            <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{program.duration}</span>
-                          )}
 
+                        {/* Meta rows */}
+                        <div className="space-y-1.5 mb-3 text-[11px] text-muted-foreground">
+                          {program.duration && (
+                            <div className="flex items-center gap-1.5"><Clock className="w-3 h-3 shrink-0" /><span className="truncate">{program.duration}</span></div>
+                          )}
                           {program.location && (
-                            <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{program.location}</span>
+                            <div className="flex items-center gap-1.5"><MapPin className="w-3 h-3 shrink-0" /><span className="truncate">{program.location}</span></div>
                           )}
                           {program.start_date && (
-                            <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />Starts {new Date(program.start_date).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</span>
+                            <div className="flex items-center gap-1.5"><Calendar className="w-3 h-3 shrink-0" /><span className="truncate">Starts {new Date(program.start_date).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</span></div>
                           )}
                         </div>
+
                         <div className="mt-auto pt-3 border-t border-border">
                           <Button
                             size="sm"
