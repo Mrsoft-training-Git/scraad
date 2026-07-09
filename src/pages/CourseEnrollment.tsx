@@ -183,8 +183,9 @@ const CourseEnrollment = () => {
     return true;
   };
 
-  const saveProfileData = async () => {
-    if (!user) return;
+  const saveProfileData = async (uid?: string) => {
+    const targetId = uid || user?.id;
+    if (!targetId) return true;
     setSaving(true);
 
     const fullName = `${personalInfo.firstName} ${personalInfo.lastName}`.trim();
@@ -204,7 +205,7 @@ const CourseEnrollment = () => {
         has_internet: learningResources.hasInternet === "yes",
         weekly_hours: hours,
       })
-      .eq("id", user.id);
+      .eq("id", targetId);
 
     setSaving(false);
     if (error) {
@@ -218,13 +219,50 @@ const CourseEnrollment = () => {
     if (step === 1 && !validateStep1()) return;
     if (step === 2 && !validateStep2()) return;
 
-    if (step === 2) {
-      // Save profile data before proceeding to payment
+    if (step === 2 && user) {
+      // Save profile data before proceeding to payment (only if logged in)
       const saved = await saveProfileData();
       if (!saved) return;
     }
 
     setStep(step + 1);
+  };
+
+  // Sign up an unauthenticated learner and return their new user id
+  const signUpLearner = async (): Promise<string | null> => {
+    if (password.length < 6) {
+      toast({ title: "Password required", description: "Please choose a password (min 6 characters).", variant: "destructive" });
+      return null;
+    }
+    const fullName = `${personalInfo.firstName} ${personalInfo.lastName}`.trim();
+    const { data, error } = await supabase.auth.signUp({
+      email: personalInfo.email,
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/dashboard/learning`,
+        data: { full_name: fullName },
+      },
+    });
+    if (error) {
+      if (error.message?.toLowerCase().includes("registered")) {
+        toast({
+          title: "Email already registered",
+          description: "Please log in first, then enroll.",
+          variant: "destructive",
+        });
+      } else {
+        toast({ title: "Signup failed", description: error.message, variant: "destructive" });
+      }
+      return null;
+    }
+    const newId = data.user?.id ?? null;
+    if (!newId) {
+      toast({
+        title: "Please confirm your email",
+        description: "Check your inbox to confirm your account, then log in to complete payment.",
+      });
+    }
+    return newId;
   };
 
   const handlePayNow = async (paymentType: "full" | "first") => {
@@ -233,6 +271,23 @@ const CourseEnrollment = () => {
       return;
     }
     if (!course) return;
+
+    // Unauthenticated: create account, enroll unpaid, redirect to auth to complete payment
+    if (!user) {
+      const newId = await signUpLearner();
+      if (!newId) return;
+      await saveProfileData(newId);
+      const success = await enrollInCourse(course.id, course.title);
+      if (success) {
+        toast({
+          title: "Account created!",
+          description: "Please log in to complete your payment and access the course.",
+        });
+        navigate("/auth");
+      }
+      return;
+    }
+
     await initializePayment(course.id, paymentType);
   };
 
@@ -242,6 +297,21 @@ const CourseEnrollment = () => {
       return;
     }
     if (!course) return;
+
+    if (!user) {
+      const newId = await signUpLearner();
+      if (!newId) return;
+      await saveProfileData(newId);
+      const success = await enrollInCourse(course.id, course.title);
+      if (success) {
+        toast({
+          title: "Enrolled!",
+          description: "Log in to your portal to complete payment and access the course.",
+        });
+        navigate("/auth");
+      }
+      return;
+    }
 
     const success = await enrollInCourse(course.id, course.title);
     if (success) {
@@ -256,6 +326,18 @@ const CourseEnrollment = () => {
       return;
     }
     if (!course) return;
+
+    if (!user) {
+      const newId = await signUpLearner();
+      if (!newId) return;
+      await saveProfileData(newId);
+      const success = await enrollInCourse(course.id, course.title, true);
+      if (success) {
+        toast({ title: "Enrolled!", description: "Log in to start learning." });
+        navigate("/auth");
+      }
+      return;
+    }
 
     const success = await enrollInCourse(course.id, course.title, true);
     if (success) {
