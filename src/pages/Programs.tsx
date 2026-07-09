@@ -124,6 +124,7 @@ const Programs = () => {
     const { data, error } = await supabase
       .from("programs")
       .select("id, title, short_description, banner_image_url, intro_video_url, duration, mode, location, start_date, end_date, status, max_participants, track")
+      .eq("is_published", true)
       .neq("status", "closed")
       .order("created_at", { ascending: false });
     if (!error && data) {

@@ -136,6 +136,7 @@ const Index = () => {
     const { data, error } = await supabase
       .from("programs")
       .select("id, title, short_description, banner_image_url, duration, mode, location, start_date, end_date, status, track")
+      .eq("is_published", true)
       .in("status", ["open", "ongoing"])
       .order("start_date", { ascending: true, nullsFirst: false })
       .limit(12);
