@@ -14,7 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useDashboardAuth } from "@/hooks/useDashboardAuth";
 import { format } from "date-fns";
-import { Check, X, Clock, Mail, Phone, FileText, Loader2, Plus, ImagePlus, Pencil, MapPin, Calendar, Users } from "lucide-react";
+import { Check, X, Clock, Mail, Phone, FileText, Loader2, Plus, ImagePlus, Pencil, MapPin, Calendar, Users, Eye, EyeOff } from "lucide-react";
 import { IntroVideoUploader } from "@/components/IntroVideoUploader";
 import { MarkdownEditor, renderMarkdown } from "@/components/MarkdownEditor";
 
@@ -33,6 +33,7 @@ interface FullProgram {
   location: string | null; banner_image_url: string | null; intro_video_url: string | null; created_at: string;
   max_participants: number | null; learning_outcomes: string[] | null; requirements: string[] | null;
   track: string | null; instructor_id: string | null; instructor_name: string | null;
+  is_published: boolean;
 }
 interface Application { id: string; program_id: string; user_id: string; full_name: string; email: string; phone: string | null; experience_level: string | null; motivation: string | null; cv_url: string | null; status: string; created_at: string; }
 interface InstructorOption { id: string; full_name: string | null; email: string | null; }
@@ -84,6 +85,18 @@ const ProgramManagement = () => {
   };
 
   const getProgramTitle = (pid: string) => programs.find(p => p.id === pid)?.title || "Unknown";
+
+  const togglePublish = async (program: FullProgram) => {
+    const next = !program.is_published;
+    const { error } = await supabase.from("programs").update({ is_published: next }).eq("id", program.id);
+    if (error) {
+      toast({ title: "Failed to update", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: next ? "Program published" : "Program unpublished" });
+    fetchPrograms();
+  };
+
   const statusBadge = (status: string) => {
     const s: Record<string, string> = { pending: "bg-secondary/10 text-secondary border-secondary/20", approved: "bg-green-500/10 text-green-600 border-green-500/20", rejected: "bg-destructive/10 text-destructive border-destructive/20" };
     return <Badge className={`capitalize ${s[status] || ""}`}>{status}</Badge>;
