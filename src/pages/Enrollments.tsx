@@ -8,7 +8,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users, BookOpen, TrendingUp, UserCheck, Search, GraduationCap } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Users, BookOpen, TrendingUp, UserCheck, Search, GraduationCap, Eye } from "lucide-react";
 import { format } from "date-fns";
 
 interface EnrollmentRecord {
@@ -33,7 +35,28 @@ const Enrollments = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState("all");
+  const [detail, setDetail] = useState<any>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
   const navigate = useNavigate();
+
+  const openDetail = async (rec: EnrollmentRecord) => {
+    setDetail({ record: rec });
+    setDetailLoading(true);
+    const profileRes = await supabase.from("profiles").select("*").eq("id", rec.user_id).maybeSingle();
+    let application: any = null;
+    if (rec.item_type === "program") {
+      const appRes = await supabase
+        .from("program_applications")
+        .select("*")
+        .eq("user_id", rec.user_id)
+        .eq("program_id", rec.item_id)
+        .order("created_at", { ascending: false })
+        .maybeSingle();
+      application = appRes.data;
+    }
+    setDetail({ record: rec, profile: profileRes.data, application });
+    setDetailLoading(false);
+  };
 
   useEffect(() => {
     const init = async () => {
@@ -253,12 +276,13 @@ const Enrollments = () => {
                     <TableHead className="text-xs">Payment</TableHead>
                     <TableHead className="text-xs">Access</TableHead>
                     <TableHead className="text-xs">Date</TableHead>
+                    <TableHead className="text-xs text-right">Details</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filtered.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={9} className="text-center text-sm text-muted-foreground py-8">
+                      <TableCell colSpan={10} className="text-center text-sm text-muted-foreground py-8">
                         No enrollments found
                       </TableCell>
                     </TableRow>
@@ -282,6 +306,11 @@ const Enrollments = () => {
                         <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                           {format(new Date(e.created_at), "MMM d, yyyy")}
                         </TableCell>
+                        <TableCell className="text-right">
+                          <Button size="sm" variant="ghost" onClick={() => openDetail(e)}>
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                        </TableCell>
                       </TableRow>
                     ))
                   )}
@@ -290,9 +319,94 @@ const Enrollments = () => {
             </div>
           </CardContent>
         </Card>
+
+        <Dialog open={!!detail} onOpenChange={(o) => !o && setDetail(null)}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Enrollment Details</DialogTitle>
+            </DialogHeader>
+            {detailLoading || !detail ? (
+              <div className="py-8 text-center text-sm text-muted-foreground">Loading…</div>
+            ) : (
+              <div className="space-y-6 text-sm">
+                <section>
+                  <h3 className="font-semibold mb-2 text-foreground">Enrollment</h3>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Field label="Item" value={detail.record.item_name} />
+                    <Field label="Type" value={detail.record.item_type} />
+                    <Field label="Payment" value={detail.record.payment_status} />
+                    <Field label="Access" value={detail.record.access_status} />
+                    <Field label="Progress" value={`${detail.record.progress}%`} />
+                    <Field label="Date" value={format(new Date(detail.record.created_at), "PPP")} />
+                  </div>
+                </section>
+
+                <section>
+                  <h3 className="font-semibold mb-2 text-foreground">Student Profile</h3>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Field label="Full Name" value={detail.profile?.full_name} />
+                    <Field label="Email" value={detail.profile?.email} />
+                    <Field label="Phone" value={detail.profile?.phone} />
+                    <Field label="Gender" value={detail.profile?.gender} />
+                    <Field label="Date of Birth" value={detail.profile?.date_of_birth} />
+                    <Field label="Country" value={detail.profile?.country} />
+                    <Field label="Education Level" value={detail.profile?.education_level} />
+                    <Field label="Department" value={detail.profile?.department} />
+                    <Field label="Device" value={detail.profile?.device_type} />
+                    <Field label="Has Internet" value={detail.profile?.has_internet === null || detail.profile?.has_internet === undefined ? null : detail.profile?.has_internet ? "Yes" : "No"} />
+                    <Field label="Weekly Hours" value={detail.profile?.weekly_hours} />
+                    <Field label="Bio" value={detail.profile?.bio} full />
+                  </div>
+                </section>
+
+                {detail.record.item_type === "program" && (
+                  <section>
+                    <h3 className="font-semibold mb-2 text-foreground">Program Application</h3>
+                    {detail.application ? (
+                      <div className="grid grid-cols-2 gap-3">
+                        <Field label="Applicant Name" value={detail.application.full_name} />
+                        <Field label="Email" value={detail.application.email} />
+                        <Field label="Phone" value={detail.application.phone} />
+                        <Field label="Age" value={detail.application.age} />
+                        <Field label="Address" value={detail.application.address} full />
+                        <Field label="Experience" value={detail.application.experience_level} />
+                        <Field label="Status" value={detail.application.status} />
+                        <Field label="Motivation" value={detail.application.motivation} full />
+                        {detail.application.cv_url && (
+                          <div className="col-span-2">
+                            <p className="text-xs text-muted-foreground">CV</p>
+                            <a href={detail.application.cv_url} target="_blank" rel="noreferrer" className="text-primary underline text-sm">View CV</a>
+                          </div>
+                        )}
+                        <div className="col-span-2 mt-2 pt-3 border-t">
+                          <h4 className="font-semibold mb-2 text-foreground">Parent / Guardian</h4>
+                          <div className="grid grid-cols-2 gap-3">
+                            <Field label="Name" value={detail.application.guardian_name} />
+                            <Field label="Relationship" value={detail.application.guardian_relationship} />
+                            <Field label="Phone" value={detail.application.guardian_phone} />
+                            <Field label="Email" value={detail.application.guardian_email} />
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-muted-foreground text-sm">No application record found.</p>
+                    )}
+                  </section>
+                )}
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </DashboardLayout>
   );
 };
+
+const Field = ({ label, value, full }: { label: string; value: any; full?: boolean }) => (
+  <div className={full ? "col-span-2" : ""}>
+    <p className="text-xs text-muted-foreground">{label}</p>
+    <p className="text-sm text-foreground break-words">{value ?? "—"}</p>
+  </div>
+);
 
 export default Enrollments;
