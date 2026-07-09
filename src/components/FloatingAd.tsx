@@ -55,21 +55,19 @@ export const FloatingAd = () => {
 
   return (
     <div className="fixed bottom-4 right-4 lg:bottom-6 lg:right-6 z-40 animate-bounce-soft">
-      <Link to={ad.href}>
-        <div className="group relative w-40 h-40 sm:w-48 sm:h-48 rounded-2xl overflow-hidden shadow-2xl ring-4 ring-card/40 hover:ring-secondary/50 transition-all">
+      <Link to={ad.href} className="block">
+        <div className="group relative rounded-2xl overflow-hidden shadow-2xl ring-2 ring-card/40 hover:ring-secondary/50 transition-all">
           <img
             src={ad.image_url}
             alt={ad.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            className="block w-auto h-auto max-w-[140px] sm:max-w-[180px] max-h-[180px] sm:max-h-[220px] object-contain group-hover:scale-[1.03] transition-transform duration-500"
           />
-          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-3">
-            <p className="text-xs font-semibold text-white line-clamp-2">{ad.title}</p>
-          </div>
-          <span className="absolute top-2 left-2 text-[10px] uppercase tracking-wider bg-secondary text-secondary-foreground px-2 py-0.5 rounded-full font-bold">
+          <span className="absolute top-2 left-2 text-[10px] uppercase tracking-wider bg-secondary text-secondary-foreground px-2 py-0.5 rounded-full font-bold shadow">
             Featured
           </span>
         </div>
       </Link>
+
     </div>
   );
 };
