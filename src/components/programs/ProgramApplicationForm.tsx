@@ -32,7 +32,6 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
     age: "",
     country: "Nigeria",
     gender: "",
-    education_level: "",
     address: "",
     motivation: "",
     guardian_name: "",
