@@ -54,7 +54,7 @@ export const FloatingAd = () => {
   if (!ad) return null;
 
   return (
-    <div className="absolute top-1/2 -translate-y-1/2 -right-2 lg:-right-6 z-10 animate-bounce-soft">
+    <div className="fixed bottom-4 right-4 lg:bottom-6 lg:right-6 z-40 animate-bounce-soft">
       <Link to={ad.href}>
         <div className="group relative w-40 h-40 sm:w-48 sm:h-48 rounded-2xl overflow-hidden shadow-2xl ring-4 ring-card/40 hover:ring-secondary/50 transition-all">
           <img
