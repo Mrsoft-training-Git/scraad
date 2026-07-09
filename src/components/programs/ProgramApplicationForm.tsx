@@ -113,6 +113,7 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
         motivation: form.motivation.trim() || null,
         guardian_name: form.guardian_name.trim(),
         guardian_phone: form.guardian_phone.trim(),
+        guardian_relationship: form.guardian_relationship.trim(),
         status: "pending",
       }, { onConflict: "program_id,user_id" });
 
