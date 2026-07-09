@@ -35,9 +35,35 @@ interface Course {
   instructor: string | null;
 }
 
+interface HomeProgram {
+  id: string;
+  title: string;
+  short_description: string | null;
+  banner_image_url: string | null;
+  duration: string | null;
+  mode: string;
+  location: string | null;
+  start_date: string | null;
+  status: string;
+  track: string | null;
+}
+
+const programModeIcons: Record<string, React.ReactNode> = {
+  physical: <Building className="w-3.5 h-3.5" />,
+  hybrid: <Globe className="w-3.5 h-3.5" />,
+  online: <Laptop className="w-3.5 h-3.5" />,
+};
+
+const programStatusColors: Record<string, string> = {
+  open: "bg-green-500/10 text-green-600 border-green-500/20",
+  ongoing: "bg-secondary/10 text-secondary border-secondary/20",
+};
+
 const Index = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
+  const [programs, setPrograms] = useState<HomeProgram[]>([]);
+  const [programsLoading, setProgramsLoading] = useState(true);
   const [enrolledCourseIds, setEnrolledCourseIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [statsData, setStatsData] = useState<{
@@ -54,6 +80,7 @@ const Index = () => {
 
   useEffect(() => {
     fetchFeaturedCourses();
+    fetchFeaturedPrograms();
     checkEnrollmentStatus();
     fetchStats();
   }, []);
