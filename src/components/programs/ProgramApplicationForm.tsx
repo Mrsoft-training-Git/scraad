@@ -159,8 +159,25 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
           </div>
           <div>
             <Label htmlFor="email">Email *</Label>
-            <Input id="email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
+            <Input id="email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required disabled={isAuthenticated} />
           </div>
+          {!isAuthenticated && (
+            <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 space-y-2">
+              <Label htmlFor="new_password" className="text-sm font-semibold">Create a password *</Label>
+              <p className="text-xs text-muted-foreground">
+                We'll create your student account so you can log in later to complete payment and access the program.
+              </p>
+              <Input
+                id="new_password"
+                type="password"
+                minLength={6}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Minimum 6 characters"
+                required
+              />
+            </div>
+          )}
           <div>
             <Label htmlFor="phone">Phone Number</Label>
             <Input id="phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
