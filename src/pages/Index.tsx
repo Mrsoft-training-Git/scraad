@@ -543,7 +543,7 @@ const Index = () => {
                             <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{program.location}</span>
                           )}
                           {program.start_date && (
-                            <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{new Date(program.start_date).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</span>
+                            <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />Starts {new Date(program.start_date).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</span>
                           )}
                         </div>
                         <div className="mt-auto pt-3 border-t border-border">
