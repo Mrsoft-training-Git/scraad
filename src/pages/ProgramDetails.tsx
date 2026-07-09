@@ -354,8 +354,13 @@ const ProgramDetails = () => {
                           )}
                         </div>
                       )}
+                      {applicationStatus === "rejected" && (
+                        <div className="rounded-md border border-destructive/20 bg-destructive/5 p-3 text-xs text-muted-foreground">
+                          Your previous application wasn't accepted. You can re-apply for this cohort.
+                        </div>
+                      )}
                       <Button onClick={handleApplyClick} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6 text-lg">
-                        Apply for Program
+                        {applicationStatus === "rejected" ? "Re-apply for Program" : "Apply for Program"}
                       </Button>
                       <p className="text-xs text-muted-foreground text-center">Free to apply. Admission required.</p>
                     </>
