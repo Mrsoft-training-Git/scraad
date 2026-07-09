@@ -16,6 +16,7 @@ import { useDashboardAuth } from "@/hooks/useDashboardAuth";
 import { format } from "date-fns";
 import { Check, X, Clock, Mail, Phone, FileText, Loader2, Plus, ImagePlus, Pencil, MapPin, Calendar, Users } from "lucide-react";
 import { IntroVideoUploader } from "@/components/IntroVideoUploader";
+import { MarkdownEditor, renderMarkdown } from "@/components/MarkdownEditor";
 
 const computeProgramStatus = (startDate: string | null, endDate: string | null): string => {
   const now = new Date();
