@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { IntroVideoCard } from "@/components/IntroVideo";
 import { getEffectiveProgramStatus } from "@/lib/program-status";
+import { renderMarkdown } from "@/components/MarkdownEditor";
 
 interface Program {
   id: string;
