@@ -520,18 +520,20 @@ const Index = () => {
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">No image</div>
                         )}
-                        <Badge className="absolute top-2.5 right-2.5 z-10 bg-background/90 backdrop-blur-sm text-foreground border-0 capitalize text-[10px]">
-                          {programModeIcons[program.mode]}<span className="ml-1">{program.mode}</span>
-                        </Badge>
                       </Link>
                       <CardContent className="p-4 sm:p-5 flex flex-col flex-grow">
                         <div className="flex items-start justify-between gap-2 mb-1.5">
                           <h3 className="font-heading font-semibold text-sm sm:text-base text-foreground line-clamp-2 group-hover:text-primary transition-colors leading-snug flex-1">
                             {program.title}
                           </h3>
-                          <Badge className={`shrink-0 capitalize text-[10px] ${programStatusColors[program.effectiveStatus] || ""}`}>
-                            {program.effectiveStatus}
-                          </Badge>
+                          <div className="flex flex-col items-end gap-1 shrink-0">
+                            <Badge className={`capitalize text-[10px] ${programStatusColors[program.effectiveStatus] || ""}`}>
+                              {program.effectiveStatus}
+                            </Badge>
+                            <Badge variant="outline" className="capitalize text-[10px] gap-1">
+                              {programModeIcons[program.mode]}{program.mode}
+                            </Badge>
+                          </div>
                         </div>
                         {program.short_description && (
                           <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{program.short_description}</p>
@@ -542,9 +544,6 @@ const Index = () => {
                             <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{program.duration}</span>
                           )}
 
-                          {program.duration && (
-                            <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{program.duration}</span>
-                          )}
                           {program.location && (
                             <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{program.location}</span>
                           )}
