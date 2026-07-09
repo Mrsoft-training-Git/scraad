@@ -1,6 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, ShieldCheck, GraduationCap, BookOpen, CreditCard, ChevronDown, ChevronUp, TrendingUp, ArrowUpRight } from "lucide-react";
 import { PromoBarSettings } from "@/components/admin/PromoBarSettings";
+import { AdsManager } from "@/components/admin/AdsManager";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -314,7 +316,18 @@ export const AdminDashboard = () => {
         </Card>
       </div>
 
-      <PromoBarSettings />
+      <Tabs defaultValue="promo" className="w-full">
+        <TabsList>
+          <TabsTrigger value="promo">Promo Bar</TabsTrigger>
+          <TabsTrigger value="ads">Ads</TabsTrigger>
+        </TabsList>
+        <TabsContent value="promo" className="mt-4">
+          <PromoBarSettings />
+        </TabsContent>
+        <TabsContent value="ads" className="mt-4">
+          <AdsManager />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
