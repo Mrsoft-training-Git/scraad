@@ -24,6 +24,7 @@ import { useCursorGlow } from "@/hooks/useCursorGlow";
 import { Squiggle, ArrowDoodle, Lightning, Underline } from "@/components/Doodles";
 import { FloatingAd } from "@/components/FloatingAd";
 import { getEffectiveProgramStatus } from "@/lib/program-status";
+import { renderMarkdown } from "@/components/MarkdownEditor";
 
 interface Course {
   id: string;
