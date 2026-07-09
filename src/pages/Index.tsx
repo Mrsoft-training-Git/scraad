@@ -203,7 +203,7 @@ const Index = () => {
         {/* Doodle accents (decorative) */}
 
 
-        <Lightning className="hidden lg:block absolute bottom-32 left-[6%] w-7 h-7 text-secondary/80 animate-bounce-soft" style={{ animationDelay: "0.6s" }} aria-hidden />
+        
         <Squiggle className="hidden lg:block absolute bottom-20 right-[18%] w-20 h-5 text-secondary/70" aria-hidden />
 
         {/* Floating blobs */}
