@@ -1750,6 +1750,7 @@ export type Database = {
           instructor_id: string | null
           instructor_name: string | null
           intro_video_url: string | null
+          is_published: boolean
           learning_outcomes: string[] | null
           location: string | null
           max_participants: number | null
@@ -1779,6 +1780,7 @@ export type Database = {
           instructor_id?: string | null
           instructor_name?: string | null
           intro_video_url?: string | null
+          is_published?: boolean
           learning_outcomes?: string[] | null
           location?: string | null
           max_participants?: number | null
@@ -1808,6 +1810,7 @@ export type Database = {
           instructor_id?: string | null
           instructor_name?: string | null
           intro_video_url?: string | null
+          is_published?: boolean
           learning_outcomes?: string[] | null
           location?: string | null
           max_participants?: number | null
