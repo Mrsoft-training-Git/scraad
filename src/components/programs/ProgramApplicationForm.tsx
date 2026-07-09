@@ -32,7 +32,6 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
     age: "",
     country: "Nigeria",
     gender: "",
-    education_level: "",
     address: "",
     motivation: "",
     guardian_name: "",
@@ -46,7 +45,7 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
     e.preventDefault();
     const fullName = `${form.first_name} ${form.last_name}`.trim();
 
-    if (!form.first_name.trim() || !form.last_name.trim() || !form.email.trim() || !form.phone.trim() || !form.age || !form.country.trim() || !form.gender || !form.education_level || !form.address.trim()) {
+    if (!form.first_name.trim() || !form.last_name.trim() || !form.email.trim() || !form.phone.trim() || !form.age || !form.country.trim() || !form.gender || !form.address.trim()) {
       toast({ title: "Please fill in all required fields", variant: "destructive" });
       return;
     }
@@ -126,7 +125,6 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
           phone: form.phone.trim(),
           country: form.country.trim(),
           gender: form.gender,
-          education_level: form.education_level,
         }).eq("id", effectiveUserId);
       }
 
@@ -187,33 +185,17 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
             </div>
           </div>
 
-          <div className="grid sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Gender *</Label>
-              <Select value={form.gender} onValueChange={(v) => setForm({ ...form, gender: v })}>
-                <SelectTrigger><SelectValue placeholder="Select gender" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="male">Male</SelectItem>
-                  <SelectItem value="female">Female</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                  <SelectItem value="prefer_not_to_say">Prefer not to say</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Education Level *</Label>
-              <Select value={form.education_level} onValueChange={(v) => setForm({ ...form, education_level: v })}>
-                <SelectTrigger><SelectValue placeholder="Select level" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="secondary">Secondary School</SelectItem>
-                  <SelectItem value="diploma">Diploma / OND</SelectItem>
-                  <SelectItem value="bachelors">Bachelor's Degree</SelectItem>
-                  <SelectItem value="masters">Master's Degree</SelectItem>
-                  <SelectItem value="doctorate">Doctorate / PhD</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="space-y-2">
+            <Label>Gender *</Label>
+            <Select value={form.gender} onValueChange={(v) => setForm({ ...form, gender: v })}>
+              <SelectTrigger><SelectValue placeholder="Select gender" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="male">Male</SelectItem>
+                <SelectItem value="female">Female</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+                <SelectItem value="prefer_not_to_say">Prefer not to say</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
