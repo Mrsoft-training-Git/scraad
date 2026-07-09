@@ -71,7 +71,7 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
         if (!uploadError) cv_url = path;
       }
 
-      const { error } = await supabase.from("program_applications").insert({
+      const { error } = await supabase.from("program_applications").upsert({
         program_id: programId,
         user_id: userId,
         full_name: form.full_name.trim(),
@@ -86,14 +86,11 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
         guardian_email: form.guardian_email.trim() || null,
         guardian_relationship: form.guardian_relationship || null,
         cv_url,
-      });
+        status: "pending",
+      }, { onConflict: "program_id,user_id" });
 
       if (error) {
-        if (error.code === "23505") {
-          toast({ title: "You've already applied to this program", variant: "destructive" });
-        } else {
-          throw error;
-        }
+        throw error;
       } else {
         toast({ title: "Application submitted!", description: "We'll review your application and get back to you." });
         onSuccess();
