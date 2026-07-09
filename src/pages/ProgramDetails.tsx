@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ProgramApplicationForm } from "@/components/programs/ProgramApplicationForm";
 import { format } from "date-fns";
 import { IntroVideoHero } from "@/components/IntroVideo";
+import { renderMarkdown } from "@/components/MarkdownEditor";
 import { getEffectiveProgramStatus } from "@/lib/program-status";
 
 interface Program {
