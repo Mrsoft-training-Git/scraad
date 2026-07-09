@@ -311,27 +311,6 @@ const Index = () => {
       {/* ─── TRUST MARQUEE ─── */}
       <LogoMarquee />
 
-      {/* ─── STATS ─── */}
-      <section className="py-12 lg:py-16 bg-background">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {stats.map((s, i) => (
-              <div
-                key={i}
-                className="text-center group animate-fade-in-up"
-                style={{ animationDelay: `${i * 0.08}s`, opacity: 0 }}
-              >
-                <div className="font-display italic font-light text-3xl md:text-4xl text-primary group-hover:text-secondary transition-colors duration-500 min-h-[60px] flex items-center justify-center">
-                  Loading…
-                </div>
-                <div className="text-xs uppercase tracking-[0.18em] text-muted-foreground mt-2 font-medium">
-                  {s.label}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* ─── CATEGORIES ─── */}
       <section className="py-16 lg:py-24 bg-background">
