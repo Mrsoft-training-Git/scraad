@@ -362,7 +362,7 @@ const ProgramDetails = () => {
                       <Button onClick={handleApplyClick} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6 text-lg">
                         {applicationStatus === "rejected" ? "Re-apply for Program" : "Apply for Program"}
                       </Button>
-                      <p className="text-xs text-muted-foreground text-center">Free to apply. Admission required.</p>
+                      
                     </>
                   ) : (
                     <Button disabled className="w-full py-6 text-lg">
