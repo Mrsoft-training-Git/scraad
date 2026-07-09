@@ -85,16 +85,13 @@ const CourseEnrollment = () => {
   const [agreementCommitment, setAgreementCommitment] = useState(false);
   const [agreementRules, setAgreementRules] = useState(false);
 
+  const [password, setPassword] = useState("");
+
   useEffect(() => {
     const init = async () => {
       setLoading(true);
 
       const { data: { user: authUser } } = await supabase.auth.getUser();
-      if (!authUser) {
-        toast({ title: "Please log in", description: "You must be logged in to enroll.", variant: "destructive" });
-        navigate("/auth");
-        return;
-      }
       setUser(authUser);
 
       // Fetch course
@@ -114,34 +111,36 @@ const CourseEnrollment = () => {
         setCourse(courseData);
       }
 
-      // Pre-fill profile data
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", authUser.id)
-        .single();
+      // Pre-fill profile data if logged in
+      if (authUser) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", authUser.id)
+          .single();
 
-      if (profile) {
-        const nameParts = (profile.full_name || "").split(" ");
-        setPersonalInfo({
-          firstName: nameParts[0] || "",
-          lastName: nameParts.slice(1).join(" ") || "",
-          email: profile.email || authUser.email || "",
-          phone: profile.phone || "",
-          country: profile.country || "",
-          dateOfBirth: profile.date_of_birth || "",
-          gender: profile.gender || "",
-          educationLevel: profile.education_level || "",
-        });
+        if (profile) {
+          const nameParts = (profile.full_name || "").split(" ");
+          setPersonalInfo({
+            firstName: nameParts[0] || "",
+            lastName: nameParts.slice(1).join(" ") || "",
+            email: profile.email || authUser.email || "",
+            phone: profile.phone || "",
+            country: profile.country || "",
+            dateOfBirth: profile.date_of_birth || "",
+            gender: profile.gender || "",
+            educationLevel: profile.education_level || "",
+          });
 
-        setLearningResources({
-          deviceType: profile.device_type || "",
-          hasInternet: profile.has_internet === true ? "yes" : profile.has_internet === false ? "no" : "",
-          weeklyHours: profile.weekly_hours || "",
-          weeklyHoursOther: "",
-        });
-      } else {
-        setPersonalInfo(prev => ({ ...prev, email: authUser.email || "" }));
+          setLearningResources({
+            deviceType: profile.device_type || "",
+            hasInternet: profile.has_internet === true ? "yes" : profile.has_internet === false ? "no" : "",
+            weeklyHours: profile.weekly_hours || "",
+            weeklyHoursOther: "",
+          });
+        } else {
+          setPersonalInfo(prev => ({ ...prev, email: authUser.email || "" }));
+        }
       }
 
       setLoading(false);
