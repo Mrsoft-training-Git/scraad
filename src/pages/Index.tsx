@@ -445,12 +445,12 @@ const Index = () => {
                 ))}
               </div>
             ) : (
-              <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 snap-x snap-mandatory scrollbar-hide sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:overflow-visible sm:pb-0 sm:mx-0 sm:px-0 sm:snap-none">
+              <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 snap-x snap-mandatory scrollbar-hide sm:mx-0 sm:px-0">
                 {programs.map((program, idx) => (
                   <div
                     key={program.id}
                     style={{ animationDelay: `${idx * 0.1}s`, opacity: 0 }}
-                    className="animate-fade-in-up w-[78vw] max-w-[300px] shrink-0 snap-start sm:w-auto sm:max-w-none"
+                    className="animate-fade-in-up w-[78vw] max-w-[300px] shrink-0 snap-start sm:w-[320px] sm:max-w-none"
                   >
                     <Card className="group overflow-hidden bg-card border border-border hover:border-secondary/40 hover:shadow-2xl transition-all duration-500 flex flex-col h-full rounded-2xl">
                       <Link to={`/programs/${program.id}`} className="block aspect-video overflow-hidden relative bg-muted">
