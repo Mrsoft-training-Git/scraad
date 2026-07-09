@@ -139,7 +139,7 @@ const Programs = () => {
   const filtered = programs.filter((p) => {
     const matchesSearch = !search || p.title.toLowerCase().includes(search.toLowerCase());
     const matchesMode = modeFilter === "all" || p.mode === modeFilter;
-    const matchesStatus = statusFilter === "all" || p.status === statusFilter;
+    const matchesStatus = statusFilter === "all" || p.effectiveStatus === statusFilter;
     const matchesTrack = trackFilter === "All" || p.track === trackFilter;
     return matchesSearch && matchesMode && matchesStatus && matchesTrack;
   });
