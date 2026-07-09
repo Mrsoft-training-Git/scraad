@@ -82,7 +82,7 @@ const ProgramGridCard = ({ program }: { program: Program }) => {
             <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{program.location}</span>
           )}
           {program.start_date && (
-            <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" />{format(new Date(program.start_date), "MMM d, yyyy")}</span>
+            <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" />Starts {format(new Date(program.start_date), "MMM d, yyyy")}</span>
           )}
         </div>
         <div className="grid grid-cols-2 gap-2">
