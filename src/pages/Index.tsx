@@ -301,44 +301,8 @@ const Index = () => {
                 />
               </div>
 
-              {/* Floating stat pills */}
-              <div className="absolute top-6 -left-2 lg:-left-6 glass-card rounded-2xl px-4 py-3 animate-bounce-soft" style={{ animationDelay: "0.4s" }}>
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-secondary/15 flex items-center justify-center">
-                    <Users className="w-4.5 h-4.5 text-secondary" />
-                  </div>
-                  <div>
-                    <div className="font-heading font-bold text-sm text-foreground">
-                      Loading…
-                    </div>
-                    <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Learners</div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="absolute -bottom-2 right-6 glass-card rounded-2xl px-4 py-3 animate-bounce-soft" style={{ animationDelay: "1.2s" }}>
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-success/15 flex items-center justify-center">
-                    <TrendingUp className="w-4.5 h-4.5 text-success" />
-                  </div>
-                  <div>
-                    <div className="font-heading font-bold text-sm text-foreground">Live</div>
-                    <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Cohorts</div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="absolute top-1/2 -right-2 lg:-right-4 glass-card rounded-2xl px-4 py-3 animate-bounce-soft" style={{ animationDelay: "0.8s" }}>
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-warning/20 flex items-center justify-center">
-                    <Star className="w-4.5 h-4.5 fill-warning text-warning" />
-                  </div>
-                  <div>
-                    <div className="font-heading font-bold text-sm text-foreground">New</div>
-                    <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Platform</div>
-                  </div>
-                </div>
-              </div>
+              {/* Featured Ad */}
+              <FloatingAd />
             </div>
           </div>
         </div>
