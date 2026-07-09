@@ -128,10 +128,6 @@ const ProgramDetails = () => {
   };
 
   const handleApplyClick = () => {
-    if (!user) {
-      navigate("/auth");
-      return;
-    }
     setShowApplicationForm(true);
   };
 
