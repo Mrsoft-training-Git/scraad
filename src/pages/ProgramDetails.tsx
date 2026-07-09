@@ -342,13 +342,6 @@ const ProgramDetails = () => {
                       </Badge>
                       <p className="text-sm text-muted-foreground">Your application is under review. We'll notify you once a decision is made.</p>
                     </div>
-                  ) : applicationStatus === "rejected" ? (
-                    <div className="text-center">
-                      <Badge className="bg-destructive/10 text-destructive border-destructive/20 text-base px-4 py-2 mb-3">
-                        Application Not Accepted
-                      </Badge>
-                      <p className="text-sm text-muted-foreground">Unfortunately, your application was not accepted for this cohort.</p>
-                    </div>
                   ) : effectiveStatus === "open" ? (
                     <>
                       {program.price > 0 && (
