@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Clock, MapPin, Calendar, ArrowLeft, Users, CheckCircle, Laptop, Building, Globe, Share2, Check } from "lucide-react";
+import { Clock, MapPin, Calendar, ArrowLeft, Users, CheckCircle, Laptop, Building, Globe, Share2, Check, GraduationCap, ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ProgramApplicationForm } from "@/components/programs/ProgramApplicationForm";
@@ -36,6 +36,8 @@ interface Program {
   price: number;
   allows_part_payment: boolean;
   first_tranche_amount: number | null;
+  track: string | null;
+  level?: string | null;
 }
 
 const modeLabels: Record<string, { label: string; icon: React.ReactNode }> = {
@@ -54,6 +56,7 @@ const ProgramDetails = () => {
   const [applicationStatus, setApplicationStatus] = useState<string | null>(null);
   const [showApplicationForm, setShowApplicationForm] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [showFullDescription, setShowFullDescription] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -162,45 +165,90 @@ const ProgramDetails = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      {/* Hero */}
-      <section className="relative">
-        <div className="aspect-[3/1] md:aspect-[4/1] overflow-hidden bg-black">
-          <IntroVideoHero
-            videoUrl={program.intro_video_url}
-            posterUrl={program.banner_image_url}
-            alt={program.title}
-            className="w-full h-full"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none" />
-        </div>
-        <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12 text-white">
-          <div className="container mx-auto">
-            <Button variant="ghost" className="text-white/80 hover:text-white mb-4 -ml-3" asChild>
-              <Link to="/programs"><ArrowLeft className="w-4 h-4 mr-2" />All Programs</Link>
-            </Button>
-            <div className="flex flex-wrap gap-2 mb-3">
-              <Badge className="bg-white/20 backdrop-blur-sm border-white/20 text-white capitalize">
-                {modeInfo.icon} <span className="ml-1">{modeInfo.label}</span>
-              </Badge>
-              <Badge className={`capitalize ${effectiveStatus === "open" ? "bg-green-500/80 text-white border-0" : effectiveStatus === "ongoing" ? "bg-secondary/80 text-white border-0" : "bg-white/20 text-white border-white/20"}`}>
-                {effectiveStatus}
-              </Badge>
+      {/* Editorial Hero — ODeL style */}
+      <section className="bg-primary text-primary-foreground">
+        <div className="container mx-auto px-4 py-8 md:py-12">
+          <Link
+            to="/programs"
+            className="inline-flex items-center gap-2 text-primary-foreground/70 hover:text-primary-foreground text-sm mb-8 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" /> All programs
+          </Link>
+
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+            {/* Left: text */}
+            <div>
+              {program.track && (
+                <p className="text-xs md:text-sm font-semibold tracking-[0.2em] uppercase text-secondary mb-4">
+                  {program.track}
+                </p>
+              )}
+              <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] mb-6">
+                {program.title}
+              </h1>
+              {program.description && (
+                <div className="relative">
+                  <p className={`text-primary-foreground/80 text-base md:text-lg leading-relaxed whitespace-pre-line ${showFullDescription ? "" : "line-clamp-4"}`}>
+                    {program.description}
+                  </p>
+                  {program.description.length > 240 && (
+                    <button
+                      onClick={() => setShowFullDescription(v => !v)}
+                      className="mt-3 inline-flex items-center gap-1 text-secondary hover:text-secondary/80 font-semibold text-sm transition-colors"
+                    >
+                      {showFullDescription ? "Show less" : "Show more"}
+                      <ChevronDown className={`w-4 h-4 transition-transform ${showFullDescription ? "rotate-180" : ""}`} />
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {/* Meta row */}
+              <div className="mt-8 flex flex-wrap gap-x-8 gap-y-3 text-sm text-primary-foreground/80">
+                {program.duration && (
+                  <span className="flex items-center gap-2"><Clock className="w-4 h-4" />{program.duration}</span>
+                )}
+                <span className="flex items-center gap-2 capitalize">{modeInfo.icon}{modeInfo.label}</span>
+                <span className={`flex items-center gap-2 capitalize font-medium ${
+                  effectiveStatus === "open" ? "text-green-400" :
+                  effectiveStatus === "ongoing" ? "text-secondary" : "text-primary-foreground/60"
+                }`}>
+                  <span className={`w-2 h-2 rounded-full ${
+                    effectiveStatus === "open" ? "bg-green-400" :
+                    effectiveStatus === "ongoing" ? "bg-secondary" : "bg-primary-foreground/40"
+                  } ${effectiveStatus !== "closed" ? "animate-pulse" : ""}`} />
+                  {effectiveStatus}
+                </span>
+                {program.location && (
+                  <span className="flex items-center gap-2"><MapPin className="w-4 h-4" />{program.location}</span>
+                )}
+                {program.start_date && (
+                  <span className="flex items-center gap-2"><Calendar className="w-4 h-4" />Starts {format(new Date(program.start_date), "MMM d, yyyy")}</span>
+                )}
+                {program.max_participants && (
+                  <span className="flex items-center gap-2"><Users className="w-4 h-4" />Max {program.max_participants}</span>
+                )}
+                {program.instructor_name && (
+                  <span className="flex items-center gap-2"><GraduationCap className="w-4 h-4" />{program.instructor_name}</span>
+                )}
+              </div>
             </div>
-            <h1 className="font-heading text-3xl md:text-5xl font-bold mb-2">{program.title}</h1>
-            {program.instructor_name && <p className="text-white/80">Instructor: {program.instructor_name}</p>}
+
+            {/* Right: banner */}
+            <div className="lg:pl-4">
+              <div className="rounded-2xl overflow-hidden shadow-2xl bg-black aspect-video">
+                <IntroVideoHero
+                  videoUrl={program.intro_video_url}
+                  posterUrl={program.banner_image_url}
+                  alt={program.title}
+                  className="w-full h-full"
+                />
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Key info bar */}
-      <section className="bg-card border-b">
-        <div className="container mx-auto px-4 py-4 flex flex-wrap gap-6 text-sm text-muted-foreground">
-          {program.duration && <span className="flex items-center gap-1.5"><Clock className="w-4 h-4 text-primary" />{program.duration}</span>}
-          {program.location && <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4 text-primary" />{program.location}</span>}
-          {program.start_date && <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4 text-primary" />Starts {format(new Date(program.start_date), "MMM d, yyyy")}</span>}
-          {program.max_participants && <span className="flex items-center gap-1.5"><Users className="w-4 h-4 text-primary" />Max {program.max_participants} participants</span>}
-        </div>
-      </section>
 
       {/* Content */}
       <section className="py-12">
