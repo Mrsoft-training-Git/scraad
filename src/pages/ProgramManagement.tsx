@@ -14,7 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useDashboardAuth } from "@/hooks/useDashboardAuth";
 import { format } from "date-fns";
-import { Check, X, Clock, Mail, Phone, FileText, Loader2, Plus, ImagePlus, Pencil, MapPin, Calendar, Users } from "lucide-react";
+import { Check, X, Clock, Mail, Phone, FileText, Loader2, Plus, ImagePlus, Pencil, MapPin, Calendar, Users, Eye, EyeOff } from "lucide-react";
 import { IntroVideoUploader } from "@/components/IntroVideoUploader";
 import { MarkdownEditor, renderMarkdown } from "@/components/MarkdownEditor";
 
@@ -33,6 +33,7 @@ interface FullProgram {
   location: string | null; banner_image_url: string | null; intro_video_url: string | null; created_at: string;
   max_participants: number | null; learning_outcomes: string[] | null; requirements: string[] | null;
   track: string | null; instructor_id: string | null; instructor_name: string | null;
+  is_published: boolean;
 }
 interface Application { id: string; program_id: string; user_id: string; full_name: string; email: string; phone: string | null; experience_level: string | null; motivation: string | null; cv_url: string | null; status: string; created_at: string; }
 interface InstructorOption { id: string; full_name: string | null; email: string | null; }
@@ -84,6 +85,18 @@ const ProgramManagement = () => {
   };
 
   const getProgramTitle = (pid: string) => programs.find(p => p.id === pid)?.title || "Unknown";
+
+  const togglePublish = async (program: FullProgram) => {
+    const next = !program.is_published;
+    const { error } = await supabase.from("programs").update({ is_published: next }).eq("id", program.id);
+    if (error) {
+      toast({ title: "Failed to update", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: next ? "Program published" : "Program unpublished" });
+    fetchPrograms();
+  };
+
   const statusBadge = (status: string) => {
     const s: Record<string, string> = { pending: "bg-secondary/10 text-secondary border-secondary/20", approved: "bg-green-500/10 text-green-600 border-green-500/20", rejected: "bg-destructive/10 text-destructive border-destructive/20" };
     return <Badge className={`capitalize ${s[status] || ""}`}>{status}</Badge>;
@@ -173,7 +186,12 @@ const ProgramManagement = () => {
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">No image</div>
                       )}
-                      <div className="absolute top-2.5 right-2.5 z-10">{programStatusBadge(program.status)}</div>
+                      <div className="absolute top-2.5 right-2.5 z-10 flex flex-col items-end gap-1">
+                        {programStatusBadge(program.status)}
+                        {!program.is_published && (
+                          <Badge className="bg-destructive/90 text-destructive-foreground border-0 text-[10px]">Unpublished</Badge>
+                        )}
+                      </div>
                       {program.track && (
                         <Badge className="absolute top-2.5 left-2.5 bg-card/95 backdrop-blur text-foreground text-[10px] border-0 z-10">{program.track}</Badge>
                       )}
@@ -200,12 +218,26 @@ const ProgramManagement = () => {
                           <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{format(new Date(program.start_date), "MMM d, yyyy")}</span>
                         )}
                       </div>
-                      <div className="mt-auto pt-3 border-t border-border grid grid-cols-2 gap-2">
-                        <Button size="sm" variant="outline" className="text-xs h-9 border-border hover:bg-muted" onClick={() => setEditingProgram(program)}>
-                          <Pencil className="w-3.5 h-3.5 mr-1" /> Edit
-                        </Button>
-                        <Button size="sm" className="text-xs h-9 font-semibold bg-secondary text-secondary-foreground hover:bg-secondary/90" asChild>
-                          <Link to={`/dashboard/programs/${program.id}/manage`}>Manage</Link>
+                      <div className="mt-auto pt-3 border-t border-border space-y-2">
+                        <div className="grid grid-cols-2 gap-2">
+                          <Button size="sm" variant="outline" className="text-xs h-9 border-border hover:bg-muted" onClick={() => setEditingProgram(program)}>
+                            <Pencil className="w-3.5 h-3.5 mr-1" /> Edit
+                          </Button>
+                          <Button size="sm" className="text-xs h-9 font-semibold bg-secondary text-secondary-foreground hover:bg-secondary/90" asChild>
+                            <Link to={`/dashboard/programs/${program.id}/manage`}>Manage</Link>
+                          </Button>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant={program.is_published ? "outline" : "default"}
+                          className="w-full text-xs h-9"
+                          onClick={() => togglePublish(program)}
+                        >
+                          {program.is_published ? (
+                            <><EyeOff className="w-3.5 h-3.5 mr-1" /> Unpublish</>
+                          ) : (
+                            <><Eye className="w-3.5 h-3.5 mr-1" /> Publish</>
+                          )}
                         </Button>
                       </div>
                     </CardContent>
