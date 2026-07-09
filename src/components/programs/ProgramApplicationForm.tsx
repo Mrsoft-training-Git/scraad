@@ -36,6 +36,7 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
     motivation: "",
     guardian_name: "",
     guardian_phone: "",
+    guardian_relationship: "",
   });
 
   const age = form.age ? parseInt(form.age) : null;
@@ -55,10 +56,10 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
       return;
     }
 
-    if (!form.guardian_name.trim() || !form.guardian_phone.trim()) {
+    if (!form.guardian_name.trim() || !form.guardian_phone.trim() || !form.guardian_relationship.trim()) {
       toast({
-        title: isMinor ? "Guardian details required" : "Guardian details required",
-        description: "Please provide a guardian name and phone number.",
+        title: "Guardian details required",
+        description: "Please provide guardian name, phone and relationship.",
         variant: "destructive",
       });
       return;
@@ -112,6 +113,7 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
         motivation: form.motivation.trim() || null,
         guardian_name: form.guardian_name.trim(),
         guardian_phone: form.guardian_phone.trim(),
+        guardian_relationship: form.guardian_relationship.trim(),
         status: "pending",
       }, { onConflict: "program_id,user_id" });
 
@@ -226,6 +228,16 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
                   id="guardian_phone"
                   value={form.guardian_phone}
                   onChange={(e) => setForm({ ...form, guardian_phone: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="space-y-2 sm:col-span-2">
+                <Label htmlFor="guardian_relationship">Relationship *</Label>
+                <Input
+                  id="guardian_relationship"
+                  value={form.guardian_relationship}
+                  onChange={(e) => setForm({ ...form, guardian_relationship: e.target.value })}
+                  placeholder="e.g. Father, Mother, Uncle"
                   required
                 />
               </div>
