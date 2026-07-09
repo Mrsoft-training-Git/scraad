@@ -460,6 +460,114 @@ const Index = () => {
         </div>
       </section>
 
+      {/* ─── UPCOMING & ACTIVE PROGRAMS ─── */}
+      {(programsLoading || programs.length > 0) && (
+        <section className="py-16 lg:py-24 bg-background relative overflow-hidden">
+          <div className="container mx-auto px-4 relative">
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-12">
+              <div className="max-w-xl">
+                <p className="text-sm uppercase tracking-[0.2em] text-secondary font-semibold mb-3">— Programs</p>
+                <h2 className="font-heading font-bold text-4xl md:text-5xl text-foreground leading-tight">
+                  Upcoming & active{" "}
+                  <span className="font-display italic font-light text-primary">programs</span>
+                </h2>
+                <p className="text-muted-foreground text-base mt-3">
+                  Accredited degrees and professional tracks — apply now or join a live cohort
+                </p>
+              </div>
+              <Link
+                to="/programs"
+                className="hidden md:inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-secondary transition-colors group"
+              >
+                View all programs
+                <ArrowDoodle className="w-10 h-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </div>
+
+            {programsLoading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="h-80 bg-muted animate-pulse rounded-2xl border border-border" />
+                ))}
+              </div>
+            ) : (
+              <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 snap-x snap-mandatory scrollbar-hide sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:overflow-visible sm:pb-0 sm:mx-0 sm:px-0 sm:snap-none">
+                {programs.map((program, idx) => (
+                  <div
+                    key={program.id}
+                    style={{ animationDelay: `${idx * 0.1}s`, opacity: 0 }}
+                    className="animate-fade-in-up w-[78vw] max-w-[300px] shrink-0 snap-start sm:w-auto sm:max-w-none"
+                  >
+                    <Card className="group overflow-hidden bg-card border border-border hover:border-secondary/40 hover:shadow-2xl transition-all duration-500 flex flex-col h-full rounded-2xl">
+                      <Link to={`/programs/${program.id}`} className="block aspect-video overflow-hidden relative bg-muted">
+                        {program.banner_image_url ? (
+                          <img
+                            src={program.banner_image_url}
+                            alt={program.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">No image</div>
+                        )}
+                        <Badge className={`absolute top-2.5 left-2.5 z-10 capitalize text-[10px] ${programStatusColors[program.status] || ""}`}>
+                          {program.status}
+                        </Badge>
+                        <Badge className="absolute top-2.5 right-2.5 z-10 bg-background/90 backdrop-blur-sm text-foreground border-0 capitalize text-[10px]">
+                          {programModeIcons[program.mode]}<span className="ml-1">{program.mode}</span>
+                        </Badge>
+                      </Link>
+                      <CardContent className="p-4 sm:p-5 flex flex-col flex-grow">
+                        <h3 className="font-heading font-semibold text-sm sm:text-base text-foreground line-clamp-2 mb-1 group-hover:text-primary transition-colors leading-snug min-h-[2.5rem]">
+                          {program.title}
+                        </h3>
+                        {program.short_description && (
+                          <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{program.short_description}</p>
+                        )}
+                        <div className="flex flex-wrap gap-2 mb-3 text-[11px] text-muted-foreground">
+                          {program.track && <Badge variant="secondary" className="text-[10px]">{program.track}</Badge>}
+                          {program.duration && (
+                            <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{program.duration}</span>
+                          )}
+                          {program.location && (
+                            <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{program.location}</span>
+                          )}
+                          {program.start_date && (
+                            <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{new Date(program.start_date).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</span>
+                          )}
+                        </div>
+                        <div className="mt-auto pt-3 border-t border-border">
+                          <Button
+                            size="sm"
+                            className="w-full text-xs h-9 font-semibold bg-secondary text-secondary-foreground hover:bg-secondary/90"
+                            asChild
+                          >
+                            <Link to={`/programs/${program.id}`}>
+                              {program.status === "open" ? "Apply Now" : "View Details"}
+                              <ArrowRight className="ml-1.5 w-3.5 h-3.5" />
+                            </Link>
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="text-center mt-8 md:hidden">
+              <Link to="/programs">
+                <Button variant="outline" className="font-semibold border-primary text-primary hover:bg-primary hover:text-primary-foreground">
+                  View All Programs <ArrowRight className="ml-2 w-4 h-4" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+
+
       {/* ─── WHY SCRAAD ─── */}
       <section className="py-16 lg:py-24 bg-background">
         <div ref={whyRef} className="container mx-auto px-4 reveal-on-scroll">
