@@ -22,6 +22,7 @@ import { CourseCard } from "@/components/CourseCard";
 import { useReveal } from "@/hooks/useReveal";
 import { useCursorGlow } from "@/hooks/useCursorGlow";
 import { Squiggle, ArrowDoodle, Lightning, Underline } from "@/components/Doodles";
+import { FloatingAd } from "@/components/FloatingAd";
 import { getEffectiveProgramStatus } from "@/lib/program-status";
 
 interface Course {
