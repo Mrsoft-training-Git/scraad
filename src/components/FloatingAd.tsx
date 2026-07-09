@@ -63,8 +63,9 @@ export const FloatingAd = () => {
             className="block w-auto h-auto max-w-[140px] sm:max-w-[180px] max-h-[180px] sm:max-h-[220px] object-contain group-hover:scale-[1.03] transition-transform duration-500"
           />
           <span className="absolute top-2 left-2 text-[10px] uppercase tracking-wider bg-secondary text-secondary-foreground px-2 py-0.5 rounded-full font-bold shadow">
-            Featured
+            Apply Now
           </span>
+
         </div>
       </Link>
 
