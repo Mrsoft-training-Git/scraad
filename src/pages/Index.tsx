@@ -22,6 +22,7 @@ import { CourseCard } from "@/components/CourseCard";
 import { useReveal } from "@/hooks/useReveal";
 import { useCursorGlow } from "@/hooks/useCursorGlow";
 import { Squiggle, ArrowDoodle, Lightning, Underline } from "@/components/Doodles";
+import { getEffectiveProgramStatus } from "@/lib/program-status";
 
 interface Course {
   id: string;
@@ -44,8 +45,10 @@ interface HomeProgram {
   mode: string;
   location: string | null;
   start_date: string | null;
+  end_date: string | null;
   status: string;
   track: string | null;
+  effectiveStatus: "open" | "ongoing" | "closed";
 }
 
 const programModeIcons: Record<string, React.ReactNode> = {
@@ -130,11 +133,18 @@ const Index = () => {
     setProgramsLoading(true);
     const { data, error } = await supabase
       .from("programs")
-      .select("id, title, short_description, banner_image_url, duration, mode, location, start_date, status, track")
+      .select("id, title, short_description, banner_image_url, duration, mode, location, start_date, end_date, status, track")
       .in("status", ["open", "ongoing"])
       .order("start_date", { ascending: true, nullsFirst: false })
-      .limit(6);
-    if (!error && data) setPrograms(data as HomeProgram[]);
+      .limit(12);
+    if (!error && data) {
+      const withEffective = (data as any[]).map(p => ({
+        ...p,
+        effectiveStatus: getEffectiveProgramStatus(p),
+      })) as HomeProgram[];
+      // Hide anything that has actually ended based on dates
+      setPrograms(withEffective.filter(p => p.effectiveStatus !== "closed").slice(0, 6));
+    }
     setProgramsLoading(false);
   };
 
@@ -510,8 +520,8 @@ const Index = () => {
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">No image</div>
                         )}
-                        <Badge className={`absolute top-2.5 left-2.5 z-10 capitalize text-[10px] ${programStatusColors[program.status] || ""}`}>
-                          {program.status}
+                        <Badge className={`absolute top-2.5 left-2.5 z-10 capitalize text-[10px] ${programStatusColors[program.effectiveStatus] || ""}`}>
+                          {program.effectiveStatus}
                         </Badge>
                         <Badge className="absolute top-2.5 right-2.5 z-10 bg-background/90 backdrop-blur-sm text-foreground border-0 capitalize text-[10px]">
                           {programModeIcons[program.mode]}<span className="ml-1">{program.mode}</span>
@@ -543,7 +553,7 @@ const Index = () => {
                             asChild
                           >
                             <Link to={`/programs/${program.id}`}>
-                              {program.status === "open" ? "Apply Now" : "View Details"}
+                              {program.effectiveStatus === "open" ? "Apply Now" : "View Details"}
                               <ArrowRight className="ml-1.5 w-3.5 h-3.5" />
                             </Link>
                           </Button>
