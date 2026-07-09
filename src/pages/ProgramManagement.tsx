@@ -122,7 +122,7 @@ const ProgramManagement = () => {
                   <CardContent className="p-4 sm:p-5 flex flex-col flex-grow">
                     <h3 className="font-heading font-semibold text-sm sm:text-base text-foreground line-clamp-2 mb-1 group-hover:text-primary transition-colors leading-snug min-h-[2.5rem]">{program.title}</h3>
                     {program.short_description && (
-                      <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{program.short_description}</p>
+                      <div className="text-xs text-muted-foreground line-clamp-2 mb-3 prose prose-xs max-w-none" dangerouslySetInnerHTML={{ __html: renderMarkdown(program.short_description) }} />
                     )}
                     <div className="flex flex-wrap gap-2 mb-3 text-[11px] text-muted-foreground">
                       {program.track && <Badge variant="secondary" className="text-[10px]">{program.track}</Badge>}
