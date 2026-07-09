@@ -520,22 +520,28 @@ const Index = () => {
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">No image</div>
                         )}
-                        <Badge className={`absolute top-2.5 left-2.5 z-10 capitalize text-[10px] ${programStatusColors[program.effectiveStatus] || ""}`}>
-                          {program.effectiveStatus}
-                        </Badge>
                         <Badge className="absolute top-2.5 right-2.5 z-10 bg-background/90 backdrop-blur-sm text-foreground border-0 capitalize text-[10px]">
                           {programModeIcons[program.mode]}<span className="ml-1">{program.mode}</span>
                         </Badge>
                       </Link>
                       <CardContent className="p-4 sm:p-5 flex flex-col flex-grow">
-                        <h3 className="font-heading font-semibold text-sm sm:text-base text-foreground line-clamp-2 mb-1 group-hover:text-primary transition-colors leading-snug min-h-[2.5rem]">
-                          {program.title}
-                        </h3>
+                        <div className="flex items-start justify-between gap-2 mb-1.5">
+                          <h3 className="font-heading font-semibold text-sm sm:text-base text-foreground line-clamp-2 group-hover:text-primary transition-colors leading-snug flex-1">
+                            {program.title}
+                          </h3>
+                          <Badge className={`shrink-0 capitalize text-[10px] ${programStatusColors[program.effectiveStatus] || ""}`}>
+                            {program.effectiveStatus}
+                          </Badge>
+                        </div>
                         {program.short_description && (
                           <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{program.short_description}</p>
                         )}
                         <div className="flex flex-wrap gap-2 mb-3 text-[11px] text-muted-foreground">
                           {program.track && <Badge variant="secondary" className="text-[10px]">{program.track}</Badge>}
+                          {program.duration && (
+                            <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{program.duration}</span>
+                          )}
+
                           {program.duration && (
                             <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{program.duration}</span>
                           )}
