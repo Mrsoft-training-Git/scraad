@@ -35,7 +35,7 @@ interface FullProgram {
   track: string | null; instructor_id: string | null; instructor_name: string | null;
   is_published: boolean;
 }
-interface Application { id: string; program_id: string; user_id: string; full_name: string; email: string; phone: string | null; experience_level: string | null; motivation: string | null; cv_url: string | null; status: string; created_at: string; }
+interface Application { id: string; program_id: string; user_id: string; full_name: string; email: string; phone: string | null; experience_level: string | null; motivation: string | null; cv_url: string | null; status: string; created_at: string; age: number | null; address: string | null; guardian_name: string | null; guardian_phone: string | null; guardian_email: string | null; guardian_relationship: string | null; }
 interface InstructorOption { id: string; full_name: string | null; email: string | null; }
 
 const ProgramManagement = () => {
