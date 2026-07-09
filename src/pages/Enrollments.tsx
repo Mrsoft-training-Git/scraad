@@ -276,6 +276,7 @@ const Enrollments = () => {
                     <TableHead className="text-xs">Payment</TableHead>
                     <TableHead className="text-xs">Access</TableHead>
                     <TableHead className="text-xs">Date</TableHead>
+                    <TableHead className="text-xs text-right">Details</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
