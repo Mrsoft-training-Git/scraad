@@ -186,22 +186,12 @@ const ProgramDetails = () => {
               <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] mb-6">
                 {program.title}
               </h1>
-              {program.description && (
-                <div className="relative">
-                  <p className={`text-primary-foreground/80 text-base md:text-lg leading-relaxed whitespace-pre-line ${showFullDescription ? "" : "line-clamp-4"}`}>
-                    {program.description}
-                  </p>
-                  {program.description.length > 240 && (
-                    <button
-                      onClick={() => setShowFullDescription(v => !v)}
-                      className="mt-3 inline-flex items-center gap-1 text-secondary hover:text-secondary/80 font-semibold text-sm transition-colors"
-                    >
-                      {showFullDescription ? "Show less" : "Show more"}
-                      <ChevronDown className={`w-4 h-4 transition-transform ${showFullDescription ? "rotate-180" : ""}`} />
-                    </button>
-                  )}
-                </div>
+              {program.short_description && (
+                <p className="text-primary-foreground/80 text-base md:text-lg leading-relaxed whitespace-pre-line">
+                  {program.short_description}
+                </p>
               )}
+
 
               {/* Meta row */}
               <div className="mt-8 flex flex-wrap gap-x-8 gap-y-3 text-sm text-primary-foreground/80">
