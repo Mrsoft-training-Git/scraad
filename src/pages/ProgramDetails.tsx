@@ -156,6 +156,7 @@ const ProgramDetails = () => {
 
   const modeInfo = modeLabels[program.mode] || modeLabels.physical;
   const schedule = Array.isArray(program.schedule) ? program.schedule : [];
+  const effectiveStatus = getEffectiveProgramStatus(program);
 
   return (
     <div className="min-h-screen bg-background">
