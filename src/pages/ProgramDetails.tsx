@@ -361,12 +361,12 @@ const ProgramDetails = () => {
       </section>
 
       {/* Application Form Dialog */}
-      {showApplicationForm && user && (
+      {showApplicationForm && (
         <ProgramApplicationForm
           programId={program.id}
           programTitle={program.title}
-          userId={user.id}
-          userEmail={user.email || ""}
+          userId={user?.id ?? null}
+          userEmail={user?.email || ""}
           open={showApplicationForm}
           onOpenChange={setShowApplicationForm}
           onSuccess={() => {
