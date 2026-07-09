@@ -126,6 +126,18 @@ const Index = () => {
     setLoading(false);
   };
 
+  const fetchFeaturedPrograms = async () => {
+    setProgramsLoading(true);
+    const { data, error } = await supabase
+      .from("programs")
+      .select("id, title, short_description, banner_image_url, duration, mode, location, start_date, status, track")
+      .in("status", ["open", "ongoing"])
+      .order("start_date", { ascending: true, nullsFirst: false })
+      .limit(6);
+    if (!error && data) setPrograms(data as HomeProgram[]);
+    setProgramsLoading(false);
+  };
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) navigate(`/courses?q=${encodeURIComponent(searchQuery)}`);
