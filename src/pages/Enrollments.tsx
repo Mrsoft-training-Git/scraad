@@ -35,7 +35,28 @@ const Enrollments = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState("all");
+  const [detail, setDetail] = useState<any>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
   const navigate = useNavigate();
+
+  const openDetail = async (rec: EnrollmentRecord) => {
+    setDetail({ record: rec });
+    setDetailLoading(true);
+    const profileRes = await supabase.from("profiles").select("*").eq("id", rec.user_id).maybeSingle();
+    let application: any = null;
+    if (rec.item_type === "program") {
+      const appRes = await supabase
+        .from("program_applications")
+        .select("*")
+        .eq("user_id", rec.user_id)
+        .eq("program_id", rec.item_id)
+        .order("created_at", { ascending: false })
+        .maybeSingle();
+      application = appRes.data;
+    }
+    setDetail({ record: rec, profile: profileRes.data, application });
+    setDetailLoading(false);
+  };
 
   useEffect(() => {
     const init = async () => {
