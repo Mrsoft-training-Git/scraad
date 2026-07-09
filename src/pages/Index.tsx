@@ -353,7 +353,9 @@ const Index = () => {
       </section>
 
       {/* ─── FEATURED COURSES ─── */}
+      {!loading && courses.length > 0 && (
       <section className="py-16 lg:py-24 bg-muted/40 relative overflow-hidden">
+
         <Squiggle className="hidden md:block absolute top-12 right-[8%] w-24 h-6 text-secondary/40" aria-hidden />
         <div className="container mx-auto px-4 relative">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-12">
@@ -413,6 +415,8 @@ const Index = () => {
           </div>
         </div>
       </section>
+      )}
+
 
       {/* ─── UPCOMING & ACTIVE PROGRAMS ─── */}
       {(programsLoading || programs.length > 0) && (
