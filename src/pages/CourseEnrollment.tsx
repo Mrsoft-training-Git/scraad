@@ -568,7 +568,25 @@ const CourseEnrollment = () => {
               <CardContent className="p-6 md:p-8 space-y-6">
                 <h2 className="font-heading text-xl font-bold">{isFree ? "Enrollment" : "Payment"}</h2>
 
+                {!user && (
+                  <div className="rounded-xl border border-primary/20 bg-primary/5 p-5 space-y-2">
+                    <Label htmlFor="signup-password" className="text-sm font-semibold">Create a password *</Label>
+                    <p className="text-xs text-muted-foreground">
+                      We'll create your student account with <span className="font-medium text-foreground">{personalInfo.email}</span> so you can log in later to complete payment and access your course.
+                    </p>
+                    <Input
+                      id="signup-password"
+                      type="password"
+                      minLength={6}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Minimum 6 characters"
+                    />
+                  </div>
+                )}
+
                 <div className="grid gap-4">
+
                   {isFree ? (
                     /* Free Course — simple enroll */
                     <div className="border border-green-500/20 rounded-xl p-5 bg-green-500/5">
