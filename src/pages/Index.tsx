@@ -415,6 +415,8 @@ const Index = () => {
           </div>
         </div>
       </section>
+      )}
+
 
       {/* ─── UPCOMING & ACTIVE PROGRAMS ─── */}
       {(programsLoading || programs.length > 0) && (
