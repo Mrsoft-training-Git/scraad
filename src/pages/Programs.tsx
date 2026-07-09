@@ -11,6 +11,7 @@ import { Clock, Users, MapPin, Calendar, Search, ArrowRight, Laptop, Building, G
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { IntroVideoCard } from "@/components/IntroVideo";
+import { getEffectiveProgramStatus } from "@/lib/program-status";
 
 interface Program {
   id: string;
@@ -22,9 +23,11 @@ interface Program {
   mode: string;
   location: string | null;
   start_date: string | null;
+  end_date: string | null;
   status: string;
   max_participants: number | null;
   track: string | null;
+  effectiveStatus: "open" | "ongoing" | "closed";
 }
 
 const programTracks = ["All", "PGD", "B.Sc", "M.Sc", "HND", "Professional Certs"] as const;
@@ -50,8 +53,8 @@ const ProgramGridCard = ({ program }: { program: Program }) => {
       onMouseLeave={() => setHover(false)}
     >
       <div className="aspect-video overflow-hidden relative">
-        <Badge className={`absolute top-3 left-3 z-10 capitalize ${statusColors[program.status] || ""}`}>
-          {program.status}
+        <Badge className={`absolute top-3 left-3 z-10 capitalize ${statusColors[program.effectiveStatus] || ""}`}>
+          {program.effectiveStatus}
         </Badge>
         <Badge className="absolute top-3 right-3 z-10 bg-background/90 backdrop-blur-sm text-foreground border-0 capitalize">
           {modeIcons[program.mode]} <span className="ml-1">{program.mode}</span>
@@ -83,13 +86,13 @@ const ProgramGridCard = ({ program }: { program: Program }) => {
           )}
         </div>
         <div className="grid grid-cols-2 gap-2">
-          {program.status === "open" ? (
+          {program.effectiveStatus === "open" ? (
             <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold" asChild>
               <Link to={`/programs/${program.id}`}>Apply Now</Link>
             </Button>
           ) : (
             <Button size="sm" variant="outline" disabled>
-              {program.status === "ongoing" ? "In Progress" : "Closed"}
+              {program.effectiveStatus === "ongoing" ? "In Progress" : "Closed"}
             </Button>
           )}
           <Button size="sm" variant="outline" asChild>
@@ -119,11 +122,16 @@ const Programs = () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("programs")
-      .select("id, title, short_description, banner_image_url, intro_video_url, duration, mode, location, start_date, status, max_participants, track")
+      .select("id, title, short_description, banner_image_url, intro_video_url, duration, mode, location, start_date, end_date, status, max_participants, track")
       .neq("status", "closed")
       .order("created_at", { ascending: false });
     if (!error && data) {
-      setPrograms(data);
+      const withEffective = (data as any[]).map(p => ({
+        ...p,
+        effectiveStatus: getEffectiveProgramStatus(p),
+      })) as Program[];
+      // Hide date-expired programs from the public catalog
+      setPrograms(withEffective.filter(p => p.effectiveStatus !== "closed"));
     }
     setLoading(false);
   };
@@ -131,7 +139,7 @@ const Programs = () => {
   const filtered = programs.filter((p) => {
     const matchesSearch = !search || p.title.toLowerCase().includes(search.toLowerCase());
     const matchesMode = modeFilter === "all" || p.mode === modeFilter;
-    const matchesStatus = statusFilter === "all" || p.status === statusFilter;
+    const matchesStatus = statusFilter === "all" || p.effectiveStatus === statusFilter;
     const matchesTrack = trackFilter === "All" || p.track === trackFilter;
     return matchesSearch && matchesMode && matchesStatus && matchesTrack;
   });

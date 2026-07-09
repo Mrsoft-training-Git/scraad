@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ProgramApplicationForm } from "@/components/programs/ProgramApplicationForm";
 import { format } from "date-fns";
 import { IntroVideoHero } from "@/components/IntroVideo";
+import { getEffectiveProgramStatus } from "@/lib/program-status";
 
 interface Program {
   id: string;
@@ -155,6 +156,7 @@ const ProgramDetails = () => {
 
   const modeInfo = modeLabels[program.mode] || modeLabels.physical;
   const schedule = Array.isArray(program.schedule) ? program.schedule : [];
+  const effectiveStatus = getEffectiveProgramStatus(program);
 
   return (
     <div className="min-h-screen bg-background">
@@ -180,8 +182,8 @@ const ProgramDetails = () => {
               <Badge className="bg-white/20 backdrop-blur-sm border-white/20 text-white capitalize">
                 {modeInfo.icon} <span className="ml-1">{modeInfo.label}</span>
               </Badge>
-              <Badge className={`capitalize ${program.status === "open" ? "bg-green-500/80 text-white border-0" : program.status === "ongoing" ? "bg-secondary/80 text-white border-0" : "bg-white/20 text-white border-white/20"}`}>
-                {program.status}
+              <Badge className={`capitalize ${effectiveStatus === "open" ? "bg-green-500/80 text-white border-0" : effectiveStatus === "ongoing" ? "bg-secondary/80 text-white border-0" : "bg-white/20 text-white border-white/20"}`}>
+                {effectiveStatus}
               </Badge>
             </div>
             <h1 className="font-heading text-3xl md:text-5xl font-bold mb-2">{program.title}</h1>
@@ -299,7 +301,7 @@ const ProgramDetails = () => {
                       </Badge>
                       <p className="text-sm text-muted-foreground">Unfortunately, your application was not accepted for this cohort.</p>
                     </div>
-                  ) : program.status === "open" ? (
+                  ) : effectiveStatus === "open" ? (
                     <>
                       {program.price > 0 && (
                         <div className="text-center mb-3">
@@ -318,7 +320,7 @@ const ProgramDetails = () => {
                     </>
                   ) : (
                     <Button disabled className="w-full py-6 text-lg">
-                      {program.status === "ongoing" ? "Program In Progress" : "Applications Closed"}
+                      {effectiveStatus === "ongoing" ? "Program In Progress" : "Applications Closed"}
                     </Button>
                   )}
 
