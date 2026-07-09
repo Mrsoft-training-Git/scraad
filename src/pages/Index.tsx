@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import {
   ArrowRight, Award, BookOpen, Clock, GraduationCap, TrendingUp,
   Users, Star, Briefcase, Monitor, Target, BarChart3,
-  Palette, Code2, Megaphone, Heart, Quote
+  Palette, Code2, Megaphone, Heart, Quote, Calendar, MapPin, Laptop, Building, Globe
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import heroTraining from "@/assets/hero-training.jpg";
