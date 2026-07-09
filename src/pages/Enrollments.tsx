@@ -10,8 +10,9 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Users, BookOpen, TrendingUp, UserCheck, Search, GraduationCap, Eye } from "lucide-react";
+import { Users, BookOpen, TrendingUp, UserCheck, Search, GraduationCap, Eye, Download } from "lucide-react";
 import { format } from "date-fns";
+import * as XLSX from "xlsx";
 
 interface EnrollmentRecord {
   id: string;
