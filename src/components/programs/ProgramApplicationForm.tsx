@@ -231,6 +231,16 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
                   required
                 />
               </div>
+              <div className="space-y-2 sm:col-span-2">
+                <Label htmlFor="guardian_relationship">Relationship *</Label>
+                <Input
+                  id="guardian_relationship"
+                  value={form.guardian_relationship}
+                  onChange={(e) => setForm({ ...form, guardian_relationship: e.target.value })}
+                  placeholder="e.g. Father, Mother, Uncle"
+                  required
+                />
+              </div>
             </div>
           </div>
 
