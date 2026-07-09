@@ -186,7 +186,12 @@ const ProgramManagement = () => {
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">No image</div>
                       )}
-                      <div className="absolute top-2.5 right-2.5 z-10">{programStatusBadge(program.status)}</div>
+                      <div className="absolute top-2.5 right-2.5 z-10 flex flex-col items-end gap-1">
+                        {programStatusBadge(program.status)}
+                        {!program.is_published && (
+                          <Badge className="bg-destructive/90 text-destructive-foreground border-0 text-[10px]">Unpublished</Badge>
+                        )}
+                      </div>
                       {program.track && (
                         <Badge className="absolute top-2.5 left-2.5 bg-card/95 backdrop-blur text-foreground text-[10px] border-0 z-10">{program.track}</Badge>
                       )}
@@ -213,12 +218,26 @@ const ProgramManagement = () => {
                           <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{format(new Date(program.start_date), "MMM d, yyyy")}</span>
                         )}
                       </div>
-                      <div className="mt-auto pt-3 border-t border-border grid grid-cols-2 gap-2">
-                        <Button size="sm" variant="outline" className="text-xs h-9 border-border hover:bg-muted" onClick={() => setEditingProgram(program)}>
-                          <Pencil className="w-3.5 h-3.5 mr-1" /> Edit
-                        </Button>
-                        <Button size="sm" className="text-xs h-9 font-semibold bg-secondary text-secondary-foreground hover:bg-secondary/90" asChild>
-                          <Link to={`/dashboard/programs/${program.id}/manage`}>Manage</Link>
+                      <div className="mt-auto pt-3 border-t border-border space-y-2">
+                        <div className="grid grid-cols-2 gap-2">
+                          <Button size="sm" variant="outline" className="text-xs h-9 border-border hover:bg-muted" onClick={() => setEditingProgram(program)}>
+                            <Pencil className="w-3.5 h-3.5 mr-1" /> Edit
+                          </Button>
+                          <Button size="sm" className="text-xs h-9 font-semibold bg-secondary text-secondary-foreground hover:bg-secondary/90" asChild>
+                            <Link to={`/dashboard/programs/${program.id}/manage`}>Manage</Link>
+                          </Button>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant={program.is_published ? "outline" : "default"}
+                          className="w-full text-xs h-9"
+                          onClick={() => togglePublish(program)}
+                        >
+                          {program.is_published ? (
+                            <><EyeOff className="w-3.5 h-3.5 mr-1" /> Unpublish</>
+                          ) : (
+                            <><Eye className="w-3.5 h-3.5 mr-1" /> Publish</>
+                          )}
                         </Button>
                       </div>
                     </CardContent>
