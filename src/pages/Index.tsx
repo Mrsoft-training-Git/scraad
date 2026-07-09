@@ -302,9 +302,8 @@ const Index = () => {
                 />
               </div>
 
-              {/* Featured Ad */}
-              <FloatingAd />
             </div>
+
           </div>
         </div>
       </section>
@@ -716,7 +715,9 @@ const Index = () => {
       </section>
 
       <Footer />
+      <FloatingAd />
     </div>
+
   );
 };
 
