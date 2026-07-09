@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Clock, MapPin, Calendar, ArrowLeft, Users, CheckCircle, Laptop, Building, Globe, Share2, Check } from "lucide-react";
+import { Clock, MapPin, Calendar, ArrowLeft, Users, CheckCircle, Laptop, Building, Globe, Share2, Check, GraduationCap, ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ProgramApplicationForm } from "@/components/programs/ProgramApplicationForm";
