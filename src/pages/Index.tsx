@@ -715,7 +715,9 @@ const Index = () => {
       </section>
 
       <Footer />
+      <FloatingAd />
     </div>
+
   );
 };
 
