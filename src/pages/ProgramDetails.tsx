@@ -56,6 +56,7 @@ const ProgramDetails = () => {
   const [applicationStatus, setApplicationStatus] = useState<string | null>(null);
   const [showApplicationForm, setShowApplicationForm] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [showFullDescription, setShowFullDescription] = useState(false);
 
   useEffect(() => {
     if (id) {
