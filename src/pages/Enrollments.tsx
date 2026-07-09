@@ -59,6 +59,69 @@ const Enrollments = () => {
     setDetailLoading(false);
   };
 
+  const handleExport = async () => {
+    const rows = filtered;
+    // Fetch profiles for all users
+    const userIds = [...new Set(rows.map(r => r.user_id))];
+    const programRows = rows.filter(r => r.item_type === "program");
+
+    const [profilesRes, appsRes] = await Promise.all([
+      userIds.length
+        ? supabase.from("profiles").select("*").in("id", userIds)
+        : Promise.resolve({ data: [] as any[] }),
+      programRows.length
+        ? supabase
+            .from("program_applications")
+            .select("*")
+            .in("user_id", programRows.map(r => r.user_id))
+            .in("program_id", programRows.map(r => r.item_id))
+        : Promise.resolve({ data: [] as any[] }),
+    ]);
+
+    const profileMap = new Map((profilesRes.data || []).map((p: any) => [p.id, p]));
+    const appMap = new Map(
+      (appsRes.data || []).map((a: any) => [`${a.user_id}-${a.program_id}`, a])
+    );
+
+    const data = rows.map((r) => {
+      const p: any = profileMap.get(r.user_id) || {};
+      const a: any = r.item_type === "program" ? appMap.get(`${r.user_id}-${r.item_id}`) || {} : {};
+      return {
+        "Student Name": r.student_name,
+        "Email": r.student_email,
+        "Phone": p.phone || a.phone || "",
+        "Gender": r.student_gender || "",
+        "Date of Birth": p.date_of_birth || "",
+        "Age": a.age || "",
+        "Country": p.country || "",
+        "Address": a.address || "",
+        "Education Level": p.education_level || "",
+        "Department": p.department || "",
+        "Item": r.item_name,
+        "Type": r.item_type,
+        "Progress %": r.progress,
+        "Payment Status": r.payment_status,
+        "Access Status": r.access_status,
+        "Enrolled Date": format(new Date(r.created_at), "yyyy-MM-dd"),
+        "Experience Level": a.experience_level || "",
+        "Motivation": a.motivation || "",
+        "Application Status": a.status || "",
+        "Guardian Name": a.guardian_name || "",
+        "Guardian Relationship": a.guardian_relationship || "",
+        "Guardian Phone": a.guardian_phone || "",
+        "Guardian Email": a.guardian_email || "",
+        "CV URL": a.cv_url || "",
+      };
+    });
+
+    const ws = XLSX.utils.json_to_sheet(data);
+    ws["!cols"] = Object.keys(data[0] || { x: "" }).map(() => ({ wch: 22 }));
+    const wb = XLSX.utils.book_new();
+    const sheetName = activeTab === "all" ? "Enrollments" : activeTab === "courses" ? "Courses" : "Programs";
+    XLSX.utils.book_append_sheet(wb, ws, sheetName);
+    XLSX.writeFile(wb, `enrollments-${sheetName.toLowerCase()}-${format(new Date(), "yyyy-MM-dd")}.xlsx`);
+  };
+
   useEffect(() => {
     const init = async () => {
       const { data: { session } } = await supabase.auth.getSession();
