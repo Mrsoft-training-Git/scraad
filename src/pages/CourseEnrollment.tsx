@@ -85,16 +85,13 @@ const CourseEnrollment = () => {
   const [agreementCommitment, setAgreementCommitment] = useState(false);
   const [agreementRules, setAgreementRules] = useState(false);
 
+  const [password, setPassword] = useState("");
+
   useEffect(() => {
     const init = async () => {
       setLoading(true);
 
       const { data: { user: authUser } } = await supabase.auth.getUser();
-      if (!authUser) {
-        toast({ title: "Please log in", description: "You must be logged in to enroll.", variant: "destructive" });
-        navigate("/auth");
-        return;
-      }
       setUser(authUser);
 
       // Fetch course
@@ -114,34 +111,36 @@ const CourseEnrollment = () => {
         setCourse(courseData);
       }
 
-      // Pre-fill profile data
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", authUser.id)
-        .single();
+      // Pre-fill profile data if logged in
+      if (authUser) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", authUser.id)
+          .single();
 
-      if (profile) {
-        const nameParts = (profile.full_name || "").split(" ");
-        setPersonalInfo({
-          firstName: nameParts[0] || "",
-          lastName: nameParts.slice(1).join(" ") || "",
-          email: profile.email || authUser.email || "",
-          phone: profile.phone || "",
-          country: profile.country || "",
-          dateOfBirth: profile.date_of_birth || "",
-          gender: profile.gender || "",
-          educationLevel: profile.education_level || "",
-        });
+        if (profile) {
+          const nameParts = (profile.full_name || "").split(" ");
+          setPersonalInfo({
+            firstName: nameParts[0] || "",
+            lastName: nameParts.slice(1).join(" ") || "",
+            email: profile.email || authUser.email || "",
+            phone: profile.phone || "",
+            country: profile.country || "",
+            dateOfBirth: profile.date_of_birth || "",
+            gender: profile.gender || "",
+            educationLevel: profile.education_level || "",
+          });
 
-        setLearningResources({
-          deviceType: profile.device_type || "",
-          hasInternet: profile.has_internet === true ? "yes" : profile.has_internet === false ? "no" : "",
-          weeklyHours: profile.weekly_hours || "",
-          weeklyHoursOther: "",
-        });
-      } else {
-        setPersonalInfo(prev => ({ ...prev, email: authUser.email || "" }));
+          setLearningResources({
+            deviceType: profile.device_type || "",
+            hasInternet: profile.has_internet === true ? "yes" : profile.has_internet === false ? "no" : "",
+            weeklyHours: profile.weekly_hours || "",
+            weeklyHoursOther: "",
+          });
+        } else {
+          setPersonalInfo(prev => ({ ...prev, email: authUser.email || "" }));
+        }
       }
 
       setLoading(false);
@@ -184,8 +183,9 @@ const CourseEnrollment = () => {
     return true;
   };
 
-  const saveProfileData = async () => {
-    if (!user) return;
+  const saveProfileData = async (uid?: string) => {
+    const targetId = uid || user?.id;
+    if (!targetId) return true;
     setSaving(true);
 
     const fullName = `${personalInfo.firstName} ${personalInfo.lastName}`.trim();
@@ -205,7 +205,7 @@ const CourseEnrollment = () => {
         has_internet: learningResources.hasInternet === "yes",
         weekly_hours: hours,
       })
-      .eq("id", user.id);
+      .eq("id", targetId);
 
     setSaving(false);
     if (error) {
@@ -219,13 +219,53 @@ const CourseEnrollment = () => {
     if (step === 1 && !validateStep1()) return;
     if (step === 2 && !validateStep2()) return;
 
-    if (step === 2) {
-      // Save profile data before proceeding to payment
+    if (step === 2 && user) {
+      // Save profile data before proceeding to payment (only if logged in)
       const saved = await saveProfileData();
       if (!saved) return;
     }
 
     setStep(step + 1);
+  };
+
+  // Sign up an unauthenticated learner and return their new user id
+  const signUpLearner = async (): Promise<string | null> => {
+    if (password.length < 6) {
+      toast({ title: "Password required", description: "Please choose a password (min 6 characters).", variant: "destructive" });
+      return null;
+    }
+    const fullName = `${personalInfo.firstName} ${personalInfo.lastName}`.trim();
+    const { data, error } = await supabase.auth.signUp({
+      email: personalInfo.email,
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/dashboard/learning`,
+        data: { full_name: fullName },
+      },
+    });
+    if (error) {
+      if (error.message?.toLowerCase().includes("registered")) {
+        toast({
+          title: "Email already registered",
+          description: "Please log in first, then enroll.",
+          variant: "destructive",
+        });
+      } else {
+        toast({ title: "Signup failed", description: error.message, variant: "destructive" });
+      }
+      return null;
+    }
+    // If no session was returned, email confirmation is required — the user
+    // cannot insert enrollments via RLS until they log in.
+    if (!data.session) {
+      toast({
+        title: "Confirm your email to continue",
+        description: "We sent a confirmation link to your inbox. After confirming, log in to complete enrollment and payment.",
+      });
+      navigate("/auth");
+      return null;
+    }
+    return data.user?.id ?? null;
   };
 
   const handlePayNow = async (paymentType: "full" | "first") => {
@@ -234,6 +274,23 @@ const CourseEnrollment = () => {
       return;
     }
     if (!course) return;
+
+    // Unauthenticated: create account, enroll unpaid, redirect to auth to complete payment
+    if (!user) {
+      const newId = await signUpLearner();
+      if (!newId) return;
+      await saveProfileData(newId);
+      const success = await enrollInCourse(course.id, course.title);
+      if (success) {
+        toast({
+          title: "Account created!",
+          description: "Please log in to complete your payment and access the course.",
+        });
+        navigate("/auth");
+      }
+      return;
+    }
+
     await initializePayment(course.id, paymentType);
   };
 
@@ -243,6 +300,21 @@ const CourseEnrollment = () => {
       return;
     }
     if (!course) return;
+
+    if (!user) {
+      const newId = await signUpLearner();
+      if (!newId) return;
+      await saveProfileData(newId);
+      const success = await enrollInCourse(course.id, course.title);
+      if (success) {
+        toast({
+          title: "Enrolled!",
+          description: "Log in to your portal to complete payment and access the course.",
+        });
+        navigate("/auth");
+      }
+      return;
+    }
 
     const success = await enrollInCourse(course.id, course.title);
     if (success) {
@@ -257,6 +329,18 @@ const CourseEnrollment = () => {
       return;
     }
     if (!course) return;
+
+    if (!user) {
+      const newId = await signUpLearner();
+      if (!newId) return;
+      await saveProfileData(newId);
+      const success = await enrollInCourse(course.id, course.title, true);
+      if (success) {
+        toast({ title: "Enrolled!", description: "Log in to start learning." });
+        navigate("/auth");
+      }
+      return;
+    }
 
     const success = await enrollInCourse(course.id, course.title, true);
     if (success) {
@@ -484,7 +568,25 @@ const CourseEnrollment = () => {
               <CardContent className="p-6 md:p-8 space-y-6">
                 <h2 className="font-heading text-xl font-bold">{isFree ? "Enrollment" : "Payment"}</h2>
 
+                {!user && (
+                  <div className="rounded-xl border border-primary/20 bg-primary/5 p-5 space-y-2">
+                    <Label htmlFor="signup-password" className="text-sm font-semibold">Create a password *</Label>
+                    <p className="text-xs text-muted-foreground">
+                      We'll create your student account with <span className="font-medium text-foreground">{personalInfo.email}</span> so you can log in later to complete payment and access your course.
+                    </p>
+                    <Input
+                      id="signup-password"
+                      type="password"
+                      minLength={6}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Minimum 6 characters"
+                    />
+                  </div>
+                )}
+
                 <div className="grid gap-4">
+
                   {isFree ? (
                     /* Free Course — simple enroll */
                     <div className="border border-green-500/20 rounded-xl p-5 bg-green-500/5">

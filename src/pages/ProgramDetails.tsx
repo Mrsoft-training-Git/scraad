@@ -128,10 +128,6 @@ const ProgramDetails = () => {
   };
 
   const handleApplyClick = () => {
-    if (!user) {
-      navigate("/auth");
-      return;
-    }
     setShowApplicationForm(true);
   };
 
@@ -336,17 +332,8 @@ const ProgramDetails = () => {
                     </div>
                   ) : effectiveStatus === "open" ? (
                     <>
-                      {program.price > 0 && (
-                        <div className="text-center mb-3">
-                          <p className="text-3xl font-bold text-primary">₦{program.price.toLocaleString()}</p>
-                          {program.allows_part_payment && program.first_tranche_amount && (
-                            <p className="text-xs text-muted-foreground mt-1">
-                              Or pay in installments from ₦{program.first_tranche_amount.toLocaleString()}
-                            </p>
-                          )}
-                        </div>
-                      )}
                       {applicationStatus === "rejected" && (
+
                         <div className="rounded-md border border-destructive/20 bg-destructive/5 p-3 text-xs text-muted-foreground">
                           Your previous application wasn't accepted. You can re-apply for this cohort.
                         </div>
@@ -374,12 +361,12 @@ const ProgramDetails = () => {
       </section>
 
       {/* Application Form Dialog */}
-      {showApplicationForm && user && (
+      {showApplicationForm && (
         <ProgramApplicationForm
           programId={program.id}
           programTitle={program.title}
-          userId={user.id}
-          userEmail={user.email || ""}
+          userId={user?.id ?? null}
+          userEmail={user?.email || ""}
           open={showApplicationForm}
           onOpenChange={setShowApplicationForm}
           onSuccess={() => {
