@@ -60,13 +60,49 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
       return;
     }
 
+    if (!isAuthenticated && password.length < 6) {
+      toast({ title: "Please choose a password (min 6 characters) to create your account", variant: "destructive" });
+      return;
+    }
+
     setSubmitting(true);
     try {
+      let effectiveUserId = userId;
+
+      // If unauthenticated, create an account first
+      if (!isAuthenticated) {
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          email: form.email.trim(),
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/dashboard/learning`,
+            data: { full_name: form.full_name.trim() },
+          },
+        });
+        if (signUpError) {
+          if (signUpError.message?.toLowerCase().includes("registered")) {
+            toast({
+              title: "Email already registered",
+              description: "Please log in first, then apply.",
+              variant: "destructive",
+            });
+          } else {
+            throw signUpError;
+          }
+          setSubmitting(false);
+          return;
+        }
+        effectiveUserId = signUpData.user?.id ?? null;
+        if (!effectiveUserId) {
+          throw new Error("Account created but session unavailable. Please log in and try again.");
+        }
+      }
+
       let cv_url: string | null = null;
 
       if (cvFile) {
         const ext = cvFile.name.split(".").pop();
-        const path = `program-applications/${programId}/${userId}.${ext}`;
+        const path = `program-applications/${programId}/${effectiveUserId}.${ext}`;
         const { error: uploadError } = await supabase.storage
           .from("cv-uploads")
           .upload(path, cvFile, { upsert: true });
@@ -75,7 +111,7 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
 
       const { error } = await supabase.from("program_applications").upsert({
         program_id: programId,
-        user_id: userId,
+        user_id: effectiveUserId,
         full_name: form.full_name.trim(),
         email: form.email.trim(),
         phone: form.phone.trim() || null,
@@ -94,7 +130,12 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
       if (error) {
         throw error;
       } else {
-        toast({ title: "Application submitted!", description: "We'll review your application and get back to you." });
+        toast({
+          title: "Application submitted!",
+          description: isAuthenticated
+            ? "We'll review your application and get back to you."
+            : "Check your email to confirm your account, then log in to complete payment and access your program.",
+        });
         onSuccess();
       }
     } catch (err: any) {
