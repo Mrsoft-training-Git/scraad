@@ -56,10 +56,10 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
       return;
     }
 
-    if (!form.guardian_name.trim() || !form.guardian_phone.trim()) {
+    if (!form.guardian_name.trim() || !form.guardian_phone.trim() || !form.guardian_relationship.trim()) {
       toast({
-        title: isMinor ? "Guardian details required" : "Guardian details required",
-        description: "Please provide a guardian name and phone number.",
+        title: "Guardian details required",
+        description: "Please provide guardian name, phone and relationship.",
         variant: "destructive",
       });
       return;
