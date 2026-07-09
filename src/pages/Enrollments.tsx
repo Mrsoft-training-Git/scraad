@@ -10,8 +10,9 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Users, BookOpen, TrendingUp, UserCheck, Search, GraduationCap, Eye } from "lucide-react";
+import { Users, BookOpen, TrendingUp, UserCheck, Search, GraduationCap, Eye, Download } from "lucide-react";
 import { format } from "date-fns";
+import * as XLSX from "xlsx";
 
 interface EnrollmentRecord {
   id: string;
@@ -56,6 +57,69 @@ const Enrollments = () => {
     }
     setDetail({ record: rec, profile: profileRes.data, application });
     setDetailLoading(false);
+  };
+
+  const handleExport = async () => {
+    const rows = filtered;
+    // Fetch profiles for all users
+    const userIds = [...new Set(rows.map(r => r.user_id))];
+    const programRows = rows.filter(r => r.item_type === "program");
+
+    const [profilesRes, appsRes] = await Promise.all([
+      userIds.length
+        ? supabase.from("profiles").select("*").in("id", userIds)
+        : Promise.resolve({ data: [] as any[] }),
+      programRows.length
+        ? supabase
+            .from("program_applications")
+            .select("*")
+            .in("user_id", programRows.map(r => r.user_id))
+            .in("program_id", programRows.map(r => r.item_id))
+        : Promise.resolve({ data: [] as any[] }),
+    ]);
+
+    const profileMap = new Map((profilesRes.data || []).map((p: any) => [p.id, p]));
+    const appMap = new Map(
+      (appsRes.data || []).map((a: any) => [`${a.user_id}-${a.program_id}`, a])
+    );
+
+    const data = rows.map((r) => {
+      const p: any = profileMap.get(r.user_id) || {};
+      const a: any = r.item_type === "program" ? appMap.get(`${r.user_id}-${r.item_id}`) || {} : {};
+      return {
+        "Student Name": r.student_name,
+        "Email": r.student_email,
+        "Phone": p.phone || a.phone || "",
+        "Gender": r.student_gender || "",
+        "Date of Birth": p.date_of_birth || "",
+        "Age": a.age || "",
+        "Country": p.country || "",
+        "Address": a.address || "",
+        "Education Level": p.education_level || "",
+        "Department": p.department || "",
+        "Item": r.item_name,
+        "Type": r.item_type,
+        "Progress %": r.progress,
+        "Payment Status": r.payment_status,
+        "Access Status": r.access_status,
+        "Enrolled Date": format(new Date(r.created_at), "yyyy-MM-dd"),
+        "Experience Level": a.experience_level || "",
+        "Motivation": a.motivation || "",
+        "Application Status": a.status || "",
+        "Guardian Name": a.guardian_name || "",
+        "Guardian Relationship": a.guardian_relationship || "",
+        "Guardian Phone": a.guardian_phone || "",
+        "Guardian Email": a.guardian_email || "",
+        "CV URL": a.cv_url || "",
+      };
+    });
+
+    const ws = XLSX.utils.json_to_sheet(data);
+    ws["!cols"] = Object.keys(data[0] || { x: "" }).map(() => ({ wch: 22 }));
+    const wb = XLSX.utils.book_new();
+    const sheetName = activeTab === "all" ? "Enrollments" : activeTab === "courses" ? "Courses" : "Programs";
+    XLSX.utils.book_append_sheet(wb, ws, sheetName);
+    XLSX.writeFile(wb, `enrollments-${sheetName.toLowerCase()}-${format(new Date(), "yyyy-MM-dd")}.xlsx`);
   };
 
   useEffect(() => {
@@ -251,14 +315,19 @@ const Enrollments = () => {
                   </TabsList>
                 </Tabs>
               </div>
-              <div className="relative w-full sm:w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search student or item..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="pl-9 h-9 text-sm"
-                />
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <div className="relative flex-1 sm:w-64">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search student or item..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="pl-9 h-9 text-sm"
+                  />
+                </div>
+                <Button size="sm" variant="outline" onClick={handleExport} disabled={filtered.length === 0} className="h-9 whitespace-nowrap">
+                  <Download className="w-4 h-4 mr-2" /> Export
+                </Button>
               </div>
             </div>
           </CardHeader>
