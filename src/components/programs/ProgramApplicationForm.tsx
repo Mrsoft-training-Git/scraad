@@ -45,7 +45,7 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
     e.preventDefault();
     const fullName = `${form.first_name} ${form.last_name}`.trim();
 
-    if (!form.first_name.trim() || !form.last_name.trim() || !form.email.trim() || !form.phone.trim() || !form.age || !form.country.trim() || !form.gender || !form.education_level || !form.address.trim()) {
+    if (!form.first_name.trim() || !form.last_name.trim() || !form.email.trim() || !form.phone.trim() || !form.age || !form.country.trim() || !form.gender || !form.address.trim()) {
       toast({ title: "Please fill in all required fields", variant: "destructive" });
       return;
     }
