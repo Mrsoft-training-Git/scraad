@@ -36,6 +36,8 @@ interface Program {
   price: number;
   allows_part_payment: boolean;
   first_tranche_amount: number | null;
+  track: string | null;
+  level: string | null;
 }
 
 const modeLabels: Record<string, { label: string; icon: React.ReactNode }> = {
