@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ProgramApplicationForm } from "@/components/programs/ProgramApplicationForm";
 import { format } from "date-fns";
 import { IntroVideoHero } from "@/components/IntroVideo";
+import { renderMarkdown } from "@/components/MarkdownEditor";
 import { getEffectiveProgramStatus } from "@/lib/program-status";
 
 interface Program {
@@ -187,9 +188,10 @@ const ProgramDetails = () => {
                 {program.title}
               </h1>
               {program.short_description && (
-                <p className="text-primary-foreground/80 text-base md:text-lg leading-relaxed whitespace-pre-line">
-                  {program.short_description}
-                </p>
+                <div
+                  className="text-primary-foreground/80 text-base md:text-lg leading-relaxed [&_a]:text-secondary [&_a]:underline [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_strong]:font-semibold"
+                  dangerouslySetInnerHTML={{ __html: renderMarkdown(program.short_description) }}
+                />
               )}
 
 

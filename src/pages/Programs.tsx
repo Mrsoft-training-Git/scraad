@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { IntroVideoCard } from "@/components/IntroVideo";
 import { getEffectiveProgramStatus } from "@/lib/program-status";
+import { renderMarkdown } from "@/components/MarkdownEditor";
 
 interface Program {
   id: string;
@@ -72,7 +73,7 @@ const ProgramGridCard = ({ program }: { program: Program }) => {
           {program.title}
         </h3>
         {program.short_description && (
-          <p className="text-muted-foreground text-sm mb-4 line-clamp-2">{program.short_description}</p>
+          <div className="text-muted-foreground text-sm mb-4 line-clamp-2" dangerouslySetInnerHTML={{ __html: renderMarkdown(program.short_description) }} />
         )}
         <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mb-4 mt-auto">
           {program.duration && (

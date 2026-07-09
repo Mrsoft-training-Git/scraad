@@ -16,6 +16,7 @@ import { useDashboardAuth } from "@/hooks/useDashboardAuth";
 import { format } from "date-fns";
 import { Check, X, Clock, Mail, Phone, FileText, Loader2, Plus, ImagePlus, Pencil, MapPin, Calendar, Users } from "lucide-react";
 import { IntroVideoUploader } from "@/components/IntroVideoUploader";
+import { MarkdownEditor, renderMarkdown } from "@/components/MarkdownEditor";
 
 const computeProgramStatus = (startDate: string | null, endDate: string | null): string => {
   const now = new Date();
@@ -121,7 +122,7 @@ const ProgramManagement = () => {
                   <CardContent className="p-4 sm:p-5 flex flex-col flex-grow">
                     <h3 className="font-heading font-semibold text-sm sm:text-base text-foreground line-clamp-2 mb-1 group-hover:text-primary transition-colors leading-snug min-h-[2.5rem]">{program.title}</h3>
                     {program.short_description && (
-                      <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{program.short_description}</p>
+                      <div className="text-xs text-muted-foreground line-clamp-2 mb-3 prose prose-xs max-w-none" dangerouslySetInnerHTML={{ __html: renderMarkdown(program.short_description) }} />
                     )}
                     <div className="flex flex-wrap gap-2 mb-3 text-[11px] text-muted-foreground">
                       {program.track && <Badge variant="secondary" className="text-[10px]">{program.track}</Badge>}
@@ -180,7 +181,7 @@ const ProgramManagement = () => {
                     <CardContent className="p-4 sm:p-5 flex flex-col flex-grow">
                       <h3 className="font-heading font-semibold text-sm sm:text-base text-foreground line-clamp-2 mb-1 group-hover:text-primary transition-colors leading-snug min-h-[2.5rem]">{program.title}</h3>
                       {program.short_description && (
-                        <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{program.short_description}</p>
+                        <div className="text-xs text-muted-foreground line-clamp-2 mb-2" dangerouslySetInnerHTML={{ __html: renderMarkdown(program.short_description) }} />
                       )}
                       <div className="flex flex-wrap gap-x-3 gap-y-1.5 mb-3 text-[11px] text-muted-foreground">
                         {program.instructor_name && (
@@ -364,7 +365,7 @@ const ProgramFormFields = ({ form, setForm, instructors }: { form: any; setForm:
   <>
     <div><Label>Title *</Label><Input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} required /></div>
     <div><Label>Track *</Label><Input placeholder="e.g. Python Programming" value={form.track} onChange={e => setForm({ ...form, track: e.target.value })} required /></div>
-    <div><Label>Short Description</Label><Input value={form.short_description} onChange={e => setForm({ ...form, short_description: e.target.value })} /></div>
+    <div><Label>Short Description</Label><MarkdownEditor value={form.short_description} onChange={v => setForm({ ...form, short_description: v })} rows={3} /></div>
     <div><Label>Full Description</Label><Textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={3} /></div>
     <div className="grid grid-cols-2 gap-4">
       <div><Label>Duration</Label><Input placeholder="e.g. 4 weeks" value={form.duration} onChange={e => setForm({ ...form, duration: e.target.value })} /></div>

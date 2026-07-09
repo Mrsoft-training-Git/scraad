@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { BookOpen, CheckCircle2, PlayCircle, CreditCard, Search, GraduationCap, Clock, UserCheck, Send } from "lucide-react";
+import { renderMarkdown } from "@/components/MarkdownEditor";
 
 type ProgramStatus = "applied" | "admitted" | "in-progress" | "ended";
 
@@ -281,7 +282,7 @@ export const LearningProgramList = ({ userId }: Props) => {
                     {p.title}
                   </h3>
                   {p.short_description && (
-                    <p className="text-xs text-muted-foreground mb-3 line-clamp-2">{p.short_description}</p>
+                    <div className="text-xs text-muted-foreground mb-3 line-clamp-2" dangerouslySetInnerHTML={{ __html: renderMarkdown(p.short_description) }} />
                   )}
                   <div className="mt-auto pt-3 border-t border-border">
                     <Button

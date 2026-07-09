@@ -24,6 +24,7 @@ import { useCursorGlow } from "@/hooks/useCursorGlow";
 import { Squiggle, ArrowDoodle, Lightning, Underline } from "@/components/Doodles";
 import { FloatingAd } from "@/components/FloatingAd";
 import { getEffectiveProgramStatus } from "@/lib/program-status";
+import { renderMarkdown } from "@/components/MarkdownEditor";
 
 interface Course {
   id: string;
@@ -495,7 +496,7 @@ const Index = () => {
                         </h3>
 
                         {program.short_description && (
-                          <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{program.short_description}</p>
+                          <div className="text-xs text-muted-foreground line-clamp-2 mb-3" dangerouslySetInnerHTML={{ __html: renderMarkdown(program.short_description) }} />
                         )}
 
                         {/* Meta rows */}
