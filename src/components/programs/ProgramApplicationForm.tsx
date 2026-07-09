@@ -36,6 +36,7 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
     motivation: "",
     guardian_name: "",
     guardian_phone: "",
+    guardian_relationship: "",
   });
 
   const age = form.age ? parseInt(form.age) : null;
