@@ -1,5 +1,7 @@
 {
   "rewrites": [
+    { "source": "/courses/:id", "destination": "/api/meta" },
+    { "source": "/programs/:id", "destination": "/api/meta" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
