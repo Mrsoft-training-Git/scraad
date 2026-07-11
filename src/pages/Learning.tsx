@@ -42,8 +42,16 @@ const Learning = () => {
   const [verifying, setVerifying] = useState(false);
   const [defaultTab, setDefaultTab] = useState("courses");
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const { loading: paymentLoading } = usePayment();
+
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab === "courses" || tab === "programs") {
+      setDefaultTab(tab);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const checkAuth = async () => {

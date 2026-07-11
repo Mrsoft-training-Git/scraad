@@ -148,7 +148,7 @@ const ProgramDashboard = () => {
         {/* Header */}
         <div>
           <Button variant="ghost" size="sm" className="-ml-2 mb-2" asChild>
-            <Link to="/programs"><ArrowLeft className="w-4 h-4 mr-1" /> All Programs</Link>
+            <Link to="/dashboard/learning?tab=programs"><ArrowLeft className="w-4 h-4 mr-1" /> My Learning</Link>
           </Button>
           <h1 className="font-heading text-2xl font-bold">{program.title}</h1>
           <div className="flex flex-wrap gap-3 mt-2 text-sm text-muted-foreground">
