@@ -71,7 +71,7 @@ export const StudentDashboard = ({ userName }: { userName: string }) => {
           .limit(30),
         supabase
           .from("program_enrollments")
-          .select("id, status, progress, program_id, program:programs(id, title, banner_image_url, instructor)")
+          .select("id, status, progress, program_id, program:programs(id, title, banner_image_url, instructor_name)")
           .eq("user_id", user.id),
       ]);
 
