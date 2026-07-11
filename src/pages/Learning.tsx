@@ -47,6 +47,13 @@ const Learning = () => {
   const { loading: paymentLoading } = usePayment();
 
   useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab === "courses" || tab === "programs") {
+      setDefaultTab(tab);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) { navigate("/auth"); return; }
