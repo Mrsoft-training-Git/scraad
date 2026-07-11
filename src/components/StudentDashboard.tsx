@@ -71,7 +71,7 @@ export const StudentDashboard = ({ userName }: { userName: string }) => {
           .limit(30),
         supabase
           .from("program_enrollments")
-          .select("id, status, progress, program_id")
+          .select("id, status, progress, program_id, program:programs(id, title, banner_image_url, instructor_name)")
           .eq("user_id", user.id),
       ]);
 
@@ -241,6 +241,96 @@ export const StudentDashboard = ({ userName }: { userName: string }) => {
                   {course.course?.instructor && (
                     <p className="text-xs text-muted-foreground mt-1">{course.course.instructor}</p>
                   )}
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </CourseScrollSection>
+      )}
+
+      {/* Active Courses & Programs */}
+      {(courses.length > 0 || programEnrollments.length > 0) && (
+        <CourseScrollSection title="Active Courses & Programs" viewAllLink="/dashboard/learning">
+          {[
+            ...courses.map((c) => {
+              const p = c.progress ?? 0;
+              const status = p >= 100 ? "Completed" : p > 0 ? "Active" : "Enrolled";
+              const statusClass =
+                status === "Completed"
+                  ? "bg-success/15 text-success"
+                  : status === "Active"
+                  ? "bg-primary/15 text-primary"
+                  : "bg-muted text-muted-foreground";
+              return {
+                key: `c-${c.id}`,
+                to: `/dashboard/learn/${c.course_id}`,
+                title: c.course_name,
+                subtitle: c.course?.instructor || "",
+                image: c.course?.image_url,
+                progress: p,
+                status,
+                statusClass,
+                type: "Course",
+              };
+            }),
+            ...programEnrollments.map((pe: any) => {
+              const raw = (pe.status || "active") as string;
+              const status = raw.charAt(0).toUpperCase() + raw.slice(1);
+              const statusClass =
+                raw === "completed"
+                  ? "bg-success/15 text-success"
+                  : raw === "admitted"
+                  ? "bg-secondary/20 text-secondary-foreground"
+                  : raw === "active"
+                  ? "bg-primary/15 text-primary"
+                  : "bg-muted text-muted-foreground";
+              return {
+                key: `p-${pe.id}`,
+                to: `/dashboard/programs/${pe.program_id}`,
+                title: pe.program?.title || "Program",
+                subtitle: pe.program?.instructor_name || "",
+                image: pe.program?.banner_image_url,
+                progress: pe.progress ?? 0,
+                status,
+                statusClass,
+                type: "Program",
+              };
+            }),
+          ].map((item) => (
+            <Link
+              key={item.key}
+              to={item.to}
+              className="min-w-[260px] md:min-w-0 snap-start flex-shrink-0 md:flex-shrink group"
+            >
+              <Card className="overflow-hidden border border-border bg-card hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300 h-full">
+                <div className="aspect-video overflow-hidden relative">
+                  <img
+                    src={item.image || "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&q=80"}
+                    alt={item.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                  <Badge className="absolute top-2 left-2 bg-background/80 backdrop-blur text-foreground border-0 text-[10px]">
+                    {item.type}
+                  </Badge>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  <div className="absolute bottom-2 left-3 right-3">
+                    <div className="flex items-center gap-1.5">
+                      <Progress value={item.progress} className="h-1.5 flex-1 bg-white/30" />
+                      <span className="text-[11px] font-bold text-white">{item.progress}%</span>
+                    </div>
+                  </div>
+                </div>
+                <CardContent className="p-4">
+                  <p className="font-heading font-semibold text-sm line-clamp-2 text-foreground group-hover:text-primary transition-colors">
+                    {item.title}
+                  </p>
+                  <div className="flex items-center justify-between gap-2 mt-2">
+                    {item.subtitle ? (
+                      <p className="text-xs text-muted-foreground truncate">{item.subtitle}</p>
+                    ) : <span />}
+                    <Badge className={`${item.statusClass} border-0 text-[10px] font-semibold`}>{item.status}</Badge>
+                  </div>
                 </CardContent>
               </Card>
             </Link>
