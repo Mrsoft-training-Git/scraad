@@ -707,52 +707,67 @@ const AdmissionLetterCard = ({ program, profile, enrollment }: { program: Progra
     const studentName = profile?.full_name || "Student";
     const enrolledDate = enrollment?.enrolled_at ? format(new Date(enrollment.enrolled_at), "MMMM d, yyyy") : format(new Date(), "MMMM d, yyyy");
     const startDate = program.start_date ? format(new Date(program.start_date), "MMMM d, yyyy") : "TBD";
+    const mode = program.mode ? program.mode.charAt(0).toUpperCase() + program.mode.slice(1) : "—";
+    const venue = program.location || (program.mode === "online" ? "Online (Virtual Classroom)" : "MRsoft Technology Complex, Port Harcourt");
+    const fee = `₦${(program.price || 0).toLocaleString()}`;
+    const logoUrl = `${window.location.origin}/__l5e/assets-v1/501a5e8d-3c48-45e3-90ab-9bbad95eb3d4/mrsoft-logo.jpeg`;
 
     const letterHtml = `
       <!DOCTYPE html>
       <html>
       <head>
+        <meta charset="utf-8" />
         <title>Admission Letter - ${program.title}</title>
         <style>
-          body { font-family: 'Georgia', serif; max-width: 700px; margin: 40px auto; padding: 40px; line-height: 1.8; color: #1a1a1a; }
-          .header { text-align: center; border-bottom: 3px double #2563eb; padding-bottom: 20px; margin-bottom: 30px; }
-          .header h1 { font-size: 24px; color: #2563eb; margin: 0; }
-          .header p { color: #666; margin: 5px 0 0; }
-          .date { text-align: right; margin-bottom: 20px; color: #555; }
-          .body { margin-bottom: 30px; }
-          .body p { margin: 12px 0; }
-          .highlight { background: #eff6ff; padding: 16px 20px; border-left: 4px solid #2563eb; border-radius: 4px; margin: 20px 0; }
-          .highlight strong { color: #2563eb; }
-          .footer { margin-top: 40px; border-top: 1px solid #ddd; padding-top: 20px; }
-          .signature { margin-top: 30px; }
-          @media print { body { margin: 0; padding: 20px; } }
+          * { box-sizing: border-box; }
+          body { font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 780px; margin: 40px auto; padding: 40px; line-height: 1.6; color: #1a1a1a; }
+          .header { text-align: center; margin-bottom: 24px; }
+          .header img { max-height: 90px; width: auto; margin-bottom: 12px; }
+          .header h1 { font-size: 26px; margin: 8px 0 4px; color: #0f0f0f; font-weight: 700; }
+          .header h2 { font-size: 16px; margin: 0; color: #444; font-weight: 400; }
+          .title-bar { background: #14603d; color: #fff; text-align: center; padding: 14px 20px; font-size: 22px; font-weight: 700; letter-spacing: 1px; margin: 24px 0; border-radius: 2px; }
+          .date { margin: 16px 0; }
+          table.details { width: 100%; border-collapse: collapse; margin: 16px 0 24px; }
+          table.details td { border: 1px solid #cfd8d3; padding: 10px 14px; font-size: 14px; vertical-align: top; }
+          table.details td:first-child { background: #eaf5ef; width: 38%; font-weight: 600; color: #14603d; }
+          p { margin: 12px 0; }
+          .signature { margin-top: 32px; }
+          .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #ddd; text-align: center; font-size: 12px; color: #555; line-height: 1.5; }
+          .print-btn { position: fixed; top: 16px; right: 16px; background: #14603d; color: #fff; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer; font-size: 14px; }
+          @media print { body { margin: 0; padding: 24px; } .print-btn { display: none; } }
         </style>
       </head>
       <body>
+        <button class="print-btn" onclick="window.print()">Print / Save as PDF</button>
         <div class="header">
-          <h1>ScraAd Academy</h1>
-          <p>Training & Development</p>
+          <img src="${logoUrl}" alt="MRsoft" />
+          <h1>M-R International (MRsoft)</h1>
+          <h2>Training and Development Department</h2>
         </div>
-        <div class="date">${enrolledDate}</div>
-        <div class="body">
-          <p>Dear <strong>${studentName}</strong>,</p>
-          <p>We are pleased to inform you that you have been <strong>admitted</strong> into the following program:</p>
-          <div class="highlight">
-            <strong>Program:</strong> ${program.title}<br/>
-            <strong>Mode:</strong> ${program.mode.charAt(0).toUpperCase() + program.mode.slice(1)}<br/>
-            ${program.location ? `<strong>Location:</strong> ${program.location}<br/>` : ""}
-            ${program.duration ? `<strong>Duration:</strong> ${program.duration}<br/>` : ""}
-            <strong>Start Date:</strong> ${startDate}
-          </div>
-          <p>Your payment has been confirmed and your enrollment is now active. You now have full access to all program materials, assignments, and examinations.</p>
-          <p>We look forward to supporting you throughout your learning journey. Please ensure you log in regularly to stay up to date with your program schedule and assignments.</p>
-          <p>Congratulations and welcome aboard!</p>
+        <div class="title-bar">ADMISSION LETTER</div>
+        <div class="date"><strong>Date:</strong> ${enrolledDate}</div>
+        <p>Dear <strong>${studentName}</strong>,</p>
+        <p>Congratulations! We are pleased to inform you that you have been successfully admitted into the following training programme:</p>
+        <table class="details">
+          <tr><td>Program</td><td>${program.title}</td></tr>
+          <tr><td>Fee</td><td>${fee}</td></tr>
+          <tr><td>Mode</td><td>${mode}</td></tr>
+          <tr><td>Training Venue</td><td>${venue}</td></tr>
+          ${program.duration ? `<tr><td>Duration</td><td>${program.duration}</td></tr>` : ""}
+          <tr><td>Start Date</td><td>${startDate}</td></tr>
+        </table>
+        <p>Your payment has been successfully confirmed and your enrolment is now active.</p>
+        <p>You will have access to learning materials, instructor-led sessions, practical exercises, assessments and a Certificate of Completion upon successfully completing the programme.</p>
+        <p>We look forward to welcoming you to M-R International (MRsoft) Training and Development Department and wish you a rewarding learning experience.</p>
+        <div class="signature">
+          <p>Best Regards,<br/>
+          <strong>Admissions Team</strong><br/>
+          M-R International (MRsoft)<br/>
+          Training and Development Department</p>
         </div>
         <div class="footer">
-          <div class="signature">
-            <p>Warm regards,</p>
-            <p><strong>The Admissions Team</strong><br/>ScraAd Academy</p>
-          </div>
+          www.m-rinternational.com &nbsp;|&nbsp; training@m-rinternational.com &nbsp;|&nbsp; +234 806 729 3772<br/>
+          MRsoft Technology Complex, Plot 3, Road 1, Centenary Garden Estate, Eneka Link Road, Off G.U. Ake Road, Port Harcourt.
         </div>
       </body>
       </html>
@@ -762,7 +777,6 @@ const AdmissionLetterCard = ({ program, profile, enrollment }: { program: Progra
     if (printWindow) {
       printWindow.document.write(letterHtml);
       printWindow.document.close();
-      setTimeout(() => printWindow.print(), 500);
     }
   };
 
