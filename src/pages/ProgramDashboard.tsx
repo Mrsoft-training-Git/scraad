@@ -702,82 +702,165 @@ const SecondTrancheButton = ({ program, onPaymentComplete }: { program: ProgramI
 };
 
 /* ─── Admission Letter Card ─── */
+import mrsoftLogoAsset from "@/assets/mrsoft-letter-logo.jpeg.asset.json";
+import { jsPDF } from "jspdf";
+
+const loadImageAsDataUrl = (url: string): Promise<string> =>
+  new Promise((resolve, reject) => {
+    fetch(url)
+      .then((r) => r.blob())
+      .then((blob) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      })
+      .catch(reject);
+  });
+
 const AdmissionLetterCard = ({ program, profile, enrollment }: { program: ProgramInfo; profile: any; enrollment: any }) => {
-  const handleDownload = () => {
+  const handleDownload = async () => {
     const studentName = profile?.full_name || "Student";
     const enrolledDate = enrollment?.enrolled_at ? format(new Date(enrollment.enrolled_at), "MMMM d, yyyy") : format(new Date(), "MMMM d, yyyy");
     const startDate = program.start_date ? format(new Date(program.start_date), "MMMM d, yyyy") : "TBD";
     const mode = program.mode ? program.mode.charAt(0).toUpperCase() + program.mode.slice(1) : "—";
     const venue = program.location || (program.mode === "online" ? "Online (Virtual Classroom)" : "MRsoft Technology Complex, Port Harcourt");
-    const fee = `₦${(program.price || 0).toLocaleString()}`;
-    const logoUrl = `${window.location.origin}/__l5e/assets-v1/501a5e8d-3c48-45e3-90ab-9bbad95eb3d4/mrsoft-logo.jpeg`;
+    const fee = `NGN ${(program.price || 0).toLocaleString()}`;
 
-    const letterHtml = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8" />
-        <title>Admission Letter - ${program.title}</title>
-        <style>
-          * { box-sizing: border-box; }
-          body { font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 780px; margin: 40px auto; padding: 40px; line-height: 1.6; color: #1a1a1a; }
-          .header { text-align: center; margin-bottom: 24px; }
-          .header img { max-height: 90px; width: auto; margin-bottom: 12px; }
-          .header h1 { font-size: 26px; margin: 8px 0 4px; color: #0f0f0f; font-weight: 700; }
-          .header h2 { font-size: 16px; margin: 0; color: #444; font-weight: 400; }
-          .title-bar { background: #14603d; color: #fff; text-align: center; padding: 14px 20px; font-size: 22px; font-weight: 700; letter-spacing: 1px; margin: 24px 0; border-radius: 2px; }
-          .date { margin: 16px 0; }
-          table.details { width: 100%; border-collapse: collapse; margin: 16px 0 24px; }
-          table.details td { border: 1px solid #cfd8d3; padding: 10px 14px; font-size: 14px; vertical-align: top; }
-          table.details td:first-child { background: #eaf5ef; width: 38%; font-weight: 600; color: #14603d; }
-          p { margin: 12px 0; }
-          .signature { margin-top: 32px; }
-          .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #ddd; text-align: center; font-size: 12px; color: #555; line-height: 1.5; }
-          .print-btn { position: fixed; top: 16px; right: 16px; background: #14603d; color: #fff; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer; font-size: 14px; }
-          @media print { body { margin: 0; padding: 24px; } .print-btn { display: none; } }
-        </style>
-      </head>
-      <body>
-        <button class="print-btn" onclick="window.print()">Print / Save as PDF</button>
-        <div class="header">
-          <img src="${logoUrl}" alt="MRsoft" />
-          <h1>M-R International (MRsoft)</h1>
-          <h2>Training and Development Department</h2>
-        </div>
-        <div class="title-bar">ADMISSION LETTER</div>
-        <div class="date"><strong>Date:</strong> ${enrolledDate}</div>
-        <p>Dear <strong>${studentName}</strong>,</p>
-        <p>Congratulations! We are pleased to inform you that you have been successfully admitted into the following training programme:</p>
-        <table class="details">
-          <tr><td>Program</td><td>${program.title}</td></tr>
-          <tr><td>Fee</td><td>${fee}</td></tr>
-          <tr><td>Mode</td><td>${mode}</td></tr>
-          <tr><td>Training Venue</td><td>${venue}</td></tr>
-          ${program.duration ? `<tr><td>Duration</td><td>${program.duration}</td></tr>` : ""}
-          <tr><td>Start Date</td><td>${startDate}</td></tr>
-        </table>
-        <p>Your payment has been successfully confirmed and your enrolment is now active.</p>
-        <p>You will have access to learning materials, instructor-led sessions, practical exercises, assessments and a Certificate of Completion upon successfully completing the programme.</p>
-        <p>We look forward to welcoming you to M-R International (MRsoft) Training and Development Department and wish you a rewarding learning experience.</p>
-        <div class="signature">
-          <p>Best Regards,<br/>
-          <strong>Admissions Team</strong><br/>
-          M-R International (MRsoft)<br/>
-          Training and Development Department</p>
-        </div>
-        <div class="footer">
-          www.m-rinternational.com &nbsp;|&nbsp; training@m-rinternational.com &nbsp;|&nbsp; +234 806 729 3772<br/>
-          MRsoft Technology Complex, Plot 3, Road 1, Centenary Garden Estate, Eneka Link Road, Off G.U. Ake Road, Port Harcourt.
-        </div>
-      </body>
-      </html>
-    `;
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const margin = 40;
+    let y = margin;
 
-    const printWindow = window.open("", "_blank");
-    if (printWindow) {
-      printWindow.document.write(letterHtml);
-      printWindow.document.close();
+    // Logo
+    try {
+      const logoData = await loadImageAsDataUrl(mrsoftLogoAsset.url);
+      const logoH = 55;
+      const logoW = 55;
+      doc.addImage(logoData, "JPEG", (pageW - logoW) / 2, y, logoW, logoH);
+      y += logoH + 6;
+    } catch {
+      // proceed without logo
     }
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(15);
+    doc.setTextColor(15, 15, 15);
+    doc.text("M-R International (MRsoft)", pageW / 2, y, { align: "center" });
+    y += 15;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(80, 80, 80);
+    doc.text("Training and Development Department", pageW / 2, y, { align: "center" });
+    y += 18;
+
+    // Title bar
+    doc.setFillColor(20, 96, 61);
+    doc.rect(margin, y, pageW - margin * 2, 26, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(13);
+    doc.text("ADMISSION LETTER", pageW / 2, y + 17, { align: "center" });
+    y += 26 + 16;
+
+    // Date
+    doc.setTextColor(26, 26, 26);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.text("Date:", margin, y);
+    doc.setFont("helvetica", "normal");
+    doc.text(enrolledDate, margin + 32, y);
+    y += 16;
+
+    // Salutation
+    doc.setFont("helvetica", "normal");
+    doc.text("Dear ", margin, y);
+    doc.setFont("helvetica", "bold");
+    doc.text(`${studentName},`, margin + 26, y);
+    y += 14;
+
+    doc.setFont("helvetica", "normal");
+    const p1 = doc.splitTextToSize(
+      "Congratulations! We are pleased to inform you that you have been successfully admitted into the following training programme:",
+      pageW - margin * 2
+    );
+    doc.text(p1, margin, y);
+    y += p1.length * 12 + 8;
+
+    // Details table
+    const rows: [string, string][] = [
+      ["Program", program.title],
+      ["Fee", fee],
+      ["Mode", mode],
+      ["Training Venue", venue],
+    ];
+    if (program.duration) rows.push(["Duration", program.duration]);
+    rows.push(["Start Date", startDate]);
+
+    const labelW = 130;
+    const valueW = pageW - margin * 2 - labelW;
+    rows.forEach(([label, value]) => {
+      const valueLines = doc.splitTextToSize(String(value), valueW - 16);
+      const rowH = Math.max(22, valueLines.length * 12 + 10);
+      doc.setDrawColor(207, 216, 211);
+      doc.setFillColor(234, 245, 239);
+      doc.rect(margin, y, labelW, rowH, "FD");
+      doc.setFillColor(255, 255, 255);
+      doc.rect(margin + labelW, y, valueW, rowH, "FD");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(20, 96, 61);
+      doc.text(label, margin + 8, y + 14);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(26, 26, 26);
+      doc.text(valueLines, margin + labelW + 8, y + 14);
+      y += rowH;
+    });
+    y += 12;
+
+    doc.setFontSize(10);
+    const body = [
+      "Your payment has been successfully confirmed and your enrolment is now active.",
+      "You will have access to learning materials, instructor-led sessions, practical exercises, assessments and a Certificate of Completion upon successfully completing the programme.",
+      "We look forward to welcoming you to M-R International (MRsoft) Training and Development Department and wish you a rewarding learning experience.",
+    ];
+    body.forEach((para) => {
+      const lines = doc.splitTextToSize(para, pageW - margin * 2);
+      doc.text(lines, margin, y);
+      y += lines.length * 12 + 6;
+    });
+
+    y += 10;
+    doc.text("Best Regards,", margin, y);
+    y += 12;
+    doc.setFont("helvetica", "bold");
+    doc.text("Admissions Team", margin, y);
+    y += 12;
+    doc.setFont("helvetica", "normal");
+    doc.text("M-R International (MRsoft)", margin, y);
+    y += 12;
+    doc.text("Training and Development Department", margin, y);
+
+    // Footer
+    const footerY = pageH - 46;
+    doc.setDrawColor(221, 221, 221);
+    doc.line(margin, footerY, pageW - margin, footerY);
+    doc.setFontSize(8);
+    doc.setTextColor(90, 90, 90);
+    doc.text(
+      "www.m-rinternational.com  |  training@m-rinternational.com  |  +234 806 729 3772",
+      pageW / 2,
+      footerY + 12,
+      { align: "center" }
+    );
+    const addr = doc.splitTextToSize(
+      "MRsoft Technology Complex, Plot 3, Road 1, Centenary Garden Estate, Eneka Link Road, Off G.U. Ake Road, Port Harcourt.",
+      pageW - margin * 2
+    );
+    doc.text(addr, pageW / 2, footerY + 24, { align: "center" });
+
+    doc.save(`Admission_Letter_${program.title.replace(/[^a-z0-9]+/gi, "_")}.pdf`);
   };
 
   return (
