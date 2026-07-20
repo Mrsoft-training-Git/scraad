@@ -114,7 +114,8 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
         guardian_name: form.guardian_name.trim(),
         guardian_phone: form.guardian_phone.trim(),
         guardian_relationship: form.guardian_relationship.trim(),
-        status: "pending",
+        // Set to approved so applicants can proceed to payment immediately
+        status: "approved",
       }, { onConflict: "program_id,user_id" });
 
       if (error) throw error;
@@ -133,7 +134,7 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
       toast({
         title: "Application submitted!",
         description: isAuthenticated
-          ? "We'll review your application and get back to you."
+          ? "Your application is complete. You can now proceed to payment from your program dashboard."
           : "Check your email to confirm your account, then log in to complete payment and access your program.",
       });
       onSuccess();
