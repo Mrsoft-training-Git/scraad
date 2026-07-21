@@ -39,6 +39,7 @@ import Bills from "./pages/Bills";
 import LiveSessions from "./pages/LiveSessions";
 import Enrollments from "./pages/Enrollments";
 import ResetPassword from "./pages/ResetPassword";
+import Unsubscribe from "./pages/Unsubscribe";
 import ProgramManagement from "./pages/ProgramManagement";
 import ProgramDashboard from "./pages/ProgramDashboard";
 import InstructorProgramManage from "./pages/InstructorProgramManage";
@@ -103,6 +104,7 @@ const App = () => (
           <Route path="/career" element={<Career />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/unsubscribe" element={<Unsubscribe />} />
           <Route path="/api/zoom/callback" element={<ZoomCallback />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
