@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, ShieldCheck, GraduationCap, BookOpen, CreditCard, ChevronDown, ChevronUp, TrendingUp, ArrowUpRight } from "lucide-react";
 import { PromoBarSettings } from "@/components/admin/PromoBarSettings";
 import { AdsManager } from "@/components/admin/AdsManager";
+import { PopupAdsManager } from "@/components/admin/PopupAdsManager";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
@@ -320,12 +321,16 @@ export const AdminDashboard = () => {
         <TabsList>
           <TabsTrigger value="promo">Promo Bar</TabsTrigger>
           <TabsTrigger value="ads">Ads</TabsTrigger>
+          <TabsTrigger value="popup">Popup Ads</TabsTrigger>
         </TabsList>
         <TabsContent value="promo" className="mt-4">
           <PromoBarSettings />
         </TabsContent>
         <TabsContent value="ads" className="mt-4">
           <AdsManager />
+        </TabsContent>
+        <TabsContent value="popup" className="mt-4">
+          <PopupAdsManager />
         </TabsContent>
       </Tabs>
     </div>
