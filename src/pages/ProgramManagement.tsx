@@ -49,6 +49,7 @@ const ProgramManagement = () => {
   const [processing, setProcessing] = useState<string | null>(null);
   const [selectedApp, setSelectedApp] = useState<Application | null>(null);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showManualEnrollDialog, setShowManualEnrollDialog] = useState(false);
   const [editingProgram, setEditingProgram] = useState<FullProgram | null>(null);
 
   useEffect(() => { if (!authLoading) { fetchPrograms(); fetchApplications(); } }, [authLoading, selectedProgram, statusFilter]);
@@ -164,8 +165,13 @@ const ProgramManagement = () => {
             <h1 className="font-heading text-2xl font-bold">Program Management</h1>
             <p className="text-sm text-muted-foreground">Manage training programs and review applications</p>
           </div>
-          <Button onClick={() => setShowCreateDialog(true)}><Plus className="w-4 h-4 mr-2" /> Create Program</Button>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={() => setShowManualEnrollDialog(true)}><Users className="w-4 h-4 mr-2" /> Manual Enroll</Button>
+            <Button onClick={() => setShowCreateDialog(true)}><Plus className="w-4 h-4 mr-2" /> Create Program</Button>
+          </div>
         </div>
+
+
 
         <Tabs defaultValue="programs" className="space-y-4">
           <TabsList>
@@ -377,6 +383,7 @@ const ProgramManagement = () => {
 
       <CreateProgramDialog open={showCreateDialog} onOpenChange={setShowCreateDialog} onCreated={fetchPrograms} />
       <EditProgramDialog program={editingProgram} onOpenChange={() => setEditingProgram(null)} onUpdated={fetchPrograms} />
+      <ManualEnrollDialog open={showManualEnrollDialog} onOpenChange={setShowManualEnrollDialog} programs={programs} onEnrolled={fetchApplications} />
     </DashboardLayout>
   );
 };
@@ -651,4 +658,119 @@ const EditProgramDialog = ({ program, onOpenChange, onUpdated }: { program: Full
   );
 };
 
+/* ─── Manual Enroll Dialog ─── */
+const ManualEnrollDialog = ({ open, onOpenChange, programs, onEnrolled }: { open: boolean; onOpenChange: (v: boolean) => void; programs: FullProgram[]; onEnrolled: () => void }) => {
+  const { toast } = useToast();
+  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState({
+    program_id: "", email: "", full_name: "", phone: "", age: "", gender: "",
+    country: "Nigeria", address: "",
+    guardian_name: "", guardian_phone: "", guardian_email: "", guardian_relationship: "",
+    motivation: "", send_invite: true,
+  });
+
+  const reset = () => setForm({
+    program_id: "", email: "", full_name: "", phone: "", age: "", gender: "",
+    country: "Nigeria", address: "",
+    guardian_name: "", guardian_phone: "", guardian_email: "", guardian_relationship: "",
+    motivation: "", send_invite: true,
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.program_id || !form.email || !form.full_name) {
+      toast({ title: "Missing fields", description: "Program, email and full name are required", variant: "destructive" });
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-manual-enroll", {
+        body: {
+          ...form,
+          age: form.age ? Number(form.age) : null,
+          redirect_to: `${window.location.origin}/dashboard/programs/${form.program_id}`,
+        },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      toast({
+        title: "Student enrolled",
+        description: form.send_invite ? "Invite email sent so they can set a password and log in." : "User created and enrolled.",
+      });
+      reset();
+      onEnrolled();
+      onOpenChange(false);
+    } catch (err: any) {
+      toast({ title: "Enrollment failed", description: err.message, variant: "destructive" });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => { onOpenChange(v); if (!v) reset(); }}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Manual Program Enrollment</DialogTitle>
+          <DialogDescription>Register a student who paid offline. They'll be granted access immediately and receive an invite to log in.</DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label>Program *</Label>
+            <Select value={form.program_id} onValueChange={v => setForm({ ...form, program_id: v })}>
+              <SelectTrigger><SelectValue placeholder="Select program" /></SelectTrigger>
+              <SelectContent>
+                {programs.map(p => <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div><Label>Full Name *</Label><Input value={form.full_name} onChange={e => setForm({ ...form, full_name: e.target.value })} required /></div>
+            <div><Label>Email *</Label><Input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required /></div>
+            <div><Label>Phone</Label><Input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} /></div>
+            <div><Label>Age</Label><Input type="number" min="1" value={form.age} onChange={e => setForm({ ...form, age: e.target.value })} /></div>
+            <div><Label>Gender</Label>
+              <Select value={form.gender} onValueChange={v => setForm({ ...form, gender: v })}>
+                <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="male">Male</SelectItem>
+                  <SelectItem value="female">Female</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div><Label>Country</Label><Input value={form.country} onChange={e => setForm({ ...form, country: e.target.value })} /></div>
+            <div className="col-span-2"><Label>Address</Label><Input value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} /></div>
+          </div>
+
+          <div className="rounded-lg border border-border p-3 bg-muted/30 space-y-3">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Parent / Guardian (optional)</p>
+            <div className="grid grid-cols-2 gap-4">
+              <div><Label>Name</Label><Input value={form.guardian_name} onChange={e => setForm({ ...form, guardian_name: e.target.value })} /></div>
+              <div><Label>Phone</Label><Input value={form.guardian_phone} onChange={e => setForm({ ...form, guardian_phone: e.target.value })} /></div>
+              <div><Label>Email</Label><Input type="email" value={form.guardian_email} onChange={e => setForm({ ...form, guardian_email: e.target.value })} /></div>
+              <div><Label>Relationship</Label><Input value={form.guardian_relationship} onChange={e => setForm({ ...form, guardian_relationship: e.target.value })} /></div>
+            </div>
+          </div>
+
+          <div><Label>Notes / Motivation</Label><Textarea rows={2} value={form.motivation} onChange={e => setForm({ ...form, motivation: e.target.value })} /></div>
+
+          <div className="flex items-center gap-2">
+            <input type="checkbox" id="send_invite" checked={form.send_invite} onChange={e => setForm({ ...form, send_invite: e.target.checked })} className="rounded border-border" />
+            <Label htmlFor="send_invite">Send login invitation email</Label>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-2 border-t">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+            <Button type="submit" disabled={submitting}>
+              {submitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Enrolling...</> : "Enroll & Grant Access"}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 export default ProgramManagement;
+
