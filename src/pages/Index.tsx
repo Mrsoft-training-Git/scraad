@@ -23,6 +23,7 @@ import { useReveal } from "@/hooks/useReveal";
 import { useCursorGlow } from "@/hooks/useCursorGlow";
 import { Squiggle, ArrowDoodle, Lightning, Underline } from "@/components/Doodles";
 import { FloatingAd } from "@/components/FloatingAd";
+import { PopupAd } from "@/components/PopupAd";
 import { getEffectiveProgramStatus } from "@/lib/program-status";
 import { renderMarkdown } from "@/components/MarkdownEditor";
 
@@ -701,6 +702,8 @@ const Index = () => {
 
       <Footer />
       <FloatingAd />
+      <PopupAd />
+
     </div>
 
   );
