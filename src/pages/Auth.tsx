@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,7 +28,10 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("login");
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectTo = searchParams.get("redirect") || "/dashboard";
   const { toast } = useToast();
+
 
   // Login state
   const [loginEmail, setLoginEmail] = useState("");
@@ -48,11 +51,12 @@ const Auth = () => {
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        navigate("/dashboard");
+        navigate(redirectTo);
       }
     };
     checkUser();
-  }, [navigate]);
+  }, [navigate, redirectTo]);
+
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,8 +75,9 @@ const Auth = () => {
         description: "You've successfully logged in.",
       });
 
-      navigate("/dashboard");
+      navigate(redirectTo);
     } catch (error: any) {
+
       toast({
         title: "Login failed",
         description: error.message || "Please check your credentials and try again.",
@@ -123,8 +128,9 @@ const Auth = () => {
         description: "Welcome to the platform. You're now logged in.",
       });
 
-      navigate("/dashboard");
+      navigate(redirectTo);
     } catch (error: any) {
+
       toast({
         title: "Signup failed",
         description: error.message || "Please try again with different credentials.",

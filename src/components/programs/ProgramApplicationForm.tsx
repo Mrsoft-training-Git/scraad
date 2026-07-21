@@ -16,7 +16,7 @@ interface Props {
   userEmail: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSuccess: () => void;
+  onSuccess: (target?: string) => void;
 }
 
 export const ProgramApplicationForm = ({ programId, programTitle, userId, userEmail, open, onOpenChange, onSuccess }: Props) => {
@@ -74,12 +74,14 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
     try {
       let effectiveUserId = userId;
 
+      let hasSession = isAuthenticated;
+
       if (!isAuthenticated) {
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email: form.email.trim(),
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/dashboard/learning`,
+            emailRedirectTo: `${window.location.origin}/dashboard/programs/${programId}`,
             data: { full_name: fullName },
           },
         });
@@ -100,7 +102,19 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
         if (!effectiveUserId) {
           throw new Error("Account created but session unavailable. Please log in and try again.");
         }
+        hasSession = !!signUpData.session;
+        if (!hasSession) {
+          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+            email: form.email.trim(),
+            password,
+          });
+          if (!signInError && signInData.session) {
+            hasSession = true;
+            effectiveUserId = signInData.user?.id ?? effectiveUserId;
+          }
+        }
       }
+
 
       const { error } = await supabase.from("program_applications").upsert({
         program_id: programId,
@@ -146,13 +160,18 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
         }).eq("id", effectiveUserId);
       }
 
+      const target = hasSession
+        ? `/dashboard/programs/${programId}`
+        : `/auth?redirect=/dashboard/programs/${programId}`;
+
       toast({
         title: "You're admitted! 🎉",
-        description: isAuthenticated
+        description: hasSession
           ? "Head to your program dashboard to get started."
-          : "Check your email to confirm your account, then log in to access your program.",
+          : "Please confirm your email via the link we sent, then log in to access your program dashboard.",
       });
-      onSuccess();
+      onSuccess(target);
+
     } catch (err: any) {
       toast({ title: "Submission failed", description: err.message, variant: "destructive" });
     } finally {
