@@ -31,8 +31,6 @@ interface Program {
   effectiveStatus: "open" | "ongoing" | "closed";
 }
 
-const programTracks = ["All", "PGD", "B.Sc", "M.Sc", "HND", "Professional Certs"] as const;
-
 const modeIcons: Record<string, React.ReactNode> = {
   physical: <Building className="w-4 h-4" />,
   hybrid: <Globe className="w-4 h-4" />,
