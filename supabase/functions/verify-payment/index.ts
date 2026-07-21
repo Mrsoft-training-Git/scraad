@@ -148,6 +148,8 @@ Deno.serve(async (req) => {
         }
       }
 
+      sendReceipt(program?.title ?? "your program");
+
       return new Response(JSON.stringify({ verified: true, entityType: "program", programId }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -209,6 +211,8 @@ Deno.serve(async (req) => {
         });
         await supabase.rpc("increment_students_count", { course_id_input: courseId });
       }
+
+      sendReceipt(course?.title ?? "your course");
 
       return new Response(JSON.stringify({ verified: true, entityType: "course", courseId }), {
         status: 200,
