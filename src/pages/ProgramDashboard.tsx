@@ -703,6 +703,7 @@ const SecondTrancheButton = ({ program, onPaymentComplete }: { program: ProgramI
 
 /* ─── Admission Letter Card ─── */
 import mrsoftLogoAsset from "@/assets/mrsoft-letter-logo.jpeg.asset.json";
+import scraadLogoAsset from "@/assets/scraad-email-logo.png.asset.json";
 import { jsPDF } from "jspdf";
 
 const loadImageAsDataUrl = (url: string): Promise<string> =>
@@ -733,15 +734,27 @@ const AdmissionLetterCard = ({ program, profile, enrollment }: { program: Progra
     const margin = 40;
     let y = margin;
 
-    // Logo
+    // Logos - ScraAD and MRsoft side by side (matches email header)
     try {
-      const logoData = await loadImageAsDataUrl(mrsoftLogoAsset.url);
-      const logoH = 55;
-      const logoW = 55;
-      doc.addImage(logoData, "JPEG", (pageW - logoW) / 2, y, logoW, logoH);
-      y += logoH + 6;
+      const [scraadData, mrsoftData] = await Promise.all([
+        loadImageAsDataUrl(scraadLogoAsset.url),
+        loadImageAsDataUrl(mrsoftLogoAsset.url),
+      ]);
+      const logoH = 48;
+      const scraadW = 130;
+      const mrsoftW = 48;
+      const gap = 20;
+      const totalW = scraadW + gap + mrsoftW;
+      const startX = (pageW - totalW) / 2;
+      doc.addImage(scraadData, "PNG", startX, y, scraadW, logoH);
+      // vertical divider
+      doc.setDrawColor(229, 231, 235);
+      doc.setLineWidth(0.8);
+      doc.line(startX + scraadW + gap / 2, y + 6, startX + scraadW + gap / 2, y + logoH - 6);
+      doc.addImage(mrsoftData, "JPEG", startX + scraadW + gap, y, mrsoftW, logoH);
+      y += logoH + 8;
     } catch {
-      // proceed without logo
+      // proceed without logos
     }
 
     doc.setFont("helvetica", "bold");
