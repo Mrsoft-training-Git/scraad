@@ -370,7 +370,7 @@ const ProgramDetails = () => {
           open={showApplicationForm}
           onOpenChange={setShowApplicationForm}
           onSuccess={() => {
-            setApplicationStatus("pending");
+            setApplicationStatus("approved");
             setShowApplicationForm(false);
           }}
         />
