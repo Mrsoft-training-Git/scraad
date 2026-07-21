@@ -31,8 +31,6 @@ interface Program {
   effectiveStatus: "open" | "ongoing" | "closed";
 }
 
-const programTracks = ["All", "PGD", "B.Sc", "M.Sc", "HND", "Professional Certs"] as const;
-
 const modeIcons: Record<string, React.ReactNode> = {
   physical: <Building className="w-4 h-4" />,
   hybrid: <Globe className="w-4 h-4" />,
@@ -125,7 +123,7 @@ const Programs = () => {
   const [search, setSearch] = useState("");
   const [modeFilter, setModeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [trackFilter, setTrackFilter] = useState("All");
+  
 
   useEffect(() => {
     fetchPrograms();
@@ -156,8 +154,7 @@ const Programs = () => {
     const matchesSearch = !search || p.title.toLowerCase().includes(search.toLowerCase());
     const matchesMode = modeFilter === "all" || p.mode === modeFilter;
     const matchesStatus = statusFilter === "all" || p.effectiveStatus === statusFilter;
-    const matchesTrack = trackFilter === "All" || p.track === trackFilter;
-    return matchesSearch && matchesMode && matchesStatus && matchesTrack;
+    return matchesSearch && matchesMode && matchesStatus;
   });
 
   return (
@@ -179,21 +176,6 @@ const Programs = () => {
           <p className="text-lg text-primary-foreground/80 mb-4 max-w-2xl mx-auto">
             Apply for advanced programs from MRsoft — study online, on-site, or hybrid.
           </p>
-          <div className="flex flex-wrap justify-center gap-2 mt-6">
-            {programTracks.map((tag) => (
-              <button
-                key={tag}
-                onClick={() => setTrackFilter(tag)}
-                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all magnetic-btn ${
-                  trackFilter === tag
-                    ? "bg-primary-foreground text-primary shadow-md"
-                    : "bg-primary-foreground/10 border border-primary-foreground/20 hover:bg-primary-foreground/20"
-                }`}
-              >
-                {tag}
-              </button>
-            ))}
-          </div>
         </div>
       </section>
 
