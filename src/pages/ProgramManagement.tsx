@@ -169,6 +169,9 @@ const ProgramManagement = () => {
             <Button variant="outline" onClick={() => setShowManualEnrollDialog(true)}><Users className="w-4 h-4 mr-2" /> Manual Enroll</Button>
             <Button onClick={() => setShowCreateDialog(true)}><Plus className="w-4 h-4 mr-2" /> Create Program</Button>
           </div>
+        </div>
+
+
 
         <Tabs defaultValue="programs" className="space-y-4">
           <TabsList>
