@@ -114,10 +114,26 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
         guardian_name: form.guardian_name.trim(),
         guardian_phone: form.guardian_phone.trim(),
         guardian_relationship: form.guardian_relationship.trim(),
-        status: "pending",
+        status: "approved",
       }, { onConflict: "program_id,user_id" });
 
       if (error) throw error;
+
+      // Auto-create program enrollment so the student is admitted immediately
+      if (effectiveUserId) {
+        const { data: existingEnroll } = await supabase
+          .from("program_enrollments")
+          .select("id")
+          .eq("program_id", programId)
+          .eq("user_id", effectiveUserId)
+          .maybeSingle();
+        if (!existingEnroll) {
+          await supabase.from("program_enrollments").insert({
+            program_id: programId,
+            user_id: effectiveUserId,
+          });
+        }
+      }
 
       // Persist basic details on profile for logged-in users
       if (effectiveUserId) {
@@ -131,10 +147,10 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
       }
 
       toast({
-        title: "Application submitted!",
+        title: "You're admitted! 🎉",
         description: isAuthenticated
-          ? "We'll review your application and get back to you."
-          : "Check your email to confirm your account, then log in to complete payment and access your program.",
+          ? "Head to your program dashboard to get started."
+          : "Check your email to confirm your account, then log in to access your program.",
       });
       onSuccess();
     } catch (err: any) {
