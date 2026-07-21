@@ -49,6 +49,7 @@ const ProgramManagement = () => {
   const [processing, setProcessing] = useState<string | null>(null);
   const [selectedApp, setSelectedApp] = useState<Application | null>(null);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showManualEnrollDialog, setShowManualEnrollDialog] = useState(false);
   const [editingProgram, setEditingProgram] = useState<FullProgram | null>(null);
 
   useEffect(() => { if (!authLoading) { fetchPrograms(); fetchApplications(); } }, [authLoading, selectedProgram, statusFilter]);
