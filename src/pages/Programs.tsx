@@ -73,17 +73,29 @@ const ProgramGridCard = ({ program }: { program: Program }) => {
           {program.title}
         </h3>
         {program.short_description && (
-          <div className="text-muted-foreground text-sm mb-4 line-clamp-2" dangerouslySetInnerHTML={{ __html: renderMarkdown(program.short_description) }} />
+          <div
+            className="text-muted-foreground text-sm mb-4 line-clamp-2"
+            dangerouslySetInnerHTML={{ __html: renderMarkdown(program.short_description) }}
+          />
         )}
         <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mb-4 mt-auto">
           {program.duration && (
-            <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{program.duration}</span>
+            <span className="flex items-center gap-1">
+              <Clock className="w-3.5 h-3.5" />
+              {program.duration}
+            </span>
           )}
           {program.location && (
-            <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{program.location}</span>
+            <span className="flex items-center gap-1">
+              <MapPin className="w-3.5 h-3.5" />
+              {program.location}
+            </span>
           )}
           {program.start_date && (
-            <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" />Starts {format(new Date(program.start_date), "MMM d, yyyy")}</span>
+            <span className="flex items-center gap-1">
+              <Calendar className="w-3.5 h-3.5" />
+              Starts {format(new Date(program.start_date), "MMM d, yyyy")}
+            </span>
           )}
         </div>
         <div className="grid grid-cols-2 gap-2">
@@ -123,17 +135,19 @@ const Programs = () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("programs")
-      .select("id, title, short_description, banner_image_url, intro_video_url, duration, mode, location, start_date, end_date, status, max_participants, track")
+      .select(
+        "id, title, short_description, banner_image_url, intro_video_url, duration, mode, location, start_date, end_date, status, max_participants, track",
+      )
       .eq("is_published", true)
       .neq("status", "closed")
       .order("created_at", { ascending: false });
     if (!error && data) {
-      const withEffective = (data as any[]).map(p => ({
+      const withEffective = (data as any[]).map((p) => ({
         ...p,
         effectiveStatus: getEffectiveProgramStatus(p),
       })) as Program[];
       // Hide date-expired programs from the public catalog
-      setPrograms(withEffective.filter(p => p.effectiveStatus !== "closed"));
+      setPrograms(withEffective.filter((p) => p.effectiveStatus !== "closed"));
     }
     setLoading(false);
   };
@@ -160,12 +174,10 @@ const Programs = () => {
           </Badge>
           <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
             Earn accredited degrees from{" "}
-            <span className="font-display italic font-light text-secondary">top universities</span>
+            <span className="font-display italic font-light text-secondary">M-R International</span>
           </h1>
           <p className="text-lg text-primary-foreground/80 mb-4 max-w-2xl mx-auto">
-            Apply for advanced online training programs from leading universities and tertiary
-            institutions in Nigeria. Land a <strong>PGD</strong>, <strong>B.Sc</strong>, or <strong>M.Sc</strong> on
-            fully accredited courses — study online, on-site, or hybrid.
+            Apply for advanced programs from MRsoft — study online, on-site, or hybrid.
           </p>
           <div className="flex flex-wrap justify-center gap-2 mt-6">
             {programTracks.map((tag) => (
@@ -198,7 +210,9 @@ const Programs = () => {
             />
           </div>
           <Select value={modeFilter} onValueChange={setModeFilter}>
-            <SelectTrigger className="w-full sm:w-[160px]"><SelectValue placeholder="Mode" /></SelectTrigger>
+            <SelectTrigger className="w-full sm:w-[160px]">
+              <SelectValue placeholder="Mode" />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Modes</SelectItem>
               <SelectItem value="physical">Physical</SelectItem>
@@ -207,7 +221,9 @@ const Programs = () => {
             </SelectContent>
           </Select>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full sm:w-[160px]"><SelectValue placeholder="Status" /></SelectTrigger>
+            <SelectTrigger className="w-full sm:w-[160px]">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Status</SelectItem>
               <SelectItem value="open">Open</SelectItem>
