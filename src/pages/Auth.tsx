@@ -112,7 +112,7 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data: signUpData, error } = await supabase.auth.signUp({
         email: signupEmail,
         password: signupPassword,
         options: {
@@ -122,6 +122,19 @@ const Auth = () => {
       });
 
       if (error) throw error;
+
+      // Send branded welcome email (non-blocking)
+      supabase.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "welcome",
+          recipientEmail: signupEmail,
+          idempotencyKey: `welcome-${signUpData.user?.id ?? signupEmail}`,
+          templateData: {
+            name: signupName,
+            dashboardUrl: `${window.location.origin}/dashboard`,
+          },
+        },
+      }).catch(() => {});
 
       toast({
         title: "Account created!",
