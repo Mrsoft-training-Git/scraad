@@ -165,8 +165,10 @@ const ProgramManagement = () => {
             <h1 className="font-heading text-2xl font-bold">Program Management</h1>
             <p className="text-sm text-muted-foreground">Manage training programs and review applications</p>
           </div>
-          <Button onClick={() => setShowCreateDialog(true)}><Plus className="w-4 h-4 mr-2" /> Create Program</Button>
-        </div>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={() => setShowManualEnrollDialog(true)}><Users className="w-4 h-4 mr-2" /> Manual Enroll</Button>
+            <Button onClick={() => setShowCreateDialog(true)}><Plus className="w-4 h-4 mr-2" /> Create Program</Button>
+          </div>
 
         <Tabs defaultValue="programs" className="space-y-4">
           <TabsList>
