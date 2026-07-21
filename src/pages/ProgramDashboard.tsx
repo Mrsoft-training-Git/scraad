@@ -703,6 +703,7 @@ const SecondTrancheButton = ({ program, onPaymentComplete }: { program: ProgramI
 
 /* ─── Admission Letter Card ─── */
 import mrsoftLogoAsset from "@/assets/mrsoft-letter-logo.jpeg.asset.json";
+import scraadLogoAsset from "@/assets/scraad-email-logo.png.asset.json";
 import { jsPDF } from "jspdf";
 
 const loadImageAsDataUrl = (url: string): Promise<string> =>
