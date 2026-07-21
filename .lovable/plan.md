@@ -1,49 +1,44 @@
 
-The user wants the "Product of MRsoft" attribution more visible but still professional. Currently it only lives in the footer's bottom strip. Let me think through the best additional placements without making it look like an ad.
+# Branded Emails via Lovable Emails (Phase 1)
 
-**Where it makes sense (professional, subtle, recurring):**
+Keep Lovable Cloud auth as-is. Use Lovable's built-in email system (managed SMTP + queue + templates) for all auth and app emails. No Resend, no third-party API keys.
 
-1. **Auth page (`src/pages/Auth.tsx`)** — Login/signup screens are high-trust moments. A small "Product of [MRsoft logo]" under the form builds credibility (think: "Powered by Stripe" on checkouts).
+## What ships in this phase
 
-2. **Navbar (very subtle)** — A tiny "by MRsoft" tagline next to the ScraAD logo on desktop only. Risky — could clutter. I'll make it optional / behind a small divider.
+1. **Email domain setup** — you configure a sender subdomain (e.g. `notify.scraad.com`) through the in-app email setup dialog. Lovable manages DNS via NS delegation. Templates can be scaffolded and code deployed while DNS verifies.
+2. **Email infrastructure** — pgmq queues, send log, suppression list, unsubscribe tokens, and the `process-email-queue` worker are provisioned automatically.
+3. **Branded auth email templates** (all 6: signup, magic-link, recovery, invite, email-change, reauthentication) — styled with ScraAD navy #0B3C5D, gold #E8963A, DM Sans/Inter, MRsoft footer, matching your product tone. Password reset and verification links come from your own domain.
+4. **Branded app email templates** for:
+   - `welcome` — after email verification / first login.
+   - `course-enrollment` — student name, course title, instructor, start date, dashboard link.
+   - `program-enrollment` — program title, track, duration, schedule, dashboard link. Also fires the admission-letter style summary.
+   - `payment-receipt` — Paystack reference, amount, course/program, date, part-payment status, next-due date if applicable. HTML invoice inline (no PDF attachment in this phase).
+5. **Trigger wiring** (each call is idempotent via a per-event key):
+   - Welcome: fired once after first successful sign-in.
+   - Course enrollment: from `useEnrollment.ts` free path and from `paystack-webhook` on first paid enrollment.
+   - Program enrollment: from `ProgramApplicationForm.tsx` after enrollment insert, and from `admin-manual-enroll`.
+   - Payment receipt: from `paystack-webhook` on every successful `charge.success` (course and program, full/first/second).
+6. **Unsubscribe page** at the scaffolded path — branded confirm/success screen (required so email footer links land in your app, not a raw function URL). Auth emails are exempt from unsubscribe by design.
 
-3. **About section on the homepage** — One line in `AboutCourseSection` or near the bottom of the hero: "A product of MRsoft / M-R International" with the logo. Visible to every visitor but contextual.
+## What is NOT in this phase (deferred, per your earlier answer)
 
-4. **Loading splash / PWA install prompt** — Already exists (`PWAInstallPrompt.tsx`). Adding "by MRsoft" there reinforces ownership when users install.
+- 2FA (TOTP / email OTP)
+- Login-alert emails (new device / IP / location)
+- Keycloak migration
+- Marketing / bulk email (not supported by Lovable Emails on purpose)
+- PDF invoice attachment
 
-5. **Email/transactional surfaces** — Out of scope for now (no email templates being touched).
+## User action required (one step)
 
-**My recommendation — pick the 3 highest-impact, lowest-clutter spots:**
+Complete the email setup dialog to pick your sender subdomain and add the NS records at your DNS provider. Everything else — templates, queue, cron, unsubscribe function — is created and deployed automatically. Sending activates the moment DNS verifies; until then, default Lovable auth emails continue and app-email calls queue.
 
-### Plan: Add "Product of MRsoft" in 3 strategic places
+## Technical notes (for reference)
 
-**1. Auth page (`src/pages/Auth.tsx`)**
-- Add a small centered attribution below the auth card: `Product of [MRsoft logo]` linking to m-rinternational.com.
-- Pattern: muted text + small logo, same as footer.
-- High visibility: every user sees this when logging in/signing up.
+- Templates live in `supabase/functions/_shared/email-templates/` (auth) and `supabase/functions/_shared/transactional-email-templates/` (app), as React-Email `.tsx` components.
+- One `send-transactional-email` edge function handles all app-email types via `templateName` + `templateData`. No per-email edge function.
+- `auth-email-hook` routes Supabase Auth events into the `auth_emails` pgmq queue.
+- Idempotency keys derived from event ids: `enroll-course-{enrollmentId}`, `enroll-program-{enrollmentId}`, `receipt-{paystackReference}`.
+- No schema changes to your existing tables; only the managed email tables (`email_send_log`, `email_send_state`, `suppressed_emails`, `email_unsubscribe_tokens`) are added by infra setup.
+- Body background stays `#ffffff` per email best practices; brand navy/gold are used for headings, buttons, and accents.
 
-**2. Homepage hero — bottom of hero section (`src/pages/Index.tsx`)**
-- Add a tiny inline attribution under the hero CTAs or just above the LogoMarquee: "A product of [MRsoft logo]".
-- Subtle, professional, doesn't compete with the main hero message.
-
-**3. Dashboard sidebar footer (`src/components/DashboardSidebar.tsx`)**
-- Add the attribution at the very bottom of the sidebar (below nav items, above collapse button if any).
-- Logged-in users see it persistently across all dashboard pages — reinforces ownership without ever being intrusive.
-
-**Consistent styling across all placements:**
-- Same "Product of" text + white-bg rounded logo container as footer
-- Logo height: `h-4` to `h-5` (smaller than footer for subtlety)
-- Always linked to `https://m-rinternational.com/` with `target="_blank"` and `rel="noopener noreferrer"`
-- Muted text color matching surrounding context
-
-**Skipped on purpose:**
-- Navbar: too crowded already with logo, search, nav links, CTA
-- Every page footer: already has it (would be redundant)
-- Course/program cards: would look like ads
-
-**Files to edit:**
-- `src/pages/Auth.tsx` — attribution under auth card
-- `src/pages/Index.tsx` — attribution above LogoMarquee section
-- `src/components/DashboardSidebar.tsx` — attribution at sidebar bottom
-
-After approval I'll implement all three with consistent styling matching the footer pattern.
+Ready to build once you approve.
