@@ -75,6 +75,33 @@ Deno.serve(async (req) => {
 
     const userId = user.id;
     const now = new Date().toISOString();
+    const amountNumber = typeof txData.amount === "number" ? txData.amount / 100 : Number(txData.amount ?? 0) / 100;
+    const amountStr = amountNumber.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const currency = txData.currency ?? "NGN";
+    const paidAt = new Date(txData.paid_at ?? now).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+    const paymentTypeLabel = paymentType === "full" ? "Full payment"
+      : paymentType === "first" ? "First installment"
+      : paymentType === "second" ? "Second installment"
+      : paymentType;
+    const recipientName = (user.user_metadata as any)?.full_name ?? email.split("@")[0];
+    const sendReceipt = (itemTitle: string) => {
+      supabase.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "payment-receipt",
+          recipientEmail: email,
+          idempotencyKey: `receipt-${reference}`,
+          templateData: {
+            name: recipientName,
+            itemTitle,
+            amount: amountStr,
+            currency,
+            reference,
+            paymentType: paymentTypeLabel,
+            paidAt,
+          },
+        },
+      }).catch(() => {});
+    };
 
     if (entityType === "program" && programId) {
       const { data: program } = await supabase
@@ -120,6 +147,8 @@ Deno.serve(async (req) => {
           }).eq("id", existing.id);
         }
       }
+
+      sendReceipt(program?.title ?? "your program");
 
       return new Response(JSON.stringify({ verified: true, entityType: "program", programId }), {
         status: 200,
@@ -182,6 +211,8 @@ Deno.serve(async (req) => {
         });
         await supabase.rpc("increment_students_count", { course_id_input: courseId });
       }
+
+      sendReceipt(course?.title ?? "your course");
 
       return new Response(JSON.stringify({ verified: true, entityType: "course", courseId }), {
         status: 200,

@@ -147,6 +147,21 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
             user_id: effectiveUserId,
           });
         }
+
+        // Enrollment confirmation email (non-blocking)
+        supabase.functions.invoke("send-transactional-email", {
+          body: {
+            templateName: "enrollment-confirmation",
+            recipientEmail: form.email.trim(),
+            idempotencyKey: `enroll-program-${effectiveUserId}-${programId}`,
+            templateData: {
+              name: fullName,
+              programTitle,
+              entityType: "program",
+              dashboardUrl: `${window.location.origin}/dashboard/programs/${programId}`,
+            },
+          },
+        }).catch(() => {});
       }
 
       // Persist basic details on profile for logged-in users
