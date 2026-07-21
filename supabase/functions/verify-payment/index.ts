@@ -75,6 +75,33 @@ Deno.serve(async (req) => {
 
     const userId = user.id;
     const now = new Date().toISOString();
+    const amountNumber = typeof txData.amount === "number" ? txData.amount / 100 : Number(txData.amount ?? 0) / 100;
+    const amountStr = amountNumber.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const currency = txData.currency ?? "NGN";
+    const paidAt = new Date(txData.paid_at ?? now).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+    const paymentTypeLabel = paymentType === "full" ? "Full payment"
+      : paymentType === "first" ? "First installment"
+      : paymentType === "second" ? "Second installment"
+      : paymentType;
+    const recipientName = (user.user_metadata as any)?.full_name ?? email.split("@")[0];
+    const sendReceipt = (itemTitle: string) => {
+      supabase.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "payment-receipt",
+          recipientEmail: email,
+          idempotencyKey: `receipt-${reference}`,
+          templateData: {
+            name: recipientName,
+            itemTitle,
+            amount: amountStr,
+            currency,
+            reference,
+            paymentType: paymentTypeLabel,
+            paidAt,
+          },
+        },
+      }).catch(() => {});
+    };
 
     if (entityType === "program" && programId) {
       const { data: program } = await supabase
