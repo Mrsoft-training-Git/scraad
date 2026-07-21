@@ -1,10 +1,7 @@
 /// <reference types="npm:@types/react@18.3.1" />
 import * as React from 'npm:react@18.3.1'
-import {
-  Body, Container, Head, Heading, Html, Preview, Section, Text, Row, Column, Hr,
-} from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
-import { main, container, header, brandName, h1, text, muted, card, footer, brand } from './_brand.ts'
+import { EmailLayout, styles, Text } from './_layout.tsx'
 
 interface Props {
   name?: string
@@ -14,11 +11,17 @@ interface Props {
   reference?: string
   paymentType?: string
   paidAt?: string
+  dashboardUrl?: string
 }
 
-const row = { padding: '6px 0' }
-const label = { ...muted, margin: 0, fontSize: '13px' }
-const value = { ...text, margin: 0, fontSize: '14px', fontWeight: 600 as const, textAlign: 'right' as const, color: brand.ink }
+const row = { ...styles.paragraph, margin: '6px 0', fontSize: '14px' }
+const amountRow = {
+  ...styles.paragraph,
+  margin: '10px 0',
+  fontSize: '18px',
+  fontWeight: 700 as const,
+  color: styles.brand.navy,
+}
 
 const Email = ({
   name = 'there',
@@ -28,64 +31,27 @@ const Email = ({
   reference = '—',
   paymentType,
   paidAt,
+  dashboardUrl = 'https://scraad011.lovable.app/dashboard/bills',
 }: Props) => (
-  <Html lang="en" dir="ltr">
-    <Head />
-    <Preview>Payment received — {currency} {amount}</Preview>
-    <Body style={main}>
-      <Container style={container}>
-        <Section style={header}>
-          <Heading style={brandName}>ScraAD</Heading>
-        </Section>
-        <Heading style={h1}>Payment received</Heading>
-        <Text style={text}>
-          Hi {name}, thanks for your payment. Here's your receipt for your records.
+  <EmailLayout
+    preview={`Payment received — ${currency} ${amount}`}
+    title="Payment received ✅"
+    greetingName={name}
+    message="Thank you for your payment. Here's your official receipt for your records."
+    detailsTitle={itemTitle}
+    detailsBody={
+      <>
+        <Text style={amountRow}>{currency} {amount}</Text>
+        {paymentType && <Text style={row}>💳 Payment type: {paymentType}</Text>}
+        <Text style={{ ...row, fontFamily: 'monospace', fontSize: '12px' }}>
+          🔖 Reference: {reference}
         </Text>
-
-        <Section style={card}>
-          <Row style={row}>
-            <Column><Text style={label}>Item</Text></Column>
-            <Column><Text style={value}>{itemTitle}</Text></Column>
-          </Row>
-          <Hr style={{ borderColor: brand.border, margin: '8px 0' }} />
-          <Row style={row}>
-            <Column><Text style={label}>Amount</Text></Column>
-            <Column><Text style={{ ...value, color: brand.navy, fontSize: '16px' }}>{currency} {amount}</Text></Column>
-          </Row>
-          {paymentType && (
-            <>
-              <Hr style={{ borderColor: brand.border, margin: '8px 0' }} />
-              <Row style={row}>
-                <Column><Text style={label}>Payment type</Text></Column>
-                <Column><Text style={value}>{paymentType}</Text></Column>
-              </Row>
-            </>
-          )}
-          <Hr style={{ borderColor: brand.border, margin: '8px 0' }} />
-          <Row style={row}>
-            <Column><Text style={label}>Reference</Text></Column>
-            <Column><Text style={{ ...value, fontFamily: 'monospace', fontSize: '12px' }}>{reference}</Text></Column>
-          </Row>
-          {paidAt && (
-            <>
-              <Hr style={{ borderColor: brand.border, margin: '8px 0' }} />
-              <Row style={row}>
-                <Column><Text style={label}>Date</Text></Column>
-                <Column><Text style={value}>{paidAt}</Text></Column>
-              </Row>
-            </>
-          )}
-        </Section>
-
-        <Text style={muted}>
-          You can review all your transactions from the Billing section of your dashboard.
-        </Text>
-        <Text style={footer}>
-          © ScraAD · Powered by M-R International
-        </Text>
-      </Container>
-    </Body>
-  </Html>
+        {paidAt && <Text style={row}>📅 Date: {paidAt}</Text>}
+      </>
+    }
+    buttonText="View my billing"
+    actionUrl={dashboardUrl}
+  />
 )
 
 export const template = {

@@ -1,10 +1,7 @@
 /// <reference types="npm:@types/react@18.3.1" />
 import * as React from 'npm:react@18.3.1'
-import {
-  Body, Button, Container, Head, Heading, Html, Preview, Section, Text,
-} from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
-import { main, container, header, brandName, h1, text, muted, button, card, footer, brand } from './_brand.ts'
+import { EmailLayout, styles, Text } from './_layout.tsx'
 
 interface Props {
   name?: string
@@ -15,6 +12,8 @@ interface Props {
   dashboardUrl?: string
 }
 
+const detailLine = { ...styles.paragraph, margin: '4px 0', fontSize: '14px' }
+
 const Email = ({
   name = 'there',
   programTitle = 'your program',
@@ -23,44 +22,27 @@ const Email = ({
   mode,
   dashboardUrl = 'https://scraad011.lovable.app/dashboard/learning',
 }: Props) => (
-  <Html lang="en" dir="ltr">
-    <Head />
-    <Preview>You're enrolled in {programTitle}</Preview>
-    <Body style={main}>
-      <Container style={container}>
-        <Section style={header}>
-          <Heading style={brandName}>ScraAD</Heading>
-        </Section>
-        <Heading style={h1}>You're in, {name} 🎉</Heading>
-        <Text style={text}>
-          Your enrollment for the {entityType} below has been confirmed.
-        </Text>
-        <Section style={card}>
-          <Text style={{ ...text, fontWeight: 700, color: brand.navy, margin: '0 0 8px' }}>
-            {programTitle}
-          </Text>
-          {startDate && (
-            <Text style={{ ...muted, margin: '0 0 4px' }}>Starts: {startDate}</Text>
-          )}
-          {mode && (
-            <Text style={{ ...muted, margin: 0 }}>Mode: {mode}</Text>
-          )}
-        </Section>
-        <Text style={text}>
-          Visit your learning dashboard to access materials, live sessions, and updates.
-        </Text>
-        <Section style={{ margin: '24px 0' }}>
-          <Button style={button} href={dashboardUrl}>Open my dashboard</Button>
-        </Section>
-        <Text style={muted}>
-          If any details look incorrect, reply to this email and we'll sort it out.
-        </Text>
-        <Text style={footer}>
-          © ScraAD · Powered by M-R International
-        </Text>
-      </Container>
-    </Body>
-  </Html>
+  <EmailLayout
+    preview={`You're enrolled in ${programTitle}`}
+    title={`You're in, ${name} 🎉`}
+    greetingName={name}
+    message={`Your enrollment for the ${entityType} below has been confirmed. Below are the details:`}
+    detailsTitle={programTitle}
+    detailsBody={
+      <>
+        {startDate && <Text style={detailLine}>📅 Starts: {startDate}</Text>}
+        {mode && <Text style={detailLine}>📍 Mode: {mode}</Text>}
+        <Text style={detailLine}>✅ Status: Confirmed</Text>
+      </>
+    }
+    buttonText="Open my dashboard"
+    actionUrl={dashboardUrl}
+    postButton={
+      <Text style={{ ...styles.paragraph, fontSize: '13px', color: styles.brand.muted }}>
+        If any details look incorrect, reply to this email and we'll sort it out.
+      </Text>
+    }
+  />
 )
 
 export const template = {
