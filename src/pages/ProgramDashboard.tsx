@@ -740,10 +740,11 @@ const AdmissionLetterCard = ({ program, profile, enrollment }: { program: Progra
         loadImageAsDataUrl(scraadLogoAsset.url),
         loadImageAsDataUrl(mrsoftLogoAsset.url),
       ]);
-      const logoH = 48;
-      const scraadW = 130;
-      const mrsoftW = 48;
-      const gap = 20;
+      const logoH = 46;
+      // Preserve intrinsic aspect ratios (ScraAD ~2.37, MRsoft ~3.23)
+      const scraadW = Math.round(logoH * (664 / 280));
+      const mrsoftW = Math.round(logoH * (820 / 254));
+      const gap = 24;
       const totalW = scraadW + gap + mrsoftW;
       const startX = (pageW - totalW) / 2;
       doc.addImage(scraadData, "PNG", startX, y, scraadW, logoH);
@@ -752,7 +753,7 @@ const AdmissionLetterCard = ({ program, profile, enrollment }: { program: Progra
       doc.setLineWidth(0.8);
       doc.line(startX + scraadW + gap / 2, y + 6, startX + scraadW + gap / 2, y + logoH - 6);
       doc.addImage(mrsoftData, "JPEG", startX + scraadW + gap, y, mrsoftW, logoH);
-      y += logoH + 8;
+      y += logoH + 12;
     } catch {
       // proceed without logos
     }
