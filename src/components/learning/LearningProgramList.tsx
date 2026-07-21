@@ -170,7 +170,7 @@ export const LearningProgramList = ({ userId }: Props) => {
       return { label: "View Program", onClick: () => navigate(`/programs/${p.program_id}`) };
     }
     if (p.computedStatus === "admitted" && (!p.enrolled || p.payment_status === "pending" || p.access_status === "locked")) {
-      return { label: "Pay Now", onClick: () => navigate(`/programs/${p.program_id}`) };
+      return { label: "Pay Now", onClick: () => navigate(`/dashboard/programs/${p.program_id}`) };
     }
     if (p.computedStatus === "in-progress" || p.computedStatus === "admitted") {
       return { label: "Continue", onClick: () => navigate(`/dashboard/programs/${p.program_id}`) };
