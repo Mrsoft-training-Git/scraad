@@ -369,10 +369,12 @@ const ProgramDetails = () => {
           userEmail={user?.email || ""}
           open={showApplicationForm}
           onOpenChange={setShowApplicationForm}
-          onSuccess={() => {
+          onSuccess={(target) => {
             setApplicationStatus("approved");
             setShowApplicationForm(false);
+            navigate(target || `/dashboard/programs/${program.id}`);
           }}
+
         />
       )}
 
