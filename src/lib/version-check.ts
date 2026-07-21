@@ -12,7 +12,7 @@
  * Skipped in dev / preview iframes to avoid disrupting editing.
  */
 
-const CHECK_INTERVAL_MS = 60_000; // every 60s
+const CHECK_INTERVAL_MS = 20_000; // every 20s
 const STORAGE_KEY = "scraad:last-reload";
 const RELOAD_COOLDOWN_MS = 30_000; // never reload twice within 30s
 
