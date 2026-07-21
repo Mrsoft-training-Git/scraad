@@ -31,7 +31,7 @@ const Email = ({
   reference = '—',
   paymentType,
   paidAt,
-  dashboardUrl = 'https://scraad011.lovable.app/dashboard/bills',
+  dashboardUrl = 'https://scraad.com/dashboard/bills',
 }: Props) => (
   <EmailLayout
     preview={`Payment received — ${currency} ${amount}`}

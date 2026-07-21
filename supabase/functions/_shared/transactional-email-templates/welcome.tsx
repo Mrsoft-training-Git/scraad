@@ -10,7 +10,7 @@ interface Props {
 
 const Email = ({
   name = 'there',
-  dashboardUrl = 'https://scraad011.lovable.app/dashboard',
+  dashboardUrl = 'https://scraad.com/dashboard',
 }: Props) => (
   <EmailLayout
     preview="Welcome to ScraAD — your learning journey starts now"
@@ -37,5 +37,5 @@ export const template = {
   component: Email,
   subject: 'Welcome to ScraAD',
   displayName: 'Welcome',
-  previewData: { name: 'Jane', dashboardUrl: 'https://scraad011.lovable.app/dashboard' },
+  previewData: { name: 'Jane', dashboardUrl: 'https://scraad.com/dashboard' },
 } satisfies TemplateEntry
