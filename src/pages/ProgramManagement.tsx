@@ -383,6 +383,7 @@ const ProgramManagement = () => {
 
       <CreateProgramDialog open={showCreateDialog} onOpenChange={setShowCreateDialog} onCreated={fetchPrograms} />
       <EditProgramDialog program={editingProgram} onOpenChange={() => setEditingProgram(null)} onUpdated={fetchPrograms} />
+      <ManualEnrollDialog open={showManualEnrollDialog} onOpenChange={setShowManualEnrollDialog} programs={programs} onEnrolled={fetchApplications} />
     </DashboardLayout>
   );
 };
