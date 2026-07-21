@@ -123,7 +123,6 @@ const Programs = () => {
   const [search, setSearch] = useState("");
   const [modeFilter, setModeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
-  
 
   useEffect(() => {
     fetchPrograms();
@@ -170,7 +169,7 @@ const Programs = () => {
             Advanced Training Programs
           </Badge>
           <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
-            Earn accredited degrees from{" "}
+            Earn Degrees and Worldclass Skills from{" "}
             <span className="font-display italic font-light text-secondary">M-R International</span>
           </h1>
           <p className="text-lg text-primary-foreground/80 mb-4 max-w-2xl mx-auto">
