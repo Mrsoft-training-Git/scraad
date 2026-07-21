@@ -15,9 +15,9 @@ export const brand = {
 }
 
 const LOGO_URL =
-  'https://scraad011.lovable.app/__l5e/assets-v1/14345a7e-fd3c-49f0-a756-885891cc3e10/scraad-email-logo.png'
+  'https://scraad.com/__l5e/assets-v1/14345a7e-fd3c-49f0-a756-885891cc3e10/scraad-email-logo.png'
 const MRSOFT_LOGO_URL =
-  'https://scraad011.lovable.app/__l5e/assets-v1/def2fe0a-0a1c-4caa-9f6a-68cdb4345611/mrsoft-logo.jpeg'
+  'https://scraad.com/__l5e/assets-v1/def2fe0a-0a1c-4caa-9f6a-68cdb4345611/mrsoft-logo.jpeg'
 
 const main = {
   backgroundColor: '#f4f6fa',

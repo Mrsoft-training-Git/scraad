@@ -20,7 +20,7 @@ const Email = ({
   entityType = 'program',
   startDate,
   mode,
-  dashboardUrl = 'https://scraad011.lovable.app/dashboard/learning',
+  dashboardUrl = 'https://scraad.com/dashboard/learning',
 }: Props) => (
   <EmailLayout
     preview={`You're enrolled in ${programTitle}`}
