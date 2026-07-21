@@ -133,6 +133,28 @@ Deno.serve(async (req) => {
       await admin.from("program_enrollments").insert(enrollPayload);
     }
 
+    // Fetch program title for email context
+    const { data: prog } = await admin
+      .from("programs").select("title, mode, start_date").eq("id", program_id).maybeSingle();
+
+    // Send enrollment confirmation email (non-blocking)
+    admin.functions.invoke("send-transactional-email", {
+      body: {
+        templateName: "enrollment-confirmation",
+        recipientEmail: normalizedEmail,
+        idempotencyKey: `enroll-program-${targetUserId}-${program_id}`,
+        templateData: {
+          name: full_name,
+          programTitle: prog?.title ?? "your program",
+          entityType: "program",
+          mode: prog?.mode ?? undefined,
+          startDate: prog?.start_date
+            ? new Date(prog.start_date).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })
+            : undefined,
+        },
+      },
+    }).catch(() => {});
+
     return new Response(JSON.stringify({ success: true, user_id: targetUserId, invited }), {
       status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
