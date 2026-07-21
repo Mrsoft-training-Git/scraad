@@ -16,6 +16,8 @@ export const brand = {
 
 const LOGO_URL =
   'https://scraad011.lovable.app/__l5e/assets-v1/14345a7e-fd3c-49f0-a756-885891cc3e10/scraad-email-logo.png'
+const MRSOFT_LOGO_URL =
+  'https://scraad011.lovable.app/__l5e/assets-v1/def2fe0a-0a1c-4caa-9f6a-68cdb4345611/mrsoft-logo.jpeg'
 
 const main = {
   backgroundColor: '#f4f6fa',
@@ -161,7 +163,16 @@ export const EmailLayout = ({
       <Container style={outer}>
         <Section style={card}>
           <Section style={header}>
-            <Img src={LOGO_URL} alt="ScraAD" style={logoStyle} />
+            <table role="presentation" cellPadding={0} cellSpacing={0} border={0} align="center" style={{ margin: '0 auto' }}>
+              <tr>
+                <td style={{ paddingRight: '16px', verticalAlign: 'middle' }}>
+                  <Img src={LOGO_URL} alt="ScraAD" style={{ height: '40px', width: 'auto', display: 'block' }} />
+                </td>
+                <td style={{ paddingLeft: '16px', borderLeft: `1px solid ${brand.border}`, verticalAlign: 'middle' }}>
+                  <Img src={MRSOFT_LOGO_URL} alt="MRsoft" style={{ height: '36px', width: 'auto', display: 'block' }} />
+                </td>
+              </tr>
+            </table>
           </Section>
           <Section style={content}>
             <Heading style={title}>{titleText}</Heading>
