@@ -447,6 +447,25 @@ const Auth = () => {
                     </div>
                   </div>
 
+                  <div className="space-y-1.5">
+                    <Label htmlFor="signup-phone" className="text-sm font-medium">
+                      Phone number
+                    </Label>
+                    <div className="relative">
+                      <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        id="signup-phone"
+                        type="tel"
+                        placeholder="+234 800 000 0000"
+                        className="pl-10 h-11 rounded-lg"
+                        value={signupPhone}
+                        onChange={(e) => setSignupPhone(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
                       <Label htmlFor="signup-password" className="text-sm font-medium">
