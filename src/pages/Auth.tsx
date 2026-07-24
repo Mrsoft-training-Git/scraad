@@ -477,7 +477,10 @@ const Auth = () => {
                       <Input
                         id="signup-phone"
                         type="tel"
-                        placeholder="+234 800 000 0000"
+                        inputMode="tel"
+                        placeholder="08137705341 or +2348137705341"
+                        pattern="^(0\d{10}|\+234\d{10})$"
+                        title="Enter a valid Nigerian number, e.g. 08137705341 or +2348137705341"
                         className="pl-10 h-11 rounded-lg"
                         value={signupPhone}
                         onChange={(e) => setSignupPhone(e.target.value)}
