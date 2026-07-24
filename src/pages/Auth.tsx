@@ -118,7 +118,7 @@ const Auth = () => {
         email: signupEmail,
         password: signupPassword,
         options: {
-          data: { full_name: signupName },
+          data: { full_name: signupName, phone: signupPhone },
           emailRedirectTo: `${window.location.origin}/dashboard`,
         },
       });
