@@ -10,6 +10,7 @@ import {
   Mail,
   Lock,
   User,
+  Phone,
   ArrowLeft,
   Sparkles,
   GraduationCap,
