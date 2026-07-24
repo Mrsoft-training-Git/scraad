@@ -360,6 +360,35 @@ const ProgramDetails = () => {
         </div>
       </section>
 
+      {/* Mobile floating Apply bar */}
+      <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.15)]">
+        <div className="container mx-auto px-4 py-3">
+          {applicationStatus === "approved" ? (
+            <Button className="w-full py-5 text-base font-semibold" asChild>
+              <Link to={`/dashboard/programs/${program.id}`}>Go to Program Dashboard</Link>
+            </Button>
+          ) : applicationStatus === "pending" ? (
+            <Button disabled className="w-full py-5 text-base font-semibold">
+              ⏳ Application Pending
+            </Button>
+          ) : effectiveStatus === "open" ? (
+            <Button
+              onClick={handleApplyClick}
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-5 text-base font-semibold shadow-lg"
+            >
+              {applicationStatus === "rejected" ? "Re-apply for Program" : "Apply for Program"}
+            </Button>
+          ) : (
+            <Button disabled className="w-full py-5 text-base font-semibold">
+              {effectiveStatus === "ongoing" ? "Program In Progress" : "Applications Closed"}
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Spacer so content isn't hidden behind the floating bar on mobile */}
+      <div className="lg:hidden h-24" aria-hidden />
+
       {/* Application Form Dialog */}
       {showApplicationForm && (
         <ProgramApplicationForm
