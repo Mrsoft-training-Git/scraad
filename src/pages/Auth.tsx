@@ -311,7 +311,7 @@ const Auth = () => {
             </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-3 mb-7 bg-muted/60 p-1 h-11 rounded-xl">
+              <TabsList className="grid w-full grid-cols-2 mb-7 bg-muted/60 p-1 h-11 rounded-xl">
                 <TabsTrigger
                   value="login"
                   className="rounded-lg text-sm data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-foreground"
@@ -323,12 +323,6 @@ const Auth = () => {
                   className="rounded-lg text-sm data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-foreground"
                 >
                   Sign Up
-                </TabsTrigger>
-                <TabsTrigger
-                  value="forgot"
-                  className="rounded-lg text-sm data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-foreground"
-                >
-                  Reset
                 </TabsTrigger>
               </TabsList>
 
