@@ -266,7 +266,7 @@ const InstructorProgramManage = () => {
                       {subs.length > 0 && (
                         <div className="mt-3 space-y-2">
                           {subs.map((sub: any) => (
-                            <GradeSubmission key={sub.id} submission={sub} maxScore={a.max_score || 100} onGraded={fetchAll} />
+                            <GradeSubmission key={sub.id} submission={sub} maxScore={a.max_score || 100} onGraded={fetchAll} programId={programId!} />
                           ))}
                         </div>
                       )}
