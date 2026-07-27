@@ -35,7 +35,7 @@ interface FullProgram {
   track: string | null; instructor_id: string | null; instructor_name: string | null;
   is_published: boolean;
 }
-interface Application { id: string; program_id: string; user_id: string; full_name: string; email: string; phone: string | null; experience_level: string | null; motivation: string | null; cv_url: string | null; status: string; created_at: string; age: number | null; address: string | null; guardian_name: string | null; guardian_phone: string | null; guardian_email: string | null; guardian_relationship: string | null; }
+interface Application { id: string; program_id: string; user_id: string; full_name: string; email: string; phone: string | null; experience_level: string | null; motivation: string | null; cv_url: string | null; status: string; created_at: string; age: number | null; address: string | null; guardian_name: string | null; guardian_phone: string | null; guardian_email: string | null; guardian_relationship: string | null; guardian_gender: string | null; }
 interface InstructorOption { id: string; full_name: string | null; email: string | null; }
 
 const ProgramManagement = () => {
@@ -356,6 +356,7 @@ const ProgramManagement = () => {
                   <div><Label className="text-muted-foreground text-xs">Phone</Label><p className="font-medium">{selectedApp.guardian_phone || "—"}</p></div>
                   {selectedApp.guardian_email && <div><Label className="text-muted-foreground text-xs">Email</Label><p className="font-medium break-all">{selectedApp.guardian_email}</p></div>}
                   {selectedApp.guardian_relationship && <div><Label className="text-muted-foreground text-xs">Relationship</Label><p className="font-medium capitalize">{selectedApp.guardian_relationship}</p></div>}
+                  {selectedApp.guardian_gender && <div><Label className="text-muted-foreground text-xs">Gender</Label><p className="font-medium capitalize">{selectedApp.guardian_gender}</p></div>}
                 </div>
                 {(Array.isArray((selectedApp as any).additional_guardians) ? (selectedApp as any).additional_guardians : []).map((g: any, i: number) => (
                   <div key={i} className="border-t border-border pt-3 space-y-2">
@@ -365,6 +366,7 @@ const ProgramManagement = () => {
                       <div><Label className="text-muted-foreground text-xs">Phone</Label><p className="font-medium">{g.phone || "—"}</p></div>
                       {g.email && <div><Label className="text-muted-foreground text-xs">Email</Label><p className="font-medium break-all">{g.email}</p></div>}
                       {g.relationship && <div><Label className="text-muted-foreground text-xs">Relationship</Label><p className="font-medium capitalize">{g.relationship}</p></div>}
+                      {g.gender && <div><Label className="text-muted-foreground text-xs">Gender</Label><p className="font-medium capitalize">{g.gender}</p></div>}
                     </div>
                   </div>
                 ))}
