@@ -693,10 +693,14 @@ const ManualEnrollDialog = ({ open, onOpenChange, programs, onEnrolled }: { open
     }
     setSubmitting(true);
     try {
+      const filledGuardians = guardians
+        .map(g => ({ name: g.name.trim(), phone: g.phone.trim(), email: g.email.trim(), relationship: g.relationship.trim() }))
+        .filter(g => g.name || g.phone || g.email || g.relationship);
       const { data, error } = await supabase.functions.invoke("admin-manual-enroll", {
         body: {
           ...form,
           age: form.age ? Number(form.age) : null,
+          guardians: filledGuardians,
           redirect_to: `${window.location.origin}/dashboard/programs/${form.program_id}`,
         },
       });
