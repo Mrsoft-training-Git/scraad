@@ -768,7 +768,7 @@ const ManualEnrollDialog = ({ open, onOpenChange, programs, onEnrolled }: { open
           </div>
 
           <div className="rounded-lg border border-border p-3 bg-muted/30 space-y-4">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Parent / Guardian (optional, up to 3)</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Parent / Guardian (up to 3)</p>
             {guardians.map((g, i) => (
               <div key={i} className="space-y-3">
                 {i > 0 && (

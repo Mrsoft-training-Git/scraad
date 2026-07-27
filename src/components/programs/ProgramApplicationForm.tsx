@@ -261,7 +261,7 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
           <div className="space-y-4 rounded-lg border border-border p-4 bg-muted/30">
             <div className="flex items-center gap-2">
               <ShieldAlert className="w-4 h-4 text-primary" />
-              <Label className="text-sm font-semibold">Parent / Guardian Details (optional)</Label>
+              <Label className="text-sm font-semibold">Parent / Guardian Details</Label>
             </div>
             {guardians.map((g, i) => (
               <div key={i} className="space-y-3">
