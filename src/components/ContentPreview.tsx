@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { FileText, Video, Link as LinkIcon, ExternalLink, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { getFileExtension } from "@/components/DocumentViewer";
 
 interface ContentPreviewProps {
   open: boolean;
@@ -127,20 +128,37 @@ export const ContentPreview = ({ open, onOpenChange, content, courseId, programI
       );
     }
 
-    // PDF document
-    if (content.content_type === "document" && isPdfUrl(url)) {
-      return (
-        <div className="w-full h-[70vh]">
-          <iframe
-            src={url}
-            title={content.title}
-            className="w-full h-full rounded-lg border"
-          />
-        </div>
-      );
+    // Documents: PDF/text inline, Office via viewer, images inline
+    if (content.content_type === "document") {
+      const ext = getFileExtension(url);
+      if (["png", "jpg", "jpeg", "gif", "webp", "svg", "bmp"].includes(ext)) {
+        return (
+          <div className="w-full max-h-[70vh] overflow-auto rounded-lg border bg-muted/30 flex items-center justify-center">
+            <img src={url} alt={content.title} className="max-w-full object-contain" />
+          </div>
+        );
+      }
+      if (isPdfUrl(url) || ["txt", "md", "json", "xml", "log", "csv"].includes(ext)) {
+        return (
+          <div className="w-full h-[70vh]">
+            <iframe src={url} title={content.title} className="w-full h-full rounded-lg border" />
+          </div>
+        );
+      }
+      if (["doc", "docx", "ppt", "pptx", "xls", "xlsx"].includes(ext)) {
+        return (
+          <div className="w-full h-[70vh]">
+            <iframe
+              src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}`}
+              title={content.title}
+              className="w-full h-full rounded-lg border"
+            />
+          </div>
+        );
+      }
     }
 
-    // Document (non-PDF) or Link
+    // Unsupported document type or Link
     return (
       <div className="flex flex-col items-center justify-center py-12 space-y-4">
         {content.content_type === "document" ? (
