@@ -153,13 +153,17 @@ export const DocumentViewer = ({ open, onOpenChange, fileUrl, title, courseId, p
                 <ExternalLink className="w-4 h-4 mr-2" /> Open in new tab
               </a>
             </Button>
-            <Button variant="outline" size="sm" asChild>
-              <a href={resolvedUrl} download={name}>
-                <Download className="w-4 h-4 mr-2" /> Download
-              </a>
+            <Button size="sm" onClick={handleDownload} disabled={downloading}>
+              {downloading ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Download className="w-4 h-4 mr-2" />
+              )}
+              Download
             </Button>
           </div>
         )}
+
       </DialogContent>
     </Dialog>
   );
