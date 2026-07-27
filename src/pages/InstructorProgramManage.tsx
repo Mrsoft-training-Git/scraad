@@ -596,9 +596,17 @@ const AddMaterialDialog = ({ open, onOpenChange, programId, modules, onSaved }: 
 
           {type === "document" && (
             <div><Label>Upload Document</Label>
-              <Input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt" onChange={e => setFile(e.target.files?.[0] || null)} />
+              <Input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.csv,.zip,.png,.jpg,.jpeg" onChange={e => setFile(e.target.files?.[0] || null)} />
+              {file && uploadProgress > 0 && uploadProgress < 100 && (
+                <div className="mt-2">
+                  <Progress value={uploadProgress} className="h-2" />
+                  <p className="text-xs text-muted-foreground mt-1">{uploadProgress}% uploaded</p>
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">Stored securely in the program file store.</p>
             </div>
           )}
+
 
           {type === "video" && (
             <>
