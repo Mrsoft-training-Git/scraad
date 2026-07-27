@@ -647,17 +647,7 @@ const AssignmentsList = ({ assignments, submissions, onSubmit, programId }: { as
                       key={url}
                       variant="outline"
                       size="sm"
-                      onClick={async () => {
-                        const { data, error } = await supabase.functions.invoke("s3-get-signed-url", {
-                          body: { s3Url: url, programId },
-                        });
-                        const link = data?.signedUrl || data?.url;
-                        if (error || !link) {
-                          toast({ title: "Could not open file", variant: "destructive" });
-                          return;
-                        }
-                        window.open(link, "_blank", "noopener");
-                      }}
+                      onClick={() => setViewerFile({ url, title: getFileNameFromUrl(url) })}
                     >
                       <Paperclip className="w-4 h-4 mr-2" />My file {i + 1}
                     </Button>
