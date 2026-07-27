@@ -240,6 +240,26 @@ const InstructorProgramManage = () => {
                             {a.due_date && <Badge variant="outline" className="text-xs"><Clock className="w-3 h-3 mr-1" />Due {format(new Date(a.due_date), "MMM d")}</Badge>}
                             <Badge variant="secondary" className="text-xs">{subs.length} submissions</Badge>
                           </div>
+                          {a.attachment_url && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="mt-2"
+                              onClick={async () => {
+                                const { data, error } = await supabase.functions.invoke("s3-get-signed-url", {
+                                  body: { s3Url: a.attachment_url, programId },
+                                });
+                                const link = data?.signedUrl || data?.url;
+                                if (error || !link) {
+                                  toast({ title: "Could not open attachment", variant: "destructive" });
+                                  return;
+                                }
+                                window.open(link, "_blank", "noopener");
+                              }}
+                            >
+                              <FileText className="w-4 h-4 mr-1" />Attached document
+                            </Button>
+                          )}
                         </div>
                       </div>
                       {/* Submissions */}
@@ -401,6 +421,7 @@ const InstructorProgramManage = () => {
           content_type: previewMaterial.material_type,
           content_url: previewMaterial.content_url,
         } : null}
+        programId={programId!}
       />
     </DashboardLayout>
   );
