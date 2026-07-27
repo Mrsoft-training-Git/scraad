@@ -125,7 +125,30 @@ const footerContact = {
   margin: '2px 0',
 }
 const footerLink = { color: brand.gold, textDecoration: 'none' }
+const poweredWrap = {
+  margin: '18px 0 0',
+  paddingTop: '16px',
+  borderTop: '1px solid rgba(255,255,255,0.15)',
+  textAlign: 'center' as const,
+}
+const poweredLabel = {
+  fontSize: '10px',
+  color: 'rgba(255,255,255,0.55)',
+  textTransform: 'uppercase' as const,
+  letterSpacing: '1.5px',
+  margin: '0 0 8px',
+}
+const mrsoftLogo = {
+  height: '20px',
+  width: 'auto',
+  margin: '0 auto',
+  display: 'block',
+  backgroundColor: '#ffffff',
+  borderRadius: '4px',
+  padding: '4px 8px',
+}
 const copyright = {
+
   fontSize: '11px',
   color: 'rgba(255,255,255,0.5)',
   margin: '16px 0 0',
