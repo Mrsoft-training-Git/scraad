@@ -548,6 +548,7 @@ const AssignmentsList = ({ assignments, submissions, onSubmit, programId }: { as
   const [textInput, setTextInput] = useState<Record<string, string>>({});
   const [files, setFiles] = useState<Record<string, File[]>>({});
   const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [viewerFile, setViewerFile] = useState<{ url: string; title?: string } | null>(null);
 
   const uploadFile = async (file: File, userId: string) => {
     const { data: uploadData, error: fnError } = await supabase.functions.invoke("s3-get-upload-url", {
