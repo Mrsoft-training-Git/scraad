@@ -752,15 +752,33 @@ const ManualEnrollDialog = ({ open, onOpenChange, programs, onEnrolled }: { open
             <div className="col-span-2"><Label>Address</Label><Input value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} /></div>
           </div>
 
-          <div className="rounded-lg border border-border p-3 bg-muted/30 space-y-3">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Parent / Guardian (optional)</p>
-            <div className="grid grid-cols-2 gap-4">
-              <div><Label>Name</Label><Input value={form.guardian_name} onChange={e => setForm({ ...form, guardian_name: e.target.value })} /></div>
-              <div><Label>Phone</Label><Input value={form.guardian_phone} onChange={e => setForm({ ...form, guardian_phone: e.target.value })} /></div>
-              <div><Label>Email</Label><Input type="email" value={form.guardian_email} onChange={e => setForm({ ...form, guardian_email: e.target.value })} /></div>
-              <div><Label>Relationship</Label><Input value={form.guardian_relationship} onChange={e => setForm({ ...form, guardian_relationship: e.target.value })} /></div>
-            </div>
+          <div className="rounded-lg border border-border p-3 bg-muted/30 space-y-4">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Parent / Guardian (optional, up to 3)</p>
+            {guardians.map((g, i) => (
+              <div key={i} className="space-y-3">
+                {i > 0 && (
+                  <div className="flex items-center justify-between border-t border-border pt-2">
+                    <span className="text-xs font-semibold text-muted-foreground">Guardian {i + 1}</span>
+                    <Button type="button" variant="ghost" size="sm" className="text-destructive" onClick={() => setGuardians(prev => prev.filter((_, idx) => idx !== i))}>
+                      <X className="w-4 h-4 mr-1" /> Remove
+                    </Button>
+                  </div>
+                )}
+                <div className="grid grid-cols-2 gap-4">
+                  <div><Label>Name</Label><Input value={g.name} onChange={e => updateGuardian(i, { name: e.target.value })} /></div>
+                  <div><Label>Phone</Label><Input value={g.phone} onChange={e => updateGuardian(i, { phone: e.target.value })} /></div>
+                  <div><Label>Email</Label><Input type="email" value={g.email} onChange={e => updateGuardian(i, { email: e.target.value })} /></div>
+                  <div><Label>Relationship</Label><Input value={g.relationship} onChange={e => updateGuardian(i, { relationship: e.target.value })} /></div>
+                </div>
+              </div>
+            ))}
+            {guardians.length < 3 && (
+              <Button type="button" variant="outline" size="sm" onClick={() => setGuardians(prev => [...prev, emptyGuardian()])}>
+                <Plus className="w-4 h-4 mr-1" /> Add another guardian
+              </Button>
+            )}
           </div>
+
 
           <div><Label>Notes / Motivation</Label><Textarea rows={2} value={form.motivation} onChange={e => setForm({ ...form, motivation: e.target.value })} /></div>
 
