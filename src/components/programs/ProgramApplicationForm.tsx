@@ -19,11 +19,14 @@ interface Props {
   onSuccess: (target?: string) => void;
 }
 
+type Guardian = { name: string; phone: string; relationship: string };
+
 export const ProgramApplicationForm = ({ programId, programTitle, userId, userEmail, open, onOpenChange, onSuccess }: Props) => {
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState(false);
   const isAuthenticated = !!userId;
   const [password, setPassword] = useState("");
+  const [guardians, setGuardians] = useState<Guardian[]>([{ name: "", phone: "", relationship: "" }]);
   const [form, setForm] = useState({
     first_name: "",
     last_name: "",
@@ -34,13 +37,14 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
     gender: "",
     address: "",
     motivation: "",
-    guardian_name: "",
-    guardian_phone: "",
-    guardian_relationship: "",
   });
+
+  const updateGuardian = (index: number, patch: Partial<Guardian>) =>
+    setGuardians((prev) => prev.map((g, i) => (i === index ? { ...g, ...patch } : g)));
 
   const age = form.age ? parseInt(form.age) : null;
   const isMinor = age !== null && age < 18;
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
