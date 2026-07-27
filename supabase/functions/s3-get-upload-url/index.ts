@@ -151,14 +151,27 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Validate file type
-    const allowedTypes = ["video/mp4", "video/quicktime", "video/webm", "video/x-msvideo", "video/mpeg"];
+    // Validate file type (videos + documents)
+    const allowedTypes = [
+      "video/mp4", "video/quicktime", "video/webm", "video/x-msvideo", "video/mpeg",
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.ms-powerpoint",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "text/plain", "text/csv",
+      "image/png", "image/jpeg", "image/webp",
+      "application/zip",
+    ];
     if (!allowedTypes.includes(contentType)) {
-      return new Response(JSON.stringify({ error: "Only video files are allowed (mp4, mov, webm, avi, mpeg)" }), {
+      return new Response(JSON.stringify({ error: "Unsupported file type. Allowed: video, PDF, Word, PowerPoint, Excel, text, images, zip" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
 
     // Validate file size (max 2GB)
     if (fileSize && fileSize > 2 * 1024 * 1024 * 1024) {

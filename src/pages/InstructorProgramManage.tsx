@@ -240,6 +240,26 @@ const InstructorProgramManage = () => {
                             {a.due_date && <Badge variant="outline" className="text-xs"><Clock className="w-3 h-3 mr-1" />Due {format(new Date(a.due_date), "MMM d")}</Badge>}
                             <Badge variant="secondary" className="text-xs">{subs.length} submissions</Badge>
                           </div>
+                          {a.attachment_url && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="mt-2"
+                              onClick={async () => {
+                                const { data, error } = await supabase.functions.invoke("s3-get-signed-url", {
+                                  body: { s3Url: a.attachment_url, programId },
+                                });
+                                const link = data?.signedUrl || data?.url;
+                                if (error || !link) {
+                                  toast({ title: "Could not open attachment", variant: "destructive" });
+                                  return;
+                                }
+                                window.open(link, "_blank", "noopener");
+                              }}
+                            >
+                              <FileText className="w-4 h-4 mr-1" />Attached document
+                            </Button>
+                          )}
                         </div>
                       </div>
                       {/* Submissions */}
@@ -401,6 +421,7 @@ const InstructorProgramManage = () => {
           content_type: previewMaterial.material_type,
           content_url: previewMaterial.content_url,
         } : null}
+        programId={programId!}
       />
     </DashboardLayout>
   );
@@ -522,34 +543,31 @@ const AddMaterialDialog = ({ open, onOpenChange, programId, modules, onSaved }: 
 
     try {
       if (file) {
-        if (type === "video") {
-          const { data: uploadData, error: fnError } = await supabase.functions.invoke("s3-get-upload-url", {
-            body: { courseId: programId, fileName: file.name, contentType: file.type, fileSize: file.size },
-          });
-          if (fnError || !uploadData?.uploadUrl) throw new Error(fnError?.message || "Failed to get upload URL");
+        const { data: uploadData, error: fnError } = await supabase.functions.invoke("s3-get-upload-url", {
+          body: {
+            courseId: programId,
+            pathPrefix: `programs/${programId}/${type === "video" ? "videos" : "documents"}`,
+            fileName: file.name,
+            contentType: file.type || "application/octet-stream",
+            fileSize: file.size,
+          },
+        });
+        if (fnError || !uploadData?.uploadUrl) throw new Error(fnError?.message || "Failed to get upload URL");
 
-          await new Promise<void>((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            xhr.upload.addEventListener("progress", (e) => { if (e.lengthComputable) setUploadProgress(Math.round((e.loaded / e.total) * 100)); });
-            xhr.addEventListener("load", () => xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(`Upload failed (${xhr.status})`)));
-            xhr.addEventListener("error", () => reject(new Error("Upload failed")));
-            xhr.open("PUT", uploadData.uploadUrl);
-            xhr.setRequestHeader("Content-Type", file.type);
-            xhr.send(file);
-          });
+        await new Promise<void>((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.upload.addEventListener("progress", (e) => { if (e.lengthComputable) setUploadProgress(Math.round((e.loaded / e.total) * 100)); });
+          xhr.addEventListener("load", () => xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(`Upload failed (${xhr.status})`)));
+          xhr.addEventListener("error", () => reject(new Error("Upload failed")));
+          xhr.open("PUT", uploadData.uploadUrl);
+          xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
+          xhr.send(file);
+        });
 
-          filePath = uploadData.s3Key;
-          fileUrl = uploadData.s3Url;
-        } else {
-          const fileExt = file.name.split(".").pop();
-          const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-          filePath = `programs/${programId}/${fileName}`;
-          const { error: uploadError } = await supabase.storage.from("course-content").upload(filePath, file);
-          if (uploadError) throw uploadError;
-          const { data: urlData } = supabase.storage.from("course-content").getPublicUrl(filePath);
-          fileUrl = urlData.publicUrl;
-        }
+        filePath = uploadData.s3Key;
+        fileUrl = uploadData.s3Url;
       }
+
 
       const { error } = await supabase.from("program_materials").insert({
         program_id: programId,
@@ -599,9 +617,17 @@ const AddMaterialDialog = ({ open, onOpenChange, programId, modules, onSaved }: 
 
           {type === "document" && (
             <div><Label>Upload Document</Label>
-              <Input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt" onChange={e => setFile(e.target.files?.[0] || null)} />
+              <Input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.csv,.zip,.png,.jpg,.jpeg" onChange={e => setFile(e.target.files?.[0] || null)} />
+              {file && uploadProgress > 0 && uploadProgress < 100 && (
+                <div className="mt-2">
+                  <Progress value={uploadProgress} className="h-2" />
+                  <p className="text-xs text-muted-foreground mt-1">{uploadProgress}% uploaded</p>
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">Stored securely in the program file store.</p>
             </div>
           )}
+
 
           {type === "video" && (
             <>
@@ -653,21 +679,53 @@ const AddAssignmentDialog = ({ open, onOpenChange, programId, modules, onSaved }
   const [maxScore, setMaxScore] = useState("100");
   const [publish, setPublish] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const handleSave = async () => {
     if (!title.trim()) return;
     setSaving(true);
     try {
+      let attachmentUrl: string | null = null;
+      let attachmentPath: string | null = null;
+
+      if (file) {
+        const { data: uploadData, error: fnError } = await supabase.functions.invoke("s3-get-upload-url", {
+          body: {
+            courseId: programId,
+            pathPrefix: `programs/${programId}/assignments`,
+            fileName: file.name,
+            contentType: file.type || "application/octet-stream",
+            fileSize: file.size,
+          },
+        });
+        if (fnError || !uploadData?.uploadUrl) throw new Error(fnError?.message || "Failed to get upload URL");
+
+        await new Promise<void>((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.upload.addEventListener("progress", (e) => { if (e.lengthComputable) setUploadProgress(Math.round((e.loaded / e.total) * 100)); });
+          xhr.addEventListener("load", () => xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(`Upload failed (${xhr.status})`)));
+          xhr.addEventListener("error", () => reject(new Error("Upload failed")));
+          xhr.open("PUT", uploadData.uploadUrl);
+          xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
+          xhr.send(file);
+        });
+
+        attachmentPath = uploadData.s3Key;
+        attachmentUrl = uploadData.s3Url;
+      }
+
       const { error } = await supabase.from("program_assignments").insert({
         program_id: programId, title: title.trim(), description: description.trim() || null,
         module_id: moduleId || null, due_date: dueDate || null,
         max_score: parseInt(maxScore) || 100, is_published: publish,
-      });
+        attachment_url: attachmentUrl, attachment_path: attachmentPath,
+      } as any);
       if (error) throw error;
       toast({ title: "Assignment created!" });
       onSaved();
       onOpenChange(false);
-      setTitle(""); setDescription(""); setDueDate("");
+      setTitle(""); setDescription(""); setDueDate(""); setFile(null); setUploadProgress(0);
     } catch (err: any) {
       toast({ title: "Failed", description: err.message, variant: "destructive" });
     } finally { setSaving(false); }
@@ -675,7 +733,7 @@ const AddAssignmentDialog = ({ open, onOpenChange, programId, modules, onSaved }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle>Create Assignment</DialogTitle><DialogDescription>Create a new assignment for this program.</DialogDescription></DialogHeader>
         <div className="space-y-4">
           <div><Label>Title *</Label><Input value={title} onChange={e => setTitle(e.target.value)} /></div>
@@ -689,6 +747,17 @@ const AddAssignmentDialog = ({ open, onOpenChange, programId, modules, onSaved }
             </div>
             <div><Label>Due Date</Label><Input type="datetime-local" value={dueDate} onChange={e => setDueDate(e.target.value)} /></div>
           </div>
+          <div>
+            <Label>Attach Document</Label>
+            <Input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.csv,.zip,.png,.jpg,.jpeg" onChange={e => setFile(e.target.files?.[0] || null)} />
+            {file && uploadProgress > 0 && uploadProgress < 100 && (
+              <div className="mt-2">
+                <Progress value={uploadProgress} className="h-2" />
+                <p className="text-xs text-muted-foreground mt-1">{uploadProgress}% uploaded</p>
+              </div>
+            )}
+            <p className="text-xs text-muted-foreground mt-1">Optional brief or resource students can download.</p>
+          </div>
           <div className="grid grid-cols-2 gap-4">
             <div><Label>Max Score</Label><Input type="number" value={maxScore} onChange={e => setMaxScore(e.target.value)} /></div>
             <div className="flex items-center gap-2 pt-6">
@@ -698,6 +767,7 @@ const AddAssignmentDialog = ({ open, onOpenChange, programId, modules, onSaved }
           </div>
           <Button onClick={handleSave} disabled={saving} className="w-full">{saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}Create Assignment</Button>
         </div>
+
       </DialogContent>
     </Dialog>
   );

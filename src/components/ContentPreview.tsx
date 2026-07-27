@@ -1,6 +1,8 @@
+import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { FileText, Video, Link as LinkIcon, ExternalLink } from "lucide-react";
+import { FileText, Video, Link as LinkIcon, ExternalLink, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ContentPreviewProps {
   open: boolean;
@@ -11,6 +13,9 @@ interface ContentPreviewProps {
     content_type: string;
     content_url?: string | null;
   } | null;
+  /** Provide one of these so private S3 files can be signed */
+  courseId?: string;
+  programId?: string;
 }
 
 const getYouTubeVideoId = (url: string): string | null => {
@@ -31,14 +36,54 @@ const isYouTubeUrl = (url: string): boolean => {
 };
 
 const isPdfUrl = (url: string): boolean => {
-  return url.toLowerCase().endsWith(".pdf");
+  return url.toLowerCase().split("?")[0].endsWith(".pdf");
 };
 
-export const ContentPreview = ({ open, onOpenChange, content }: ContentPreviewProps) => {
+const isS3Url = (url: string): boolean =>
+  url.startsWith("s3://") || /\.amazonaws\.com\//.test(url);
+
+export const ContentPreview = ({ open, onOpenChange, content, courseId, programId }: ContentPreviewProps) => {
+  const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
+  const [resolving, setResolving] = useState(false);
+
+  const rawUrl = content?.content_url ?? null;
+
+  useEffect(() => {
+    let cancelled = false;
+    const resolve = async () => {
+      if (!open || !rawUrl) { setResolvedUrl(null); return; }
+      if (!isS3Url(rawUrl)) { setResolvedUrl(rawUrl); return; }
+      setResolving(true);
+      try {
+        const { data, error } = await supabase.functions.invoke("s3-get-signed-url", {
+          body: programId ? { s3Url: rawUrl, programId } : { s3Url: rawUrl, courseId },
+        });
+        if (error) throw error;
+        if (!cancelled) setResolvedUrl(data?.signedUrl || data?.url || null);
+      } catch {
+        if (!cancelled) setResolvedUrl(null);
+      } finally {
+        if (!cancelled) setResolving(false);
+      }
+    };
+    resolve();
+    return () => { cancelled = true; };
+  }, [open, rawUrl, courseId, programId]);
+
   if (!content) return null;
 
   const renderContent = () => {
-    const url = content.content_url;
+    if (resolving) {
+      return (
+        <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+          <Loader2 className="w-8 h-8 animate-spin mb-3" />
+          <p>Preparing secure preview…</p>
+        </div>
+      );
+    }
+
+    const url = resolvedUrl;
+
     
     if (!url) {
       return (

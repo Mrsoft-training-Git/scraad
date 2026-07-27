@@ -131,9 +131,9 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { s3Url, courseId } = await req.json();
-    if (!s3Url || !courseId) {
-      return new Response(JSON.stringify({ error: "s3Url and courseId are required" }), {
+    const { s3Url, courseId, programId } = await req.json();
+    if (!s3Url || (!courseId && !programId)) {
+      return new Response(JSON.stringify({ error: "s3Url and (courseId or programId) are required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -147,7 +147,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Access control: admin, course instructor, or enrolled student
+    // Access control: admin, instructor, or enrolled student
     const adminClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
     const { data: roleData } = await adminClient
@@ -159,34 +159,61 @@ Deno.serve(async (req) => {
     const isAdmin = roleData?.role === "admin";
 
     if (!isAdmin) {
-      const { data: course } = await adminClient
-        .from("courses")
-        .select("instructor_id")
-        .eq("id", courseId)
-        .maybeSingle();
+      const denied = () =>
+        new Response(JSON.stringify({ error: "Access denied" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
 
-      const isInstructor = course?.instructor_id === user.id;
-
-      if (!isInstructor) {
-        const { data: enrollment } = await adminClient
-          .from("enrollments")
-          .select("access_status, payment_status")
-          .eq("user_id", user.id)
-          .eq("course_id", courseId)
+      if (programId) {
+        const { data: program } = await adminClient
+          .from("programs")
+          .select("instructor_id")
+          .eq("id", programId)
           .maybeSingle();
 
-        if (
-          !enrollment ||
-          enrollment.access_status !== "active" ||
-          !["paid", "partial"].includes(enrollment.payment_status)
-        ) {
-          return new Response(JSON.stringify({ error: "Access denied" }), {
-            status: 403,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
+        if (program?.instructor_id !== user.id) {
+          const { data: enrollment } = await adminClient
+            .from("program_enrollments")
+            .select("access_status, payment_status")
+            .eq("user_id", user.id)
+            .eq("program_id", programId)
+            .maybeSingle();
+
+          if (
+            !enrollment ||
+            enrollment.access_status !== "active" ||
+            !["paid", "partial"].includes(enrollment.payment_status)
+          ) {
+            return denied();
+          }
+        }
+      } else {
+        const { data: course } = await adminClient
+          .from("courses")
+          .select("instructor_id")
+          .eq("id", courseId)
+          .maybeSingle();
+
+        if (course?.instructor_id !== user.id) {
+          const { data: enrollment } = await adminClient
+            .from("enrollments")
+            .select("access_status, payment_status")
+            .eq("user_id", user.id)
+            .eq("course_id", courseId)
+            .maybeSingle();
+
+          if (
+            !enrollment ||
+            enrollment.access_status !== "active" ||
+            !["paid", "partial"].includes(enrollment.payment_status)
+          ) {
+            return denied();
+          }
         }
       }
     }
+
 
     const awsAccessKeyId = Deno.env.get("AWS_ACCESS_KEY_ID")!;
     const awsSecretAccessKey = Deno.env.get("AWS_SECRET_ACCESS_KEY")!;
