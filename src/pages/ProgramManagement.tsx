@@ -670,8 +670,8 @@ const EditProgramDialog = ({ program, onOpenChange, onUpdated }: { program: Full
 };
 
 /* ─── Manual Enroll Dialog ─── */
-type ManualGuardian = { name: string; phone: string; email: string; relationship: string };
-const emptyGuardian = (): ManualGuardian => ({ name: "", phone: "", email: "", relationship: "" });
+type ManualGuardian = { name: string; phone: string; email: string; relationship: string; gender: string };
+const emptyGuardian = (): ManualGuardian => ({ name: "", phone: "", email: "", relationship: "", gender: "" });
 
 const ManualEnrollDialog = ({ open, onOpenChange, programs, onEnrolled }: { open: boolean; onOpenChange: (v: boolean) => void; programs: FullProgram[]; onEnrolled: () => void }) => {
   const { toast } = useToast();
@@ -705,8 +705,8 @@ const ManualEnrollDialog = ({ open, onOpenChange, programs, onEnrolled }: { open
     setSubmitting(true);
     try {
       const filledGuardians = guardians
-        .map(g => ({ name: g.name.trim(), phone: g.phone.trim(), email: g.email.trim(), relationship: g.relationship.trim() }))
-        .filter(g => g.name || g.phone || g.email || g.relationship);
+        .map(g => ({ name: g.name.trim(), phone: g.phone.trim(), email: g.email.trim(), relationship: g.relationship.trim(), gender: g.gender.trim() }))
+        .filter(g => g.name || g.phone || g.email || g.relationship || g.gender);
       const { data, error } = await supabase.functions.invoke("admin-manual-enroll", {
         body: {
           ...form,
@@ -784,6 +784,16 @@ const ManualEnrollDialog = ({ open, onOpenChange, programs, onEnrolled }: { open
                   <div><Label>Phone</Label><Input value={g.phone} onChange={e => updateGuardian(i, { phone: e.target.value })} /></div>
                   <div><Label>Email</Label><Input type="email" value={g.email} onChange={e => updateGuardian(i, { email: e.target.value })} /></div>
                   <div><Label>Relationship</Label><Input value={g.relationship} onChange={e => updateGuardian(i, { relationship: e.target.value })} /></div>
+                  <div><Label>Gender</Label>
+                    <Select value={g.gender} onValueChange={v => updateGuardian(i, { gender: v })}>
+                      <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="male">Male</SelectItem>
+                        <SelectItem value="female">Female</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
             ))}
