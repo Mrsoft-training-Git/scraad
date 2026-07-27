@@ -110,6 +110,9 @@ const Enrollments = () => {
         "Guardian Relationship": a.guardian_relationship || "",
         "Guardian Phone": a.guardian_phone || "",
         "Guardian Email": a.guardian_email || "",
+        "Additional Guardians": (Array.isArray((a as any).additional_guardians) ? (a as any).additional_guardians : [])
+          .map((g: any) => [g.name, g.relationship, g.phone, g.email].filter(Boolean).join(" / "))
+          .join(" | "),
         "CV URL": a.cv_url || "",
       };
     });
