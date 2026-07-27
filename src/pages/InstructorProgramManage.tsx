@@ -522,34 +522,31 @@ const AddMaterialDialog = ({ open, onOpenChange, programId, modules, onSaved }: 
 
     try {
       if (file) {
-        if (type === "video") {
-          const { data: uploadData, error: fnError } = await supabase.functions.invoke("s3-get-upload-url", {
-            body: { courseId: programId, fileName: file.name, contentType: file.type, fileSize: file.size },
-          });
-          if (fnError || !uploadData?.uploadUrl) throw new Error(fnError?.message || "Failed to get upload URL");
+        const { data: uploadData, error: fnError } = await supabase.functions.invoke("s3-get-upload-url", {
+          body: {
+            courseId: programId,
+            pathPrefix: `programs/${programId}/${type === "video" ? "videos" : "documents"}`,
+            fileName: file.name,
+            contentType: file.type || "application/octet-stream",
+            fileSize: file.size,
+          },
+        });
+        if (fnError || !uploadData?.uploadUrl) throw new Error(fnError?.message || "Failed to get upload URL");
 
-          await new Promise<void>((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            xhr.upload.addEventListener("progress", (e) => { if (e.lengthComputable) setUploadProgress(Math.round((e.loaded / e.total) * 100)); });
-            xhr.addEventListener("load", () => xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(`Upload failed (${xhr.status})`)));
-            xhr.addEventListener("error", () => reject(new Error("Upload failed")));
-            xhr.open("PUT", uploadData.uploadUrl);
-            xhr.setRequestHeader("Content-Type", file.type);
-            xhr.send(file);
-          });
+        await new Promise<void>((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.upload.addEventListener("progress", (e) => { if (e.lengthComputable) setUploadProgress(Math.round((e.loaded / e.total) * 100)); });
+          xhr.addEventListener("load", () => xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(`Upload failed (${xhr.status})`)));
+          xhr.addEventListener("error", () => reject(new Error("Upload failed")));
+          xhr.open("PUT", uploadData.uploadUrl);
+          xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
+          xhr.send(file);
+        });
 
-          filePath = uploadData.s3Key;
-          fileUrl = uploadData.s3Url;
-        } else {
-          const fileExt = file.name.split(".").pop();
-          const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-          filePath = `programs/${programId}/${fileName}`;
-          const { error: uploadError } = await supabase.storage.from("course-content").upload(filePath, file);
-          if (uploadError) throw uploadError;
-          const { data: urlData } = supabase.storage.from("course-content").getPublicUrl(filePath);
-          fileUrl = urlData.publicUrl;
-        }
+        filePath = uploadData.s3Key;
+        fileUrl = uploadData.s3Url;
       }
+
 
       const { error } = await supabase.from("program_materials").insert({
         program_id: programId,
