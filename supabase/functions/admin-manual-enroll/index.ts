@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
       guardians, motivation, send_invite = true,
     } = body ?? {};
 
-    type G = { name?: string; phone?: string; email?: string; relationship?: string };
+    type G = { name?: string; phone?: string; email?: string; relationship?: string; gender?: string };
     const guardianList: G[] = Array.isArray(guardians) && guardians.length
       ? guardians.slice(0, 3)
       : (guardian_name || guardian_phone || guardian_email || guardian_relationship
@@ -118,6 +118,7 @@ Deno.serve(async (req) => {
       phone: phone ?? null, age: age ?? null, address: address ?? null, gender: gender ?? null,
       guardian_name: primaryGuardian.name ?? null, guardian_phone: primaryGuardian.phone ?? null,
       guardian_email: primaryGuardian.email ?? null, guardian_relationship: primaryGuardian.relationship ?? null,
+      guardian_gender: primaryGuardian.gender ?? null,
       additional_guardians: extraGuardians,
       motivation: motivation ?? null,
       status: "approved", reviewed_by: userData.user.id, reviewed_at: new Date().toISOString(),

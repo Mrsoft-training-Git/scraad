@@ -35,7 +35,7 @@ interface FullProgram {
   track: string | null; instructor_id: string | null; instructor_name: string | null;
   is_published: boolean;
 }
-interface Application { id: string; program_id: string; user_id: string; full_name: string; email: string; phone: string | null; experience_level: string | null; motivation: string | null; cv_url: string | null; status: string; created_at: string; age: number | null; address: string | null; guardian_name: string | null; guardian_phone: string | null; guardian_email: string | null; guardian_relationship: string | null; }
+interface Application { id: string; program_id: string; user_id: string; full_name: string; email: string; phone: string | null; experience_level: string | null; motivation: string | null; cv_url: string | null; status: string; created_at: string; age: number | null; address: string | null; guardian_name: string | null; guardian_phone: string | null; guardian_email: string | null; guardian_relationship: string | null; guardian_gender: string | null; }
 interface InstructorOption { id: string; full_name: string | null; email: string | null; }
 
 const ProgramManagement = () => {
@@ -356,6 +356,7 @@ const ProgramManagement = () => {
                   <div><Label className="text-muted-foreground text-xs">Phone</Label><p className="font-medium">{selectedApp.guardian_phone || "—"}</p></div>
                   {selectedApp.guardian_email && <div><Label className="text-muted-foreground text-xs">Email</Label><p className="font-medium break-all">{selectedApp.guardian_email}</p></div>}
                   {selectedApp.guardian_relationship && <div><Label className="text-muted-foreground text-xs">Relationship</Label><p className="font-medium capitalize">{selectedApp.guardian_relationship}</p></div>}
+                  {selectedApp.guardian_gender && <div><Label className="text-muted-foreground text-xs">Gender</Label><p className="font-medium capitalize">{selectedApp.guardian_gender}</p></div>}
                 </div>
                 {(Array.isArray((selectedApp as any).additional_guardians) ? (selectedApp as any).additional_guardians : []).map((g: any, i: number) => (
                   <div key={i} className="border-t border-border pt-3 space-y-2">
@@ -365,6 +366,7 @@ const ProgramManagement = () => {
                       <div><Label className="text-muted-foreground text-xs">Phone</Label><p className="font-medium">{g.phone || "—"}</p></div>
                       {g.email && <div><Label className="text-muted-foreground text-xs">Email</Label><p className="font-medium break-all">{g.email}</p></div>}
                       {g.relationship && <div><Label className="text-muted-foreground text-xs">Relationship</Label><p className="font-medium capitalize">{g.relationship}</p></div>}
+                      {g.gender && <div><Label className="text-muted-foreground text-xs">Gender</Label><p className="font-medium capitalize">{g.gender}</p></div>}
                     </div>
                   </div>
                 ))}
@@ -670,8 +672,8 @@ const EditProgramDialog = ({ program, onOpenChange, onUpdated }: { program: Full
 };
 
 /* ─── Manual Enroll Dialog ─── */
-type ManualGuardian = { name: string; phone: string; email: string; relationship: string };
-const emptyGuardian = (): ManualGuardian => ({ name: "", phone: "", email: "", relationship: "" });
+type ManualGuardian = { name: string; phone: string; email: string; relationship: string; gender: string };
+const emptyGuardian = (): ManualGuardian => ({ name: "", phone: "", email: "", relationship: "", gender: "" });
 
 const ManualEnrollDialog = ({ open, onOpenChange, programs, onEnrolled }: { open: boolean; onOpenChange: (v: boolean) => void; programs: FullProgram[]; onEnrolled: () => void }) => {
   const { toast } = useToast();
@@ -705,8 +707,8 @@ const ManualEnrollDialog = ({ open, onOpenChange, programs, onEnrolled }: { open
     setSubmitting(true);
     try {
       const filledGuardians = guardians
-        .map(g => ({ name: g.name.trim(), phone: g.phone.trim(), email: g.email.trim(), relationship: g.relationship.trim() }))
-        .filter(g => g.name || g.phone || g.email || g.relationship);
+        .map(g => ({ name: g.name.trim(), phone: g.phone.trim(), email: g.email.trim(), relationship: g.relationship.trim(), gender: g.gender.trim() }))
+        .filter(g => g.name || g.phone || g.email || g.relationship || g.gender);
       const { data, error } = await supabase.functions.invoke("admin-manual-enroll", {
         body: {
           ...form,
@@ -784,6 +786,16 @@ const ManualEnrollDialog = ({ open, onOpenChange, programs, onEnrolled }: { open
                   <div><Label>Phone</Label><Input value={g.phone} onChange={e => updateGuardian(i, { phone: e.target.value })} /></div>
                   <div><Label>Email</Label><Input type="email" value={g.email} onChange={e => updateGuardian(i, { email: e.target.value })} /></div>
                   <div><Label>Relationship</Label><Input value={g.relationship} onChange={e => updateGuardian(i, { relationship: e.target.value })} /></div>
+                  <div><Label>Gender</Label>
+                    <Select value={g.gender} onValueChange={v => updateGuardian(i, { gender: v })}>
+                      <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="male">Male</SelectItem>
+                        <SelectItem value="female">Female</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
             ))}
