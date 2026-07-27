@@ -60,14 +60,10 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
       return;
     }
 
-    if (!form.guardian_name.trim() || !form.guardian_phone.trim() || !form.guardian_relationship.trim()) {
-      toast({
-        title: "Guardian details required",
-        description: "Please provide guardian name, phone and relationship.",
-        variant: "destructive",
-      });
-      return;
-    }
+    const filledGuardians = guardians
+      .map((g) => ({ name: g.name.trim(), phone: g.phone.trim(), relationship: g.relationship.trim() }))
+      .filter((g) => g.name || g.phone || g.relationship);
+
 
     if (!isAuthenticated && password.length < 6) {
       toast({ title: "Please choose a password (min 6 characters) to create your account", variant: "destructive" });
