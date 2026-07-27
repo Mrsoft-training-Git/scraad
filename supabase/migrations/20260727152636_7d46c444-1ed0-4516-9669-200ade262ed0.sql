@@ -1,0 +1,1 @@
+ALTER TABLE public.program_applications ADD COLUMN IF NOT EXISTS additional_guardians jsonb NOT NULL DEFAULT '[]'::jsonb;

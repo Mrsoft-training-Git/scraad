@@ -1444,6 +1444,7 @@ export type Database = {
       }
       program_applications: {
         Row: {
+          additional_guardians: Json
           address: string | null
           age: number | null
           created_at: string
@@ -1466,6 +1467,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          additional_guardians?: Json
           address?: string | null
           age?: number | null
           created_at?: string
@@ -1488,6 +1490,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          additional_guardians?: Json
           address?: string | null
           age?: number | null
           created_at?: string
