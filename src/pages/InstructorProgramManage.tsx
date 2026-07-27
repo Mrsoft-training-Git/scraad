@@ -428,7 +428,7 @@ const InstructorProgramManage = () => {
 };
 
 /* ─── Grade Submission ─── */
-const GradeSubmission = ({ submission, maxScore, onGraded }: { submission: any; maxScore: number; onGraded: () => void }) => {
+const GradeSubmission = ({ submission, maxScore, onGraded, programId }: { submission: any; maxScore: number; onGraded: () => void; programId: string }) => {
   const { toast } = useToast();
   const [score, setScore] = useState(String(submission.score || ""));
   const [feedback, setFeedback] = useState(submission.feedback || "");
