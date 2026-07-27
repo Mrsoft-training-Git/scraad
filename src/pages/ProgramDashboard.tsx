@@ -18,6 +18,7 @@ import {
   BookOpen, Calendar, FileText, ClipboardList, BarChart3,
   CheckCircle, Clock, Upload, Loader2, Play, ArrowLeft,
   Video, File, ExternalLink, CreditCard, Wallet, Download, HelpCircle, Link as LinkIcon,
+  TrendingUp, CalendarCheck, Award, Paperclip, X,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -50,6 +51,7 @@ const ProgramDashboard = () => {
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [exams, setExams] = useState<any[]>([]);
   const [examResults, setExamResults] = useState<any[]>([]);
+  const [attendance, setAttendance] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -84,7 +86,7 @@ const ProgramDashboard = () => {
     if (!user || !programId) return;
     setLoading(true);
 
-    const [programRes, enrollRes, modulesRes, materialsRes, assignmentsRes, subsRes, cbtExamsRes] = await Promise.all([
+    const [programRes, enrollRes, modulesRes, materialsRes, assignmentsRes, subsRes, cbtExamsRes, attendanceRes] = await Promise.all([
       supabase.from("programs").select("*").eq("id", programId).single(),
       supabase.from("program_enrollments").select("*").eq("program_id", programId).eq("user_id", user.id).maybeSingle(),
       supabase.from("program_modules").select("*").eq("program_id", programId).order("order_index"),
@@ -92,6 +94,7 @@ const ProgramDashboard = () => {
       supabase.from("program_assignments").select("*").eq("program_id", programId).eq("is_published", true).order("due_date"),
       supabase.from("program_submissions").select("*").eq("user_id", user.id),
       supabase.from("cbt_exams").select("*").eq("program_id", programId).eq("is_published", true).eq("exam_type", "program").order("start_time"),
+      supabase.from("program_attendance").select("*").eq("program_id", programId).eq("user_id", user.id).order("session_date", { ascending: false }),
     ]);
 
     if (programRes.data) setProgram(programRes.data as ProgramInfo);
@@ -101,6 +104,7 @@ const ProgramDashboard = () => {
     if (assignmentsRes.data) setAssignments(assignmentsRes.data);
     if (subsRes.data) setSubmissions(subsRes.data);
     if (cbtExamsRes.data) setExams(cbtExamsRes.data as any[]);
+    setAttendance(attendanceRes.data || []);
     setExamResults([]);
     setLoading(false);
   };
@@ -141,6 +145,28 @@ const ProgramDashboard = () => {
   const totalItems = assignments.length + exams.length;
   const completedItems = completedAssignments + completedExams;
   const progressPercent = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+
+  // Performance stats
+  const submittedAssignments = assignments.filter(a => submissions.some(s => s.assignment_id === a.id)).length;
+  const pendingAssignments = assignments.length - submittedAssignments;
+  const gradedSubs = submissions.filter(s =>
+    s.status === "graded" && s.score != null && assignments.some(a => a.id === s.assignment_id)
+  );
+  const assignmentAveragePercent = gradedSubs.length > 0
+    ? Math.round(
+        (gradedSubs.reduce((acc, s) => {
+          const max = assignments.find(a => a.id === s.assignment_id)?.max_score || 100;
+          return acc + (Number(s.score) / (max || 100)) * 100;
+        }, 0) / gradedSubs.length)
+      )
+    : null;
+  const attendancePresent = attendance.filter(r => r.status === "present").length;
+  const attendanceLate = attendance.filter(r => r.status === "late").length;
+  const attendanceAbsent = attendance.filter(r => r.status === "absent").length;
+  const attendanceExcused = attendance.filter(r => r.status === "excused").length;
+  const attendanceRate = attendance.length > 0
+    ? Math.round(((attendancePresent + attendanceLate) / attendance.length) * 100)
+    : null;
 
   return (
     <DashboardLayout user={user} userRole={userRole} profile={profile}>
@@ -227,6 +253,74 @@ const ProgramDashboard = () => {
                 </Card>
               ))}
             </div>
+
+            {/* Performance */}
+            <Card className="border-border/60">
+              <CardHeader><CardTitle className="text-lg flex items-center gap-2"><TrendingUp className="w-5 h-5 text-primary" />My Performance</CardTitle></CardHeader>
+              <CardContent className="space-y-5">
+                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  {[
+                    { label: "Attendance Rate", value: attendanceRate !== null ? `${attendanceRate}%` : "—", icon: CalendarCheck },
+                    { label: "Average Score", value: assignmentAveragePercent !== null ? `${assignmentAveragePercent}%` : "—", icon: Award },
+                    { label: "Submitted", value: `${submittedAssignments}/${assignments.length}`, icon: ClipboardList },
+                    { label: "Pending", value: pendingAssignments, icon: Clock },
+                  ].map(s => (
+                    <div key={s.label} className="rounded-lg border border-border/60 p-3">
+                      <div className="flex items-center gap-2 text-muted-foreground text-xs">
+                        <s.icon className="w-4 h-4" />{s.label}
+                      </div>
+                      <p className="text-2xl font-bold mt-1">{s.value}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between text-sm mb-2">
+                    <span className="font-medium">Attendance</span>
+                    <span className="text-muted-foreground text-xs">
+                      {attendance.length > 0 ? `${attendance.length} session${attendance.length > 1 ? "s" : ""} recorded` : "No sessions recorded yet"}
+                    </span>
+                  </div>
+                  {attendance.length > 0 && (
+                    <>
+                      <Progress value={attendanceRate ?? 0} className="h-2" />
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        <Badge variant="outline" className="text-xs">Present {attendancePresent}</Badge>
+                        <Badge variant="outline" className="text-xs">Late {attendanceLate}</Badge>
+                        <Badge variant="outline" className="text-xs">Absent {attendanceAbsent}</Badge>
+                        <Badge variant="outline" className="text-xs">Excused {attendanceExcused}</Badge>
+                      </div>
+                      <div className="mt-4 space-y-2">
+                        {attendance.slice(0, 5).map((r: any) => (
+                          <div key={r.id} className="flex items-center justify-between text-sm border-b border-border/40 pb-2 last:border-0">
+                            <span>{format(new Date(r.session_date), "MMM d, yyyy")}</span>
+                            <Badge className="capitalize" variant={r.status === "absent" ? "destructive" : "secondary"}>{r.status}</Badge>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {gradedSubs.length > 0 && (
+                  <div>
+                    <p className="text-sm font-medium mb-2">Graded Assignments</p>
+                    <div className="space-y-2">
+                      {gradedSubs.map((s: any) => {
+                        const a = assignments.find(x => x.id === s.assignment_id);
+                        return (
+                          <div key={s.id} className="flex items-center justify-between text-sm border-b border-border/40 pb-2 last:border-0">
+                            <span className="truncate pr-3">{a?.title}</span>
+                            <Badge variant="secondary">{s.score}/{a?.max_score ?? 100}</Badge>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
             {program.description && (
               <Card className="border-border/60">
                 <CardHeader><CardTitle className="text-lg">About</CardTitle></CardHeader>
@@ -452,16 +546,50 @@ const AssignmentsList = ({ assignments, submissions, onSubmit, programId }: { as
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState<string | null>(null);
   const [textInput, setTextInput] = useState<Record<string, string>>({});
+  const [files, setFiles] = useState<Record<string, File[]>>({});
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+
+  const uploadFile = async (file: File, userId: string) => {
+    const { data: uploadData, error: fnError } = await supabase.functions.invoke("s3-get-upload-url", {
+      body: {
+        pathPrefix: `programs/${programId}/submissions/${userId}`,
+        fileName: file.name,
+        contentType: file.type || "application/octet-stream",
+        fileSize: file.size,
+      },
+    });
+    if (fnError || !uploadData?.uploadUrl) throw new Error(fnError?.message || uploadData?.error || "Failed to get upload URL");
+
+    await new Promise<void>((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.upload.addEventListener("progress", (e) => { if (e.lengthComputable) setUploadProgress(Math.round((e.loaded / e.total) * 100)); });
+      xhr.addEventListener("load", () => (xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(`Upload failed (${xhr.status})`))));
+      xhr.addEventListener("error", () => reject(new Error("Upload failed")));
+      xhr.open("PUT", uploadData.uploadUrl);
+      xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
+      xhr.send(file);
+    });
+
+    return uploadData.s3Url as string;
+  };
 
   const handleSubmit = async (assignmentId: string) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
     setSubmitting(assignmentId);
+    setUploadProgress(0);
     try {
+      const selected = files[assignmentId] || [];
+      const fileUrls: string[] = [];
+      for (const f of selected) {
+        fileUrls.push(await uploadFile(f, user.id));
+      }
+
       const { error } = await supabase.from("program_submissions").insert({
         assignment_id: assignmentId,
         user_id: user.id,
         text_content: textInput[assignmentId]?.trim() || null,
+        file_urls: fileUrls.length > 0 ? fileUrls : null,
       });
       if (error) throw error;
       toast({ title: "Assignment submitted!" });
@@ -521,6 +649,30 @@ const AssignmentsList = ({ assignments, submissions, onSubmit, programId }: { as
                   <p>{sub.feedback}</p>
                 </div>
               )}
+              {sub?.file_urls?.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {sub.file_urls.map((url: string, i: number) => (
+                    <Button
+                      key={url}
+                      variant="outline"
+                      size="sm"
+                      onClick={async () => {
+                        const { data, error } = await supabase.functions.invoke("s3-get-signed-url", {
+                          body: { s3Url: url, programId },
+                        });
+                        const link = data?.signedUrl || data?.url;
+                        if (error || !link) {
+                          toast({ title: "Could not open file", variant: "destructive" });
+                          return;
+                        }
+                        window.open(link, "_blank", "noopener");
+                      }}
+                    >
+                      <Paperclip className="w-4 h-4 mr-2" />My file {i + 1}
+                    </Button>
+                  ))}
+                </div>
+              )}
               {!sub && (
                 <div className="mt-3 space-y-2">
                   <Textarea
@@ -529,14 +681,49 @@ const AssignmentsList = ({ assignments, submissions, onSubmit, programId }: { as
                     onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setTextInput({ ...textInput, [a.id]: e.target.value })}
                     rows={3}
                   />
+
+                  <div className="space-y-2">
+                    <label className="inline-flex items-center gap-2 text-sm border border-dashed border-border rounded-lg px-3 py-2 cursor-pointer hover:bg-muted/50 transition-colors">
+                      <Paperclip className="w-4 h-4" />
+                      <span>Attach document(s)</span>
+                      <input
+                        type="file"
+                        multiple
+                        className="hidden"
+                        accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.csv,.png,.jpg,.jpeg,.webp,.zip"
+                        onChange={(e) => {
+                          const picked = Array.from(e.target.files || []);
+                          if (picked.length) setFiles({ ...files, [a.id]: [...(files[a.id] || []), ...picked].slice(0, 5) });
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
+                    {(files[a.id] || []).map((f, idx) => (
+                      <div key={`${f.name}-${idx}`} className="flex items-center justify-between text-xs bg-muted/50 rounded px-2 py-1.5">
+                        <span className="truncate pr-2">{f.name}</span>
+                        <button
+                          type="button"
+                          className="text-muted-foreground hover:text-destructive"
+                          onClick={() => setFiles({ ...files, [a.id]: (files[a.id] || []).filter((_, i) => i !== idx) })}
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                    {submitting === a.id && (files[a.id]?.length || 0) > 0 && (
+                      <Progress value={uploadProgress} className="h-1.5" />
+                    )}
+                  </div>
+
                   <Button
                     size="sm"
                     onClick={() => handleSubmit(a.id)}
-                    disabled={submitting === a.id || !textInput[a.id]?.trim()}
+                    disabled={submitting === a.id || (!textInput[a.id]?.trim() && !(files[a.id]?.length))}
                   >
                     {submitting === a.id ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Upload className="w-4 h-4 mr-1" />}
                     Submit
                   </Button>
+                  <p className="text-xs text-muted-foreground">Type an answer, attach documents, or both.</p>
                 </div>
               )}
             </CardContent>

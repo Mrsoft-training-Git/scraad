@@ -266,7 +266,7 @@ const InstructorProgramManage = () => {
                       {subs.length > 0 && (
                         <div className="mt-3 space-y-2">
                           {subs.map((sub: any) => (
-                            <GradeSubmission key={sub.id} submission={sub} maxScore={a.max_score || 100} onGraded={fetchAll} />
+                            <GradeSubmission key={sub.id} submission={sub} maxScore={a.max_score || 100} onGraded={fetchAll} programId={programId!} />
                           ))}
                         </div>
                       )}
@@ -428,7 +428,7 @@ const InstructorProgramManage = () => {
 };
 
 /* ─── Grade Submission ─── */
-const GradeSubmission = ({ submission, maxScore, onGraded }: { submission: any; maxScore: number; onGraded: () => void }) => {
+const GradeSubmission = ({ submission, maxScore, onGraded, programId }: { submission: any; maxScore: number; onGraded: () => void; programId: string }) => {
   const { toast } = useToast();
   const [score, setScore] = useState(String(submission.score || ""));
   const [feedback, setFeedback] = useState(submission.feedback || "");
@@ -451,6 +451,30 @@ const GradeSubmission = ({ submission, maxScore, onGraded }: { submission: any; 
     <div className="bg-muted/30 rounded-lg p-3 space-y-2">
       <p className="text-sm font-medium">Submission #{submission.id.slice(0, 8)}</p>
       {submission.text_content && <p className="text-sm text-muted-foreground">{submission.text_content}</p>}
+      {submission.file_urls?.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {submission.file_urls.map((url: string, i: number) => (
+            <Button
+              key={url}
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                const { data, error } = await supabase.functions.invoke("s3-get-signed-url", {
+                  body: { s3Url: url, programId },
+                });
+                const link = data?.signedUrl || data?.url;
+                if (error || !link) {
+                  toast({ title: "Could not open file", variant: "destructive" });
+                  return;
+                }
+                window.open(link, "_blank", "noopener");
+              }}
+            >
+              <FileText className="w-3.5 h-3.5 mr-1.5" />File {i + 1}
+            </Button>
+          ))}
+        </div>
+      )}
       <div className="flex gap-2 items-end">
         <div className="flex-1">
           <Label className="text-xs">Score (/{maxScore})</Label>

@@ -123,26 +123,48 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Only instructors and admins can upload
     const adminClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-    const { data: roleData } = await adminClient
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .maybeSingle();
-
-    if (!roleData || !["admin", "instructor"].includes(roleData.role)) {
-      return new Response(JSON.stringify({ error: "Only instructors and admins can upload videos" }), {
-        status: 403,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
 
     const body = await req.json();
     const { courseId, fileName, contentType, fileSize } = body;
     // Optional: pathPrefix overrides default `courses/{courseId}/lessons/`
     // Accepted values: "courses/{id}/lessons", "courses/{id}/intro", "programs/{id}/intro", etc.
     const pathPrefix: string | undefined = body.pathPrefix;
+
+    const { data: roleData } = await adminClient
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    const isStaff = !!roleData && ["admin", "instructor"].includes(roleData.role);
+
+    if (!isStaff) {
+      // Enrolled students may only upload their own assignment submissions
+      const match = (pathPrefix || "").replace(/^\/+|\/+$/g, "")
+        .match(/^programs\/([0-9a-fA-F-]{36})\/submissions\/([0-9a-fA-F-]{36})$/);
+      const allowedSubmission = match && match[2] === user.id;
+
+      if (allowedSubmission) {
+        const { data: enrollment } = await adminClient
+          .from("program_enrollments")
+          .select("id")
+          .eq("program_id", match![1])
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (!enrollment) {
+          return new Response(JSON.stringify({ error: "You are not enrolled in this program" }), {
+            status: 403,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      } else {
+        return new Response(JSON.stringify({ error: "Not allowed to upload to this location" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
 
     if ((!courseId && !pathPrefix) || !fileName || !contentType) {
       return new Response(JSON.stringify({ error: "fileName, contentType, and (courseId or pathPrefix) are required" }), {
