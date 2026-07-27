@@ -711,6 +711,13 @@ const AssignmentsList = ({ assignments, submissions, onSubmit, programId }: { as
           </Card>
         );
       })}
+      <DocumentViewer
+        open={!!viewerFile}
+        onOpenChange={(v) => !v && setViewerFile(null)}
+        fileUrl={viewerFile?.url || null}
+        title={viewerFile?.title}
+        programId={programId}
+      />
     </div>
   );
 };
