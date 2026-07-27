@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useDashboardAuth } from "@/hooks/useDashboardAuth";
 import { usePayment } from "@/hooks/usePayment";
 import { ContentPreview } from "@/components/ContentPreview";
+import { DocumentViewer, getFileNameFromUrl } from "@/components/DocumentViewer";
 import { KnowledgeCheckPlayer } from "@/components/KnowledgeCheckPlayer";
 import { format } from "date-fns";
 import {
