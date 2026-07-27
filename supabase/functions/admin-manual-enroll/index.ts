@@ -116,8 +116,9 @@ Deno.serve(async (req) => {
     const appPayload: Record<string, unknown> = {
       program_id, user_id: targetUserId, full_name, email: normalizedEmail,
       phone: phone ?? null, age: age ?? null, address: address ?? null, gender: gender ?? null,
-      guardian_name: guardian_name ?? null, guardian_phone: guardian_phone ?? null,
-      guardian_email: guardian_email ?? null, guardian_relationship: guardian_relationship ?? null,
+      guardian_name: primaryGuardian.name ?? null, guardian_phone: primaryGuardian.phone ?? null,
+      guardian_email: primaryGuardian.email ?? null, guardian_relationship: primaryGuardian.relationship ?? null,
+      additional_guardians: extraGuardians,
       motivation: motivation ?? null,
       status: "approved", reviewed_by: userData.user.id, reviewed_at: new Date().toISOString(),
     };
