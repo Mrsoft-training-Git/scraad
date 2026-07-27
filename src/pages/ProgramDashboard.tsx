@@ -50,6 +50,7 @@ const ProgramDashboard = () => {
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [exams, setExams] = useState<any[]>([]);
   const [examResults, setExamResults] = useState<any[]>([]);
+  const [attendance, setAttendance] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
 
