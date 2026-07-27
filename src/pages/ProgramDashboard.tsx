@@ -252,6 +252,74 @@ const ProgramDashboard = () => {
                 </Card>
               ))}
             </div>
+
+            {/* Performance */}
+            <Card className="border-border/60">
+              <CardHeader><CardTitle className="text-lg flex items-center gap-2"><TrendingUp className="w-5 h-5 text-primary" />My Performance</CardTitle></CardHeader>
+              <CardContent className="space-y-5">
+                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  {[
+                    { label: "Attendance Rate", value: attendanceRate !== null ? `${attendanceRate}%` : "—", icon: CalendarCheck },
+                    { label: "Average Score", value: assignmentAveragePercent !== null ? `${assignmentAveragePercent}%` : "—", icon: Award },
+                    { label: "Submitted", value: `${submittedAssignments}/${assignments.length}`, icon: ClipboardList },
+                    { label: "Pending", value: pendingAssignments, icon: Clock },
+                  ].map(s => (
+                    <div key={s.label} className="rounded-lg border border-border/60 p-3">
+                      <div className="flex items-center gap-2 text-muted-foreground text-xs">
+                        <s.icon className="w-4 h-4" />{s.label}
+                      </div>
+                      <p className="text-2xl font-bold mt-1">{s.value}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between text-sm mb-2">
+                    <span className="font-medium">Attendance</span>
+                    <span className="text-muted-foreground text-xs">
+                      {attendance.length > 0 ? `${attendance.length} session${attendance.length > 1 ? "s" : ""} recorded` : "No sessions recorded yet"}
+                    </span>
+                  </div>
+                  {attendance.length > 0 && (
+                    <>
+                      <Progress value={attendanceRate ?? 0} className="h-2" />
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        <Badge variant="outline" className="text-xs">Present {attendancePresent}</Badge>
+                        <Badge variant="outline" className="text-xs">Late {attendanceLate}</Badge>
+                        <Badge variant="outline" className="text-xs">Absent {attendanceAbsent}</Badge>
+                        <Badge variant="outline" className="text-xs">Excused {attendanceExcused}</Badge>
+                      </div>
+                      <div className="mt-4 space-y-2">
+                        {attendance.slice(0, 5).map((r: any) => (
+                          <div key={r.id} className="flex items-center justify-between text-sm border-b border-border/40 pb-2 last:border-0">
+                            <span>{format(new Date(r.session_date), "MMM d, yyyy")}</span>
+                            <Badge className="capitalize" variant={r.status === "absent" ? "destructive" : "secondary"}>{r.status}</Badge>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {gradedSubs.length > 0 && (
+                  <div>
+                    <p className="text-sm font-medium mb-2">Graded Assignments</p>
+                    <div className="space-y-2">
+                      {gradedSubs.map((s: any) => {
+                        const a = assignments.find(x => x.id === s.assignment_id);
+                        return (
+                          <div key={s.id} className="flex items-center justify-between text-sm border-b border-border/40 pb-2 last:border-0">
+                            <span className="truncate pr-3">{a?.title}</span>
+                            <Badge variant="secondary">{s.score}/{a?.max_score ?? 100}</Badge>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
             {program.description && (
               <Card className="border-border/60">
                 <CardHeader><CardTitle className="text-lg">About</CardTitle></CardHeader>
