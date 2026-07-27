@@ -16,11 +16,12 @@ import { useToast } from "@/hooks/use-toast";
 import { useDashboardAuth } from "@/hooks/useDashboardAuth";
 import { KnowledgeCheckBuilder, QuizQuestion } from "@/components/KnowledgeCheckBuilder";
 import { ContentPreview } from "@/components/ContentPreview";
+import { ProgramAttendance } from "@/components/programs/ProgramAttendance";
 import { format } from "date-fns";
 import {
   ArrowLeft, BookOpen, ClipboardList, FileText, Users, Video,
   Plus, Loader2, Pencil, Trash2, CheckCircle, Clock, Calendar,
-  Link as LinkIcon, Eye, HelpCircle,
+  Link as LinkIcon, Eye, HelpCircle, CalendarCheck,
 } from "lucide-react";
 
 const InstructorProgramManage = () => {
@@ -61,7 +62,7 @@ const InstructorProgramManage = () => {
       supabase.from("program_assignments").select("*").eq("program_id", programId).order("created_at"),
       supabase.from("program_submissions").select("*, program_assignments(title)"),
       supabase.from("program_exams").select("*").eq("program_id", programId),
-      supabase.from("program_enrollments").select("*, profiles:user_id(full_name, email)").eq("program_id", programId),
+      supabase.from("program_enrollments").select("*").eq("program_id", programId),
       supabase.from("live_sessions").select("*").eq("instructor_id", user.id).order("scheduled_at", { ascending: false }),
     ]);
     if (progRes.data) setProgram(progRes.data);
@@ -70,7 +71,15 @@ const InstructorProgramManage = () => {
     if (asgRes.data) setAssignments(asgRes.data);
     if (subRes.data) setSubmissions(subRes.data);
     if (examRes.data) setExams(examRes.data);
-    if (enrollRes.data) setEnrollments(enrollRes.data);
+    if (enrollRes.data) {
+      const userIds = enrollRes.data.map((e: any) => e.user_id);
+      let profileMap: Record<string, any> = {};
+      if (userIds.length) {
+        const { data: profs } = await supabase.from("profiles").select("id, full_name, email, phone").in("id", userIds);
+        (profs || []).forEach((pr: any) => { profileMap[pr.id] = pr; });
+      }
+      setEnrollments(enrollRes.data.map((e: any) => ({ ...e, profiles: profileMap[e.user_id] || null })));
+    }
     if (sessRes.data) setSessions(sessRes.data);
     setLoading(false);
   };
@@ -145,12 +154,13 @@ const InstructorProgramManage = () => {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-5 w-full">
+          <TabsList className="grid grid-cols-3 sm:grid-cols-6 w-full">
             <TabsTrigger value="overview">Modules</TabsTrigger>
             <TabsTrigger value="assignments">Assignments</TabsTrigger>
             <TabsTrigger value="exams">Exams</TabsTrigger>
             <TabsTrigger value="sessions">Live Sessions</TabsTrigger>
             <TabsTrigger value="students">Students</TabsTrigger>
+            <TabsTrigger value="attendance">Attendance</TabsTrigger>
           </TabsList>
 
           {/* Modules & Materials */}
@@ -317,8 +327,8 @@ const InstructorProgramManage = () => {
                   <Card key={enr.id} className="border-border/60">
                     <CardContent className="p-3 flex items-center justify-between">
                       <div>
-                        <p className="font-medium">{enr.profiles?.full_name || "Unknown"}</p>
-                        <p className="text-xs text-muted-foreground">{enr.profiles?.email}</p>
+                        <p className="font-medium">{enr.profiles?.full_name || enr.profiles?.email || "Unnamed student"}</p>
+                        <p className="text-xs text-muted-foreground">{enr.profiles?.email || "No email on file"}</p>
                       </div>
                       <div className="flex gap-2">
                         <Badge variant={enr.payment_status === "paid" ? "default" : "outline"} className="text-xs capitalize">{enr.payment_status}</Badge>
@@ -329,6 +339,20 @@ const InstructorProgramManage = () => {
                 ))}
               </div>
             )}
+          </TabsContent>
+
+          {/* Attendance */}
+          <TabsContent value="attendance" className="mt-6 space-y-4">
+            <h3 className="font-semibold flex items-center gap-2"><CalendarCheck className="w-4 h-4 text-primary" />Attendance</h3>
+            <ProgramAttendance
+              programId={programId!}
+              markedBy={user?.id}
+              students={enrollments.map((e: any) => ({
+                user_id: e.user_id,
+                full_name: e.profiles?.full_name,
+                email: e.profiles?.email,
+              }))}
+            />
           </TabsContent>
         </Tabs>
       </div>
