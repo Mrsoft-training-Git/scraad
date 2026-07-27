@@ -41,6 +41,7 @@ export const DocumentViewer = ({ open, onOpenChange, fileUrl, title, courseId, p
   const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
   const [resolving, setResolving] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -68,6 +69,30 @@ export const DocumentViewer = ({ open, onOpenChange, fileUrl, title, courseId, p
 
   const name = title || (fileUrl ? getFileNameFromUrl(fileUrl) : "Document");
   const kind = getKind(getFileExtension(fileUrl || ""));
+
+  const handleDownload = async () => {
+    if (!resolvedUrl) return;
+    setDownloading(true);
+    try {
+      const res = await fetch(resolvedUrl);
+      if (!res.ok) throw new Error("fetch failed");
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = objectUrl;
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(objectUrl);
+    } catch {
+      // Fallback: let the browser handle it
+      window.open(resolvedUrl, "_blank", "noopener,noreferrer");
+    } finally {
+      setDownloading(false);
+    }
+  };
+
 
   const renderBody = () => {
     if (resolving) {
@@ -153,13 +178,17 @@ export const DocumentViewer = ({ open, onOpenChange, fileUrl, title, courseId, p
                 <ExternalLink className="w-4 h-4 mr-2" /> Open in new tab
               </a>
             </Button>
-            <Button variant="outline" size="sm" asChild>
-              <a href={resolvedUrl} download={name}>
-                <Download className="w-4 h-4 mr-2" /> Download
-              </a>
+            <Button size="sm" onClick={handleDownload} disabled={downloading}>
+              {downloading ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Download className="w-4 h-4 mr-2" />
+              )}
+              Download
             </Button>
           </div>
         )}
+
       </DialogContent>
     </Dialog>
   );
