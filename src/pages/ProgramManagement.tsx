@@ -357,6 +357,17 @@ const ProgramManagement = () => {
                   {selectedApp.guardian_email && <div><Label className="text-muted-foreground text-xs">Email</Label><p className="font-medium break-all">{selectedApp.guardian_email}</p></div>}
                   {selectedApp.guardian_relationship && <div><Label className="text-muted-foreground text-xs">Relationship</Label><p className="font-medium capitalize">{selectedApp.guardian_relationship}</p></div>}
                 </div>
+                {(Array.isArray((selectedApp as any).additional_guardians) ? (selectedApp as any).additional_guardians : []).map((g: any, i: number) => (
+                  <div key={i} className="border-t border-border pt-3 space-y-2">
+                    <p className="text-xs font-semibold text-muted-foreground">Guardian {i + 2}</p>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div><Label className="text-muted-foreground text-xs">Name</Label><p className="font-medium">{g.name || "—"}</p></div>
+                      <div><Label className="text-muted-foreground text-xs">Phone</Label><p className="font-medium">{g.phone || "—"}</p></div>
+                      {g.email && <div><Label className="text-muted-foreground text-xs">Email</Label><p className="font-medium break-all">{g.email}</p></div>}
+                      {g.relationship && <div><Label className="text-muted-foreground text-xs">Relationship</Label><p className="font-medium capitalize">{g.relationship}</p></div>}
+                    </div>
+                  </div>
+                ))}
               </div>
               <div><Label className="text-muted-foreground text-xs">Program</Label><p className="font-medium">{getProgramTitle(selectedApp.program_id)}</p></div>
               {selectedApp.experience_level && <div><Label className="text-muted-foreground text-xs">Experience</Label><p className="font-medium capitalize">{selectedApp.experience_level}</p></div>}
