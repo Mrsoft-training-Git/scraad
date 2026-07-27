@@ -69,6 +69,30 @@ export const DocumentViewer = ({ open, onOpenChange, fileUrl, title, courseId, p
   const name = title || (fileUrl ? getFileNameFromUrl(fileUrl) : "Document");
   const kind = getKind(getFileExtension(fileUrl || ""));
 
+  const handleDownload = async () => {
+    if (!resolvedUrl) return;
+    setDownloading(true);
+    try {
+      const res = await fetch(resolvedUrl);
+      if (!res.ok) throw new Error("fetch failed");
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = objectUrl;
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(objectUrl);
+    } catch {
+      // Fallback: let the browser handle it
+      window.open(resolvedUrl, "_blank", "noopener,noreferrer");
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+
   const renderBody = () => {
     if (resolving) {
       return (
