@@ -455,6 +455,17 @@ const Enrollments = () => {
                             <Field label="Phone" value={detail.application.guardian_phone} />
                             <Field label="Email" value={detail.application.guardian_email} />
                           </div>
+                          {(Array.isArray((detail.application as any).additional_guardians) ? (detail.application as any).additional_guardians : []).map((g: any, i: number) => (
+                            <div key={i} className="mt-3 pt-3 border-t">
+                              <p className="text-xs font-semibold text-muted-foreground mb-2">Guardian {i + 2}</p>
+                              <div className="grid grid-cols-2 gap-3">
+                                <Field label="Name" value={g.name} />
+                                <Field label="Relationship" value={g.relationship} />
+                                <Field label="Phone" value={g.phone} />
+                                <Field label="Email" value={g.email} />
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
                     ) : (
