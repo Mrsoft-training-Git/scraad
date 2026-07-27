@@ -269,7 +269,7 @@ const ProgramDashboard = () => {
                 </CardContent>
               </Card>
             ) : materials.length > 0 ? (
-              <ProgramMaterialsList materials={materials} modules={modules} />
+              <ProgramMaterialsList materials={materials} modules={modules} programId={programId!} />
             ) : (
               <p className="text-center text-muted-foreground py-8">No materials available yet.</p>
             )}
@@ -285,7 +285,7 @@ const ProgramDashboard = () => {
                 </CardContent>
               </Card>
             ) : (
-              <AssignmentsList assignments={assignments} submissions={submissions} onSubmit={fetchAll} />
+              <AssignmentsList assignments={assignments} submissions={submissions} onSubmit={fetchAll} programId={programId!} />
             )}
           </TabsContent>
 
@@ -340,7 +340,7 @@ const ProgramDashboard = () => {
 };
 
 /* ─── Program Materials List ─── */
-const ProgramMaterialsList = ({ materials, modules }: { materials: any[]; modules: any[] }) => {
+const ProgramMaterialsList = ({ materials, modules, programId }: { materials: any[]; modules: any[]; programId: string }) => {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewMat, setPreviewMat] = useState<any>(null);
   const [quizMat, setQuizMat] = useState<any>(null);
@@ -442,12 +442,13 @@ const ProgramMaterialsList = ({ materials, modules }: { materials: any[]; module
           content_type: previewMat.material_type === "document" ? "document" : "video",
           content_url: previewMat.content_url,
         } : null}
+        programId={programId}
       />
     </div>
   );
 };
 
-const AssignmentsList = ({ assignments, submissions, onSubmit }: { assignments: any[]; submissions: any[]; onSubmit: () => void }) => {
+const AssignmentsList = ({ assignments, submissions, onSubmit, programId }: { assignments: any[]; submissions: any[]; onSubmit: () => void; programId: string }) => {
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState<string | null>(null);
   const [textInput, setTextInput] = useState<Record<string, string>>({});
@@ -485,6 +486,26 @@ const AssignmentsList = ({ assignments, submissions, onSubmit }: { assignments: 
                 <div>
                   <h4 className="font-semibold">{a.title}</h4>
                   {a.description && <p className="text-sm text-muted-foreground mt-1">{a.description}</p>}
+                  {a.attachment_url && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-2"
+                      onClick={async () => {
+                        const { data, error } = await supabase.functions.invoke("s3-get-signed-url", {
+                          body: { s3Url: a.attachment_url, programId },
+                        });
+                        const link = data?.signedUrl || data?.url;
+                        if (error || !link) {
+                          toast({ title: "Could not open attachment", variant: "destructive" });
+                          return;
+                        }
+                        window.open(link, "_blank", "noopener");
+                      }}
+                    >
+                      <FileText className="w-4 h-4 mr-2" />Assignment document
+                    </Button>
+                  )}
                 </div>
                 {sub ? (
                   <Badge className={sub.status === "graded" ? "bg-green-500/10 text-green-600 border-green-500/20" : "bg-secondary/10 text-secondary border-secondary/20"}>
