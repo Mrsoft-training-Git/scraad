@@ -125,9 +125,10 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
         age,
         address: form.address.trim(),
         motivation: form.motivation.trim() || null,
-        guardian_name: form.guardian_name.trim(),
-        guardian_phone: form.guardian_phone.trim(),
-        guardian_relationship: form.guardian_relationship.trim(),
+        guardian_name: filledGuardians[0]?.name || null,
+        guardian_phone: filledGuardians[0]?.phone || null,
+        guardian_relationship: filledGuardians[0]?.relationship || null,
+        additional_guardians: filledGuardians.slice(1),
         status: "approved",
       }, { onConflict: "program_id,user_id" });
 
