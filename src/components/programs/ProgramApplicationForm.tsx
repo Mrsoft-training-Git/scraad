@@ -261,42 +261,70 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
           </div>
 
           {/* Guardian */}
-          <div className="space-y-3 rounded-lg border border-border p-4 bg-muted/30">
+          <div className="space-y-4 rounded-lg border border-border p-4 bg-muted/30">
             <div className="flex items-center gap-2">
               <ShieldAlert className="w-4 h-4 text-primary" />
-              <Label className="text-sm font-semibold">Parent / Guardian Details *</Label>
+              <Label className="text-sm font-semibold">Parent / Guardian Details (optional)</Label>
             </div>
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="guardian_name">Guardian Full Name *</Label>
-                <Input
-                  id="guardian_name"
-                  value={form.guardian_name}
-                  onChange={(e) => setForm({ ...form, guardian_name: e.target.value })}
-                  required
-                />
+            {guardians.map((g, i) => (
+              <div key={i} className="space-y-3">
+                {i > 0 && (
+                  <div className="flex items-center justify-between pt-2 border-t border-border">
+                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mt-2">
+                      Guardian {i + 1}
+                    </span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="mt-2 text-destructive"
+                      onClick={() => setGuardians((prev) => prev.filter((_, idx) => idx !== i))}
+                    >
+                      <X className="w-4 h-4 mr-1" /> Remove
+                    </Button>
+                  </div>
+                )}
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor={`guardian_name_${i}`}>Guardian Full Name</Label>
+                    <Input
+                      id={`guardian_name_${i}`}
+                      value={g.name}
+                      onChange={(e) => updateGuardian(i, { name: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor={`guardian_phone_${i}`}>Guardian Phone</Label>
+                    <Input
+                      id={`guardian_phone_${i}`}
+                      value={g.phone}
+                      onChange={(e) => updateGuardian(i, { phone: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2 sm:col-span-2">
+                    <Label htmlFor={`guardian_relationship_${i}`}>Relationship</Label>
+                    <Input
+                      id={`guardian_relationship_${i}`}
+                      value={g.relationship}
+                      onChange={(e) => updateGuardian(i, { relationship: e.target.value })}
+                      placeholder="e.g. Father, Mother, Uncle"
+                    />
+                  </div>
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="guardian_phone">Guardian Phone *</Label>
-                <Input
-                  id="guardian_phone"
-                  value={form.guardian_phone}
-                  onChange={(e) => setForm({ ...form, guardian_phone: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="space-y-2 sm:col-span-2">
-                <Label htmlFor="guardian_relationship">Relationship *</Label>
-                <Input
-                  id="guardian_relationship"
-                  value={form.guardian_relationship}
-                  onChange={(e) => setForm({ ...form, guardian_relationship: e.target.value })}
-                  placeholder="e.g. Father, Mother, Uncle"
-                  required
-                />
-              </div>
-            </div>
+            ))}
+            {guardians.length < 3 && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setGuardians((prev) => [...prev, { name: "", phone: "", relationship: "" }])}
+              >
+                <Plus className="w-4 h-4 mr-1" /> Add another guardian
+              </Button>
+            )}
           </div>
+
 
           <div className="space-y-2">
             <Label htmlFor="motivation">Why do you want to join? (Short essay)</Label>
