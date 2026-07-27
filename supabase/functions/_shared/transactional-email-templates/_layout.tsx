@@ -125,13 +125,34 @@ const footerContact = {
   margin: '2px 0',
 }
 const footerLink = { color: brand.gold, textDecoration: 'none' }
+const poweredWrap = {
+  margin: '18px 0 0',
+  paddingTop: '16px',
+  borderTop: '1px solid rgba(255,255,255,0.15)',
+  textAlign: 'center' as const,
+}
+const poweredLabel = {
+  fontSize: '10px',
+  color: 'rgba(255,255,255,0.55)',
+  textTransform: 'uppercase' as const,
+  letterSpacing: '1.5px',
+  margin: '0 0 8px',
+}
+const mrsoftLogo = {
+  height: '20px',
+  width: 'auto',
+  margin: '0 auto',
+  display: 'block',
+  backgroundColor: '#ffffff',
+  borderRadius: '4px',
+  padding: '4px 8px',
+}
 const copyright = {
   fontSize: '11px',
   color: 'rgba(255,255,255,0.5)',
-  margin: '16px 0 0',
-  paddingTop: '14px',
-  borderTop: '1px solid rgba(255,255,255,0.15)',
+  margin: '14px 0 0',
 }
+
 
 interface Props {
   preview: string
@@ -163,17 +184,9 @@ export const EmailLayout = ({
       <Container style={outer}>
         <Section style={card}>
           <Section style={header}>
-            <table role="presentation" cellPadding={0} cellSpacing={0} border={0} align="center" style={{ margin: '0 auto' }}>
-              <tr>
-                <td style={{ paddingRight: '16px', verticalAlign: 'middle' }}>
-                  <Img src={LOGO_URL} alt="ScraAD" style={{ height: '40px', width: 'auto', display: 'block' }} />
-                </td>
-                <td style={{ paddingLeft: '16px', borderLeft: `1px solid ${brand.border}`, verticalAlign: 'middle' }}>
-                  <Img src={MRSOFT_LOGO_URL} alt="MRsoft" style={{ height: '36px', width: 'auto', display: 'block' }} />
-                </td>
-              </tr>
-            </table>
+            <Img src={LOGO_URL} alt="ScraAD" style={logoStyle} />
           </Section>
+
           <Section style={content}>
             <Heading style={title}>{titleText}</Heading>
             {greetingName && (
@@ -217,9 +230,14 @@ export const EmailLayout = ({
             <Text style={footerContact}>
               ✉️ <Link href="mailto:support@scraad.com" style={footerLink}>support@scraad.com</Link>
             </Text>
+            <Section style={poweredWrap}>
+              <Text style={poweredLabel}>Powered by</Text>
+              <Img src={MRSOFT_LOGO_URL} alt="MRsoft" style={mrsoftLogo} />
+            </Section>
             <Text style={copyright}>
               © {new Date().getFullYear()} ScraAD. All rights reserved.
             </Text>
+
           </Section>
         </Section>
       </Container>
