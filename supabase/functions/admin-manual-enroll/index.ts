@@ -40,8 +40,18 @@ Deno.serve(async (req) => {
     const {
       program_id, email, full_name, phone, age, gender, country, address,
       guardian_name, guardian_phone, guardian_email, guardian_relationship,
-      motivation, send_invite = true,
+      guardians, motivation, send_invite = true,
     } = body ?? {};
+
+    type G = { name?: string; phone?: string; email?: string; relationship?: string };
+    const guardianList: G[] = Array.isArray(guardians) && guardians.length
+      ? guardians.slice(0, 3)
+      : (guardian_name || guardian_phone || guardian_email || guardian_relationship
+        ? [{ name: guardian_name, phone: guardian_phone, email: guardian_email, relationship: guardian_relationship }]
+        : []);
+    const primaryGuardian = guardianList[0] ?? {};
+    const extraGuardians = guardianList.slice(1);
+
 
     if (!program_id || !email || !full_name) {
       return new Response(JSON.stringify({ error: "program_id, email and full_name are required" }), {
@@ -106,8 +116,9 @@ Deno.serve(async (req) => {
     const appPayload: Record<string, unknown> = {
       program_id, user_id: targetUserId, full_name, email: normalizedEmail,
       phone: phone ?? null, age: age ?? null, address: address ?? null, gender: gender ?? null,
-      guardian_name: guardian_name ?? null, guardian_phone: guardian_phone ?? null,
-      guardian_email: guardian_email ?? null, guardian_relationship: guardian_relationship ?? null,
+      guardian_name: primaryGuardian.name ?? null, guardian_phone: primaryGuardian.phone ?? null,
+      guardian_email: primaryGuardian.email ?? null, guardian_relationship: primaryGuardian.relationship ?? null,
+      additional_guardians: extraGuardians,
       motivation: motivation ?? null,
       status: "approved", reviewed_by: userData.user.id, reviewed_at: new Date().toISOString(),
     };

@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ShieldAlert } from "lucide-react";
+import { Loader2, ShieldAlert, Plus, X } from "lucide-react";
 
 interface Props {
   programId: string;
@@ -19,11 +19,14 @@ interface Props {
   onSuccess: (target?: string) => void;
 }
 
+type Guardian = { name: string; phone: string; relationship: string };
+
 export const ProgramApplicationForm = ({ programId, programTitle, userId, userEmail, open, onOpenChange, onSuccess }: Props) => {
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState(false);
   const isAuthenticated = !!userId;
   const [password, setPassword] = useState("");
+  const [guardians, setGuardians] = useState<Guardian[]>([{ name: "", phone: "", relationship: "" }]);
   const [form, setForm] = useState({
     first_name: "",
     last_name: "",
@@ -34,13 +37,14 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
     gender: "",
     address: "",
     motivation: "",
-    guardian_name: "",
-    guardian_phone: "",
-    guardian_relationship: "",
   });
+
+  const updateGuardian = (index: number, patch: Partial<Guardian>) =>
+    setGuardians((prev) => prev.map((g, i) => (i === index ? { ...g, ...patch } : g)));
 
   const age = form.age ? parseInt(form.age) : null;
   const isMinor = age !== null && age < 18;
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,14 +60,10 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
       return;
     }
 
-    if (!form.guardian_name.trim() || !form.guardian_phone.trim() || !form.guardian_relationship.trim()) {
-      toast({
-        title: "Guardian details required",
-        description: "Please provide guardian name, phone and relationship.",
-        variant: "destructive",
-      });
-      return;
-    }
+    const filledGuardians = guardians
+      .map((g) => ({ name: g.name.trim(), phone: g.phone.trim(), relationship: g.relationship.trim() }))
+      .filter((g) => g.name || g.phone || g.relationship);
+
 
     if (!isAuthenticated && password.length < 6) {
       toast({ title: "Please choose a password (min 6 characters) to create your account", variant: "destructive" });
@@ -125,9 +125,10 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
         age,
         address: form.address.trim(),
         motivation: form.motivation.trim() || null,
-        guardian_name: form.guardian_name.trim(),
-        guardian_phone: form.guardian_phone.trim(),
-        guardian_relationship: form.guardian_relationship.trim(),
+        guardian_name: filledGuardians[0]?.name || null,
+        guardian_phone: filledGuardians[0]?.phone || null,
+        guardian_relationship: filledGuardians[0]?.relationship || null,
+        additional_guardians: filledGuardians.slice(1),
         status: "approved",
       }, { onConflict: "program_id,user_id" });
 
@@ -257,42 +258,70 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
           </div>
 
           {/* Guardian */}
-          <div className="space-y-3 rounded-lg border border-border p-4 bg-muted/30">
+          <div className="space-y-4 rounded-lg border border-border p-4 bg-muted/30">
             <div className="flex items-center gap-2">
               <ShieldAlert className="w-4 h-4 text-primary" />
-              <Label className="text-sm font-semibold">Parent / Guardian Details *</Label>
+              <Label className="text-sm font-semibold">Parent / Guardian Details (optional)</Label>
             </div>
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="guardian_name">Guardian Full Name *</Label>
-                <Input
-                  id="guardian_name"
-                  value={form.guardian_name}
-                  onChange={(e) => setForm({ ...form, guardian_name: e.target.value })}
-                  required
-                />
+            {guardians.map((g, i) => (
+              <div key={i} className="space-y-3">
+                {i > 0 && (
+                  <div className="flex items-center justify-between pt-2 border-t border-border">
+                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mt-2">
+                      Guardian {i + 1}
+                    </span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="mt-2 text-destructive"
+                      onClick={() => setGuardians((prev) => prev.filter((_, idx) => idx !== i))}
+                    >
+                      <X className="w-4 h-4 mr-1" /> Remove
+                    </Button>
+                  </div>
+                )}
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor={`guardian_name_${i}`}>Guardian Full Name</Label>
+                    <Input
+                      id={`guardian_name_${i}`}
+                      value={g.name}
+                      onChange={(e) => updateGuardian(i, { name: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor={`guardian_phone_${i}`}>Guardian Phone</Label>
+                    <Input
+                      id={`guardian_phone_${i}`}
+                      value={g.phone}
+                      onChange={(e) => updateGuardian(i, { phone: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2 sm:col-span-2">
+                    <Label htmlFor={`guardian_relationship_${i}`}>Relationship</Label>
+                    <Input
+                      id={`guardian_relationship_${i}`}
+                      value={g.relationship}
+                      onChange={(e) => updateGuardian(i, { relationship: e.target.value })}
+                      placeholder="e.g. Father, Mother, Uncle"
+                    />
+                  </div>
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="guardian_phone">Guardian Phone *</Label>
-                <Input
-                  id="guardian_phone"
-                  value={form.guardian_phone}
-                  onChange={(e) => setForm({ ...form, guardian_phone: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="space-y-2 sm:col-span-2">
-                <Label htmlFor="guardian_relationship">Relationship *</Label>
-                <Input
-                  id="guardian_relationship"
-                  value={form.guardian_relationship}
-                  onChange={(e) => setForm({ ...form, guardian_relationship: e.target.value })}
-                  placeholder="e.g. Father, Mother, Uncle"
-                  required
-                />
-              </div>
-            </div>
+            ))}
+            {guardians.length < 3 && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setGuardians((prev) => [...prev, { name: "", phone: "", relationship: "" }])}
+              >
+                <Plus className="w-4 h-4 mr-1" /> Add another guardian
+              </Button>
+            )}
           </div>
+
 
           <div className="space-y-2">
             <Label htmlFor="motivation">Why do you want to join? (Short essay)</Label>

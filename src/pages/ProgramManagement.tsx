@@ -357,6 +357,17 @@ const ProgramManagement = () => {
                   {selectedApp.guardian_email && <div><Label className="text-muted-foreground text-xs">Email</Label><p className="font-medium break-all">{selectedApp.guardian_email}</p></div>}
                   {selectedApp.guardian_relationship && <div><Label className="text-muted-foreground text-xs">Relationship</Label><p className="font-medium capitalize">{selectedApp.guardian_relationship}</p></div>}
                 </div>
+                {(Array.isArray((selectedApp as any).additional_guardians) ? (selectedApp as any).additional_guardians : []).map((g: any, i: number) => (
+                  <div key={i} className="border-t border-border pt-3 space-y-2">
+                    <p className="text-xs font-semibold text-muted-foreground">Guardian {i + 2}</p>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div><Label className="text-muted-foreground text-xs">Name</Label><p className="font-medium">{g.name || "—"}</p></div>
+                      <div><Label className="text-muted-foreground text-xs">Phone</Label><p className="font-medium">{g.phone || "—"}</p></div>
+                      {g.email && <div><Label className="text-muted-foreground text-xs">Email</Label><p className="font-medium break-all">{g.email}</p></div>}
+                      {g.relationship && <div><Label className="text-muted-foreground text-xs">Relationship</Label><p className="font-medium capitalize">{g.relationship}</p></div>}
+                    </div>
+                  </div>
+                ))}
               </div>
               <div><Label className="text-muted-foreground text-xs">Program</Label><p className="font-medium">{getProgramTitle(selectedApp.program_id)}</p></div>
               {selectedApp.experience_level && <div><Label className="text-muted-foreground text-xs">Experience</Label><p className="font-medium capitalize">{selectedApp.experience_level}</p></div>}
@@ -659,22 +670,31 @@ const EditProgramDialog = ({ program, onOpenChange, onUpdated }: { program: Full
 };
 
 /* ─── Manual Enroll Dialog ─── */
+type ManualGuardian = { name: string; phone: string; email: string; relationship: string };
+const emptyGuardian = (): ManualGuardian => ({ name: "", phone: "", email: "", relationship: "" });
+
 const ManualEnrollDialog = ({ open, onOpenChange, programs, onEnrolled }: { open: boolean; onOpenChange: (v: boolean) => void; programs: FullProgram[]; onEnrolled: () => void }) => {
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState(false);
+  const [guardians, setGuardians] = useState<ManualGuardian[]>([emptyGuardian()]);
   const [form, setForm] = useState({
     program_id: "", email: "", full_name: "", phone: "", age: "", gender: "",
     country: "Nigeria", address: "",
-    guardian_name: "", guardian_phone: "", guardian_email: "", guardian_relationship: "",
     motivation: "", send_invite: true,
   });
 
-  const reset = () => setForm({
-    program_id: "", email: "", full_name: "", phone: "", age: "", gender: "",
-    country: "Nigeria", address: "",
-    guardian_name: "", guardian_phone: "", guardian_email: "", guardian_relationship: "",
-    motivation: "", send_invite: true,
-  });
+  const updateGuardian = (index: number, patch: Partial<ManualGuardian>) =>
+    setGuardians(prev => prev.map((g, i) => (i === index ? { ...g, ...patch } : g)));
+
+  const reset = () => {
+    setGuardians([emptyGuardian()]);
+    setForm({
+      program_id: "", email: "", full_name: "", phone: "", age: "", gender: "",
+      country: "Nigeria", address: "",
+      motivation: "", send_invite: true,
+    });
+  };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -684,10 +704,14 @@ const ManualEnrollDialog = ({ open, onOpenChange, programs, onEnrolled }: { open
     }
     setSubmitting(true);
     try {
+      const filledGuardians = guardians
+        .map(g => ({ name: g.name.trim(), phone: g.phone.trim(), email: g.email.trim(), relationship: g.relationship.trim() }))
+        .filter(g => g.name || g.phone || g.email || g.relationship);
       const { data, error } = await supabase.functions.invoke("admin-manual-enroll", {
         body: {
           ...form,
           age: form.age ? Number(form.age) : null,
+          guardians: filledGuardians,
           redirect_to: `${window.location.origin}/dashboard/programs/${form.program_id}`,
         },
       });
@@ -743,15 +767,33 @@ const ManualEnrollDialog = ({ open, onOpenChange, programs, onEnrolled }: { open
             <div className="col-span-2"><Label>Address</Label><Input value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} /></div>
           </div>
 
-          <div className="rounded-lg border border-border p-3 bg-muted/30 space-y-3">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Parent / Guardian (optional)</p>
-            <div className="grid grid-cols-2 gap-4">
-              <div><Label>Name</Label><Input value={form.guardian_name} onChange={e => setForm({ ...form, guardian_name: e.target.value })} /></div>
-              <div><Label>Phone</Label><Input value={form.guardian_phone} onChange={e => setForm({ ...form, guardian_phone: e.target.value })} /></div>
-              <div><Label>Email</Label><Input type="email" value={form.guardian_email} onChange={e => setForm({ ...form, guardian_email: e.target.value })} /></div>
-              <div><Label>Relationship</Label><Input value={form.guardian_relationship} onChange={e => setForm({ ...form, guardian_relationship: e.target.value })} /></div>
-            </div>
+          <div className="rounded-lg border border-border p-3 bg-muted/30 space-y-4">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Parent / Guardian (optional, up to 3)</p>
+            {guardians.map((g, i) => (
+              <div key={i} className="space-y-3">
+                {i > 0 && (
+                  <div className="flex items-center justify-between border-t border-border pt-2">
+                    <span className="text-xs font-semibold text-muted-foreground">Guardian {i + 1}</span>
+                    <Button type="button" variant="ghost" size="sm" className="text-destructive" onClick={() => setGuardians(prev => prev.filter((_, idx) => idx !== i))}>
+                      <X className="w-4 h-4 mr-1" /> Remove
+                    </Button>
+                  </div>
+                )}
+                <div className="grid grid-cols-2 gap-4">
+                  <div><Label>Name</Label><Input value={g.name} onChange={e => updateGuardian(i, { name: e.target.value })} /></div>
+                  <div><Label>Phone</Label><Input value={g.phone} onChange={e => updateGuardian(i, { phone: e.target.value })} /></div>
+                  <div><Label>Email</Label><Input type="email" value={g.email} onChange={e => updateGuardian(i, { email: e.target.value })} /></div>
+                  <div><Label>Relationship</Label><Input value={g.relationship} onChange={e => updateGuardian(i, { relationship: e.target.value })} /></div>
+                </div>
+              </div>
+            ))}
+            {guardians.length < 3 && (
+              <Button type="button" variant="outline" size="sm" onClick={() => setGuardians(prev => [...prev, emptyGuardian()])}>
+                <Plus className="w-4 h-4 mr-1" /> Add another guardian
+              </Button>
+            )}
           </div>
+
 
           <div><Label>Notes / Motivation</Label><Textarea rows={2} value={form.motivation} onChange={e => setForm({ ...form, motivation: e.target.value })} /></div>
 
