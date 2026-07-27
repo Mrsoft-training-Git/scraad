@@ -347,9 +347,9 @@ const InstructorProgramManage = () => {
                   <Card key={enr.id} className="border-border/60">
                     <CardContent className="p-3 flex items-center justify-between">
                       <div>
-                        <p className="font-medium">{enr.profiles?.full_name || enr.profiles?.email || "Unnamed student"}</p>
-                        <p className="text-xs text-muted-foreground">{enr.profiles?.email || "No email on file"}</p>
+                        <p className="font-medium">{enr.profiles?.full_name || "Unnamed student"}</p>
                       </div>
+
                       <div className="flex gap-2">
                         <Badge variant={enr.payment_status === "paid" ? "default" : "outline"} className="text-xs capitalize">{enr.payment_status}</Badge>
                         <Badge variant="secondary" className="text-xs capitalize">{enr.status}</Badge>
