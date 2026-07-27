@@ -108,10 +108,11 @@ const Enrollments = () => {
         "Application Status": a.status || "",
         "Guardian Name": a.guardian_name || "",
         "Guardian Relationship": a.guardian_relationship || "",
+        "Guardian Gender": a.guardian_gender || "",
         "Guardian Phone": a.guardian_phone || "",
         "Guardian Email": a.guardian_email || "",
         "Additional Guardians": (Array.isArray((a as any).additional_guardians) ? (a as any).additional_guardians : [])
-          .map((g: any) => [g.name, g.relationship, g.phone, g.email].filter(Boolean).join(" / "))
+          .map((g: any) => [g.name, g.relationship, g.gender, g.phone, g.email].filter(Boolean).join(" / "))
           .join(" | "),
         "CV URL": a.cv_url || "",
       };
@@ -455,6 +456,7 @@ const Enrollments = () => {
                           <div className="grid grid-cols-2 gap-3">
                             <Field label="Name" value={detail.application.guardian_name} />
                             <Field label="Relationship" value={detail.application.guardian_relationship} />
+                            <Field label="Gender" value={detail.application.guardian_gender} />
                             <Field label="Phone" value={detail.application.guardian_phone} />
                             <Field label="Email" value={detail.application.guardian_email} />
                           </div>
@@ -464,6 +466,7 @@ const Enrollments = () => {
                               <div className="grid grid-cols-2 gap-3">
                                 <Field label="Name" value={g.name} />
                                 <Field label="Relationship" value={g.relationship} />
+                                <Field label="Gender" value={g.gender} />
                                 <Field label="Phone" value={g.phone} />
                                 <Field label="Email" value={g.email} />
                               </div>
