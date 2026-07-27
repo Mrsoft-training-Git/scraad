@@ -546,16 +546,50 @@ const AssignmentsList = ({ assignments, submissions, onSubmit, programId }: { as
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState<string | null>(null);
   const [textInput, setTextInput] = useState<Record<string, string>>({});
+  const [files, setFiles] = useState<Record<string, File[]>>({});
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+
+  const uploadFile = async (file: File, userId: string) => {
+    const { data: uploadData, error: fnError } = await supabase.functions.invoke("s3-get-upload-url", {
+      body: {
+        pathPrefix: `programs/${programId}/submissions/${userId}`,
+        fileName: file.name,
+        contentType: file.type || "application/octet-stream",
+        fileSize: file.size,
+      },
+    });
+    if (fnError || !uploadData?.uploadUrl) throw new Error(fnError?.message || uploadData?.error || "Failed to get upload URL");
+
+    await new Promise<void>((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.upload.addEventListener("progress", (e) => { if (e.lengthComputable) setUploadProgress(Math.round((e.loaded / e.total) * 100)); });
+      xhr.addEventListener("load", () => (xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(`Upload failed (${xhr.status})`))));
+      xhr.addEventListener("error", () => reject(new Error("Upload failed")));
+      xhr.open("PUT", uploadData.uploadUrl);
+      xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
+      xhr.send(file);
+    });
+
+    return uploadData.s3Url as string;
+  };
 
   const handleSubmit = async (assignmentId: string) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
     setSubmitting(assignmentId);
+    setUploadProgress(0);
     try {
+      const selected = files[assignmentId] || [];
+      const fileUrls: string[] = [];
+      for (const f of selected) {
+        fileUrls.push(await uploadFile(f, user.id));
+      }
+
       const { error } = await supabase.from("program_submissions").insert({
         assignment_id: assignmentId,
         user_id: user.id,
         text_content: textInput[assignmentId]?.trim() || null,
+        file_urls: fileUrls.length > 0 ? fileUrls : null,
       });
       if (error) throw error;
       toast({ title: "Assignment submitted!" });
