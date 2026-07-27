@@ -145,6 +145,28 @@ const ProgramDashboard = () => {
   const completedItems = completedAssignments + completedExams;
   const progressPercent = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
 
+  // Performance stats
+  const submittedAssignments = assignments.filter(a => submissions.some(s => s.assignment_id === a.id)).length;
+  const pendingAssignments = assignments.length - submittedAssignments;
+  const gradedSubs = submissions.filter(s =>
+    s.status === "graded" && s.score != null && assignments.some(a => a.id === s.assignment_id)
+  );
+  const assignmentAveragePercent = gradedSubs.length > 0
+    ? Math.round(
+        (gradedSubs.reduce((acc, s) => {
+          const max = assignments.find(a => a.id === s.assignment_id)?.max_score || 100;
+          return acc + (Number(s.score) / (max || 100)) * 100;
+        }, 0) / gradedSubs.length)
+      )
+    : null;
+  const attendancePresent = attendance.filter(r => r.status === "present").length;
+  const attendanceLate = attendance.filter(r => r.status === "late").length;
+  const attendanceAbsent = attendance.filter(r => r.status === "absent").length;
+  const attendanceExcused = attendance.filter(r => r.status === "excused").length;
+  const attendanceRate = attendance.length > 0
+    ? Math.round(((attendancePresent + attendanceLate) / attendance.length) * 100)
+    : null;
+
   return (
     <DashboardLayout user={user} userRole={userRole} profile={profile}>
       <div className="space-y-6">
