@@ -84,7 +84,7 @@ const ProgramDashboard = () => {
     if (!user || !programId) return;
     setLoading(true);
 
-    const [programRes, enrollRes, modulesRes, materialsRes, assignmentsRes, subsRes, cbtExamsRes] = await Promise.all([
+    const [programRes, enrollRes, modulesRes, materialsRes, assignmentsRes, subsRes, cbtExamsRes, attendanceRes] = await Promise.all([
       supabase.from("programs").select("*").eq("id", programId).single(),
       supabase.from("program_enrollments").select("*").eq("program_id", programId).eq("user_id", user.id).maybeSingle(),
       supabase.from("program_modules").select("*").eq("program_id", programId).order("order_index"),
@@ -92,6 +92,7 @@ const ProgramDashboard = () => {
       supabase.from("program_assignments").select("*").eq("program_id", programId).eq("is_published", true).order("due_date"),
       supabase.from("program_submissions").select("*").eq("user_id", user.id),
       supabase.from("cbt_exams").select("*").eq("program_id", programId).eq("is_published", true).eq("exam_type", "program").order("start_time"),
+      supabase.from("program_attendance").select("*").eq("program_id", programId).eq("user_id", user.id).order("session_date", { ascending: false }),
     ]);
 
     if (programRes.data) setProgram(programRes.data as ProgramInfo);
@@ -101,6 +102,7 @@ const ProgramDashboard = () => {
     if (assignmentsRes.data) setAssignments(assignmentsRes.data);
     if (subsRes.data) setSubmissions(subsRes.data);
     if (cbtExamsRes.data) setExams(cbtExamsRes.data as any[]);
+    setAttendance(attendanceRes.data || []);
     setExamResults([]);
     setLoading(false);
   };
