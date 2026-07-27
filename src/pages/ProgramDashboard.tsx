@@ -649,6 +649,30 @@ const AssignmentsList = ({ assignments, submissions, onSubmit, programId }: { as
                   <p>{sub.feedback}</p>
                 </div>
               )}
+              {sub?.file_urls?.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {sub.file_urls.map((url: string, i: number) => (
+                    <Button
+                      key={url}
+                      variant="outline"
+                      size="sm"
+                      onClick={async () => {
+                        const { data, error } = await supabase.functions.invoke("s3-get-signed-url", {
+                          body: { s3Url: url, programId },
+                        });
+                        const link = data?.signedUrl || data?.url;
+                        if (error || !link) {
+                          toast({ title: "Could not open file", variant: "destructive" });
+                          return;
+                        }
+                        window.open(link, "_blank", "noopener");
+                      }}
+                    >
+                      <Paperclip className="w-4 h-4 mr-2" />My file {i + 1}
+                    </Button>
+                  ))}
+                </div>
+              )}
               {!sub && (
                 <div className="mt-3 space-y-2">
                   <Textarea
@@ -657,14 +681,49 @@ const AssignmentsList = ({ assignments, submissions, onSubmit, programId }: { as
                     onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setTextInput({ ...textInput, [a.id]: e.target.value })}
                     rows={3}
                   />
+
+                  <div className="space-y-2">
+                    <label className="inline-flex items-center gap-2 text-sm border border-dashed border-border rounded-lg px-3 py-2 cursor-pointer hover:bg-muted/50 transition-colors">
+                      <Paperclip className="w-4 h-4" />
+                      <span>Attach document(s)</span>
+                      <input
+                        type="file"
+                        multiple
+                        className="hidden"
+                        accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.csv,.png,.jpg,.jpeg,.webp,.zip"
+                        onChange={(e) => {
+                          const picked = Array.from(e.target.files || []);
+                          if (picked.length) setFiles({ ...files, [a.id]: [...(files[a.id] || []), ...picked].slice(0, 5) });
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
+                    {(files[a.id] || []).map((f, idx) => (
+                      <div key={`${f.name}-${idx}`} className="flex items-center justify-between text-xs bg-muted/50 rounded px-2 py-1.5">
+                        <span className="truncate pr-2">{f.name}</span>
+                        <button
+                          type="button"
+                          className="text-muted-foreground hover:text-destructive"
+                          onClick={() => setFiles({ ...files, [a.id]: (files[a.id] || []).filter((_, i) => i !== idx) })}
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                    {submitting === a.id && (files[a.id]?.length || 0) > 0 && (
+                      <Progress value={uploadProgress} className="h-1.5" />
+                    )}
+                  </div>
+
                   <Button
                     size="sm"
                     onClick={() => handleSubmit(a.id)}
-                    disabled={submitting === a.id || !textInput[a.id]?.trim()}
+                    disabled={submitting === a.id || (!textInput[a.id]?.trim() && !(files[a.id]?.length))}
                   >
                     {submitting === a.id ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Upload className="w-4 h-4 mr-1" />}
                     Submit
                   </Button>
+                  <p className="text-xs text-muted-foreground">Type an answer, attach documents, or both.</p>
                 </div>
               )}
             </CardContent>
