@@ -1527,6 +1527,8 @@ export type Database = {
       }
       program_assignments: {
         Row: {
+          attachment_path: string | null
+          attachment_url: string | null
           created_at: string
           description: string | null
           due_date: string | null
@@ -1539,6 +1541,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          attachment_path?: string | null
+          attachment_url?: string | null
           created_at?: string
           description?: string | null
           due_date?: string | null
@@ -1551,6 +1555,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          attachment_path?: string | null
+          attachment_url?: string | null
           created_at?: string
           description?: string | null
           due_date?: string | null
