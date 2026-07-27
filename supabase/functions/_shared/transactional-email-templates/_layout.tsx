@@ -228,7 +228,10 @@ export const EmailLayout = ({
               🌐 <Link href="https://scraad.com" style={footerLink}>https://scraad.com</Link>
             </Text>
             <Text style={footerContact}>
-              ✉️ <Link href="mailto:support@scraad.com" style={footerLink}>support@scraad.com</Link>
+              ☎️ +234 806 729 3772
+            </Text>
+            <Text style={footerContact}>
+              ✉️ <Link href="mailto:training@m-rinternational.com" style={footerLink}>training@m-rinternational.com</Link>
             </Text>
             <Section style={poweredWrap}>
               <Text style={poweredLabel}>Powered by</Text>
