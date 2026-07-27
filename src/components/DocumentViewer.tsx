@@ -41,6 +41,7 @@ export const DocumentViewer = ({ open, onOpenChange, fileUrl, title, courseId, p
   const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
   const [resolving, setResolving] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
