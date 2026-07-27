@@ -209,9 +209,14 @@ export const EmailLayout = ({
             <Text style={footerContact}>
               ✉️ <Link href="mailto:support@scraad.com" style={footerLink}>support@scraad.com</Link>
             </Text>
+            <Section style={poweredWrap}>
+              <Text style={poweredLabel}>Powered by</Text>
+              <Img src={MRSOFT_LOGO_URL} alt="MRsoft" style={mrsoftLogo} />
+            </Section>
             <Text style={copyright}>
               © {new Date().getFullYear()} ScraAD. All rights reserved.
             </Text>
+
           </Section>
         </Section>
       </Container>
