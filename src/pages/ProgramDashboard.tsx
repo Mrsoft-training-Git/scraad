@@ -18,6 +18,7 @@ import {
   BookOpen, Calendar, FileText, ClipboardList, BarChart3,
   CheckCircle, Clock, Upload, Loader2, Play, ArrowLeft,
   Video, File, ExternalLink, CreditCard, Wallet, Download, HelpCircle, Link as LinkIcon,
+  TrendingUp, CalendarCheck, Award, Paperclip, X,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
