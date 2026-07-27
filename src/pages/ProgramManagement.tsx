@@ -659,22 +659,31 @@ const EditProgramDialog = ({ program, onOpenChange, onUpdated }: { program: Full
 };
 
 /* ─── Manual Enroll Dialog ─── */
+type ManualGuardian = { name: string; phone: string; email: string; relationship: string };
+const emptyGuardian = (): ManualGuardian => ({ name: "", phone: "", email: "", relationship: "" });
+
 const ManualEnrollDialog = ({ open, onOpenChange, programs, onEnrolled }: { open: boolean; onOpenChange: (v: boolean) => void; programs: FullProgram[]; onEnrolled: () => void }) => {
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState(false);
+  const [guardians, setGuardians] = useState<ManualGuardian[]>([emptyGuardian()]);
   const [form, setForm] = useState({
     program_id: "", email: "", full_name: "", phone: "", age: "", gender: "",
     country: "Nigeria", address: "",
-    guardian_name: "", guardian_phone: "", guardian_email: "", guardian_relationship: "",
     motivation: "", send_invite: true,
   });
 
-  const reset = () => setForm({
-    program_id: "", email: "", full_name: "", phone: "", age: "", gender: "",
-    country: "Nigeria", address: "",
-    guardian_name: "", guardian_phone: "", guardian_email: "", guardian_relationship: "",
-    motivation: "", send_invite: true,
-  });
+  const updateGuardian = (index: number, patch: Partial<ManualGuardian>) =>
+    setGuardians(prev => prev.map((g, i) => (i === index ? { ...g, ...patch } : g)));
+
+  const reset = () => {
+    setGuardians([emptyGuardian()]);
+    setForm({
+      program_id: "", email: "", full_name: "", phone: "", age: "", gender: "",
+      country: "Nigeria", address: "",
+      motivation: "", send_invite: true,
+    });
+  };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
