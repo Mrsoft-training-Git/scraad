@@ -148,13 +148,11 @@ const mrsoftLogo = {
   padding: '4px 8px',
 }
 const copyright = {
-
   fontSize: '11px',
   color: 'rgba(255,255,255,0.5)',
-  margin: '16px 0 0',
-  paddingTop: '14px',
-  borderTop: '1px solid rgba(255,255,255,0.15)',
+  margin: '14px 0 0',
 }
+
 
 interface Props {
   preview: string
