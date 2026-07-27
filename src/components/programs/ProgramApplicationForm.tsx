@@ -19,14 +19,14 @@ interface Props {
   onSuccess: (target?: string) => void;
 }
 
-type Guardian = { name: string; phone: string; relationship: string };
+type Guardian = { name: string; phone: string; relationship: string; gender: string };
 
 export const ProgramApplicationForm = ({ programId, programTitle, userId, userEmail, open, onOpenChange, onSuccess }: Props) => {
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState(false);
   const isAuthenticated = !!userId;
   const [password, setPassword] = useState("");
-  const [guardians, setGuardians] = useState<Guardian[]>([{ name: "", phone: "", relationship: "" }]);
+  const [guardians, setGuardians] = useState<Guardian[]>([{ name: "", phone: "", relationship: "", gender: "" }]);
   const [form, setForm] = useState({
     first_name: "",
     last_name: "",
@@ -61,8 +61,8 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
     }
 
     const filledGuardians = guardians
-      .map((g) => ({ name: g.name.trim(), phone: g.phone.trim(), relationship: g.relationship.trim() }))
-      .filter((g) => g.name || g.phone || g.relationship);
+      .map((g) => ({ name: g.name.trim(), phone: g.phone.trim(), relationship: g.relationship.trim(), gender: g.gender.trim() }))
+      .filter((g) => g.name || g.phone || g.relationship || g.gender);
 
 
     if (!isAuthenticated && password.length < 6) {
@@ -128,6 +128,7 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
         guardian_name: filledGuardians[0]?.name || null,
         guardian_phone: filledGuardians[0]?.phone || null,
         guardian_relationship: filledGuardians[0]?.relationship || null,
+        guardian_gender: filledGuardians[0]?.gender || null,
         additional_guardians: filledGuardians.slice(1),
         status: "approved",
       }, { onConflict: "program_id,user_id" });
@@ -298,7 +299,7 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
                       onChange={(e) => updateGuardian(i, { phone: e.target.value })}
                     />
                   </div>
-                  <div className="space-y-2 sm:col-span-2">
+                  <div className="space-y-2">
                     <Label htmlFor={`guardian_relationship_${i}`}>Relationship</Label>
                     <Input
                       id={`guardian_relationship_${i}`}
@@ -306,6 +307,17 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
                       onChange={(e) => updateGuardian(i, { relationship: e.target.value })}
                       placeholder="e.g. Father, Mother, Uncle"
                     />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor={`guardian_gender_${i}`}>Gender</Label>
+                    <Select value={g.gender} onValueChange={(v) => updateGuardian(i, { gender: v })}>
+                      <SelectTrigger id={`guardian_gender_${i}`}><SelectValue placeholder="Select" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="male">Male</SelectItem>
+                        <SelectItem value="female">Female</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               </div>
@@ -315,7 +327,7 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => setGuardians((prev) => [...prev, { name: "", phone: "", relationship: "" }])}
+                onClick={() => setGuardians((prev) => [...prev, { name: "", phone: "", relationship: "", gender: "" }])}
               >
                 <Plus className="w-4 h-4 mr-1" /> Add another guardian
               </Button>
