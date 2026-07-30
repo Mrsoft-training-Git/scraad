@@ -18,6 +18,7 @@ import { KnowledgeCheckBuilder, QuizQuestion } from "@/components/KnowledgeCheck
 import { ContentPreview } from "@/components/ContentPreview";
 import { ProgramAttendance } from "@/components/programs/ProgramAttendance";
 import { format } from "date-fns";
+import { notifyLearners } from "@/lib/notify-learners";
 import {
   ArrowLeft, BookOpen, ClipboardList, FileText, Users, Video,
   Plus, Loader2, Pencil, Trash2, CheckCircle, Clock, Calendar,
@@ -602,8 +603,18 @@ const AddMaterialDialog = ({ open, onOpenChange, programId, modules, onSaved }: 
         content_url: fileUrl,
         file_path: filePath,
         quiz_data: type === "quiz" ? quizQuestions : [],
-      } as any);
+      } as any).select("id").single();
       if (error) throw error;
+
+      notifyLearners({
+        entityType: "program",
+        entityId: programId,
+        kind: type === "document" || type === "file" ? "upload" : "material",
+        itemId: (data as any)?.id,
+        itemTitle: title.trim(),
+        moduleTitle: modules.find(m => m.id === moduleId)?.title ?? null,
+        description: description.trim() || null,
+      });
 
       toast({ title: "Material added!" });
       onSaved();
@@ -744,8 +755,21 @@ const AddAssignmentDialog = ({ open, onOpenChange, programId, modules, onSaved }
         module_id: moduleId || null, due_date: dueDate || null,
         max_score: parseInt(maxScore) || 100, is_published: publish,
         attachment_url: attachmentUrl, attachment_path: attachmentPath,
-      } as any);
+      } as any).select("id").single();
       if (error) throw error;
+      if (publish) {
+        notifyLearners({
+          entityType: "program",
+          entityId: programId,
+          kind: "assignment",
+          itemId: (data as any)?.id,
+          itemTitle: title.trim(),
+          moduleTitle: modules.find(m => m.id === moduleId)?.title ?? null,
+          description: description.trim() || null,
+          dueDate: dueDate ? new Date(dueDate).toISOString() : null,
+          maxScore: parseInt(maxScore) || 100,
+        });
+      }
       toast({ title: "Assignment created!" });
       onSaved();
       onOpenChange(false);
