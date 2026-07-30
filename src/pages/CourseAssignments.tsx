@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ClipboardList, Plus, Calendar, Clock, FileUp, Link as LinkIcon, Code, FileText, Loader2, Eye, Edit, CheckCircle, X, Upload, User as UserIcon } from "lucide-react";
 import { FilePreviewButton } from "@/components/FilePreview";
 import { format, isPast, formatDistanceToNow } from "date-fns";
+import { notifyLearners } from "@/lib/notify-learners";
 
 interface Course {
   id: string;
@@ -300,11 +301,27 @@ const CourseAssignments = () => {
         rubric: JSON.parse(JSON.stringify(newAssignment.rubric)),
         is_published: newAssignment.is_published
       };
-      const { error } = await supabase.from("course_assignments").insert(insertData);
+      const { data: created, error } = await supabase
+        .from("course_assignments")
+        .insert(insertData)
+        .select("id")
+        .single();
 
       if (error) {
         toast({ title: "Error", description: "Failed to create assignment", variant: "destructive" });
       } else {
+        if (insertData.is_published) {
+          notifyLearners({
+            entityType: "course",
+            entityId: insertData.course_id,
+            kind: "assignment",
+            itemId: created?.id,
+            itemTitle: insertData.title,
+            description: insertData.description,
+            dueDate: insertData.due_date,
+            maxScore: insertData.max_score,
+          });
+        }
         toast({ title: "Success", description: "Assignment created!" });
         closeCreateDialog();
         fetchAssignments();
