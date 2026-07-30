@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ContentPreview } from "@/components/ContentPreview";
 import { KnowledgeCheckBuilder, QuizQuestion } from "@/components/KnowledgeCheckBuilder";
+import { notifyLearners } from "@/lib/notify-learners";
 
 interface Course {
   id: string;
@@ -488,6 +489,17 @@ const CreateContent = () => {
         .single();
       error = insertError;
       contentId = insertData?.id || null;
+
+      if (!insertError && formData.is_published) {
+        notifyLearners({
+          entityType: "course",
+          entityId: formData.course_id,
+          kind: ["document", "pdf", "file"].includes(formData.content_type) ? "upload" : "material",
+          itemId: contentId || undefined,
+          itemTitle: formData.title,
+          description: formData.description || null,
+        });
+      }
     }
     
     // Save quiz questions for knowledge check content

@@ -13,6 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
+import { notifyLearners } from "@/lib/notify-learners";
 
 const CBTExamCreate = () => {
   const { user, profile, userRole, loading: authLoading } = useDashboardAuth();
@@ -92,6 +93,19 @@ const CBTExamCreate = () => {
     if (error) {
       toast({ title: "Error creating exam", description: error.message, variant: "destructive" });
     } else {
+      const entityId = form.exam_type === "program" ? form.program_id : form.course_id;
+      if (entityId) {
+        notifyLearners({
+          entityType: form.exam_type === "program" ? "program" : "course",
+          entityId,
+          kind: "exam",
+          itemId: (data as any)?.id,
+          itemTitle: form.title,
+          description: form.description || null,
+          startTime: form.start_time ? new Date(form.start_time).toISOString() : null,
+          durationMinutes: form.duration_minutes,
+        });
+      }
       toast({ title: "Exam created!" });
       navigate(`/dashboard/cbt/${(data as any).id}/manage`);
     }
