@@ -15,3 +15,7 @@ project_id = "hhhylhihtfdmbhhqzxqu"
     verify_jwt = false
   [functions.handle-email-suppression]
     verify_jwt = false
+  [functions.notify-learners]
+    verify_jwt = true
+  [functions.send-due-reminders]
+    verify_jwt = false
