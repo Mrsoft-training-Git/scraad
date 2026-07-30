@@ -594,7 +594,7 @@ const AddMaterialDialog = ({ open, onOpenChange, programId, modules, onSaved }: 
       }
 
 
-      const { error } = await supabase.from("program_materials").insert({
+      const { data, error } = await supabase.from("program_materials").insert({
         program_id: programId,
         module_id: moduleId,
         title: title.trim(),
@@ -750,7 +750,7 @@ const AddAssignmentDialog = ({ open, onOpenChange, programId, modules, onSaved }
         attachmentUrl = uploadData.s3Url;
       }
 
-      const { error } = await supabase.from("program_assignments").insert({
+      const { data, error } = await supabase.from("program_assignments").insert({
         program_id: programId, title: title.trim(), description: description.trim() || null,
         module_id: moduleId || null, due_date: dueDate || null,
         max_score: parseInt(maxScore) || 100, is_published: publish,
