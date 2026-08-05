@@ -166,12 +166,19 @@ Deno.serve(async (req) => {
       }
     }
 
-    if ((!courseId && !pathPrefix) || !fileName || !contentType) {
-      return new Response(JSON.stringify({ error: "fileName, contentType, and (courseId or pathPrefix) are required" }), {
+    if ((!courseId && !pathPrefix) || !fileName) {
+      return new Response(JSON.stringify({ error: "fileName and (courseId or pathPrefix) are required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // The browser sends the exact same Content-Type header on the PUT, so we must
+    // sign whatever it gave us (some OS/browsers report a generic type).
+    const effectiveContentType: string =
+      typeof contentType === "string" && contentType.trim()
+        ? contentType.trim()
+        : "application/octet-stream";
 
     // Validate file type (videos + documents)
     const allowedTypes = [
@@ -187,12 +194,24 @@ Deno.serve(async (req) => {
       "image/png", "image/jpeg", "image/webp",
       "application/zip",
     ];
-    if (!allowedTypes.includes(contentType)) {
-      return new Response(JSON.stringify({ error: "Unsupported file type. Allowed: video, PDF, Word, PowerPoint, Excel, text, images, zip" }), {
+    // Generic/unknown types are accepted only when the extension is a known safe one.
+    const allowedExtensions = [
+      "mp4", "mov", "webm", "avi", "mpeg", "mpg",
+      "pdf", "doc", "docx", "ppt", "pptx", "xls", "xlsx",
+      "txt", "csv", "zip", "png", "jpg", "jpeg", "webp",
+    ];
+    const ext = String(fileName).split(".").pop()?.toLowerCase() ?? "";
+    const typeOk =
+      allowedTypes.includes(effectiveContentType) || allowedExtensions.includes(ext);
+
+    if (!typeOk) {
+      console.error("Rejected upload: unsupported type", { fileName, effectiveContentType, ext });
+      return new Response(JSON.stringify({ error: `Unsupported file type (${effectiveContentType || ext || "unknown"}). Allowed: video, PDF, Word, PowerPoint, Excel, text, images, zip` }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
 
 
     // Validate file size (max 2GB)
