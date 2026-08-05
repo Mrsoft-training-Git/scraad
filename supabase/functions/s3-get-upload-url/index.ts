@@ -246,7 +246,7 @@ Deno.serve(async (req) => {
     // The public-style URL that will be stored in the DB as a marker
     const s3Url = `s3://${awsBucket}/${s3Key}`;
 
-    return new Response(JSON.stringify({ uploadUrl, s3Key, s3Url }), {
+    return new Response(JSON.stringify({ uploadUrl, s3Key, s3Url, contentType: effectiveContentType }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
