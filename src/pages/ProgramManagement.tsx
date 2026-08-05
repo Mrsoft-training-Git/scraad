@@ -503,7 +503,7 @@ const CreateProgramDialog = ({ open, onOpenChange, onCreated }: { open: boolean;
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [instructors, setInstructors] = useState<InstructorOption[]>([]);
-  const [form, setForm] = useState({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", end_date: "", price: "0", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "", track: "", instructor_id: "", instructor_name: "", intro_video_url: "" });
+  const [form, setForm] = useState({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", end_date: "", price: "", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "", track: "", instructor_id: "", instructor_name: "", intro_video_url: "" });
 
   useEffect(() => {
     if (open) fetchInstructors();
@@ -546,7 +546,7 @@ const CreateProgramDialog = ({ open, onOpenChange, onCreated }: { open: boolean;
       toast({ title: "Program created!" });
       onCreated();
       onOpenChange(false);
-      setForm({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", end_date: "", price: "0", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "", track: "", instructor_id: "", instructor_name: "", intro_video_url: "" });
+      setForm({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", end_date: "", price: "", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "", track: "", instructor_id: "", instructor_name: "", intro_video_url: "" });
       setImageFile(null);
       setImagePreview(null);
     } catch (err: any) {
@@ -580,7 +580,7 @@ const EditProgramDialog = ({ program, onOpenChange, onUpdated }: { program: Full
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [instructors, setInstructors] = useState<InstructorOption[]>([]);
-  const [form, setForm] = useState({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", end_date: "", price: "0", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "", track: "", instructor_id: "", instructor_name: "", intro_video_url: "" });
+  const [form, setForm] = useState({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", end_date: "", price: "", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "", track: "", instructor_id: "", instructor_name: "", intro_video_url: "" });
 
   useEffect(() => {
     if (program) {
@@ -593,7 +593,7 @@ const EditProgramDialog = ({ program, onOpenChange, onUpdated }: { program: Full
         location: program.location || "",
         start_date: program.start_date || "",
         end_date: program.end_date || "",
-        price: String((program as any).price || "0"),
+        price: String((program as any).price ?? ""),
         allows_part_payment: (program as any).allows_part_payment || false,
         first_tranche_amount: String((program as any).first_tranche_amount || ""),
         second_tranche_amount: String((program as any).second_tranche_amount || ""),
