@@ -74,14 +74,14 @@ const Email = ({
       detailsTitle={itemTitle}
       detailsBody={
         <>
-          {moduleTitle && <Text style={detailLine}>Module: {moduleTitle}</Text>}
+          {moduleTitle && <Text style={detailLine}><strong>Module:</strong> {moduleTitle}</Text>}
           {description && <Text style={detailLine}>{description}</Text>}
-          {dueDate && <Text style={detailLine}>Due: {dueDate}</Text>}
-          {startTime && <Text style={detailLine}>Opens: {startTime}</Text>}
+          {dueDate && <Text style={detailLine}><strong>Due:</strong> {dueDate}</Text>}
+          {startTime && <Text style={detailLine}><strong>Opens:</strong> {startTime}</Text>}
           {durationMinutes ? (
-            <Text style={detailLine}>Duration: {durationMinutes} minutes</Text>
+            <Text style={detailLine}><strong>Duration:</strong> {durationMinutes} minutes</Text>
           ) : null}
-          {maxScore ? <Text style={detailLine}>Max score: {maxScore}</Text> : null}
+          {maxScore ? <Text style={detailLine}><strong>Max score:</strong> {maxScore}</Text> : null}
         </>
       }
       buttonText={copy.cta}

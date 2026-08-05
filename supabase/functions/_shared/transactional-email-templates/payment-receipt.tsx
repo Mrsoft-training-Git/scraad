@@ -42,11 +42,11 @@ const Email = ({
     detailsBody={
       <>
         <Text style={amountRow}>{currency} {amount}</Text>
-        {paymentType && <Text style={row}>Payment type: {paymentType}</Text>}
+        {paymentType && <Text style={row}><strong>Payment type:</strong> {paymentType}</Text>}
         <Text style={{ ...row, fontFamily: 'monospace', fontSize: '12px' }}>
-          Reference: {reference}
+          <strong>Reference:</strong> {reference}
         </Text>
-        {paidAt && <Text style={row}>Date: {paidAt}</Text>}
+        {paidAt && <Text style={row}><strong>Date:</strong> {paidAt}</Text>}
       </>
     }
     buttonText="View my billing"

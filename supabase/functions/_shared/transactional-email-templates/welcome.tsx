@@ -14,7 +14,7 @@ const Email = ({
 }: Props) => (
   <EmailLayout
     preview="Welcome to ScraAD — your learning journey starts now"
-    title="Welcome to ScraAD "
+    title="Welcome to ScraAD"
     greetingName={name}
     message={
       <>
