@@ -24,15 +24,15 @@ const Email = ({
 }: Props) => (
   <EmailLayout
     preview={`You're enrolled in ${programTitle}`}
-    title={`You're in, ${name} 🎉`}
+    title={`You're in, ${name} `}
     greetingName={name}
     message={`Your enrollment for the ${entityType} below has been confirmed. Below are the details:`}
     detailsTitle={programTitle}
     detailsBody={
       <>
-        {startDate && <Text style={detailLine}>📅 Starts: {startDate}</Text>}
-        {mode && <Text style={detailLine}>📍 Mode: {mode}</Text>}
-        <Text style={detailLine}>✅ Status: Confirmed</Text>
+        {startDate && <Text style={detailLine}>Starts: {startDate}</Text>}
+        {mode && <Text style={detailLine}>Mode: {mode}</Text>}
+        <Text style={detailLine}>Status: Confirmed</Text>
       </>
     }
     buttonText="Open my dashboard"

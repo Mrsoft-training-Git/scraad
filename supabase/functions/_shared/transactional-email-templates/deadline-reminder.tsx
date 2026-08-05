@@ -40,15 +40,15 @@ const Email = ({
       <>
         {dueDate && (
           <Text style={detailLine}>
-            {kind === 'exam' ? '🗓️ Opens: ' : '⏰ Due: '}
+            {kind === 'exam' ? 'Opens: ' : 'Due: '}
             {dueDate}
           </Text>
         )}
         {hoursLeft ? (
-          <Text style={detailLine}>⚡ Time left: about {hoursLeft} hour(s)</Text>
+          <Text style={detailLine}>Time left: about {hoursLeft} hour(s)</Text>
         ) : null}
         {kind === 'assignment' && (
-          <Text style={detailLine}>📌 Status: Not submitted yet</Text>
+          <Text style={detailLine}>Status: Not submitted yet</Text>
         )}
       </>
     }

@@ -35,18 +35,18 @@ const Email = ({
 }: Props) => (
   <EmailLayout
     preview={`Payment received — ${currency} ${amount}`}
-    title="Payment received ✅"
+    title="Payment received"
     greetingName={name}
     message="Thank you for your payment. Here's your official receipt for your records."
     detailsTitle={itemTitle}
     detailsBody={
       <>
         <Text style={amountRow}>{currency} {amount}</Text>
-        {paymentType && <Text style={row}>💳 Payment type: {paymentType}</Text>}
+        {paymentType && <Text style={row}>Payment type: {paymentType}</Text>}
         <Text style={{ ...row, fontFamily: 'monospace', fontSize: '12px' }}>
-          🔖 Reference: {reference}
+          Reference: {reference}
         </Text>
-        {paidAt && <Text style={row}>📅 Date: {paidAt}</Text>}
+        {paidAt && <Text style={row}>Date: {paidAt}</Text>}
       </>
     }
     buttonText="View my billing"
