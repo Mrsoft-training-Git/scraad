@@ -466,7 +466,10 @@ const ProgramFormFields = ({ form, setForm, instructors }: { form: any; setForm:
         </Select>
       </div>
     )}
-    <div><Label>Price (₦) *</Label><Input type="number" min="0" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="0" /></div>
+    <div>
+      <Label>Price (₦) <span className="text-muted-foreground font-normal">(optional)</span></Label>
+      <Input type="number" min="0" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="Leave blank if free" />
+    </div>
     <div className="flex items-center gap-2">
       <input type="checkbox" id="allows_part_payment" checked={form.allows_part_payment} onChange={e => setForm({ ...form, allows_part_payment: e.target.checked })} className="rounded border-border" />
       <Label htmlFor="allows_part_payment">Allow Part Payment (Installments)</Label>
@@ -500,7 +503,7 @@ const CreateProgramDialog = ({ open, onOpenChange, onCreated }: { open: boolean;
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [instructors, setInstructors] = useState<InstructorOption[]>([]);
-  const [form, setForm] = useState({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", end_date: "", price: "0", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "", track: "", instructor_id: "", instructor_name: "", intro_video_url: "" });
+  const [form, setForm] = useState({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", end_date: "", price: "", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "", track: "", instructor_id: "", instructor_name: "", intro_video_url: "" });
 
   useEffect(() => {
     if (open) fetchInstructors();
@@ -543,7 +546,7 @@ const CreateProgramDialog = ({ open, onOpenChange, onCreated }: { open: boolean;
       toast({ title: "Program created!" });
       onCreated();
       onOpenChange(false);
-      setForm({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", end_date: "", price: "0", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "", track: "", instructor_id: "", instructor_name: "", intro_video_url: "" });
+      setForm({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", end_date: "", price: "", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "", track: "", instructor_id: "", instructor_name: "", intro_video_url: "" });
       setImageFile(null);
       setImagePreview(null);
     } catch (err: any) {
@@ -577,7 +580,7 @@ const EditProgramDialog = ({ program, onOpenChange, onUpdated }: { program: Full
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [instructors, setInstructors] = useState<InstructorOption[]>([]);
-  const [form, setForm] = useState({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", end_date: "", price: "0", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "", track: "", instructor_id: "", instructor_name: "", intro_video_url: "" });
+  const [form, setForm] = useState({ title: "", short_description: "", description: "", duration: "", mode: "physical", location: "", start_date: "", end_date: "", price: "", allows_part_payment: false, first_tranche_amount: "", second_tranche_amount: "", second_payment_due_days: "", track: "", instructor_id: "", instructor_name: "", intro_video_url: "" });
 
   useEffect(() => {
     if (program) {
@@ -590,7 +593,7 @@ const EditProgramDialog = ({ program, onOpenChange, onUpdated }: { program: Full
         location: program.location || "",
         start_date: program.start_date || "",
         end_date: program.end_date || "",
-        price: String((program as any).price || "0"),
+        price: String((program as any).price ?? ""),
         allows_part_payment: (program as any).allows_part_payment || false,
         first_tranche_amount: String((program as any).first_tranche_amount || ""),
         second_tranche_amount: String((program as any).second_tranche_amount || ""),
