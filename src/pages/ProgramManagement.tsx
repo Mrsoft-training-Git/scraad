@@ -468,7 +468,7 @@ const ProgramFormFields = ({ form, setForm, instructors }: { form: any; setForm:
     )}
     <div>
       <Label>Price (₦) <span className="text-muted-foreground font-normal">(optional)</span></Label>
-      <Input type="number" min="0" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="Leave blank if free" />
+      <Input type="number" min="0" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="Leave empty to hide price" />
     </div>
     <div className="flex items-center gap-2">
       <input type="checkbox" id="allows_part_payment" checked={form.allows_part_payment} onChange={e => setForm({ ...form, allows_part_payment: e.target.checked })} className="rounded border-border" />

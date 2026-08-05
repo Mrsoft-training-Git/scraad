@@ -923,7 +923,6 @@ const AdmissionLetterCard = ({ program, profile, enrollment }: { program: Progra
     const startDate = program.start_date ? format(new Date(program.start_date), "MMMM d, yyyy") : "TBD";
     const mode = program.mode ? program.mode.charAt(0).toUpperCase() + program.mode.slice(1) : "—";
     const venue = program.location || (program.mode === "online" ? "Online (Virtual Classroom)" : "MRsoft Technology Complex, Port Harcourt");
-    const fee = `NGN ${(program.price || 0).toLocaleString()}`;
 
     const doc = new jsPDF({ unit: "pt", format: "a4" });
     const pageW = doc.internal.pageSize.getWidth();
@@ -1002,7 +1001,6 @@ const AdmissionLetterCard = ({ program, profile, enrollment }: { program: Progra
     // Details table
     const rows: [string, string][] = [
       ["Program", program.title],
-      ["Fee", fee],
       ["Mode", mode],
       ["Training Venue", venue],
     ];
