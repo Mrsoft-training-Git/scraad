@@ -19,6 +19,7 @@ import { ContentPreview } from "@/components/ContentPreview";
 import { ProgramAttendance } from "@/components/programs/ProgramAttendance";
 import { format } from "date-fns";
 import { notifyLearners } from "@/lib/notify-learners";
+import { edgeErrorMessage } from "@/lib/edge-error";
 import {
   ArrowLeft, BookOpen, ClipboardList, FileText, Users, Video,
   Plus, Loader2, Pencil, Trash2, CheckCircle, Clock, Calendar,
@@ -577,7 +578,7 @@ const AddMaterialDialog = ({ open, onOpenChange, programId, modules, onSaved }: 
             fileSize: file.size,
           },
         });
-        if (fnError || !uploadData?.uploadUrl) throw new Error(fnError?.message || "Failed to get upload URL");
+        if (fnError || !uploadData?.uploadUrl) throw new Error(await edgeErrorMessage(fnError, "Failed to get upload URL"));
 
         await new Promise<void>((resolve, reject) => {
           const xhr = new XMLHttpRequest();
@@ -734,7 +735,7 @@ const AddAssignmentDialog = ({ open, onOpenChange, programId, modules, onSaved }
             fileSize: file.size,
           },
         });
-        if (fnError || !uploadData?.uploadUrl) throw new Error(fnError?.message || "Failed to get upload URL");
+        if (fnError || !uploadData?.uploadUrl) throw new Error(await edgeErrorMessage(fnError, "Failed to get upload URL"));
 
         await new Promise<void>((resolve, reject) => {
           const xhr = new XMLHttpRequest();
