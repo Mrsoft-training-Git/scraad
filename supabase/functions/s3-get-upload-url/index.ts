@@ -238,7 +238,8 @@ Deno.serve(async (req) => {
       awsRegion,
       awsAccessKeyId,
       awsSecretAccessKey,
-      contentType,
+      effectiveContentType,
+
       3600 // 1 hour to complete upload
     );
 
