@@ -22,6 +22,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { MRsoftAttribution } from "@/components/MRsoftAttribution";
 import scraadLogo from "@/assets/scraad-logo-official.png";
+import { siteUrl } from "@/lib/site-url";
 
 const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -140,7 +141,7 @@ const Auth = () => {
         password: signupPassword,
         options: {
           data: { full_name: signupName, phone: signupPhone },
-          emailRedirectTo: `${window.location.origin}/dashboard`,
+          emailRedirectTo: siteUrl("/email-verified"),
         },
       });
 
@@ -154,7 +155,7 @@ const Auth = () => {
           idempotencyKey: `welcome-${signUpData.user?.id ?? signupEmail}`,
           templateData: {
             name: signupName,
-            dashboardUrl: `${window.location.origin}/dashboard`,
+            dashboardUrl: siteUrl("/dashboard"),
           },
         },
       }).catch(() => {});
@@ -183,7 +184,7 @@ const Auth = () => {
 
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: siteUrl("/reset-password"),
       });
 
       if (error) throw error;

@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, ShieldAlert, Plus, X } from "lucide-react";
+import { siteUrl } from "@/lib/site-url";
 
 interface Props {
   programId: string;
@@ -81,7 +82,7 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
           email: form.email.trim(),
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/dashboard/programs/${programId}`,
+            emailRedirectTo: siteUrl(`/dashboard/programs/${programId}`),
             data: { full_name: fullName },
           },
         });
@@ -160,7 +161,7 @@ export const ProgramApplicationForm = ({ programId, programTitle, userId, userEm
               name: fullName,
               programTitle,
               entityType: "program",
-              dashboardUrl: `${window.location.origin}/dashboard/programs/${programId}`,
+              dashboardUrl: siteUrl(`/dashboard/programs/${programId}`),
             },
           },
         }).catch(() => {});

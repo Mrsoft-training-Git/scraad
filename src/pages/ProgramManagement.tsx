@@ -17,6 +17,7 @@ import { format } from "date-fns";
 import { Check, X, Clock, Mail, Phone, FileText, Loader2, Plus, ImagePlus, Pencil, MapPin, Calendar, Users, Eye, EyeOff } from "lucide-react";
 import { IntroVideoUploader } from "@/components/IntroVideoUploader";
 import { MarkdownEditor, renderMarkdown } from "@/components/MarkdownEditor";
+import { siteUrl } from "@/lib/site-url";
 
 const computeProgramStatus = (startDate: string | null, endDate: string | null): string => {
   const now = new Date();
@@ -717,14 +718,18 @@ const ManualEnrollDialog = ({ open, onOpenChange, programs, onEnrolled }: { open
           ...form,
           age: form.age ? Number(form.age) : null,
           guardians: filledGuardians,
-          redirect_to: `${window.location.origin}/dashboard/programs/${form.program_id}`,
+          redirect_to: siteUrl(`/dashboard/programs/${form.program_id}`),
         },
       });
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
+      const loginEmail = (data as any)?.login_email as string | undefined;
+      const aliasNote = loginEmail && loginEmail !== form.email.trim().toLowerCase()
+        ? ` Login email for this participant: ${loginEmail} (delivers to ${form.email}).`
+        : "";
       toast({
         title: "Student enrolled",
-        description: form.send_invite ? "Invite email sent so they can set a password and log in." : "User created and enrolled.",
+        description: (form.send_invite ? "Invite email sent so they can set a password and log in." : "User created and enrolled.") + aliasNote,
       });
       reset();
       onEnrolled();
@@ -741,7 +746,7 @@ const ManualEnrollDialog = ({ open, onOpenChange, programs, onEnrolled }: { open
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Manual Program Enrollment</DialogTitle>
-          <DialogDescription>Register a student who paid offline. They'll be granted access immediately and receive an invite to log in.</DialogDescription>
+          <DialogDescription>Register a student who paid offline. They'll be granted access immediately and receive an invite to log in. You can enroll several participants (e.g. siblings) with the same email — each one gets their own account and login address that still delivers to that inbox.</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
