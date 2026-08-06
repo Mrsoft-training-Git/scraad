@@ -139,7 +139,7 @@ Deno.serve(async (req) => {
       .eq("program_id", program_id).eq("user_id", targetUserId).maybeSingle();
 
     const appPayload: Record<string, unknown> = {
-      program_id, user_id: targetUserId, full_name, email: normalizedEmail,
+      program_id, user_id: targetUserId, full_name, email: contactEmail,
       phone: phone ?? null, age: age ?? null, address: address ?? null, gender: gender ?? null,
       guardian_name: primaryGuardian.name ?? null, guardian_phone: primaryGuardian.phone ?? null,
       guardian_email: primaryGuardian.email ?? null, guardian_relationship: primaryGuardian.relationship ?? null,
@@ -178,7 +178,7 @@ Deno.serve(async (req) => {
     admin.functions.invoke("send-transactional-email", {
       body: {
         templateName: "enrollment-confirmation",
-        recipientEmail: normalizedEmail,
+        recipientEmail: contactEmail,
         idempotencyKey: `enroll-program-${targetUserId}-${program_id}`,
         templateData: {
           name: full_name,
@@ -192,7 +192,7 @@ Deno.serve(async (req) => {
       },
     }).catch(() => {});
 
-    return new Response(JSON.stringify({ success: true, user_id: targetUserId, invited }), {
+    return new Response(JSON.stringify({ success: true, user_id: targetUserId, invited, login_email: loginEmail }), {
       status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e: any) {
