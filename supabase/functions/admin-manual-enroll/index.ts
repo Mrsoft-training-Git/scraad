@@ -59,27 +59,51 @@ Deno.serve(async (req) => {
       });
     }
 
-    const normalizedEmail = String(email).trim().toLowerCase();
+    const contactEmail = String(email).trim().toLowerCase();
     const redirectTo = (body.redirect_to as string) || undefined;
+    const [localPart, domainPart] = contactEmail.split("@");
+    const nameKey = String(full_name).trim().toLowerCase().replace(/\s+/g, " ");
 
-    // Find existing user by email
+    // A parent may enroll several children using the same contact inbox.
+    // Each participant becomes a separate account: the first uses the plain
+    // address, subsequent ones get a plus-alias (parent+2@..., parent+3@...)
+    // which still delivers to the same inbox but is a distinct identity.
+    const { data: sameInbox } = await admin
+      .from("profiles")
+      .select("id, full_name, email")
+      .or(`email.eq.${contactEmail},email.like.${localPart}+%@${domainPart}`);
+
     let targetUserId: string | null = null;
-    const { data: existingProfile } = await admin
-      .from("profiles").select("id").ilike("email", normalizedEmail).maybeSingle();
-    if (existingProfile) targetUserId = existingProfile.id;
+    let loginEmail = contactEmail;
+
+    const existingSamePerson = (sameInbox ?? []).find(
+      (p) => (p.full_name ?? "").trim().toLowerCase().replace(/\s+/g, " ") === nameKey,
+    );
+
+    if (existingSamePerson) {
+      targetUserId = existingSamePerson.id;
+      loginEmail = (existingSamePerson.email ?? contactEmail).toLowerCase();
+    } else {
+      const taken = new Set((sameInbox ?? []).map((p) => (p.email ?? "").toLowerCase()));
+      if (taken.has(contactEmail)) {
+        let n = 2;
+        while (taken.has(`${localPart}+${n}@${domainPart}`)) n++;
+        loginEmail = `${localPart}+${n}@${domainPart}`;
+      }
+    }
 
     let invited = false;
     if (!targetUserId) {
       // Try invite
       if (send_invite) {
-        const { data: invData, error: invErr } = await admin.auth.admin.inviteUserByEmail(normalizedEmail, {
+        const { data: invData, error: invErr } = await admin.auth.admin.inviteUserByEmail(loginEmail, {
           data: { full_name },
           redirectTo,
         });
         if (invErr) {
           // If already registered, look them up
           const { data: list } = await admin.auth.admin.listUsers({ page: 1, perPage: 200 });
-          const found = list?.users.find(u => (u.email ?? "").toLowerCase() === normalizedEmail);
+          const found = list?.users.find(u => (u.email ?? "").toLowerCase() === loginEmail);
           if (found) targetUserId = found.id;
           else throw invErr;
         } else if (invData?.user) {
@@ -88,7 +112,7 @@ Deno.serve(async (req) => {
         }
       } else {
         const { data: created, error: cErr } = await admin.auth.admin.createUser({
-          email: normalizedEmail, email_confirm: true, user_metadata: { full_name },
+          email: loginEmail, email_confirm: true, user_metadata: { full_name },
         });
         if (cErr) throw cErr;
         targetUserId = created.user!.id;
@@ -96,6 +120,7 @@ Deno.serve(async (req) => {
     }
 
     if (!targetUserId) throw new Error("Could not resolve target user");
+    const normalizedEmail = loginEmail;
 
     // Upsert profile fields
     await admin.from("profiles").upsert({
