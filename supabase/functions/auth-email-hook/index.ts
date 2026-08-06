@@ -46,7 +46,33 @@ const FROM_DOMAIN = "notify.app.threatoraintelligence.com" // Domain shown in Fr
 // The sample email uses a fixed placeholder (RFC 6761 .test TLD) so the Go backend
 // can always find-and-replace it with the actual recipient when sending test emails,
 // even if the project's domain has changed since the template was scaffolded.
-const SAMPLE_PROJECT_URL = "https://scraad.com"
+const APP_URL = "https://scraad.com"
+
+// Force every auth email link to land back on the public site (https://scraad.com)
+// instead of the preview/backend host that produced the token.
+function toAppUrl(rawUrl: string | undefined, emailType: string): string | undefined {
+  if (!rawUrl) return rawUrl
+  try {
+    const url = new URL(rawUrl)
+    const existing = url.searchParams.get('redirect_to')
+    let target = emailType === 'signup' ? `${APP_URL}/email-verified` : APP_URL
+    if (existing) {
+      try {
+        const prev = new URL(existing)
+        const path = prev.pathname === '/' && emailType === 'signup' ? '/email-verified' : prev.pathname
+        target = `${APP_URL}${path}${prev.search}${prev.hash}`
+      } catch {
+        target = `${APP_URL}${existing.startsWith('/') ? existing : `/${existing}`}`
+      }
+    }
+    url.searchParams.set('redirect_to', target)
+    return url.toString()
+  } catch {
+    return rawUrl
+  }
+}
+
+const SAMPLE_PROJECT_URL = APP_URL
 const SAMPLE_EMAIL = "user@example.test"
 const SAMPLE_DATA: Record<string, object> = {
   signup: {
@@ -221,9 +247,9 @@ async function handleWebhook(req: Request): Promise<Response> {
   // Build template props from payload.data (HookData structure)
   const templateProps = {
     siteName: SITE_NAME,
-    siteUrl: `https://${ROOT_DOMAIN}`,
+    siteUrl: APP_URL,
     recipient: payload.data.email,
-    confirmationUrl: payload.data.url,
+    confirmationUrl: toAppUrl(payload.data.url, emailType),
     token: payload.data.token,
     email: payload.data.email,
     oldEmail: payload.data.old_email,

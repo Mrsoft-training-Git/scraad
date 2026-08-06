@@ -17,6 +17,7 @@ import { format } from "date-fns";
 import { Check, X, Clock, Mail, Phone, FileText, Loader2, Plus, ImagePlus, Pencil, MapPin, Calendar, Users, Eye, EyeOff } from "lucide-react";
 import { IntroVideoUploader } from "@/components/IntroVideoUploader";
 import { MarkdownEditor, renderMarkdown } from "@/components/MarkdownEditor";
+import { siteUrl } from "@/lib/site-url";
 
 const computeProgramStatus = (startDate: string | null, endDate: string | null): string => {
   const now = new Date();
@@ -717,7 +718,7 @@ const ManualEnrollDialog = ({ open, onOpenChange, programs, onEnrolled }: { open
           ...form,
           age: form.age ? Number(form.age) : null,
           guardians: filledGuardians,
-          redirect_to: `${window.location.origin}/dashboard/programs/${form.program_id}`,
+          redirect_to: siteUrl(`/dashboard/programs/${form.program_id}`),
         },
       });
       if (error) throw error;

@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { usePayment } from "@/hooks/usePayment";
 import { useEnrollment } from "@/hooks/useEnrollment";
+import { siteUrl } from "@/lib/site-url";
 
 interface Course {
   id: string;
@@ -239,7 +240,7 @@ const CourseEnrollment = () => {
       email: personalInfo.email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/dashboard/learning`,
+        emailRedirectTo: siteUrl("/dashboard/learning"),
         data: { full_name: fullName },
       },
     });

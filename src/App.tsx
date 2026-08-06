@@ -50,6 +50,7 @@ import CBTExamView from "./pages/CBTExamView";
 import CBTExamTake from "./pages/CBTExamTake";
 import CBTSubmissions from "./pages/CBTSubmissions";
 import CourseDetails from "@/pages/CourseDetails";
+import EmailVerified from "./pages/EmailVerified";
 
 const queryClient = new QueryClient();
 
@@ -104,6 +105,7 @@ const App = () => (
           <Route path="/career" element={<Career />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/email-verified" element={<EmailVerified />} />
           <Route path="/unsubscribe" element={<Unsubscribe />} />
           <Route path="/api/zoom/callback" element={<ZoomCallback />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
