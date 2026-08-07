@@ -282,7 +282,11 @@ async function handleWebhook(req: Request): Promise<Response> {
     siteName: SITE_NAME,
     siteUrl: APP_URL,
     recipient: payload.data.email,
-    confirmationUrl: toAppUrl(payload.data.url, emailType),
+    confirmationUrl: toAppUrl(
+      payload.data.url,
+      emailType,
+      payload.data.token_hash ?? payload.data.tokenHash ?? payload.data.token_hash_new,
+    ),
     token: payload.data.token,
     email: payload.data.email,
     oldEmail: payload.data.old_email,
