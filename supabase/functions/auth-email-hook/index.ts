@@ -48,24 +48,57 @@ const FROM_DOMAIN = "notify.app.threatoraintelligence.com" // Domain shown in Fr
 // even if the project's domain has changed since the template was scaffolded.
 const APP_URL = "https://scraad.com"
 
-// Force every auth email link to land back on the public site (https://scraad.com)
-// instead of the preview/backend host that produced the token.
-function toAppUrl(rawUrl: string | undefined, emailType: string): string | undefined {
+// Every auth email button must point at the public site (https://scraad.com).
+// Instead of linking to the backend verify endpoint, we hand the hashed token to
+// our own /auth/confirm page which exchanges it for a session client-side.
+const VERIFY_TYPES: Record<string, string> = {
+  signup: 'signup',
+  invite: 'invite',
+  magiclink: 'magiclink',
+  recovery: 'recovery',
+  email_change: 'email_change',
+}
+
+const DEFAULT_NEXT: Record<string, string> = {
+  signup: '/email-verified',
+  invite: '/auth',
+  magiclink: '/dashboard',
+  recovery: '/reset-password',
+  email_change: '/dashboard/profile',
+}
+
+function toAppUrl(rawUrl: string | undefined, emailType: string, tokenHash?: string): string | undefined {
+  const type = VERIFY_TYPES[emailType]
+
+  if (tokenHash && type) {
+    let next = DEFAULT_NEXT[emailType] || '/'
+    if (rawUrl) {
+      try {
+        const existing = new URL(rawUrl).searchParams.get('redirect_to')
+        if (existing) {
+          try {
+            const prev = new URL(existing)
+            if (prev.pathname && prev.pathname !== '/') next = `${prev.pathname}${prev.search}${prev.hash}`
+          } catch {
+            next = existing.startsWith('/') ? existing : `/${existing}`
+          }
+        }
+      } catch {
+        // ignore malformed source url
+      }
+    }
+    const confirm = new URL(`${APP_URL}/auth/confirm`)
+    confirm.searchParams.set('token_hash', tokenHash)
+    confirm.searchParams.set('type', type)
+    confirm.searchParams.set('next', next)
+    return confirm.toString()
+  }
+
+  // Fallback: keep the backend link but force the post-verify redirect to the site.
   if (!rawUrl) return rawUrl
   try {
     const url = new URL(rawUrl)
-    const existing = url.searchParams.get('redirect_to')
-    let target = emailType === 'signup' ? `${APP_URL}/email-verified` : APP_URL
-    if (existing) {
-      try {
-        const prev = new URL(existing)
-        const path = prev.pathname === '/' && emailType === 'signup' ? '/email-verified' : prev.pathname
-        target = `${APP_URL}${path}${prev.search}${prev.hash}`
-      } catch {
-        target = `${APP_URL}${existing.startsWith('/') ? existing : `/${existing}`}`
-      }
-    }
-    url.searchParams.set('redirect_to', target)
+    url.searchParams.set('redirect_to', `${APP_URL}${DEFAULT_NEXT[emailType] || '/'}`)
     return url.toString()
   } catch {
     return rawUrl
