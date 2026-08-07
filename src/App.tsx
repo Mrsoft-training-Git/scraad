@@ -51,6 +51,7 @@ import CBTExamTake from "./pages/CBTExamTake";
 import CBTSubmissions from "./pages/CBTSubmissions";
 import CourseDetails from "@/pages/CourseDetails";
 import EmailVerified from "./pages/EmailVerified";
+import AuthConfirm from "./pages/AuthConfirm";
 
 const queryClient = new QueryClient();
 
