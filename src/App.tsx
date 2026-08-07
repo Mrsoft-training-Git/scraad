@@ -107,6 +107,8 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/email-verified" element={<EmailVerified />} />
+          <Route path="/auth/confirm" element={<AuthConfirm />} />
+
           <Route path="/unsubscribe" element={<Unsubscribe />} />
           <Route path="/api/zoom/callback" element={<ZoomCallback />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
