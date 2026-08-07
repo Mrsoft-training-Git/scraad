@@ -138,7 +138,6 @@ export const ProgramAttendance = ({ programId, students, markedBy }: Props) => {
               <CardContent className="p-3 flex flex-wrap items-center justify-between gap-3">
                 <div className="min-w-0">
                   <p className="font-medium truncate">{s.full_name || "Unnamed student"}</p>
-                  <p className="text-xs text-muted-foreground truncate">{s.email}</p>
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   {STATUSES.map((st) => (
